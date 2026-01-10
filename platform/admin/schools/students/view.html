@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Student Profile | NexusAdmin Executive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --brand-primary: #2563eb;
+            --brand-surface: #ffffff;
+            --brand-bg: #f8fafc;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--brand-bg); 
+            color: #1e293b; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Mobile-optimized scrollbar */
+        ::-webkit-scrollbar { 
+            width: 4px; 
+            height: 4px; 
+        }
+        ::-webkit-scrollbar-track { 
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb { 
+            background: #cbd5e1; 
+            border-radius: 10px; 
+        }
+
+        .sidebar-link { 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-left: 3px solid transparent; 
+        }
+        .sidebar-link:hover { 
+            background: #f1f5f9; 
+            color: var(--brand-primary); 
+        }
+        .active-link { 
+            background: #eff6ff; 
+            color: var(--brand-primary); 
+            border-left-color: var(--brand-primary); 
+            font-weight: 600; 
+        }
+        
+        .dropdown-content { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .dropdown-open .dropdown-content { 
+            max-height: 500px; 
+        }
+        .dropdown-open .chevron { 
+            transform: rotate(180deg); 
+        }
+
+        /* Mobile-first responsive design */
+        @media (max-width: 640px) {
+            .mobile-stack { flex-direction: column; }
+            .mobile-full { width: 100%; }
+            .mobile-text-center { text-align: center; }
+            .mobile-p-4 { padding: 1rem; }
+            .mobile-space-y-4 > * + * { margin-top: 1rem; }
+        }
+
+        @media (max-width: 768px) {
+            .tablet-hide { display: none; }
+            .tablet-full { width: 100%; }
+        }
+
+        /* Touch-friendly sizes */
+        .touch-target {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .glass-header { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
+        }
+        
+        .profile-card { 
+            border: 1px solid #e2e8f0; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); 
+            border-radius: 20px;
+        }
+
+        /* Status indicators */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-active {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .status-inactive {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+        }
+        
+        .status-probation {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        
+        .status-graduated {
+            background-color: #e0e7ff;
+            color: #3730a3;
+            border: 1px solid #c7d2fe;
+        }
+
+        /* Progress bars */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #f1f5f9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-success {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+        
+        .progress-warning {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+        
+        .progress-danger {
+            background: linear-gradient(90deg, #ef4444, #f87171);
+        }
+
+        /* Tabs */
+        .tab-button {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-button:hover {
+            color: #2563eb;
+        }
+        
+        .tab-button.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+            background: linear-gradient(to top, rgba(37, 99, 235, 0.05), transparent);
+        }
+
+        /* Form styling */
+        .form-group {
+            position: relative;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+            background: white;
+            transition: all 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-input.error {
+            border-color: #ef4444;
+        }
+        
+        .error-message {
+            display: none;
+            font-size: 12px;
+            color: #ef4444;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        /* Timeline */
+        .timeline-item {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #2563eb;
+            background: white;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 20px;
+            width: 2px;
+            height: calc(100% + 12px);
+            background: #e2e8f0;
+        }
+        
+        .timeline-item:last-child::after {
+            display: none;
+        }
+
+        /* Success animation */
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .success-pulse {
+            animation: successPulse 0.6s ease-in-out;
+        }
+
+        /* Mobile menu overlay */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Grade badge */
+        .grade-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 14px;
+        }
+        
+        .grade-a { background-color: #dcfce7; color: #166534; }
+        .grade-b { background-color: #dbeafe; color: #1e40af; }
+        .grade-c { background-color: #fef3c7; color: #92400e; }
+        .grade-d { background-color: #fee2e2; color: #991b1b; }
+        .grade-f { background-color: #f3f4f6; color: #4b5563; }
+    </style>
+</head>
+<body class="antialiased overflow-hidden selection:bg-blue-100">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay lg:hidden" onclick="mobileSidebarToggle()"></div>
+
+    <!-- Edit Student Modal -->
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-slate-900">Edit Student Profile</h3>
+                <button onclick="closeModal('editModal')" class="text-slate-400 hover:text-slate-600 touch-target">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="editStudentForm" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">First Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="editFirstName" class="form-input" value="Emma" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Last Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="editLastName" class="form-input" value="Johnson" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email <span class="text-red-500">*</span></label>
+                    <input type="email" id="editEmail" class="form-input" value="emma.johnson@greenwood.edu" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Student ID</label>
+                    <input type="text" id="editStudentId" class="form-input" value="STU-2023-1245" readonly>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">Grade Level</label>
+                        <select id="editGradeLevel" class="form-input">
+                            <option value="9">Grade 9</option>
+                            <option value="10" selected>Grade 10</option>
+                            <option value="11">Grade 11</option>
+                            <option value="12">Grade 12</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select id="editStatus" class="form-input">
+                            <option value="active" selected>Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="probation">Probation</option>
+                            <option value="graduated">Graduated</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" id="editPhone" class="form-input" value="+44 20 7123 7890">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <textarea id="editAddress" class="form-input" rows="2">123 Maple Street, London EC1A 1BB</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Guardian/Parent</label>
+                    <input type="text" id="editGuardian" class="form-input" value="Mr. & Mrs. Johnson">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Emergency Contact</label>
+                    <input type="tel" id="editEmergencyContact" class="form-input" value="+44 20 7123 7891">
+                </div>
+            </form>
+            
+            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
+                <button onclick="closeModal('editModal')" class="px-6 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition touch-target">
+                    Cancel
+                </button>
+                <button onclick="saveStudentChanges()" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition touch-target">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-content p-6">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-2">Delete Student?</h3>
+                <p class="text-slate-600 mb-6">Are you sure you want to delete <span class="font-bold">Emma Johnson</span>? This action cannot be undone and will permanently remove all student records.</p>
+                <div class="space-y-3">
+                    <button onclick="confirmDeleteStudent()" class="w-full py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition touch-target">
+                        Yes, Delete Student
+                    </button>
+                    <button onclick="closeModal('deleteModal')" class="w-full py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition touch-target">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal-overlay">
+        <div class="modal-content p-6">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 success-pulse">
+                    <i class="fas fa-check text-emerald-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-2">Success!</h3>
+                <p class="text-slate-600 mb-6" id="successMessage">Operation completed successfully</p>
+                <button onclick="closeModal('successModal')" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition touch-target">
+                    Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-[100] lg:relative lg:translate-x-0 -translate-x-full transition-transform duration-300 flex flex-col shadow-xl lg:shadow-none">
+            
+            <div class="h-16 flex items-center px-6 border-b border-slate-100 shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-100">
+                        <i class="fas fa-university text-white text-sm"></i>
+                    </div>
+                    <span class="text-xl font-extrabold tracking-tighter text-slate-900 italic">NEXUS<span class="text-blue-600 font-normal">OS</span></span>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto py-5 space-y-7 px-2">
+                <div>
+                    <nav class="space-y-1">
+                        <a href="dashboard.html" class="sidebar-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-600 rounded-lg mx-2 touch-target">
+                            <i class="fas fa-grid-2 w-4"></i> Dashboard
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Institutional Ops</p>
+                    <nav class="space-y-1">
+                        <div class="dropdown-group" id="schools-drop">
+                            <button onclick="toggleDropdown('schools-drop')" class="w-full flex items-center justify-between px-4 py-3 sidebar-link text-sm rounded-lg mx-2 touch-target">
+                                <span class="flex items-center gap-3"><i class="fas fa-school-flag w-4"></i> Schools Registry</span>
+                                <i class="fas fa-chevron-down text-xs chevron transition-transform opacity-50"></i>
+                            </button>
+                            <div class="dropdown-content bg-slate-50/50 ml-4">
+                                <a href="../index.html" class="block pl-10 py-2.5 text-xs font-medium text-slate-500 hover:text-blue-600 transition touch-target">Active Directory</a>
+                                <a href="../add.html" class="block pl-10 py-2.5 text-xs font-medium text-slate-500 hover:text-blue-600 transition touch-target">Provision New Node</a>
+                                <a href="../view.html" class="block pl-10 py-2.5 text-xs font-medium text-slate-500 hover:text-blue-600 transition touch-target">Performance Audit</a>
+                            </div>
+                        </div>
+                        <a href="../subscriptions/index.html" class="sidebar-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-600 rounded-lg mx-2 touch-target">
+                            <i class="fas fa-credit-card-front w-4"></i> Subscription Tiers
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Student Management</p>
+                    <nav class="space-y-1">
+                        <a href="index.html" class="sidebar-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-600 rounded-lg mx-2 touch-target">
+                            <i class="fas fa-users w-4"></i> All Students
+                        </a>
+                        <a href="add.html" class="sidebar-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-600 rounded-lg mx-2 touch-target">
+                            <i class="fas fa-user-plus w-4"></i> Add Student
+                        </a>
+                        <a href="view.html" class="sidebar-link active-link flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-600 rounded-lg mx-2 touch-target">
+                            <i class="fas fa-user-circle w-4"></i> Student Profile
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-100 bg-slate-50/30 shrink-0">
+                <div class="flex items-center gap-3 p-2 group cursor-pointer">
+                    <div class="relative">
+                        <img src="https://ui-avatars.com/api/?name=Admin+Master&background=1e293b&color=fff&bold=true" class="w-9 h-9 rounded-lg shadow-sm">
+                        <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-[12px] font-bold text-slate-900 truncate">Alexander Pierce</p>
+                        <p class="text-[10px] text-blue-600 font-black uppercase">Super Admin</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <header class="h-16 glass-header border-b border-slate-200 px-4 lg:px-8 flex items-center justify-between shrink-0 z-40">
+                <div class="flex items-center gap-3">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-500 p-2 hover:bg-slate-100 rounded-lg transition touch-target">
+                        <i class="fas fa-bars-staggered"></i>
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-sm font-black text-slate-800 uppercase tracking-widest">Student Profile</h1>
+                        <span class="px-2 py-0.5 bg-blue-600 text-[10px] text-white font-black rounded uppercase">Live</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <a href="index.html" class="hidden sm:flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-blue-600 text-sm font-medium transition">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back to Students</span>
+                    </a>
+                    <div class="flex items-center gap-2 text-xs text-slate-500">
+                        <i class="fas fa-clock"></i>
+                        <span id="timestamp">Loading...</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tabs Navigation -->
+            <div class="border-b border-slate-200 bg-white">
+                <div class="max-w-7xl mx-auto px-4 lg:px-8">
+                    <div class="flex overflow-x-auto">
+                        <button class="tab-button active" onclick="switchTab('overview')">
+                            <i class="fas fa-user-circle mr-2"></i>Overview
+                        </button>
+                        <button class="tab-button" onclick="switchTab('academic')">
+                            <i class="fas fa-graduation-cap mr-2"></i>Academic
+                        </button>
+                        <button class="tab-button" onclick="switchTab('attendance')">
+                            <i class="fas fa-calendar-check mr-2"></i>Attendance
+                        </button>
+                        <button class="tab-button" onclick="switchTab('performance')">
+                            <i class="fas fa-chart-line mr-2"></i>Performance
+                        </button>
+                        <button class="tab-button" onclick="switchTab('documents')">
+                            <i class="fas fa-file-alt mr-2"></i>Documents
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 lg:p-8">
+                <!-- Student Header -->
+                <div class="max-w-7xl mx-auto mb-8">
+                    <div class="bg-white profile-card p-6">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
+                            <div class="flex items-center gap-4">
+                                <div class="relative">
+                                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center relative overflow-hidden">
+                                        <img src="https://ui-avatars.com/api/?name=Emma+Johnson&background=ffffff&color=2563eb&size=128" class="w-full h-full object-cover">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                                    </div>
+                                    <span class="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 border-2 border-white rounded-full"></span>
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-black text-slate-900 mb-1">Emma Johnson</h2>
+                                    <div class="flex items-center gap-3">
+                                        <span class="status-badge status-active">
+                                            <i class="fas fa-circle text-[8px] mr-1"></i> Active
+                                        </span>
+                                        <span class="text-sm text-slate-500 font-medium">
+                                            <i class="fas fa-id-card mr-1"></i>STU-2023-1245
+                                        </span>
+                                        <span class="text-sm text-slate-500 font-medium">
+                                            <i class="fas fa-school mr-1"></i>Greenwood High Academy
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-3">
+                                <button onclick="sendMessage()" class="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2 touch-target">
+                                    <i class="fas fa-envelope"></i> Message
+                                </button>
+                                <button onclick="openModal('editModal')" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition flex items-center gap-2 touch-target">
+                                    <i class="fas fa-edit"></i> Edit Profile
+                                </button>
+                                <button onclick="openModal('deleteModal')" class="px-5 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition flex items-center gap-2 touch-target">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-slate-50 rounded-xl p-4">
+                                <p class="text-xs font-bold text-slate-500 uppercase mb-1">GPA</p>
+                                <div class="flex items-end justify-between">
+                                    <p class="text-2xl font-black text-slate-900">3.78</p>
+                                    <span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded">A-</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-slate-50 rounded-xl p-4">
+                                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Attendance</p>
+                                <div class="flex items-end justify-between">
+                                    <p class="text-2xl font-black text-slate-900">96.4%</p>
+                                    <span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded">+2.1%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-slate-50 rounded-xl p-4">
+                                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Grade Level</p>
+                                <div class="flex items-end justify-between">
+                                    <p class="text-2xl font-black text-slate-900">10</p>
+                                    <span class="text-xs font-medium text-slate-500">Sophomore</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-slate-50 rounded-xl p-4">
+                                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Enrollment</p>
+                                <div class="flex items-end justify-between">
+                                    <p class="text-2xl font-black text-slate-900">2 Years</p>
+                                    <span class="text-xs font-medium text-slate-500">Since 2022</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Overview -->
+                <div id="overviewTab" class="max-w-7xl mx-auto space-y-6 tab-content active">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Left Column -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <!-- Personal Information -->
+                            <div class="bg-white profile-card p-6">
+                                <h3 class="text-lg font-bold text-slate-900 mb-6">Personal Information</h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-4">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-500 uppercase">Date of Birth</p>
+                                            <p class="text-sm font-medium">March 15, 2007</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-500 uppercase">Gender</p>
+                                            <p class="text-sm font-medium">Female</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-500 uppercase">Nationality</p>
+                                            <p class="text-sm font-medium">British</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-500 uppercase">Email</p>
+                                            <p class="text-sm font-medium text-blue-600">emma.johnson@greenwood.edu</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="space-y-4">
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-500 uppercase">Phone</p>
+                                            <p class="text-sm font-medium">+44 20 7123 7890</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-500 uppercase">Address</p>
+                                            <p class="text-sm font-medium">123 Maple Street, London EC1A 1BB</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-500 uppercase">Guardian/Parent</p>
+                                            <p class="text-sm font-medium">Mr. & Mrs. Johnson</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold text-slate-500 uppercase">Emergency Contact</p>
+                                            <p class="text-sm font-medium">+44 20 7123 7891</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Recent Activity -->
+                            <div class="bg-white profile-card p-6">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h3 class="text-lg font-bold text-slate-900">Recent Activity</h3>
+                                    <button onclick="viewAllActivity()" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                        View All
+                                    </button>
+                                </div>
+                                
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                                                <i class="fas fa-book text-blue-600"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-slate-900">Submitted Math Assignment</p>
+                                                <p class="text-sm text-slate-500">Algebra II - Chapter 5 Exercises</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm font-medium text-slate-900">Yesterday</p>
+                                            <p class="text-xs text-slate-500">2:30 PM</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                                <i class="fas fa-award text-emerald-600"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-slate-900">Science Fair Winner</p>
+                                                <p class="text-sm text-slate-500">1st Place - Renewable Energy Project</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm font-medium text-slate-900">Nov 28</p>
+                                            <p class="text-xs text-slate-500">Last Week</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                                                <i class="fas fa-exclamation-triangle text-amber-600"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-slate-900">Late Submission</p>
+                                                <p class="text-sm text-slate-500">History Essay - 2 days late</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm font-medium text-slate-900">Nov 25</p>
+                                            <p class="text-xs text-slate-500">Last Week</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column -->
+                        <div class="space-y-6">
+                            <!-- Class Schedule -->
+                            <div class="bg-white profile-card p-6">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4">Current Schedule</h3>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-3 border border-slate-100 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-slate-900">Mathematics</p>
+                                            <p class="text-xs text-slate-500">Mr. Davidson • Room 204</p>
+                                        </div>
+                                        <span class="text-sm font-bold text-blue-600">A</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between p-3 border border-slate-100 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-slate-900">Physics</p>
+                                            <p class="text-xs text-slate-500">Dr. Chen • Lab 3</p>
+                                        </div>
+                                        <span class="text-sm font-bold text-blue-600">A-</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between p-3 border border-slate-100 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-slate-900">English Literature</p>
+                                            <p class="text-xs text-slate-500">Ms. Parker • Room 112</p>
+                                        </div>
+                                        <span class="text-sm font-bold text-emerald-600">B+</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between p-3 border border-slate-100 rounded-lg">
+                                        <div>
+                                            <p class="font-medium text-slate-900">Computer Science</p>
+                                            <p class="text-xs text-slate-500">Mr. Gupta • Computer Lab</p>
+                                        </div>
+                                        <span class="text-sm font-bold text-blue-600">A</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Actions -->
+                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 profile-card p-6 text-white">
+                                <h3 class="text-lg font-bold mb-4">Quick Actions</h3>
+                                <div class="space-y-3">
+                                    <button onclick="sendEmail()" class="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition flex items-center gap-3 touch-target">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span>Send Email</span>
+                                    </button>
+                                    <button onclick="generateReportCard()" class="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition flex items-center gap-3 touch-target">
+                                        <i class="fas fa-file-pdf"></i>
+                                        <span>Generate Report</span>
+                                    </button>
+                                    <button onclick="scheduleMeeting()" class="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition flex items-center gap-3 touch-target">
+                                        <i class="fas fa-calendar-plus"></i>
+                                        <span>Schedule Meeting</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Health & Medical -->
+                            <div class="bg-white profile-card p-6">
+                                <h3 class="text-lg font-bold text-slate-900 mb-4">Health Information</h3>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-slate-600">Blood Type</span>
+                                        <span class="text-sm font-bold">O+</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-slate-600">Allergies</span>
+                                        <span class="text-sm font-bold text-amber-600">Penicillin</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-slate-600">Last Check-up</span>
+                                        <span class="text-sm font-bold">Oct 15, 2023</span>
+                                    </div>
+                                    <button onclick="viewMedicalRecords()" class="w-full mt-4 py-2 border border-blue-600 text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition touch-target">
+                                        View Medical Records
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Academic -->
+                <div id="academicTab" class="max-w-7xl mx-auto space-y-6 tab-content">
+                    <div class="bg-white profile-card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-slate-900">Academic Performance</h3>
+                            <select class="text-sm border border-slate-200 rounded-lg px-3 py-1">
+                                <option>Current Semester</option>
+                                <option>Previous Semester</option>
+                                <option>All Time</option>
+                            </select>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-slate-100">
+                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Subject</th>
+                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Teacher</th>
+                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Grade</th>
+                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Percentage</th>
+                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Rank</th>
+                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-50">
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="py-4 px-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="grade-badge grade-a">A</div>
+                                                <div>
+                                                    <p class="font-medium text-slate-900">Mathematics</p>
+                                                    <p class="text-sm text-slate-500">Algebra II & Calculus</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm text-slate-700">Mr. Davidson</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded">A</span>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm font-bold text-slate-900">94.5%</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm text-slate-700">12/125</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <span class="flex items-center gap-2">
+                                                <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                                <span class="text-sm text-slate-700">Excellent</span>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="py-4 px-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="grade-badge grade-a">A-</div>
+                                                <div>
+                                                    <p class="font-medium text-slate-900">Physics</p>
+                                                    <p class="text-sm text-slate-500">Mechanics & Thermodynamics</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm text-slate-700">Dr. Chen</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded">A-</span>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm font-bold text-slate-900">90.2%</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm text-slate-700">24/125</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <span class="flex items-center gap-2">
+                                                <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                                <span class="text-sm text-slate-700">Good</span>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="py-4 px-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="grade-badge grade-b">B+</div>
+                                                <div>
+                                                    <p class="font-medium text-slate-900">English Literature</p>
+                                                    <p class="text-sm text-slate-500">19th Century Novels</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm text-slate-700">Ms. Parker</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded">B+</span>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm font-bold text-slate-900">87.8%</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm text-slate-700">42/125</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <span class="flex items-center gap-2">
+                                                <span class="w-2 h-2 bg-amber-500 rounded-full"></span>
+                                                <span class="text-sm text-slate-700">Average</span>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- GPA Trend -->
+                    <div class="bg-white profile-card p-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-6">GPA Trend</h3>
+                        <div class="h-64">
+                            <canvas id="gpaChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Attendance -->
+                <div id="attendanceTab" class="max-w-7xl mx-auto space-y-6 tab-content">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white profile-card p-6">
+                            <h3 class="text-lg font-bold text-slate-900 mb-6">Attendance Overview</h3>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="font-medium text-slate-700">Overall Attendance</span>
+                                        <span class="font-bold">96.4%</span>
+                                    </div>
+                                    <div class="progress-container">
+                                        <div class="progress-bar progress-success" style="width: 96.4%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="font-medium text-slate-700">Classes Attended</span>
+                                        <span class="font-bold">214/222</span>
+                                    </div>
+                                    <div class="progress-container">
+                                        <div class="progress-bar progress-success" style="width: 96.4%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="font-medium text-slate-700">Late Arrivals</span>
+                                        <span class="font-bold">5/222</span>
+                                    </div>
+                                    <div class="progress-container">
+                                        <div class="progress-bar progress-warning" style="width: 2.3%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white profile-card p-6">
+                            <h3 class="text-lg font-bold text-slate-900 mb-6">Attendance by Month</h3>
+                            <div class="h-64">
+                                <canvas id="attendanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Absences -->
+                    <div class="bg-white profile-card p-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-6">Recent Absences</h3>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-slate-100">
+                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Date</th>
+                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Subject</th>
+                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Teacher</th>
+                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Reason</th>
+                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-50">
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm font-medium text-slate-900">Nov 20, 2023</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm text-slate-700">Physics</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm text-slate-700">Dr. Chen</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm text-slate-700">Medical Appointment</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <span class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded">Excused</span>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm font-medium text-slate-900">Oct 15, 2023</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm text-slate-700">Mathematics</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm text-slate-700">Mr. Davidson</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <p class="text-sm text-slate-700">Family Event</p>
+                                        </td>
+                                        <td class="py-4 px-4">
+                                            <span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded">Unexcused</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Performance -->
+                <div id="performanceTab" class="max-w-7xl mx-auto space-y-6 tab-content">
+                    <div class="bg-white profile-card p-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-6">Performance Analytics</h3>
+                        <div class="h-64">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white profile-card p-6 text-center">
+                            <div class="text-3xl font-black text-blue-600 mb-2">92nd</div>
+                            <p class="text-sm text-slate-600">Percentile Rank</p>
+                        </div>
+                        <div class="bg-white profile-card p-6 text-center">
+                            <div class="text-3xl font-black text-emerald-600 mb-2">Top 8%</div>
+                            <p class="text-sm text-slate-600">Class Standing</p>
+                        </div>
+                        <div class="bg-white profile-card p-6 text-center">
+                            <div class="text-3xl font-black text-amber-600 mb-2">15</div>
+                            <p class="text-sm text-slate-600">Awards Received</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Documents -->
+                <div id="documentsTab" class="max-w-7xl mx-auto space-y-6 tab-content">
+                    <div class="bg-white profile-card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-slate-900">Student Documents</h3>
+                            <button onclick="uploadDocument()" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition touch-target">
+                                <i class="fas fa-upload mr-2"></i>Upload Document
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center">
+                                        <i class="fas fa-file-pdf text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-slate-900">Transcript 2023-2024</p>
+                                        <p class="text-sm text-slate-500">Academic Transcript • Updated: Nov 30, 2023</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="viewDocument(1)" class="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:text-blue-600 transition touch-target">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button onclick="downloadDocument(1)" class="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:text-emerald-600 transition touch-target">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                                        <i class="fas fa-file-word text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-slate-900">Medical Records</p>
+                                        <p class="text-sm text-slate-500">Health Information • Updated: Oct 15, 2023</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="viewDocument(2)" class="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:text-blue-600 transition touch-target">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button onclick="downloadDocument(2)" class="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:text-emerald-600 transition touch-target">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                        <i class="fas fa-file-excel text-emerald-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-slate-900">Attendance Records</p>
+                                        <p class="text-sm text-slate-500">2023-2024 Attendance • Updated: Daily</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="viewDocument(3)" class="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:text-blue-600 transition touch-target">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button onclick="downloadDocument(3)" class="w-10 h-10 rounded-lg border border-slate-200 text-slate-600 hover:text-emerald-600 transition touch-target">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            const options = { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', options);
+        }
+        
+        updateTimestamp();
+        setInterval(updateTimestamp, 1000);
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show selected tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function saveStudentChanges() {
+            // Get form values
+            const firstName = document.getElementById('editFirstName').value;
+            const lastName = document.getElementById('editLastName').value;
+            const status = document.getElementById('editStatus').value;
+            
+            // Show loading
+            showNotification('Saving student changes...', 'info');
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Update UI
+                document.querySelector('h2').textContent = `${firstName} ${lastName}`;
+                
+                // Update status badge
+                const badge = document.querySelector('.status-badge');
+                badge.className = `status-badge status-${status}`;
+                badge.innerHTML = `<i class="fas fa-circle text-[8px] mr-1"></i> ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+                
+                closeModal('editModal');
+                showSuccessMessage('Student profile updated successfully');
+            }, 1500);
+        }
+
+        function confirmDeleteStudent() {
+            showNotification('Deleting student...', 'info');
+            
+            setTimeout(() => {
+                closeModal('deleteModal');
+                showSuccessMessage('Student deleted successfully');
+                
+                // Redirect to students list after delay
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            }, 1500);
+        }
+
+        function showSuccessMessage(message) {
+            document.getElementById('successMessage').textContent = message;
+            openModal('successModal');
+        }
+
+        // Chart initialization
+        function initCharts() {
+            // GPA Chart
+            const gpaCtx = document.getElementById('gpaChart').getContext('2d');
+            new Chart(gpaCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'],
+                    datasets: [{
+                        label: 'GPA',
+                        data: [3.65, 3.72, 3.78, 3.75, 3.80, 3.82, 3.85, 3.78],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 3.0,
+                            max: 4.0,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Attendance Chart
+            const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+            new Chart(attendanceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'],
+                    datasets: [{
+                        label: 'Attendance %',
+                        data: [95.2, 96.8, 94.5, 96.4, 97.1, 96.2],
+                        backgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 90,
+                            max: 100,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Performance Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(performanceCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Mathematics', 'Physics', 'English', 'Computer Science', 'History', 'Chemistry'],
+                    datasets: [{
+                        label: 'Current Performance',
+                        data: [94, 90, 88, 95, 85, 89],
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                        borderColor: '#2563eb',
+                        borderWidth: 2
+                    }, {
+                        label: 'Class Average',
+                        data: [82, 78, 81, 79, 76, 80],
+                        backgroundColor: 'rgba(148, 163, 184, 0.2)',
+                        borderColor: '#94a3b8',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 60,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Quick action functions
+        function sendMessage() {
+            showNotification('Opening message composer...', 'info');
+        }
+
+        function sendEmail() {
+            showNotification('Opening email composer...', 'info');
+        }
+
+        function generateReportCard() {
+            showNotification('Generating report card...', 'info');
+            
+            setTimeout(() => {
+                showNotification('Report card generated successfully', 'success');
+                
+                // Simulate download
+                const link = document.createElement('a');
+                link.href = '#';
+                link.download = 'Emma_Johnson_Report_Card.pdf';
+                link.click();
+            }, 1500);
+        }
+
+        function scheduleMeeting() {
+            showNotification('Opening scheduling tool...', 'info');
+        }
+
+        function viewMedicalRecords() {
+            showNotification('Opening medical records...', 'info');
+        }
+
+        function viewAllActivity() {
+            showNotification('Loading all activity...', 'info');
+        }
+
+        // Document functions
+        function viewDocument(id) {
+            showNotification(`Opening document ${id}...`, 'info');
+        }
+
+        function downloadDocument(id) {
+            showNotification(`Downloading document ${id}...`, 'info');
+            
+            setTimeout(() => {
+                showNotification('Document downloaded successfully', 'success');
+            }, 1000);
+        }
+
+        function uploadDocument() {
+            showNotification('Opening document upload...', 'info');
+        }
+
+        // Notification system
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-xl shadow-lg z-[1001] animate-fadeIn ${
+                type === 'success' ? 'bg-emerald-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation' : 'info'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Sidebar functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('active');
+        }
+
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById(id);
+            dropdown.classList.toggle('dropdown-open');
+        }
+
+        function mobileSidebarToggle() {
+            toggleSidebar();
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (window.innerWidth < 1024 && 
+                !sidebar.contains(e.target) && 
+                !e.target.closest('[onclick*="mobileSidebarToggle"]')) {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.remove('active');
+            }
+        });
+
+        // Handle escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+                
+                // Close modals
+                document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
+</body>
+</html>

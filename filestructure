@@ -1,0 +1,175 @@
+academixsuite/
+├── config/
+│   ├── database.php
+│   ├── constants.php
+│   └── functions.php
+│
+├── includes/
+│   ├── autoload.php
+│   ├── ErrorHandler.php
+│   ├── Database.php
+│   ├── Auth.php
+│   ├── Session.php
+│   ├── Utils.php
+│   ├── Tenant.php              # Tenant management
+│   └── SchoolSession.php       # School-specific session
+│
+├── assets/
+│   ├── css/
+│   ├── js/
+│   ├── images/
+│   └── uploads/
+│       ├── platform/           # Platform-level uploads
+│       ├── schools/            # School-specific uploads (organized by ID)
+│       │   ├── 1/              # School ID 1
+│       │   │   ├── logo/
+│       │   │   ├── students/
+│       │   │   │   ├── photos/
+│       │   │   │   ├── documents/
+│       │   │   │   └── assignments/
+│       │   │   ├── teachers/
+│       │   │   ├── parents/
+│       │   │   └── reports/
+│       │   ├── 2/              # School ID 2
+│       │   │   └── (same structure as School 1)
+│       │   └── temp/           # Temporary uploads
+│
+├── platform/
+│   ├── admin/
+│   │   ├── filepath/
+│   │   │   └── sidebar.php
+│   │   ├── index.php           # Redirect to dashboard
+│   │   ├── dashboard.php       # Main admin dashboard
+│   │   │
+│   │   ├── schools/            # Schools Management
+│   │   │   ├── index.php       # List all schools
+│   │   │   ├── view.php        # View school details
+│   │   │   ├── add.php         # Add new school
+│   │   │   ├── edit.php        # Edit school
+│   │   │   ├── delete.php      # Delete school
+│   │   │   ├── manage.php      # School management hub
+│   │   │   └── actions/        # School action handlers
+│   │   │       ├── suspend-school.php
+│   │   │       ├── activate-school.php
+│   │   │       ├── delete-school.php
+│   │   │       ├── extend-subscription.php
+│   │   │       ├── approve-invoice.php
+│   │   │       ├── reject-invoice.php
+│   │   │       ├── resend-invoice.php
+│   │   │       ├── generate-invoice.php
+│   │   │       ├── backup-database.php
+│   │   │       ├── optimize-database.php
+│   │   │       ├── check-tables.php
+│   │   │       ├── export-schema.php
+│   │   │       ├── import-data.php
+│   │   │       ├── reset-database.php
+│   │   │       ├── clear-cache.php
+│   │   │       ├── reset-passwords.php
+│   │   │       ├── send-broadcast.php
+│   │   │       ├── generate-report.php
+│   │   │       ├── reset-school.php
+│   │   │       ├── create-admin.php
+│   │   │       └── export-users.php
+│   │   │
+│   │   ├── plans/              # Subscription Plans
+│   │   │   ├── index.php       # List all plans
+│   │   │   ├── add.php         # Add new plan
+│   │   │   └── edit.php        # Edit plan
+│   │   │
+│   │   ├── subscriptions/      # School Subscriptions
+│   │   │   └── index.php       # Manage subscriptions
+│   │   │
+│   │   ├── users/              # Platform Users (Staff)
+│   │   │   ├── index.php       # List platform users
+│   │   │   ├── add.php         # Add platform user
+│   │   │   └── edit.php        # Edit platform user
+│   │   │
+│   │   ├── reports/            # Reports & Analytics
+│   │   │   ├── index.php       # Reports dashboard
+│   │   │   ├── revenue.php     # Revenue reports
+│   │   │   ├── schools-growth.php  # Growth analytics
+│   │   │   └── exports.php     # Export reports
+│   │   │
+│   │   ├── settings/           # Platform Settings
+│   │   │   ├── general.php     # General settings
+│   │   │   ├── email.php       # Email configuration
+│   │   │   ├── payment.php     # Payment gateway settings
+│   │   │   └── security.php    # Security settings
+│   │   │
+│   │   ├── support/            # Support System
+│   │   │   ├── tickets.php     # List support tickets
+│   │   │   └── view-ticket.php # View ticket details
+│   │   │
+│   │   └── logs/               # System Logs
+│   │       ├── activity.php    # Activity logs
+│   │       ├── email-logs.php  # Email logs
+│   │       └── error-logs.php  # Error logs
+│   │
+│   ├── login.php               # Platform login
+│   ├── logout.php              # Platform logout
+│   └── settings.php
+│
+├── tenant/                     # School-Specific Portals (Multi-tenant)
+│   ├── {school-slug}/          # Dynamic: Created per school
+│   │   │
+│   │   ├── admin/              # School Admin Portal
+│   │   │   ├── dashboard.php
+│   │   │   ├── students.php
+│   │   │   ├── teachers.php
+│   │   │   ├── classes.php
+│   │   │   ├── attendance.php
+│   │   │   ├── fees.php
+│   │   │   └── settings.php
+│   │   │
+│   │   ├── teacher/            # Teacher Portal
+│   │   │   ├── dashboard.php
+│   │   │   ├── my-classes.php
+│   │   │   ├── attendance.php
+│   │   │   ├── grades.php
+│   │   │   ├── assignments.php
+│   │   │   └── messages.php
+│   │   │
+│   │   ├── student/            # Student Portal
+│   │   │   ├── dashboard.php
+│   │   │   ├── timetable.php
+│   │   │   ├── assignments.php
+│   │   │   ├── grades.php
+│   │   │   └── profile.php
+│   │   │
+│   │   ├── parent/             # Parent Portal
+│   │   │   ├── dashboard.php
+│   │   │   ├── children.php
+│   │   │   ├── attendance.php
+│   │   │   ├── fees.php
+│   │   │   └── messages.php
+│   │   │
+│   │   ├── assets/             # School-specific assets
+│   │   │   ├── css/
+│   │   │   │   └── school-style.css
+│   │   │   └── js/
+│   │   │       └── school-scripts.js
+│   │   │
+│   │   ├── config.php          # School-specific configuration
+│   │   ├── index.php           # School homepage
+│   │   └── login.php           # School login page
+│   │
+│   └── login.php               # General tenant login
+│
+├── public/                     # Public-Facing Pages
+│   ├── index.php               # Landing page
+│   ├── register.php            # School registration
+│   ├── pricing.php             # Pricing page
+│   └── contact.php             # Contact page
+│
+├── templates/                  # Reusable Templates
+│   ├── header.php
+│   ├── footer.php
+│   ├── sidebar-admin.php
+│   └── sidebar-teacher.php
+│
+├── vendor/                     # Composer packages
+│
+├── .htaccess                   # URL rewriting rules
+├── index.php                   # Main entry point
+├── login.php                   # Global login
+└── composer.json               # Composer dependencies

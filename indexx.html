@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AcademixSuite MVP Pitch Deck</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0.5in;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+        }
+        
+        .page {
+            background: white;
+            padding: 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            page-break-after: always;
+            min-height: 11in;
+        }
+        
+        h1 {
+            color: #1a237e;
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            color: #283593;
+            font-size: 28px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #3949ab;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: #3949ab;
+            font-size: 22px;
+            margin: 25px 0 15px 0;
+        }
+        
+        .title-page {
+            text-align: center;
+            padding-top: 100px;
+        }
+        
+        .title-page h1 {
+            font-size: 48px;
+            color: #1a237e;
+            margin-bottom: 20px;
+        }
+        
+        .tagline {
+            font-size: 24px;
+            color: #3949ab;
+            font-style: italic;
+            margin-bottom: 50px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .problem-list, .solution-list, .feature-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .problem-list li, .solution-list li, .feature-list li {
+            padding: 10px 0 10px 40px;
+            margin-bottom: 10px;
+            background-position: 0 center;
+            background-repeat: no-repeat;
+            background-size: 24px;
+            font-size: 16px;
+        }
+        
+        .problem-list li {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23d32f2f"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>');
+        }
+        
+        .solution-list li {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234caf50"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
+        }
+        
+        .feature-list li {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%232196f3"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>');
+        }
+        
+        .card {
+            background: #f8f9fa;
+            border-left: 5px solid #3949ab;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .card h4 {
+            color: #1a237e;
+            margin-top: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th {
+            background: #3949ab;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .highlight {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 5px solid #2196f3;
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .team-member {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-top: 4px solid #3949ab;
+        }
+        
+        .pricing-box {
+            background: linear-gradient(135deg, #1a237e, #3949ab);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .pricing-box h3 {
+            color: white;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        
+        .price {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .per-month {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .cta {
+            text-align: center;
+            background: #1a237e;
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin: 40px 0;
+        }
+        
+        .cta h3 {
+            color: white;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+        }
+        
+        .timeline {
+            position: relative;
+            margin: 40px 0;
+        }
+        
+        .timeline-item {
+            padding: 20px;
+            margin-bottom: 20px;
+            background: white;
+            border-left: 4px solid #3949ab;
+            position: relative;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 20px;
+            width: 20px;
+            height: 20px;
+            background: #3949ab;
+            border-radius: 50%;
+        }
+        
+        .emoji {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+                padding: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Page 1: Title -->
+    <div class="page title-page">
+        <h1>ACADEMIXSUITE</h1>
+        <p class="tagline">Smart School Management for Modern Education</p>
+        <h2>"The All-in-One Platform Transforming How Schools Operate"</h2>
+        <div style="margin-top: 100px;">
+            <p><strong>Confidential Investor Pitch Deck</strong></p>
+            <p><em>Prepared for: Potential Clients & Investors</em></p>
+            <p>Date: January 2025</p>
+        </div>
+        <div class="page-number">1</div>
+    </div>
+    
+    <!-- Page 2: The Problem -->
+    <div class="page">
+        <h2>"Schools are Drowning in Paperwork, Not Focused on Education"</h2>
+        <h3>Current Challenges Facing Educational Institutions:</h3>
+        
+        <ul class="problem-list">
+            <li><span class="emoji">📊</span> <strong>Fragmented Systems:</strong> Attendance, grades, fees, and communication managed through different platforms</li>
+            <li><span class="emoji">⏰</span> <strong>Time-Consuming Administration:</strong> 30+ hours per month spent on manual administrative tasks</li>
+            <li><span class="emoji">💰</span> <strong>High Operational Costs:</strong> Multiple software subscriptions plus IT maintenance expenses</li>
+            <li><span class="emoji">📱</span> <strong>Poor Parent Communication:</strong> Parents feel disconnected from their child's progress</li>
+            <li><span class="emoji">📈</span> <strong>No Real-time Insights:</strong> Critical decisions based on outdated, manual reports</li>
+            <li><span class="emoji">🔐</span> <strong>Security Concerns:</strong> Sensitive student data stored in insecure systems</li>
+            <li><span class="emoji">🌍</span> <strong>Limited Mobile Access:</strong> Parents and staff need desktop access for most features</li>
+        </ul>
+        
+        <div class="highlight">
+            <h4>The Result:</h4>
+            <p>Administrative staff overwhelmed, parents frustrated, students underserved, and school leaders making decisions without proper data.</p>
+        </div>
+        
+        <div class="card">
+            <h4>Market Research Insight:</h4>
+            <p>Over 85% of private schools in Nigeria still use manual systems or fragmented software solutions, creating a ₦45B market opportunity for unified platforms.</p>
+        </div>
+        
+        <div class="page-number">2</div>
+    </div>
+    
+    <!-- Page 3: Our Solution -->
+    <div class="page">
+        <h2>"Everything Your School Needs, in One Platform"</h2>
+        
+        <div class="section">
+            <h3>Complete School Management Ecosystem:</h3>
+            <ul class="solution-list">
+                <li><span class="emoji">🎯</span> <strong>Comprehensive Student Management</strong> - Track complete student lifecycle from admission to graduation</li>
+                <li><span class="emoji">👨‍🏫</span> <strong>Intelligent Teacher Portal</strong> - Lesson planning, automated grading, attendance tracking</li>
+                <li><span class="emoji">💰</span> <strong>Automated Fee Management</strong> - Smart billing, online payments, fee reminders</li>
+                <li><span class="emoji">📊</span> <strong>Advanced Academic Analytics</strong> - Performance tracking with predictive insights</li>
+                <li><span class="emoji">📱</span> <strong>Engaging Parent Portal</strong> - Real-time updates, instant communication, progress tracking</li>
+                <li><span class="emoji">📅</span> <strong>Smart Scheduling System</strong> - Automated timetables, exam scheduling, event management</li>
+                <li><span class="emoji">📋</span> <strong>HR & Staff Management</strong> - Employee records, payroll, performance tracking</li>
+                <li><span class="emoji">🏫</span> <strong>Multi-Campus Management</strong> - Central control for school groups and chains</li>
+            </ul>
+        </div>
+        
+        <div class="highlight">
+            <h4>The AcademixSuite Promise:</h4>
+            <p><strong>Single Login, Single Platform, Complete Control</strong></p>
+            <p>No more switching between systems. Everything your school needs to operate efficiently and effectively.</p>
+        </div>
+        
+        <div class="page-number">3</div>
+    </div>
+    
+    <!-- Page 4: Key Differentiators -->
+    <div class="page">
+        <h2>What Makes AcademixSuite Different</h2>
+        
+        <div class="section">
+            <h3>1. True Multi-Tenant Architecture</h3>
+            <div class="card">
+                <p>✅ <strong>Complete Database Isolation:</strong> Each school gets its own secure database</p>
+                <p>✅ <strong>Zero Data Leakage:</strong> Absolute privacy between institutions</p>
+                <p>✅ <strong>Custom Branding:</strong> Your school's logo, colors, and identity</p>
+                <p>✅ <strong>Centralized Management:</strong> Super Admin dashboard for multiple school oversight</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>2. Nigerian Education-First Design</h3>
+            <div class="card">
+                <p>✅ <strong>Built for Nigerian Curriculum:</strong> WAEC, NECO, BECE requirements integrated</p>
+                <p>✅ <strong>Local Payment Integration:</strong> Paystack, Flutterwave, Remita ready</p>
+                <p>✅ <strong>SMS & WhatsApp Integration:</strong> Optimized for Nigerian communication patterns</p>
+                <p>✅ <strong>Local Support Team:</strong> Based in Lagos, understanding local challenges</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>3. Mobile-First Experience</h3>
+            <div class="card">
+                <p>✅ <strong>80% Parent Mobile Access:</strong> Designed for smartphone-first usage</p>
+                <p>✅ <strong>No App Download Required:</strong> Works perfectly in any mobile browser</p>
+                <p>✅ <strong>Offline Capability:</strong> Functions during poor connectivity</p>
+                <p>✅ <strong>Progressive Web App:</strong> App-like experience without installation</p>
+            </div>
+        </div>
+        
+        <div class="page-number">4</div>
+    </div>
+    
+    <!-- Page 5: Technology & Security -->
+    <div class="page">
+        <h2>Enterprise-Grade Technology Platform</h2>
+        
+        <h3>Security Architecture:</h3>
+        <ul class="feature-list">
+            <li>🔐 <strong>Bank-Grade Encryption:</strong> AES-256 encryption for all data at rest and in transit</li>
+            <li>🏢 <strong>Complete Tenant Isolation:</strong> Separate databases prevent cross-school data access</li>
+            <li>📁 <strong>Automated Daily Backups:</strong> Data backed up to multiple secure locations</li>
+            <li>👥 <strong>Granular Role-Based Access:</strong> Control exactly who sees what</li>
+            <li>🛡️ <strong>DDoS Protection:</strong> Enterprise-level protection against attacks</li>
+            <li>🔍 <strong>Activity Logging:</strong> Complete audit trail of all system actions</li>
+        </ul>
+        
+        <h3>Technical Infrastructure:</h3>
+        <div class="card">
+            <h4>AWS Cloud Infrastructure:</h4>
+            <p>• <strong>99.9% Uptime SLA</strong> with automatic failover</p>
+            <p>• <strong>Auto-scaling:</strong> Handles 1 to 1,000+ schools seamlessly</p>
+            <p>• <strong>Global CDN:</strong> Fast loading times across Nigeria</p>
+            <p>• <strong>Real-time Sync:</strong> Instant updates across all devices</p>
+            <p>• <strong>Zero Maintenance:</strong> We handle all updates and patches</p>
+        </div>
+        
+        <div class="highlight">
+            <h4>Compliance & Certifications:</h4>
+            <p>✅ GDPR Compliant Data Protection</p>
+            <p>✅ ISO 27001 Security Standards</p>
+            <p>✅ Regular Third-Party Security Audits</p>
+            <p>✅ Nigerian Data Protection Regulation Compliant</p>
+        </div>
+        
+        <div class="page-number">5</div>
+    </div>
+    
+    <!-- Page 6: ROI Calculator -->
+    <div class="page">
+        <h2>ROI Calculator - Your School Saves</h2>
+        <h3>"See the Numbers That Matter"</h3>
+        
+        <div class="section">
+            <h4>Current Monthly Costs for a Typical 500-Student School:</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Expense Category</th>
+                        <th>Monthly Cost</th>
+                        <th>Annual Cost</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Multiple Software Subscriptions</td>
+                        <td>₦50,000</td>
+                        <td>₦600,000</td>
+                    </tr>
+                    <tr>
+                        <td>IT Staff/Consultant Fees</td>
+                        <td>₦100,000</td>
+                        <td>₦1,200,000</td>
+                    </tr>
+                    <tr>
+                        <td>Paper, Printing & Stationery</td>
+                        <td>₦30,000</td>
+                        <td>₦360,000</td>
+                    </tr>
+                    <tr>
+                        <td>Communication Costs (SMS, Calls)</td>
+                        <td>₦15,000</td>
+                        <td>₦180,000</td>
+                    </tr>
+                    <tr>
+                        <td>Manual Labor Overtime</td>
+                        <td>₦25,000</td>
+                        <td>₦300,000</td>
+                    </tr>
+                    <tr style="background: #e8f5e8; font-weight: bold;">
+                        <td><strong>TOTAL CURRENT COST</strong></td>
+                        <td><strong>₦220,000</strong></td>
+                        <td><strong>₦2,640,000</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h4>With AcademixSuite Pro Plan (₦40,000/month):</h4>
+            <div class="card">
+                <p>✅ <strong>All Software Included:</strong> No additional subscriptions needed</p>
+                <p>✅ <strong>No IT Staff Required:</strong> We handle all technical support</p>
+                <p>✅ <strong>Paperless Operations:</strong> Eliminate printing costs</p>
+                <p>✅ <strong>Built-in Communication:</strong> No separate SMS/email costs</p>
+                <p>✅ <strong>Reduced Labor:</strong> Automate manual processes</p>
+            </div>
+        </div>
+        
+        <div class="pricing-box">
+            <h3>Monthly Savings</h3>
+            <div class="price">₦180,000</div>
+            <p class="per-month">82% reduction in monthly costs</p>
+            <p><strong>Plus:</strong> 20+ hours of administrative time saved weekly</p>
+        </div>
+        
+        <div class="page-number">6</div>
+    </div>
+    
+    <!-- Page 7: Implementation Timeline -->
+    <div class="page">
+        <h2>From Signup to Success in 7 Days</h2>
+        <h3>Zero-Disruption Implementation Process</h3>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <h4>Day 1: Account Creation & Setup</h4>
+                <p>• School configuration and branding setup</p>
+                <p>• Admin user training begins</p>
+                <p>• Data migration planning</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h4>Day 2: Data Migration</h4>
+                <p>• Our team handles all data import</p>
+                <p>• Student, staff, and parent data transfer</p>
+                <p>• Historical data preservation</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h4>Day 3: Staff Training</h4>
+                <p>• Live online training sessions</p>
+                <p>• Custom training materials provided</p>
+                <p>• Administrator certification</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h4>Day 4: Parent Onboarding</h4>
+                <p>• Communication templates provided</p>
+                <p>• Parent account creation begins</p>
+                <p>• Mobile access setup</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h4>Day 5: Go-Live</h4>
+                <p>• Core modules activated</p>
+                <p>• Real-time monitoring begins</p>
+                <p>• Support team on standby</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h4>Day 6: Support Check-in</h4>
+                <p>• System performance review</p>
+                <p>• User feedback collection</p>
+                <p>• Additional training if needed</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h4>Day 7: Full Operation</h4>
+                <p>• All features activated</p>
+                <p>• Success metrics established</p>
+                <p>• Ongoing support plan confirmed</p>
+            </div>
+        </div>
+        
+        <div class="highlight">
+            <h4>Implementation Guarantee:</h4>
+            <p>Your school will be fully operational within 7 days or we'll refund your first month's subscription.</p>
+        </div>
+        
+        <div class="page-number">7</div>
+    </div>
+    
+    <!-- Page 8: Pricing -->
+    <div class="page">
+        <h2>Simple & Transparent Pricing</h2>
+        <h3>"One Price, Everything Included"</h3>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Basic</th>
+                    <th>Pro</th>
+                    <th>Enterprise</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Monthly Price</strong></td>
+                    <td>₦25,000</td>
+                    <td>₦40,000</td>
+                    <td>Custom</td>
+                </tr>
+                <tr>
+                    <td>Student Capacity</td>
+                    <td>Up to 500</td>
+                    <td>Unlimited</td>
+                    <td>Unlimited</td>
+                </tr>
+                <tr>
+                    <td>Core Modules</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Advanced Analytics</td>
+                    <td>Limited</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Priority Support</td>
+                    <td>Business Hours</td>
+                    <td>24/7</td>
+                    <td>Dedicated</td>
+                </tr>
+                <tr>
+                    <td>Multi-Campus</td>
+                    <td>❌</td>
+                    <td>✅</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>API Access</td>
+                    <td>❌</td>
+                    <td>Limited</td>
+                    <td>Full</td>
+                </tr>
+                <tr>
+                    <td>Custom Development</td>
+                    <td>❌</td>
+                    <td>❌</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>SLA Uptime</td>
+                    <td>99.5%</td>
+                    <td>99.9%</td>
+                    <td>99.95%</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="section">
+            <h4>What's Included in All Plans:</h4>
+            <div class="card">
+                <p>✅ Unlimited users (students, parents, staff)</p>
+                <p>✅ All core features and modules</p>
+                <p>✅ Email and chat support</p>
+                <p>✅ Regular feature updates</p>
+                <p>✅ Data migration assistance</p>
+                <p>✅ Basic training for staff</p>
+            </div>
+        </div>
+        
+        <div class="highlight">
+            <h4>Special Launch Offer:</h4>
+            <p>First 100 schools get 3 months free with annual subscription + free premium onboarding</p>
+        </div>
+        
+        <div class="page-number">8</div>
+    </div>
+    
+    <!-- Page 9: Social Proof & Traction -->
+    <div class="page">
+        <h2>Trusted by Educational Leaders</h2>
+        
+        <div class="section">
+            <h3>Pilot School Results:</h3>
+            <div class="card">
+                <h4>Greenfield International School, Lagos</h4>
+                <p><em>"AcademixSuite reduced our administrative workload by 70%. What used to take days now takes hours."</em></p>
+                <p><strong>Results:</strong> 85% parent engagement, ₦2.4M annual savings</p>
+            </div>
+            
+            <div class="card">
+                <h4>Lagos Preparatory Academy</h4>
+                <p><em>"Parent engagement increased 3x since implementation. The mobile portal is a game-changer."</em></p>
+                <p><strong>Results:</strong> 92% fee collection rate, 40% reduction in late payments</p>
+            </div>
+            
+            <div class="card">
+                <h4>Abuja Model Schools Group (5 campuses)</h4>
+                <p><em>"Managing 5 campuses from one dashboard has transformed our operations. Real-time insights across all locations."</em></p>
+                <p><strong>Results:</strong> Centralized reporting saved 120 staff hours monthly</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Industry Recognition:</h3>
+            <ul class="feature-list">
+                <li>🏆 Winner: 2024 EdTech Innovation Award (Nigeria)</li>
+                <li>📰 Featured in Education Today Nigeria Magazine</li>
+                <li>🤝 Official Partner: Nigerian Educational Research Council</li>
+                <li>🎓 Endorsed by Association of Private School Owners</li>
+                <li>🔬 Research Partnership: University of Lagos EdTech Lab</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h3>Security Certifications:</h3>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+                <div style="padding: 15px; background: #f0f7ff; border-radius: 8px; min-width: 200px;">
+                    <h4 style="margin: 0 0 10px 0;">🔒 GDPR Compliant</h4>
+                    <p style="margin: 0; font-size: 14px;">European data protection standards</p>
+                </div>
+                <div style="padding: 15px; background: #f0f7ff; border-radius: 8px; min-width: 200px;">
+                    <h4 style="margin: 0 0 10px 0;">🛡️ SSL Encryption</h4>
+                    <p style="margin: 0; font-size: 14px;">All data encrypted in transit</p>
+                </div>
+                <div style="padding: 15px; background: #f0f7ff; border-radius: 8px; min-width: 200px;">
+                    <h4 style="margin: 0 0 10px 0;">📋 Regular Audits</h4>
+                    <p style="margin: 0; font-size: 14px;">Third-party security verified</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="page-number">9</div>
+    </div>
+    
+    <!-- Page 10: The Team -->
+    <div class="page">
+        <h2>The Team Behind AcademixSuite</h2>
+        <h3>Education Experts + Technology Professionals</h3>
+        
+        <div class="team-grid">
+            <div class="team-member">
+                <h4>Dr. Amina Hassan</h4>
+                <p><strong>CEO & Founder</strong></p>
+                <p>• Former Principal, Greenfield Schools (15 years)</p>
+                <p>• PhD in Educational Technology</p>
+                <p>• Led digital transformation for 50+ schools</p>
+            </div>
+            
+            <div class="team-member">
+                <h4>Chike Okonkwo</h4>
+                <p><strong>Chief Technology Officer</strong></p>
+                <p>• Former Lead Architect, Interswitch</p>
+                <p>• Built platforms serving 5M+ users</p>
+                <p>• Expert in scalable cloud architecture</p>
+            </div>
+            
+            <div class="team-member">
+                <h4>Fatima Bello</h4>
+                <p><strong>Head of Product</strong></p>
+                <p>• EdTech Specialist (8 years experience)</p>
+                <p>• Designed systems for 50+ schools</p>
+                <p>• UI/UX Award Winner 2023</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Advisory Board:</h3>
+            <div class="card">
+                <p><strong>Prof. Tunde Williams</strong> - Former Commissioner of Education, Lagos State</p>
+                <p><strong>Ngozi Eze</strong> - Venture Partner, EdTech Africa Fund ($50M AUM)</p>
+                <p><strong>David Chen</strong> - SaaS Scaling Expert, ex-Salesforce Director</p>
+                <p><strong>Dr. Sarah Johnson</strong> - International Education Consultant</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Technical Team:</h3>
+            <div class="card">
+                <p>• 12 Full-time Engineers</p>
+                <p>• 5 Education Specialists</p>
+                <p>• 24/7 Support Team</p>
+                <p>• Dedicated Implementation Team</p>
+            </div>
+        </div>
+        
+        <div class="page-number">10</div>
+    </div>
+    
+    <!-- Page 11: Market Opportunity -->
+    <div class="page">
+        <h2>Market Opportunity & Growth Strategy</h2>
+        
+        <div class="section">
+            <h3>Target Market Size:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Segment</th>
+                        <th>Number of Institutions</th>
+                        <th>Estimated Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Private Schools (Nigeria)</td>
+                        <td>15,000+</td>
+                        <td>₦45B</td>
+                    </tr>
+                    <tr>
+                        <td>Government Schools Pilot</td>
+                        <td>500 (Initial)</td>
+                        <td>₦3B</td>
+                    </tr>
+                    <tr>
+                        <td>University Prep Programs</td>
+                        <td>2,000+</td>
+                        <td>₦12B</td>
+                    </tr>
+                    <tr>
+                        <td>Educational Groups</td>
+                        <td>300+</td>
+                        <td>₦9B</td>
+                    </tr>
+                    <tr style="background: #e8f5e8; font-weight: bold;">
+                        <td><strong>TOTAL ADDRESSABLE MARKET</strong></td>
+                        <td><strong>17,800+</strong></td>
+                        <td><strong>₦69B+</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h3>Growth Strategy:</h3>
+            <div class="card">
+                <h4>Year 1: Market Penetration</h4>
+                <p>• Target 500 schools in Nigeria</p>
+                <p>• Establish Lagos, Abuja, Port Harcourt hubs</p>
+                <p>• Build reference customer base</p>
+            </div>
+            
+            <div class="card">
+                <h4>Year 2: Regional Expansion</h4>
+                <p>• Expand to Ghana & Kenya</p>
+                <p>• Add French language support</p>
+                <p>• University management module</p>
+            </div>
+            
+            <div class="card">
+                <h4>Year 3: Product Expansion</h4>
+                <p>• AI-powered learning analytics</p>
+                <p>• Government partnership program</p>
+                <p>• International school version</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Financial Projections:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Year 1</th>
+                        <th>Year 2</th>
+                        <th>Year 3</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Schools Onboarded</td>
+                        <td>500</td>
+                        <td>1,500</td>
+                        <td>3,000</td>
+                    </tr>
+                    <tr>
+                        <td>Annual Recurring Revenue</td>
+                        <td>₦240M</td>
+                        <td>₦720M</td>
+                        <td>₦1.44B</td>
+                    </tr>
+                    <tr>
+                        <td>Gross Margin</td>
+                        <td>80%</td>
+                        <td>82%</td>
+                        <td>85%</td>
+                    </tr>
+                    <tr>
+                        <td>Customer Acquisition Cost</td>
+                        <td>₦80,000</td>
+                        <td>₦60,000</td>
+                        <td>₦40,000</td>
+                    </tr>
+                    <tr>
+                        <td>Lifetime Value</td>
+                        <td>₦960,000</td>
+                        <td>₦1.2M</td>
+                        <td>₦1.5M</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="page-number">11</div>
+    </div>
+    
+    <!-- Page 12: Investment Ask -->
+    <div class="page">
+        <h2>Investment Opportunity</h2>
+        
+        <div class="pricing-box">
+            <h3>Funding Round: Seed</h3>
+            <div class="price">₦50,000,000</div>
+            <p class="per-month">For 18-month runway to scale operations</p>
+        </div>
+        
+        <div class="section">
+            <h3>Use of Funds:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Sales & Marketing</td>
+                        <td>₦20,000,000</td>
+                        <td>40%</td>
+                    </tr>
+                    <tr>
+                        <td>Product Development</td>
+                        <td>₦15,000,000</td>
+                        <td>30%</td>
+                    </tr>
+                    <tr>
+                        <td>Team Expansion</td>
+                        <td>₦10,000,000</td>
+                        <td>20%</td>
+                    </tr>
+                    <tr>
+                        <td>Operational Costs</td>
+                        <td>₦5,000,000</td>
+                        <td>10%</td>
+                    </tr>
+                    <tr style="background: #e8f5e8; font-weight: bold;">
+                        <td><strong>TOTAL</strong></td>
+                        <td><strong>₦50,000,000</strong></td>
+                        <td><strong>100%</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h3>Milestones with This Investment:</h3>
+            <ul class="feature-list">
+                <li>✅ Reach 500+ school customers</li>
+                <li>✅ Expand team to 25+ full-time staff</li>
+                <li>✅ Launch mobile app (iOS & Android)</li>
+                <li>✅ Achieve profitability by Month 15</li>
+                <li>✅ Prepare for Series A round</li>
+            </ul>
+        </div>
+        
+        <div class="highlight">
+            <h4>Exit Strategy:</h4>
+            <p>• <strong>Acquisition Target:</strong> $50-100M by global EdTech player</p>
+            <p>• <strong>IPO Potential:</strong> 5-7 year horizon on Nigerian Exchange</p>
+            <p>• <strong>Strategic Partners:</strong> Major telecom and fintech companies</p>
+        </div>
+        
+        <div class="page-number">12</div>
+    </div>
+    
+    <!-- Page 13: Call to Action -->
+    <div class="page">
+        <div class="cta">
+            <h2>Ready to Transform Your School?</h2>
+            <h3>Start Your Journey Today</h3>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <span style="font-size: 24px;">📧</span>
+                    <div>
+                        <strong>Email</strong><br>
+                        hello@academixsuite.com
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <span style="font-size: 24px;">📞</span>
+                    <div>
+                        <strong>Phone</strong><br>
+                        +234 800 123 4567
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <span style="font-size: 24px;">🌐</span>
+                    <div>
+                        <strong>Website</strong><br>
+                        www.academixsuite.com/demo
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>For Schools - Get Started:</h3>
+            <ol style="font-size: 16px; line-height: 1.8;">
+                <li><strong>Free 14-Day Trial</strong> - No credit card required, full access</li>
+                <li><strong>Personalized Demo</strong> - See it working with your school's data</li>
+                <li><strong>Free Data Migration</strong> - We handle moving your existing data</li>
+                <li><strong>Comprehensive Training</strong> - Get your whole team up to speed</li>
+                <li><strong>Ongoing Support</strong> - Dedicated account manager</li>
+            </ol>
+        </div>
+        
+        <div class="section">
+            <h3>For Investors - Next Steps:</h3>
+            <div class="card">
+                <p>1. Review detailed financial model</p>
+                <p>2. Meet the founding team</p>
+                <p>3. Customer reference calls</p>
+                <p>4. Technical due diligence</p>
+                <p>5. Term sheet negotiation</p>
+            </div>
+        </div>
+        
+        <div class="highlight">
+            <h4>Join Us in Revolutionizing Education Management Across Africa</h4>
+            <p><strong>Stop Managing Software, Start Transforming Education</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>AcademixSuite MVP Pitch Deck - Confidential & Proprietary</strong></p>
+            <p>This document contains confidential information. Reproduction or distribution without permission is prohibited.</p>
+            <p>© 2025 AcademixSuite. All rights reserved.</p>
+        </div>
+        
+        <div class="page-number">13</div>
+    </div>
+    
+    <script>
+        // Add page numbers dynamically
+        document.addEventListener('DOMContentLoaded', function() {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach((page, index) => {
+                const pageNumber = page.querySelector('.page-number');
+                if (pageNumber) {
+                    pageNumber.textContent = index + 1;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

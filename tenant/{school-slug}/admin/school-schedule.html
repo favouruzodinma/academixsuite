@@ -1,0 +1,2157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Timetable Management | AcademixSuite School Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --school-primary: #4f46e5;
+            --school-secondary: #10b981;
+            --school-surface: #ffffff;
+            --school-bg: #f8fafc;
+            --subject-math: #4f46e5;
+            --subject-science: #10b981;
+            --subject-english: #ef4444;
+            --subject-history: #f59e0b;
+            --subject-physics: #8b5cf6;
+            --subject-chemistry: #06b6d4;
+            --subject-biology: #84cc16;
+            --subject-art: #ec4899;
+            --subject-pe: #f97316;
+            --subject-music: #3b82f6;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--school-bg); 
+            color: #1e293b; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Glassmorphism effects */
+        .glass-header { 
+            background: rgba(255, 255, 255, 0.92); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+        
+        .toast {
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease forwards;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            border-left: 4px solid #059669;
+        }
+        
+        .toast-info {
+            background: linear-gradient(135deg, #4f46e5, #7c73e9);
+            color: white;
+            border-left: 4px solid #3730a3;
+        }
+        
+        .toast-warning {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+            border-left: 4px solid #d97706;
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+            border-left: 4px solid #dc2626;
+        }
+        
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateX(100px); }
+        }
+        
+        .toast-exit { animation: fadeOut 0.3s ease forwards; }
+        
+        .toast-icon { font-size: 18px; flex-shrink: 0; }
+        .toast-content { flex: 1; }
+        .toast-close {
+            background: none; border: none; color: rgba(255, 255, 255, 0.8);
+            font-size: 14px; cursor: pointer; padding: 0; width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; transition: background-color 0.2s;
+        }
+        
+        .toast-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+        /* Sidebar styling */
+        .sidebar-link { 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-left: 3px solid transparent; 
+            position: relative;
+        }
+        
+        .sidebar-link:hover { 
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%);
+            color: var(--school-primary); 
+            border-left-color: rgba(79, 70, 229, 0.3);
+        }
+        
+        .active-link { 
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.1) 0%, rgba(79, 70, 229, 0.05) 100%);
+            color: var(--school-primary); 
+            border-left-color: var(--school-primary); 
+            font-weight: 700;
+        }
+        
+        .active-link::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: var(--school-primary);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
+
+        /* Timetable Styles */
+        .timetable-container {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+        
+        .timetable {
+            min-width: 1000px;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .timetable th {
+            background: #f8fafc;
+            padding: 16px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .timetable td {
+            padding: 16px;
+            border: 1px solid #f1f5f9;
+            min-width: 150px;
+            vertical-align: top;
+            transition: all 0.2s;
+        }
+        
+        .timetable tr:hover td {
+            background: #f8fafc;
+        }
+        
+        .time-slot {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #475569;
+            text-align: center;
+            border-right: 2px solid #e2e8f0;
+            position: sticky;
+            left: 0;
+            z-index: 5;
+        }
+        
+        .period-cell {
+            min-height: 80px;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .period-cell:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: rgba(79, 70, 229, 0.3);
+        }
+        
+        .period-cell.empty {
+            background: #f8fafc;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-style: italic;
+        }
+        
+        .period-cell.empty:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+        
+        .subject-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        
+        .teacher-info {
+            font-size: 12px;
+            color: #64748b;
+            margin: 4px 0;
+        }
+        
+        .room-info {
+            font-size: 11px;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* Subject Colors */
+        .subject-math { background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; }
+        .subject-science { background: linear-gradient(135deg, #10b981, #34d399); color: white; }
+        .subject-english { background: linear-gradient(135deg, #ef4444, #f87171); color: white; }
+        .subject-history { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; }
+        .subject-physics { background: linear-gradient(135deg, #8b5cf6, #a78bfa); color: white; }
+        .subject-chemistry { background: linear-gradient(135deg, #06b6d4, #22d3ee); color: white; }
+        .subject-biology { background: linear-gradient(135deg, #84cc16, #a3e635); color: white; }
+        .subject-art { background: linear-gradient(135deg, #ec4899, #f472b6); color: white; }
+        .subject-pe { background: linear-gradient(135deg, #f97316, #fb923c); color: white; }
+        .subject-music { background: linear-gradient(135deg, #3b82f6, #60a5fa); color: white; }
+        .subject-computer { background: linear-gradient(135deg, #8b5cf6, #a78bfa); color: white; }
+        .subject-geography { background: linear-gradient(135deg, #14b8a6, #2dd4bf); color: white; }
+
+        /* Form Styles */
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            background: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .action-btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c73e9);
+            color: white;
+        }
+        
+        .action-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+        }
+        
+        .action-btn-secondary {
+            background: white;
+            color: #4f46e5;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .action-btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #4f46e5;
+        }
+        
+        .action-btn-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+        }
+        
+        .action-btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .action-btn-danger {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+        }
+        
+        .action-btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Class Selector */
+        .class-selector {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            padding: 8px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .class-tab {
+            padding: 12px 24px;
+            border: none;
+            background: #f8fafc;
+            color: #64748b;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .class-tab:hover {
+            background: #e2e8f0;
+            color: #4f46e5;
+        }
+        
+        .class-tab.active {
+            background: #4f46e5;
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Period Card */
+        .period-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+            cursor: move;
+        }
+        
+        .period-card:hover {
+            border-color: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .period-card.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        /* Teacher Availability */
+        .availability-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        
+        .availability-cell {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .availability-cell.available {
+            background: #dcfce7;
+            color: #166534;
+            border: 2px solid #bbf7d0;
+        }
+        
+        .availability-cell.busy {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #fecaca;
+        }
+        
+        .availability-cell.break {
+            background: #fef3c7;
+            color: #92400e;
+            border: 2px solid #fde68a;
+        }
+        
+        .availability-cell:hover {
+            transform: scale(1.1);
+        }
+
+        /* Loading Animation */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #f1f5f9;
+            border-top-color: #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .glass-header {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: white;
+            }
+            
+            .toast-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+            
+            .timetable-container {
+                margin: 0 -16px;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+            
+            .class-selector {
+                padding: 4px;
+            }
+            
+            .class-tab {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            body {
+                background: white;
+            }
+            
+            .timetable-container {
+                box-shadow: none;
+                border: 1px solid #000;
+            }
+            
+            .period-cell {
+                break-inside: avoid;
+            }
+        }
+
+        /* Drag and Drop */
+        .drag-over {
+            background: rgba(79, 70, 229, 0.1) !important;
+            border-color: #4f46e5 !important;
+            border-style: dashed !important;
+        }
+        
+        .drop-success {
+            animation: pulse 0.5s ease;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* Schedule Stats */
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .stats-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .stats-content { flex: 1; }
+        .stats-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+        
+        .stats-label {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* Color Legend */
+        .color-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        /* Schedule Conflict */
+        .conflict-warning {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .conflict-icon {
+            color: #d97706;
+            font-size: 16px;
+            margin-top: 2px;
+        }
+        
+        .conflict-content {
+            flex: 1;
+        }
+        
+        .conflict-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 4px;
+        }
+        
+        .conflict-text {
+            font-size: 12px;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[99] lg:hidden hidden" onclick="mobileSidebarToggle()"></div>
+
+    <!-- Create Timetable Modal -->
+    <div id="createTimetableModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Create New Timetable</h3>
+                    <button onclick="closeModal('createTimetableModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="form-label">Academic Year</label>
+                        <select id="timetableYear" class="form-select" required>
+                            <option value="2024-2025" selected>2024-2025</option>
+                            <option value="2023-2024">2023-2024</option>
+                            <option value="2025-2026">2025-2026</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Term</label>
+                        <select id="timetableTerm" class="form-select" required>
+                            <option value="term1">Term 1</option>
+                            <option value="term2" selected>Term 2</option>
+                            <option value="term3">Term 3</option>
+                            <option value="annual">Annual</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Class/Grade</label>
+                        <select id="timetableClass" class="form-select" required onchange="loadClassTemplate()">
+                            <option value="">Select Class</option>
+                            <option value="10A">Grade 10A</option>
+                            <option value="10B">Grade 10B</option>
+                            <option value="10C">Grade 10C</option>
+                            <option value="11A">Grade 11A</option>
+                            <option value="11B">Grade 11B</option>
+                            <option value="12A">Grade 12A</option>
+                            <option value="12B">Grade 12B</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Effective Date</label>
+                        <input type="date" id="timetableDate" class="form-input" value="2024-12-17" required>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Based on Template</label>
+                        <select id="timetableTemplate" class="form-select">
+                            <option value="">No Template</option>
+                            <option value="template1">Standard Timetable</option>
+                            <option value="template2">Science Stream</option>
+                            <option value="template3">Commerce Stream</option>
+                            <option value="template4">Arts Stream</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Number of Periods per Day</label>
+                        <input type="number" id="periodsPerDay" class="form-input" value="8" min="1" max="12">
+                    </div>
+                </div>
+                
+                <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl mb-6">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-info-circle text-blue-600"></i>
+                        <p class="text-sm text-blue-700">You can add periods and assign teachers after creating the timetable.</p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button onclick="closeModal('createTimetableModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="createNewTimetable()" class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                        Create Timetable
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Period Modal -->
+    <div id="addPeriodModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Add/Edit Period</h3>
+                    <button onclick="closeModal('addPeriodModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">Subject</label>
+                            <select id="periodSubject" class="form-select" required onchange="updateSubjectColor()">
+                                <option value="">Select Subject</option>
+                                <option value="math">Mathematics</option>
+                                <option value="science">Science</option>
+                                <option value="english">English</option>
+                                <option value="history">History</option>
+                                <option value="physics">Physics</option>
+                                <option value="chemistry">Chemistry</option>
+                                <option value="biology">Biology</option>
+                                <option value="art">Art</option>
+                                <option value="pe">Physical Education</option>
+                                <option value="music">Music</option>
+                                <option value="computer">Computer Science</option>
+                                <option value="geography">Geography</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Teacher</label>
+                            <select id="periodTeacher" class="form-select" required>
+                                <option value="">Select Teacher</option>
+                                <option value="teacher1">Dr. Sarah Johnson (Math)</option>
+                                <option value="teacher2">Mr. David Lee (Science)</option>
+                                <option value="teacher3">Ms. Emma Wilson (English)</option>
+                                <option value="teacher4">Mr. Michael Brown (History)</option>
+                                <option value="teacher5">Dr. Lisa Chen (Physics)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Room</label>
+                            <select id="periodRoom" class="form-select" required>
+                                <option value="">Select Room</option>
+                                <option value="room101">Room 101</option>
+                                <option value="room102">Room 102</option>
+                                <option value="room103">Room 103</option>
+                                <option value="lab1">Science Lab 1</option>
+                                <option value="lab2">Computer Lab</option>
+                                <option value="auditorium">Auditorium</option>
+                                <option value="gym">Gymnasium</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Period Type</label>
+                            <select id="periodType" class="form-select">
+                                <option value="regular">Regular Class</option>
+                                <option value="lab">Laboratory</option>
+                                <option value="tutorial">Tutorial</option>
+                                <option value="assembly">Assembly</option>
+                                <option value="break">Break</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Duration (Minutes)</label>
+                        <input type="number" id="periodDuration" class="form-input" value="45" min="15" max="120">
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Notes</label>
+                        <textarea id="periodNotes" class="form-textarea" placeholder="Additional notes about this period..."></textarea>
+                    </div>
+                    
+                    <!-- Conflict Warning -->
+                    <div id="conflictWarning" class="conflict-warning hidden">
+                        <i class="fas fa-exclamation-triangle conflict-icon"></i>
+                        <div class="conflict-content">
+                            <p class="conflict-title">Schedule Conflict Detected</p>
+                            <p class="conflict-text" id="conflictDetails">Teacher is already assigned to another class during this time slot.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Teacher Availability -->
+                    <div>
+                        <label class="form-label">Teacher Availability</label>
+                        <div class="availability-grid mb-2">
+                            <div class="availability-cell available">M</div>
+                            <div class="availability-cell available">T</div>
+                            <div class="availability-cell available">W</div>
+                            <div class="availability-cell busy">T</div>
+                            <div class="availability-cell available">F</div>
+                            <div class="availability-cell break">S</div>
+                            <div class="availability-cell break">S</div>
+                        </div>
+                        <p class="text-xs text-slate-500">M: Monday, T: Tuesday, W: Wednesday, T: Thursday, F: Friday, S: Saturday/Sunday</p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-8 pt-6 border-t border-slate-100">
+                    <button onclick="closeModal('addPeriodModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="savePeriod()" class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                        Save Period
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View/Print Timetable Modal -->
+    <div id="viewTimetableModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Timetable Preview - Grade 10A</h3>
+                    <div class="flex items-center gap-3">
+                        <button onclick="printTimetable()" class="p-2 text-slate-600 hover:text-slate-800">
+                            <i class="fas fa-print"></i>
+                        </button>
+                        <button onclick="downloadTimetable()" class="p-2 text-slate-600 hover:text-slate-800">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button onclick="shareTimetable()" class="p-2 text-slate-600 hover:text-slate-800">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                        <button onclick="closeModal('viewTimetableModal')" class="text-slate-400 hover:text-slate-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="timetablePreview">
+                    <!-- Timetable will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Templates Modal -->
+    <div id="manageTemplatesModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Manage Timetable Templates</h3>
+                    <button onclick="closeModal('manageTemplatesModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="period-card">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <span class="subject-badge subject-math">Mathematics</span>
+                                    <p class="teacher-info">Dr. Sarah Johnson</p>
+                                </div>
+                                <button class="text-slate-400 hover:text-slate-600">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="room-info">
+                                <i class="fas fa-door-closed"></i> Room 101
+                            </div>
+                        </div>
+                        
+                        <div class="period-card">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <span class="subject-badge subject-science">Science</span>
+                                    <p class="teacher-info">Mr. David Lee</p>
+                                </div>
+                                <button class="text-slate-400 hover:text-slate-600">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="room-info">
+                                <i class="fas fa-flask"></i> Lab 1
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="fas fa-lightbulb text-amber-600"></i>
+                            <span class="text-sm font-bold text-amber-700">Template Tips</span>
+                        </div>
+                        <p class="text-xs text-amber-600">Create templates for different streams or grade levels to save time when creating new timetables.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="form-label">Template Name</label>
+                            <input type="text" class="form-input" placeholder="Enter template name" id="templateName">
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Apply to Grades</label>
+                            <select class="form-select" id="templateGrades" multiple>
+                                <option value="10">Grade 10</option>
+                                <option value="11">Grade 11</option>
+                                <option value="12">Grade 12</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-8 pt-6 border-t border-slate-100">
+                    <button onclick="closeModal('manageTemplatesModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="saveTemplate()" class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200">
+                        Save Template
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-[100] lg:relative lg:translate-x-0 -translate-x-full transition-transform duration-300 flex flex-col shadow-xl lg:shadow-none">
+            
+            <!-- School Header -->
+            <div class="h-20 flex items-center px-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-100">
+                            <i class="fas fa-school text-white text-lg"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div>
+                        <span class="text-xl font-black tracking-tight text-slate-900">Greenwood High</span>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">SCHOOL ADMIN</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Info -->
+            <div class="p-6 border-b border-slate-100">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Active Classes:</span>
+                        <span class="text-sm font-black text-emerald-600">12</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Teachers:</span>
+                        <span class="text-sm font-bold text-blue-600">45</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Current Term:</span>
+                        <span class="text-sm font-bold text-amber-600">Term 2</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 space-y-8 custom-scrollbar">
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Dashboard</p>
+                    <nav class="space-y-1">
+                        <a href="school-dashboard.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <span>Overview</span>
+                        </a>
+                        <a href="school-announcements.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <span>Announcements</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Student Management</p>
+                    <nav class="space-y-1">
+                        <a href="school-students.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <span>Students Directory</span>
+                        </a>
+                        <a href="school-attendance.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <span>Attendance</span>
+                        </a>
+                        <a href="school-grades.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <span>Grades & Reports</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Staff Management</p>
+                    <nav class="space-y-1">
+                        <a href="school-teachers.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                            <span>Teachers</span>
+                        </a>
+                        <a href="school-schedule.html" class="sidebar-link active-link flex items-center gap-3 px-6 py-3 text-sm font-semibold">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <span>Timetable</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">School Operations</p>
+                    <nav class="space-y-1">
+                        <a href="school-fees.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            <span>Fee Management</span>
+                        </a>
+                        <a href="school-settings.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <span>School Settings</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- User Profile -->
+            <div class="p-6 border-t border-slate-100">
+                <div class="flex items-center gap-3 p-2 group cursor-pointer hover:bg-slate-50 rounded-xl transition">
+                    <div class="relative">
+                        <img src="https://ui-avatars.com/api/?name=Principal+Smith&background=4f46e5&color=fff&bold=true&size=128" class="w-10 h-10 rounded-xl shadow-sm">
+                        <div class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div class="overflow-hidden flex-1">
+                        <p class="text-[13px] font-black text-slate-900 truncate">Principal Smith</p>
+                        <p class="text-[10px] font-black text-indigo-600 uppercase tracking-wider italic">School_Admin</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- Header -->
+            <header class="h-20 glass-header px-6 lg:px-8 flex items-center justify-between shrink-0 z-40">
+                <div class="flex items-center gap-3">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition">
+                        <i class="fas fa-bars-staggered"></i>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-lg font-black text-slate-900 tracking-tight">Timetable Management</h1>
+                        <div class="hidden lg:flex items-center gap-2">
+                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            <span class="text-xs font-black text-emerald-600 uppercase tracking-widest">Term 2, 2024-2025</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Quick Stats -->
+                    <div class="hidden md:flex items-center gap-6 bg-white border border-slate-200 px-4 py-2 rounded-xl">
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Classes</p>
+                            <p class="text-sm font-black text-emerald-600">12</p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Periods Today</p>
+                            <p class="text-sm font-black text-blue-600">96</p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="openModal('manageTemplatesModal')" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                            <i class="fas fa-copy"></i>
+                            <span class="hidden sm:inline">Templates</span>
+                        </button>
+                        <button onclick="openModal('viewTimetableModal')" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                            <i class="fas fa-eye"></i>
+                            <span class="hidden sm:inline">Preview</span>
+                        </button>
+                        <button onclick="openModal('createTimetableModal')" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                            <i class="fas fa-plus-circle"></i>
+                            <span class="hidden sm:inline">New Timetable</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Class Selector -->
+            <div class="border-b border-slate-200 bg-white px-6 lg:px-8 py-4">
+                <div class="max-w-7xl mx-auto">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-black text-slate-900">Select Class</h3>
+                        <div class="flex items-center gap-3">
+                            <button onclick="previousWeek()" class="p-2 text-slate-600 hover:text-slate-800">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span class="text-sm font-bold text-slate-700">Week 15, Dec 16-20</span>
+                            <button onclick="nextWeek()" class="p-2 text-slate-600 hover:text-slate-800">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="class-selector">
+                        <button class="class-tab active" onclick="selectClass('10A')">
+                            <i class="fas fa-users mr-2"></i>Grade 10A
+                        </button>
+                        <button class="class-tab" onclick="selectClass('10B')">
+                            <i class="fas fa-users mr-2"></i>Grade 10B
+                        </button>
+                        <button class="class-tab" onclick="selectClass('10C')">
+                            <i class="fas fa-users mr-2"></i>Grade 10C
+                        </button>
+                        <button class="class-tab" onclick="selectClass('11A')">
+                            <i class="fas fa-users mr-2"></i>Grade 11A
+                        </button>
+                        <button class="class-tab" onclick="selectClass('11B')">
+                            <i class="fas fa-users mr-2"></i>Grade 11B
+                        </button>
+                        <button class="class-tab" onclick="selectClass('12A')">
+                            <i class="fas fa-users mr-2"></i>Grade 12A
+                        </button>
+                        <button class="class-tab" onclick="selectClass('12B')">
+                            <i class="fas fa-users mr-2"></i>Grade 12B
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar">
+                
+                <!-- Stats & Actions -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stats-card animate-fadeInUp" style="animation-delay: 0.1s">
+                        <div class="stats-icon bg-blue-100 text-blue-600">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stats-content">
+                            <div class="stats-value">8</div>
+                            <div class="stats-label">Periods per Day</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-card animate-fadeInUp" style="animation-delay: 0.2s">
+                        <div class="stats-icon bg-emerald-100 text-emerald-600">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="stats-content">
+                            <div class="stats-value">15</div>
+                            <div class="stats-label">Teachers Assigned</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-card animate-fadeInUp" style="animation-delay: 0.3s">
+                        <div class="stats-icon bg-amber-100 text-amber-600">
+                            <i class="fas fa-door-closed"></i>
+                        </div>
+                        <div class="stats-content">
+                            <div class="stats-value">8</div>
+                            <div class="stats-label">Rooms Used</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-card animate-fadeInUp" style="animation-delay: 0.4s">
+                        <div class="stats-icon bg-purple-100 text-purple-600">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stats-content">
+                            <div class="stats-value">40</div>
+                            <div class="stats-label">Weekly Periods</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timetable Container -->
+                <div class="max-w-7xl mx-auto mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-black text-slate-900">Timetable - Grade 10A</h3>
+                        <div class="flex items-center gap-3">
+                            <div class="color-legend">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: #4f46e5;"></div>
+                                    <span>Mathematics</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: #10b981;"></div>
+                                    <span>Science</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: #ef4444;"></div>
+                                    <span>English</span>
+                                </div>
+                            </div>
+                            <button onclick="exportTimetable()" class="action-btn action-btn-secondary">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="timetable-container">
+                        <table class="timetable" id="mainTimetable">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Monday</th>
+                                    <th>Tuesday</th>
+                                    <th>Wednesday</th>
+                                    <th>Thursday</th>
+                                    <th>Friday</th>
+                                    <th>Saturday</th>
+                                </tr>
+                            </thead>
+                            <tbody id="timetableBody">
+                                <!-- Timetable rows will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Quick Actions & Period Pool -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Quick Actions -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-lg font-black text-slate-900 mb-6">Quick Actions</h3>
+                        
+                        <div class="space-y-4">
+                            <button onclick="addNewPeriod()" class="w-full action-btn action-btn-primary">
+                                <i class="fas fa-plus-circle"></i> Add New Period
+                            </button>
+                            
+                            <button onclick="clearTimetable()" class="w-full action-btn action-btn-secondary">
+                                <i class="fas fa-trash"></i> Clear Timetable
+                            </button>
+                            
+                            <button onclick="autoSchedule()" class="w-full action-btn action-btn-success">
+                                <i class="fas fa-magic"></i> Auto Schedule
+                            </button>
+                            
+                            <button onclick="checkConflicts()" class="w-full action-btn action-btn-danger">
+                                <i class="fas fa-exclamation-triangle"></i> Check Conflicts
+                            </button>
+                        </div>
+                        
+                        <div class="mt-8 pt-6 border-t border-slate-100">
+                            <h4 class="text-md font-bold text-slate-900 mb-4">Timetable Settings</h4>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-medium text-slate-900">Show Breaks</p>
+                                        <p class="text-sm text-slate-500">Display break periods</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" checked id="showBreaks">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-medium text-slate-900">Auto-save</p>
+                                        <p class="text-sm text-slate-500">Save changes automatically</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" checked id="autoSave">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-medium text-slate-900">Conflict Detection</p>
+                                        <p class="text-sm text-slate-500">Warn about schedule conflicts</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" checked id="conflictDetection">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Period Pool -->
+                    <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Period Pool</h3>
+                            <p class="text-sm text-slate-500">Drag and drop periods into timetable</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="periodPool">
+                            <!-- Period cards will be loaded here -->
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-info-circle text-slate-500"></i>
+                                <p class="text-sm text-slate-600">Drag periods from the pool and drop them into the timetable cells above.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teacher Availability -->
+                <div class="max-w-7xl mx-auto glass-card rounded-2xl p-6 mt-8">
+                    <h3 class="text-lg font-black text-slate-900 mb-6">Teacher Availability</h3>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr>
+                                    <th class="text-left p-3 bg-slate-50">Teacher</th>
+                                    <th class="text-center p-3 bg-slate-50">Mon</th>
+                                    <th class="text-center p-3 bg-slate-50">Tue</th>
+                                    <th class="text-center p-3 bg-slate-50">Wed</th>
+                                    <th class="text-center p-3 bg-slate-50">Thu</th>
+                                    <th class="text-center p-3 bg-slate-50">Fri</th>
+                                    <th class="text-center p-3 bg-slate-50">Sat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-slate-100">
+                                    <td class="p-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                                <i class="fas fa-user text-blue-600"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-slate-900">Dr. Sarah Johnson</p>
+                                                <p class="text-xs text-slate-500">Mathematics</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-3">
+                                        <div class="availability-grid justify-center">
+                                            <div class="availability-cell available">1-8</div>
+                                        </div>
+                                    </td>
+                                    <td class="p-3">
+                                        <div class="availability-grid justify-center">
+                                            <div class="availability-cell available">1-8</div>
+                                        </div>
+                                    </td>
+                                    <td class="p-3">
+                                        <div class="availability-grid justify-center">
+                                            <div class="availability-cell busy">1-4</div>
+                                            <div class="availability-cell available">5-8</div>
+                                        </div>
+                                    </td>
+                                    <td class="p-3">
+                                        <div class="availability-grid justify-center">
+                                            <div class="availability-cell available">1-8</div>
+                                        </div>
+                                    </td>
+                                    <td class="p-3">
+                                        <div class="availability-grid justify-center">
+                                            <div class="availability-cell available">1-8</div>
+                                        </div>
+                                    </td>
+                                    <td class="p-3">
+                                        <div class="availability-grid justify-center">
+                                            <div class="availability-cell break">Off</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- More teacher rows would go here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            let icon = 'fa-info-circle';
+            switch(type) {
+                case 'success': icon = 'fa-check-circle'; break;
+                case 'warning': icon = 'fa-exclamation-triangle'; break;
+                case 'error': icon = 'fa-times-circle'; break;
+                default: icon = 'fa-info-circle';
+            }
+            
+            toast.innerHTML = `
+                <i class="fas ${icon} toast-icon"></i>
+                <div class="toast-content">${message}</div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 10);
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.classList.add('toast-exit');
+                    setTimeout(() => {
+                        if (toast.parentElement) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }, duration);
+            }
+        }
+
+        // Mobile Sidebar Toggle
+        function mobileSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Class Selection
+        let currentClass = '10A';
+        let currentPeriodData = {};
+        let draggedPeriod = null;
+
+        function selectClass(className) {
+            currentClass = className;
+            
+            // Update active tab
+            document.querySelectorAll('.class-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update title
+            document.querySelector('h3').textContent = `Timetable - Grade ${className}`;
+            
+            // Load timetable for selected class
+            loadTimetable(className);
+            loadPeriodPool(className);
+            
+            showToast(`Loaded timetable for Grade ${className}`, 'info');
+        }
+
+        // Load Timetable
+        function loadTimetable(className) {
+            const timetableBody = document.getElementById('timetableBody');
+            const periods = [
+                { time: '8:00 - 8:45', day: 'Monday', subject: 'math', teacher: 'Dr. Sarah Johnson', room: '101' },
+                { time: '8:00 - 8:45', day: 'Tuesday', subject: 'english', teacher: 'Ms. Emma Wilson', room: '102' },
+                { time: '8:00 - 8:45', day: 'Wednesday', subject: 'science', teacher: 'Mr. David Lee', room: 'Lab 1' },
+                { time: '8:00 - 8:45', day: 'Thursday', subject: 'history', teacher: 'Mr. Michael Brown', room: '103' },
+                { time: '8:00 - 8:45', day: 'Friday', subject: 'math', teacher: 'Dr. Sarah Johnson', room: '101' },
+                { time: '9:00 - 9:45', day: 'Monday', subject: 'physics', teacher: 'Dr. Lisa Chen', room: 'Lab 2' },
+                { time: '9:00 - 9:45', day: 'Tuesday', subject: 'chemistry', teacher: 'Mr. Robert Kim', room: 'Lab 1' },
+                { time: '9:00 - 9:45', day: 'Wednesday', subject: 'biology', teacher: 'Ms. Sophia Wang', room: 'Lab 3' },
+                { time: '9:00 - 9:45', day: 'Thursday', subject: 'computer', teacher: 'Mr. Alex Garcia', room: 'Comp Lab' },
+                { time: '9:00 - 9:45', day: 'Friday', subject: 'geography', teacher: 'Mrs. Maya Patel', room: '104' }
+            ];
+
+            const timeSlots = [
+                '8:00 - 8:45',
+                '9:00 - 9:45',
+                '10:00 - 10:45',
+                '11:00 - 11:45',
+                '12:00 - 12:45',
+                '1:30 - 2:15',
+                '2:30 - 3:15',
+                '3:30 - 4:15'
+            ];
+
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            
+            let html = '';
+            
+            timeSlots.forEach((timeSlot, timeIndex) => {
+                html += '<tr>';
+                html += `<td class="time-slot">${timeSlot}</td>`;
+                
+                days.forEach(day => {
+                    const period = periods.find(p => p.time === timeSlot && p.day === day);
+                    
+                    if (period) {
+                        const subjectClass = `subject-${period.subject}`;
+                        const periodId = `${day}-${timeIndex}-${period.subject}`;
+                        currentPeriodData[periodId] = period;
+                        
+                        html += `
+                            <td>
+                                <div class="period-cell ${subjectClass}" onclick="editPeriod('${periodId}')" 
+                                     draggable="true" ondragstart="dragPeriod(event, '${periodId}')"
+                                     ondragover="allowDrop(event)" ondrop="dropPeriod(event, '${day}', ${timeIndex})">
+                                    <span class="subject-badge ${subjectClass}">
+                                        ${getSubjectName(period.subject)}
+                                    </span>
+                                    <p class="teacher-info">${period.teacher}</p>
+                                    <div class="room-info">
+                                        <i class="fas fa-door-closed"></i> ${period.room}
+                                    </div>
+                                </div>
+                            </td>
+                        `;
+                    } else if (timeIndex === 3) { // Break at 11:00
+                        html += `
+                            <td>
+                                <div class="period-cell empty" onclick="addPeriod('${day}', ${timeIndex})">
+                                    <i class="fas fa-coffee mr-2"></i>Break
+                                </div>
+                            </td>
+                        `;
+                    } else if (timeIndex === 7) { // Last period
+                        html += `
+                            <td>
+                                <div class="period-cell empty" onclick="addPeriod('${day}', ${timeIndex})">
+                                    <i class="fas fa-door-open mr-2"></i>Empty Slot
+                                </div>
+                            </td>
+                        `;
+                    } else {
+                        html += `
+                            <td>
+                                <div class="period-cell empty" onclick="addPeriod('${day}', ${timeIndex})"
+                                     ondragover="allowDrop(event)" ondrop="dropPeriod(event, '${day}', ${timeIndex})">
+                                    <i class="fas fa-plus mr-2"></i>Add Period
+                                </div>
+                            </td>
+                        `;
+                    }
+                });
+                
+                html += '</tr>';
+            });
+            
+            timetableBody.innerHTML = html;
+        }
+
+        function getSubjectName(subjectCode) {
+            const subjects = {
+                'math': 'Mathematics',
+                'science': 'Science',
+                'english': 'English',
+                'history': 'History',
+                'physics': 'Physics',
+                'chemistry': 'Chemistry',
+                'biology': 'Biology',
+                'art': 'Art',
+                'pe': 'Physical Education',
+                'music': 'Music',
+                'computer': 'Computer Science',
+                'geography': 'Geography'
+            };
+            return subjects[subjectCode] || subjectCode;
+        }
+
+        // Load Period Pool
+        function loadPeriodPool(className) {
+            const periodPool = document.getElementById('periodPool');
+            const availablePeriods = [
+                { subject: 'math', teacher: 'Dr. Sarah Johnson', room: '101', duration: '45 min' },
+                { subject: 'science', teacher: 'Mr. David Lee', room: 'Lab 1', duration: '45 min' },
+                { subject: 'english', teacher: 'Ms. Emma Wilson', room: '102', duration: '45 min' },
+                { subject: 'history', teacher: 'Mr. Michael Brown', room: '103', duration: '45 min' },
+                { subject: 'physics', teacher: 'Dr. Lisa Chen', room: 'Lab 2', duration: '90 min' },
+                { subject: 'chemistry', teacher: 'Mr. Robert Kim', room: 'Lab 1', duration: '90 min' },
+                { subject: 'biology', teacher: 'Ms. Sophia Wang', room: 'Lab 3', duration: '90 min' },
+                { subject: 'art', teacher: 'Mrs. Rachel Green', room: 'Art Room', duration: '45 min' },
+                { subject: 'pe', teacher: 'Coach Alex Smith', room: 'Gym', duration: '45 min' },
+                { subject: 'music', teacher: 'Ms. Olivia Brown', room: 'Music Room', duration: '45 min' }
+            ];
+            
+            let html = '';
+            
+            availablePeriods.forEach((period, index) => {
+                const subjectClass = `subject-${period.subject}`;
+                const periodId = `pool-${index}`;
+                
+                html += `
+                    <div class="period-card" draggable="true" 
+                         ondragstart="dragFromPool(event, '${periodId}')"
+                         id="${periodId}">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <span class="subject-badge ${subjectClass}">
+                                    ${getSubjectName(period.subject)}
+                                </span>
+                                <p class="teacher-info">${period.teacher}</p>
+                            </div>
+                            <span class="text-xs font-bold text-slate-500">${period.duration}</span>
+                        </div>
+                        <div class="room-info">
+                            <i class="fas fa-door-closed"></i> ${period.room}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            periodPool.innerHTML = html;
+        }
+
+        // Drag and Drop Functions
+        function allowDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function dragPeriod(event, periodId) {
+            event.dataTransfer.setData('text/plain', periodId);
+            draggedPeriod = periodId;
+            event.currentTarget.classList.add('dragging');
+        }
+
+        function dragFromPool(event, periodId) {
+            event.dataTransfer.setData('text/plain', periodId);
+            draggedPeriod = periodId;
+            event.currentTarget.classList.add('dragging');
+        }
+
+        function dropPeriod(event, day, timeIndex) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+            
+            const periodId = event.dataTransfer.getData('text/plain');
+            
+            if (periodId.startsWith('pool-')) {
+                // Adding from pool
+                addPeriodFromPool(day, timeIndex, periodId);
+            } else {
+                // Moving existing period
+                movePeriod(periodId, day, timeIndex);
+            }
+            
+            event.currentTarget.classList.add('drop-success');
+            setTimeout(() => {
+                event.currentTarget.classList.remove('drop-success');
+            }, 500);
+        }
+
+        function addPeriodFromPool(day, timeIndex, poolId) {
+            const periodElement = document.getElementById(poolId);
+            const subject = periodElement.querySelector('.subject-badge').textContent.toLowerCase();
+            const teacher = periodElement.querySelector('.teacher-info').textContent;
+            const room = periodElement.querySelector('.room-info').textContent.replace('Room ', '');
+            
+            const periodId = `${day}-${timeIndex}-${subject}`;
+            
+            currentPeriodData[periodId] = {
+                subject: subject,
+                teacher: teacher,
+                room: room,
+                day: day,
+                timeIndex: timeIndex
+            };
+            
+            updateTimetableCell(day, timeIndex, periodId);
+            showToast(`Added ${getSubjectName(subject)} to ${day}`, 'success');
+        }
+
+        function movePeriod(periodId, newDay, newTimeIndex) {
+            const period = currentPeriodData[periodId];
+            if (!period) return;
+            
+            // Remove from old position
+            delete currentPeriodData[periodId];
+            
+            // Add to new position
+            const newPeriodId = `${newDay}-${newTimeIndex}-${period.subject}`;
+            period.day = newDay;
+            period.timeIndex = newTimeIndex;
+            currentPeriodData[newPeriodId] = period;
+            
+            // Clear old cell
+            const [oldDay, oldTimeIndex] = periodId.split('-');
+            clearTimetableCell(oldDay, parseInt(oldTimeIndex));
+            
+            // Update new cell
+            updateTimetableCell(newDay, newTimeIndex, newPeriodId);
+            
+            showToast(`Moved ${getSubjectName(period.subject)} to ${newDay}`, 'success');
+        }
+
+        function updateTimetableCell(day, timeIndex, periodId) {
+            const period = currentPeriodData[periodId];
+            if (!period) return;
+            
+            const subjectClass = `subject-${period.subject}`;
+            const table = document.getElementById('mainTimetable');
+            const rows = table.querySelectorAll('tbody tr');
+            const cell = rows[timeIndex].cells[getDayIndex(day) + 1]; // +1 for time column
+            
+            cell.innerHTML = `
+                <div class="period-cell ${subjectClass}" onclick="editPeriod('${periodId}')" 
+                     draggable="true" ondragstart="dragPeriod(event, '${periodId}')"
+                     ondragover="allowDrop(event)" ondrop="dropPeriod(event, '${day}', ${timeIndex})">
+                    <span class="subject-badge ${subjectClass}">
+                        ${getSubjectName(period.subject)}
+                    </span>
+                    <p class="teacher-info">${period.teacher}</p>
+                    <div class="room-info">
+                        <i class="fas fa-door-closed"></i> ${period.room}
+                    </div>
+                </div>
+            `;
+        }
+
+        function clearTimetableCell(day, timeIndex) {
+            const table = document.getElementById('mainTimetable');
+            const rows = table.querySelectorAll('tbody tr');
+            const cell = rows[timeIndex].cells[getDayIndex(day) + 1];
+            
+            cell.innerHTML = `
+                <div class="period-cell empty" onclick="addPeriod('${day}', ${timeIndex})"
+                     ondragover="allowDrop(event)" ondrop="dropPeriod(event, '${day}', ${timeIndex})">
+                    <i class="fas fa-plus mr-2"></i>Add Period
+                </div>
+            `;
+        }
+
+        function getDayIndex(day) {
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            return days.indexOf(day);
+        }
+
+        // Period Management
+        function addPeriod(day, timeIndex) {
+            openModal('addPeriodModal');
+            window.currentEditingCell = { day, timeIndex };
+        }
+
+        function editPeriod(periodId) {
+            const period = currentPeriodData[periodId];
+            if (!period) return;
+            
+            openModal('addPeriodModal');
+            window.currentEditingPeriod = periodId;
+            
+            // Fill form with existing data
+            document.getElementById('periodSubject').value = period.subject;
+            document.getElementById('periodTeacher').value = period.teacher;
+            document.getElementById('periodRoom').value = period.room;
+            updateSubjectColor();
+        }
+
+        function addNewPeriod() {
+            openModal('addPeriodModal');
+            window.currentEditingPeriod = null;
+            window.currentEditingCell = null;
+        }
+
+        function savePeriod() {
+            const subject = document.getElementById('periodSubject').value;
+            const teacher = document.getElementById('periodTeacher').value;
+            const room = document.getElementById('periodRoom').value;
+            
+            if (!subject || !teacher || !room) {
+                showToast('Please fill all required fields', 'error');
+                return;
+            }
+            
+            if (window.currentEditingPeriod) {
+                // Update existing period
+                const period = currentPeriodData[window.currentEditingPeriod];
+                period.subject = subject;
+                period.teacher = teacher;
+                period.room = room;
+                
+                updateTimetableCell(period.day, period.timeIndex, window.currentEditingPeriod);
+                showToast('Period updated successfully', 'success');
+            } else if (window.currentEditingCell) {
+                // Add new period to specific cell
+                const { day, timeIndex } = window.currentEditingCell;
+                const periodId = `${day}-${timeIndex}-${subject}`;
+                
+                currentPeriodData[periodId] = {
+                    subject: subject,
+                    teacher: teacher,
+                    room: room,
+                    day: day,
+                    timeIndex: timeIndex
+                };
+                
+                updateTimetableCell(day, timeIndex, periodId);
+                showToast('Period added successfully', 'success');
+            } else {
+                // Add to period pool
+                const poolId = `pool-${Date.now()}`;
+                const periodPool = document.getElementById('periodPool');
+                
+                const periodElement = document.createElement('div');
+                periodElement.className = 'period-card';
+                periodElement.draggable = true;
+                periodElement.id = poolId;
+                periodElement.ondragstart = (e) => dragFromPool(e, poolId);
+                
+                const subjectClass = `subject-${subject}`;
+                periodElement.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="subject-badge ${subjectClass}">
+                                ${getSubjectName(subject)}
+                            </span>
+                            <p class="teacher-info">${teacher}</p>
+                        </div>
+                        <span class="text-xs font-bold text-slate-500">45 min</span>
+                    </div>
+                    <div class="room-info">
+                        <i class="fas fa-door-closed"></i> ${room}
+                    </div>
+                `;
+                
+                periodPool.appendChild(periodElement);
+                showToast('Period added to pool', 'success');
+            }
+            
+            closeModal('addPeriodModal');
+        }
+
+        function updateSubjectColor() {
+            const subject = document.getElementById('periodSubject').value;
+            const modal = document.getElementById('addPeriodModal');
+            
+            // Remove all subject color classes
+            modal.classList.remove('subject-math', 'subject-science', 'subject-english', 'subject-history',
+                                 'subject-physics', 'subject-chemistry', 'subject-biology', 'subject-art',
+                                 'subject-pe', 'subject-music', 'subject-computer', 'subject-geography');
+            
+            if (subject) {
+                modal.classList.add(`subject-${subject}`);
+            }
+        }
+
+        // Timetable Actions
+        function createNewTimetable() {
+            const className = document.getElementById('timetableClass').value;
+            const year = document.getElementById('timetableYear').value;
+            const term = document.getElementById('timetableTerm').value;
+            
+            if (!className) {
+                showToast('Please select a class', 'error');
+                return;
+            }
+            
+            showToast(`Creating timetable for ${className}, ${term} ${year}...`, 'info');
+            closeModal('createTimetableModal');
+            
+            setTimeout(() => {
+                selectClass(className);
+                showToast('New timetable created successfully!', 'success');
+            }, 1500);
+        }
+
+        function clearTimetable() {
+            if (confirm('Are you sure you want to clear the entire timetable? This action cannot be undone.')) {
+                currentPeriodData = {};
+                loadTimetable(currentClass);
+                showToast('Timetable cleared', 'success');
+            }
+        }
+
+        function autoSchedule() {
+            showToast('Generating optimal schedule...', 'info');
+            
+            // Simulate auto-scheduling
+            setTimeout(() => {
+                // Add some sample periods
+                const samplePeriods = [
+                    { day: 'Monday', timeIndex: 0, subject: 'math', teacher: 'Dr. Sarah Johnson', room: '101' },
+                    { day: 'Tuesday', timeIndex: 1, subject: 'science', teacher: 'Mr. David Lee', room: 'Lab 1' },
+                    { day: 'Wednesday', timeIndex: 2, subject: 'english', teacher: 'Ms. Emma Wilson', room: '102' },
+                    { day: 'Thursday', timeIndex: 3, subject: 'history', teacher: 'Mr. Michael Brown', room: '103' },
+                    { day: 'Friday', timeIndex: 4, subject: 'physics', teacher: 'Dr. Lisa Chen', room: 'Lab 2' }
+                ];
+                
+                samplePeriods.forEach((period, index) => {
+                    const periodId = `${period.day}-${period.timeIndex}-${period.subject}-${index}`;
+                    currentPeriodData[periodId] = period;
+                    updateTimetableCell(period.day, period.timeIndex, periodId);
+                });
+                
+                showToast('Auto-schedule completed!', 'success');
+            }, 2000);
+        }
+
+        function checkConflicts() {
+            showToast('Checking for schedule conflicts...', 'info');
+            
+            // Simulate conflict check
+            setTimeout(() => {
+                const hasConflicts = Math.random() > 0.5;
+                
+                if (hasConflicts) {
+                    showToast('Found 2 schedule conflicts', 'warning');
+                    
+                    // Show conflict warning in modal
+                    const conflictWarning = document.getElementById('conflictWarning');
+                    conflictWarning.classList.remove('hidden');
+                    document.getElementById('conflictDetails').textContent = 
+                        'Teacher conflicts found: Dr. Sarah Johnson (Math) is scheduled in two classes at the same time.';
+                } else {
+                    showToast('No conflicts found! Schedule is optimal.', 'success');
+                }
+            }, 1500);
+        }
+
+        function exportTimetable() {
+            showToast('Exporting timetable...', 'info');
+            
+            // Create downloadable content
+            const timetableData = {
+                class: currentClass,
+                periods: Object.values(currentPeriodData),
+                generated: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(timetableData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `timetable_${currentClass}_${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showToast('Timetable exported successfully!', 'success');
+        }
+
+        function printTimetable() {
+            window.print();
+        }
+
+        function downloadTimetable() {
+            showToast('Downloading timetable as PDF...', 'info');
+            setTimeout(() => {
+                showToast('Timetable downloaded successfully!', 'success');
+            }, 1500);
+        }
+
+        function shareTimetable() {
+            if (navigator.share) {
+                navigator.share({
+                    title: `Timetable - Grade ${currentClass}`,
+                    text: `Check out the timetable for Grade ${currentClass}`,
+                    url: window.location.href
+                });
+            } else {
+                showToast('Sharing not supported on this device', 'warning');
+            }
+        }
+
+        function previousWeek() {
+            showToast('Loading previous week...', 'info');
+        }
+
+        function nextWeek() {
+            showToast('Loading next week...', 'info');
+        }
+
+        function saveTemplate() {
+            const templateName = document.getElementById('templateName').value;
+            if (!templateName) {
+                showToast('Please enter a template name', 'error');
+                return;
+            }
+            
+            showToast(`Template "${templateName}" saved successfully!`, 'success');
+            closeModal('manageTemplatesModal');
+        }
+
+        function loadClassTemplate() {
+            const className = document.getElementById('timetableClass').value;
+            if (className) {
+                // Load appropriate template based on class
+                showToast(`Loading template for ${className}...`, 'info');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize date pickers
+            flatpickr("#timetableDate", {
+                dateFormat: "Y-m-d",
+                defaultDate: "2024-12-17"
+            });
+            
+            // Load initial timetable
+            loadTimetable(currentClass);
+            loadPeriodPool(currentClass);
+            
+            // Setup drag and drop events
+            document.addEventListener('dragend', function(event) {
+                document.querySelectorAll('.drag-over').forEach(el => {
+                    el.classList.remove('drag-over');
+                });
+                document.querySelectorAll('.dragging').forEach(el => {
+                    el.classList.remove('dragging');
+                });
+                draggedPeriod = null;
+            });
+            
+            // Show welcome message
+            setTimeout(() => {
+                showToast('Welcome to Timetable Management!', 'info');
+            }, 1000);
+            
+            // Auto-save functionality
+            setInterval(() => {
+                if (document.getElementById('autoSave')?.checked) {
+                    // Auto-save logic would go here
+                    console.log('Auto-saving timetable...');
+                }
+            }, 30000); // Every 30 seconds
+        });
+
+        // Helper function to check teacher availability
+        function checkTeacherAvailability(teacher, day, time) {
+            // This would check against teacher schedule
+            // For now, return true
+            return true;
+        }
+
+        // Helper function to check room availability
+        function checkRoomAvailability(room, day, time) {
+            // This would check against room schedule
+            // For now, return true
+            return true;
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>School Dashboard | AcademixSuite School Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --school-primary: #4f46e5;
+            --school-secondary: #10b981;
+            --school-surface: #ffffff;
+            --school-bg: #f8fafc;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--school-bg); 
+            color: #1e293b; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Glassmorphism effects */
+        .glass-header { 
+            background: rgba(255, 255, 255, 0.92); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+        
+        .toast {
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease forwards;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            border-left: 4px solid #059669;
+        }
+        
+        .toast-info {
+            background: linear-gradient(135deg, #4f46e5, #7c73e9);
+            color: white;
+            border-left: 4px solid #3730a3;
+        }
+        
+        .toast-warning {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+            border-left: 4px solid #d97706;
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+            border-left: 4px solid #dc2626;
+        }
+        
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+        
+        .toast-exit {
+            animation: fadeOut 0.3s ease forwards;
+        }
+        
+        .toast-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        
+        .toast-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Sidebar styling */
+        .sidebar-link { 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-left: 3px solid transparent; 
+            position: relative;
+        }
+        
+        .sidebar-link:hover { 
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%);
+            color: var(--school-primary); 
+            border-left-color: rgba(79, 70, 229, 0.3);
+        }
+        
+        .active-link { 
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.1) 0%, rgba(79, 70, 229, 0.05) 100%);
+            color: var(--school-primary); 
+            border-left-color: var(--school-primary); 
+            font-weight: 700;
+        }
+        
+        .active-link::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: var(--school-primary);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-active {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        
+        .status-inactive {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .status-completed {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .glass-header {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: white;
+            }
+            
+            .toast-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+            
+            .chart-container {
+                height: 250px !important;
+            }
+        }
+
+        /* Tab styling */
+        .tab-button {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-button:hover {
+            color: #4f46e5;
+        }
+        
+        .tab-button.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+            background: linear-gradient(to top, rgba(79, 70, 229, 0.05), transparent);
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--metric-color), transparent);
+        }
+        
+        .metric-primary {
+            --metric-color: #4f46e5;
+        }
+        
+        .metric-success {
+            --metric-color: #10b981;
+        }
+        
+        .metric-warning {
+            --metric-color: #f59e0b;
+        }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Quick Actions */
+        .quick-action {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .quick-action:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Announcement Cards */
+        .announcement-card {
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .announcement-card:hover {
+            transform: translateX(4px);
+        }
+        
+        .announcement-urgent {
+            border-left-color: #ef4444;
+        }
+        
+        .announcement-important {
+            border-left-color: #f59e0b;
+        }
+        
+        .announcement-info {
+            border-left-color: #4f46e5;
+        }
+        
+        /* Progress bars */
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            background: #f1f5f9;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-primary {
+            background: linear-gradient(90deg, #4f46e5, #7c73e9);
+        }
+        
+        .progress-success {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+        
+        .progress-warning {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+        
+        /* Avatar Styles */
+        .avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .avatar-sm {
+            width: 32px;
+            height: 32px;
+            font-size: 12px;
+        }
+        
+        .avatar-md {
+            width: 40px;
+            height: 40px;
+            font-size: 14px;
+        }
+        
+        .avatar-lg {
+            width: 48px;
+            height: 48px;
+            font-size: 16px;
+        }
+        
+        /* Badge Styles */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .badge-primary {
+            background-color: #e0e7ff;
+            color: #4f46e5;
+        }
+        
+        .badge-success {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+        
+        .badge-warning {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        
+        /* Form Styles */
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            background: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[99] lg:hidden hidden" onclick="mobileSidebarToggle()"></div>
+
+    <!-- New Announcement Modal -->
+    <div id="newAnnouncementModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-2xl w-11/12 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-slate-900">Create New Announcement</h3>
+                <button onclick="closeModal('newAnnouncementModal')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="form-label">Announcement Title</label>
+                    <input type="text" id="announcementTitle" class="form-input" placeholder="e.g., Upcoming Parent-Teacher Meetings">
+                </div>
+                
+                <div>
+                    <label class="form-label">Priority Level</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <label class="flex flex-col items-center justify-center p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50">
+                            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center mb-2">
+                                <i class="fas fa-info-circle text-blue-600"></i>
+                            </div>
+                            <span class="text-sm font-medium">Information</span>
+                            <input type="radio" name="announcementPriority" value="info" class="hidden" checked>
+                        </label>
+                        <label class="flex flex-col items-center justify-center p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50">
+                            <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center mb-2">
+                                <i class="fas fa-exclamation-triangle text-amber-600"></i>
+                            </div>
+                            <span class="text-sm font-medium">Important</span>
+                            <input type="radio" name="announcementPriority" value="important" class="hidden">
+                        </label>
+                        <label class="flex flex-col items-center justify-center p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50">
+                            <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center mb-2">
+                                <i class="fas fa-exclamation-circle text-red-600"></i>
+                            </div>
+                            <span class="text-sm font-medium">Urgent</span>
+                            <input type="radio" name="announcementPriority" value="urgent" class="hidden">
+                        </label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="form-label">Target Audience</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3">
+                            <input type="checkbox" checked class="rounded border-slate-300">
+                            <span class="text-sm text-slate-700">All Students</span>
+                        </label>
+                        <label class="flex items-center gap-3">
+                            <input type="checkbox" class="rounded border-slate-300">
+                            <span class="text-sm text-slate-700">All Teachers</span>
+                        </label>
+                        <label class="flex items-center gap-3">
+                            <input type="checkbox" class="rounded border-slate-300">
+                            <span class="text-sm text-slate-700">All Parents</span>
+                        </label>
+                        <label class="flex items-center gap-3">
+                            <input type="checkbox" class="rounded border-slate-300">
+                            <span class="text-sm text-slate-700">Specific Grade Levels</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="form-label">Announcement Content</label>
+                    <textarea id="announcementContent" class="form-input h-40" placeholder="Enter detailed announcement content..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="form-label">Schedule</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <input type="date" id="announcementDate" class="form-input">
+                            <p class="text-xs text-slate-500 mt-1">Publish Date</p>
+                        </div>
+                        <div>
+                            <input type="time" id="announcementTime" class="form-input">
+                            <p class="text-xs text-slate-500 mt-1">Publish Time</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-8 pt-6 border-t border-slate-100">
+                <button onclick="closeModal('newAnnouncementModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                    Cancel
+                </button>
+                <button onclick="createAnnouncement()" class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200">
+                    Publish Announcement
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-2xl w-11/12 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-slate-900">Add New Student</h3>
+                <button onclick="closeModal('addStudentModal')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="form-label">First Name</label>
+                    <input type="text" class="form-input" placeholder="John">
+                </div>
+                <div>
+                    <label class="form-label">Last Name</label>
+                    <input type="text" class="form-input" placeholder="Doe">
+                </div>
+                <div>
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" class="form-input">
+                </div>
+                <div>
+                    <label class="form-label">Gender</label>
+                    <select class="form-select">
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Grade Level</label>
+                    <select class="form-select">
+                        <option value="">Select Grade</option>
+                        <option value="k">Kindergarten</option>
+                        <option value="1">Grade 1</option>
+                        <option value="2">Grade 2</option>
+                        <option value="3">Grade 3</option>
+                        <option value="4">Grade 4</option>
+                        <option value="5">Grade 5</option>
+                        <option value="6">Grade 6</option>
+                        <option value="7">Grade 7</option>
+                        <option value="8">Grade 8</option>
+                        <option value="9">Grade 9</option>
+                        <option value="10">Grade 10</option>
+                        <option value="11">Grade 11</option>
+                        <option value="12">Grade 12</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Section</label>
+                    <input type="text" class="form-input" placeholder="e.g., Section A">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="form-label">Parent/Guardian Email</label>
+                    <input type="email" class="form-input" placeholder="parent@email.com">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="form-label">Parent/Guardian Phone</label>
+                    <input type="tel" class="form-input" placeholder="+1 (555) 123-4567">
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-8 pt-6 border-t border-slate-100">
+                <button onclick="closeModal('addStudentModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                    Cancel
+                </button>
+                <button onclick="addNewStudent()" class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                    Add Student
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-[100] lg:relative lg:translate-x-0 -translate-x-full transition-transform duration-300 flex flex-col shadow-xl lg:shadow-none">
+            
+            <!-- School Header -->
+            <div class="h-20 flex items-center px-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-100">
+                            <i class="fas fa-school text-white text-lg"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div>
+                        <span class="text-xl font-black tracking-tight text-slate-900">Greenwood High</span>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">SCHOOL ADMIN</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- School Quick Info -->
+            <div class="p-6 border-b border-slate-100">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">School Code:</span>
+                        <span class="text-sm font-black text-indigo-600">NX-NOD-0924A</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Subscription:</span>
+                        <span class="badge badge-primary">Enterprise</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Renewal Date:</span>
+                        <span class="text-sm font-bold text-slate-900">Dec 15, 2024</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 space-y-8 custom-scrollbar">
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Dashboard</p>
+                    <nav class="space-y-1">
+                        <a href="school-dashboard.html" class="sidebar-link active-link flex items-center gap-3 px-6 py-3 text-sm font-semibold">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <span>Overview</span>
+                        </a>
+                        <a href="school-announcements.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <span>Announcements</span>
+                            <span class="badge badge-primary ml-auto">3</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Student Management</p>
+                    <nav class="space-y-1">
+                        <a href="school-students.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <span>Students Directory</span>
+                            <span class="text-xs font-bold text-slate-400 ml-auto">1,248</span>
+                        </a>
+                        <a href="school-attendance.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <span>Attendance</span>
+                        </a>
+                        <a href="school-grades.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <span>Grades & Reports</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Staff Management</p>
+                    <nav class="space-y-1">
+                        <a href="school-teachers.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                            <span>Teachers</span>
+                            <span class="text-xs font-bold text-slate-400 ml-auto">84</span>
+                        </a>
+                        <a href="school-staff.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <span>Staff Directory</span>
+                        </a>
+                        <a href="school-schedule.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <span>Timetable</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">School Operations</p>
+                    <nav class="space-y-1">
+                        <a href="school-fees.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            <span>Fee Management</span>
+                        </a>
+                        <a href="school-inventory.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <span>Inventory</span>
+                        </a>
+                        <a href="school-settings.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <span>School Settings</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- User Profile -->
+            <div class="p-6 border-t border-slate-100">
+                <div class="flex items-center gap-3 p-2 group cursor-pointer hover:bg-slate-50 rounded-xl transition">
+                    <div class="relative">
+                        <img src="https://ui-avatars.com/api/?name=Principal+Smith&background=4f46e5&color=fff&bold=true&size=128" class="w-10 h-10 rounded-xl shadow-sm">
+                        <div class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div class="overflow-hidden flex-1">
+                        <p class="text-[13px] font-black text-slate-900 truncate">Principal Smith</p>
+                        <p class="text-[10px] font-black text-indigo-600 uppercase tracking-wider italic">School_Admin</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- Header -->
+            <header class="h-20 glass-header px-6 lg:px-8 flex items-center justify-between shrink-0 z-40">
+                <div class="flex items-center gap-3">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition">
+                        <i class="fas fa-bars-staggered"></i>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-lg font-black text-slate-900 tracking-tight">School Overview Dashboard</h1>
+                        <div class="hidden lg:flex items-center gap-2">
+                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            <span class="text-xs font-black text-emerald-600 uppercase tracking-widest">Academic Year 2024-2025</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Quick Stats -->
+                    <div class="hidden md:flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl">
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Today's Attendance</p>
+                            <p class="text-sm font-black text-emerald-600">94.2%</p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="openModal('newAnnouncementModal')" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                            <i class="fas fa-bullhorn"></i>
+                            <span class="hidden sm:inline">New Announcement</span>
+                        </button>
+                        <button onclick="openModal('addStudentModal')" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                            <i class="fas fa-user-plus"></i>
+                            <span class="hidden sm:inline">Add Student</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tabs Navigation -->
+            <div class="border-b border-slate-200 bg-white">
+                <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                    <div class="flex overflow-x-auto">
+                        <button class="tab-button active" onclick="switchTab('overview')" data-tab="overview">
+                            <i class="fas fa-home mr-2"></i>Overview
+                        </button>
+                        <button class="tab-button" onclick="switchTab('students')" data-tab="students">
+                            <i class="fas fa-user-graduate mr-2"></i>Students
+                        </button>
+                        <button class="tab-button" onclick="switchTab('teachers')" data-tab="teachers">
+                            <i class="fas fa-chalkboard-teacher mr-2"></i>Teachers
+                        </button>
+                        <button class="tab-button" onclick="switchTab('academics')" data-tab="academics">
+                            <i class="fas fa-graduation-cap mr-2"></i>Academics
+                        </button>
+                        <button class="tab-button" onclick="switchTab('finance')" data-tab="finance">
+                            <i class="fas fa-dollar-sign mr-2"></i>Finance
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar">
+                <!-- Welcome Section -->
+                <div class="max-w-7xl mx-auto mb-8">
+                    <div class="glass-card rounded-2xl p-8 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-100">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            <div>
+                                <h2 class="text-2xl lg:text-3xl font-black text-slate-900 mb-2">Welcome back, Principal Smith</h2>
+                                <p class="text-slate-600 font-medium">Here's what's happening at Greenwood High Academy today</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <p class="text-sm font-black text-slate-900">School Status</p>
+                                    <p class="text-2xl font-black text-emerald-600">All Systems Operational</p>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                                    <i class="fas fa-check-circle text-emerald-600 text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="max-w-7xl mx-auto mb-8">
+                    <h3 class="text-lg font-black text-slate-900 mb-4">Quick Actions</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="glass-card quick-action rounded-2xl p-6 text-center hover:border-indigo-200" onclick="takeAttendance()">
+                            <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-calendar-check text-amber-600 text-xl"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-900 mb-1">Take Attendance</h4>
+                            <p class="text-sm text-slate-500">Record today's attendance</p>
+                        </div>
+                        <div class="glass-card quick-action rounded-2xl p-6 text-center hover:border-emerald-200" onclick="sendNotifications()">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-bell text-emerald-600 text-xl"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-900 mb-1">Send Notification</h4>
+                            <p class="text-sm text-slate-500">Notify parents/students</p>
+                        </div>
+                        <div class="glass-card quick-action rounded-2xl p-6 text-center hover:border-blue-200" onclick="generateReports()">
+                            <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-file-alt text-blue-600 text-xl"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-900 mb-1">Generate Reports</h4>
+                            <p class="text-sm text-slate-500">Academic/financial reports</p>
+                        </div>
+                        <div class="glass-card quick-action rounded-2xl p-6 text-center hover:border-purple-200" onclick="manageSchedule()">
+                            <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-calendar-alt text-purple-600 text-xl"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-900 mb-1">Update Schedule</h4>
+                            <p class="text-sm text-slate-500">Modify class timetable</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Students Card -->
+                    <div class="glass-card metric-card metric-primary rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.1s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">TOTAL STUDENTS</p>
+                                <p class="text-2xl font-black text-slate-900">1,248</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
+                                <i class="fas fa-user-graduate text-indigo-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-emerald-600 font-bold"><i class="fas fa-arrow-up mr-1"></i> 4.2%</span>
+                            <span class="text-slate-500">from last year</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Teachers Card -->
+                    <div class="glass-card metric-card metric-primary rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.2s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">TOTAL TEACHERS</p>
+                                <p class="text-2xl font-black text-slate-900">84</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+                                <i class="fas fa-chalkboard-teacher text-blue-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-primary" style="width: 90%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">90% staff retention rate</p>
+                    </div>
+                    
+                    <!-- Attendance Rate Card -->
+                    <div class="glass-card metric-card metric-success rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.3s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">ATTENDANCE RATE</p>
+                                <p class="text-2xl font-black text-slate-900">94.2%</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-emerald-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-emerald-600 font-bold"><i class="fas fa-arrow-up mr-1"></i> 1.8%</span>
+                            <span class="text-slate-500">from last week</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Fee Collection Card -->
+                    <div class="glass-card metric-card metric-warning rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.4s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">FEE COLLECTION</p>
+                                <p class="text-2xl font-black text-slate-900">87.5%</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center">
+                                <i class="fas fa-receipt text-amber-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-warning" style="width: 87.5%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">Current term collection rate</p>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Attendance Trend Chart -->
+                    <div class="glass-card rounded-2xl p-6 animate-fadeInUp">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">Attendance Trend</h3>
+                                <p class="text-slate-500">Weekly attendance percentage</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold text-emerald-600"><i class="fas fa-arrow-up mr-1"></i> 1.8% growth</span>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Grade Distribution Chart -->
+                    <div class="glass-card rounded-2xl p-6 animate-fadeInUp">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">Grade Distribution</h3>
+                                <p class="text-slate-500">Student count by grade level</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="exportGradeData()" class="px-3 py-1.5 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition text-xs">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="gradeDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Announcements -->
+                <div class="max-w-7xl mx-auto glass-card rounded-2xl p-6 mb-8 animate-fadeInUp">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="text-lg font-black text-slate-900">Recent Announcements</h3>
+                            <p class="text-slate-500">Latest school announcements and updates</p>
+                        </div>
+                        <button onclick="openModal('newAnnouncementModal')" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200">
+                            <i class="fas fa-plus mr-2"></i>New Announcement
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="announcement-card announcement-urgent p-4 bg-red-50 border border-red-100 rounded-xl">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="badge badge-warning">Urgent</span>
+                                        <span class="text-xs text-slate-500">Dec 3, 2024 • 09:30 AM</span>
+                                    </div>
+                                    <h4 class="font-bold text-slate-900 mb-1">School Closure Due to Weather</h4>
+                                    <p class="text-sm text-slate-600">Due to severe weather conditions, school will be closed tomorrow. All classes will resume on Wednesday.</p>
+                                </div>
+                                <button class="p-2 text-slate-400 hover:text-slate-600">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="announcement-card announcement-important p-4 bg-amber-50 border border-amber-100 rounded-xl">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="badge badge-warning">Important</span>
+                                        <span class="text-xs text-slate-500">Dec 2, 2024 • 02:15 PM</span>
+                                    </div>
+                                    <h4 class="font-bold text-slate-900 mb-1">Parent-Teacher Meetings Schedule</h4>
+                                    <p class="text-sm text-slate-600">Parent-teacher meetings are scheduled for December 10-12. Please book your slots through the parent portal.</p>
+                                </div>
+                                <button class="p-2 text-slate-400 hover:text-slate-600">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="announcement-card announcement-info p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="badge badge-primary">Information</span>
+                                        <span class="text-xs text-slate-500">Dec 1, 2024 • 10:45 AM</span>
+                                    </div>
+                                    <h4 class="font-bold text-slate-900 mb-1">Annual Science Fair Registration</h4>
+                                    <p class="text-sm text-slate-600">Registration for the annual science fair is now open. Students can submit their project proposals by December 15.</p>
+                                </div>
+                                <button class="p-2 text-slate-400 hover:text-slate-600">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Events & Recent Activity -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Upcoming Events -->
+                    <div class="glass-card rounded-2xl p-6 animate-fadeInUp">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">Upcoming Events</h3>
+                                <p class="text-slate-500">School events and activities</p>
+                            </div>
+                            <button onclick="viewAllEvents()" class="px-4 py-2 text-indigo-600 font-bold rounded-xl hover:bg-indigo-50 transition">
+                                View All
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4 p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+                                <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-emerald-100 flex flex-col items-center justify-center">
+                                    <span class="text-sm font-black text-emerald-600">DEC</span>
+                                    <span class="text-lg font-black text-emerald-600">10</span>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-slate-900 mb-1">Parent-Teacher Meetings Begin</h4>
+                                    <p class="text-xs text-slate-500">10:00 AM - 4:00 PM • Main Hall</p>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span class="badge badge-primary">All Day</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-4 p-3 bg-blue-50 border border-blue-100 rounded-xl">
+                                <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-100 flex flex-col items-center justify-center">
+                                    <span class="text-sm font-black text-blue-600">DEC</span>
+                                    <span class="text-lg font-black text-blue-600">15</span>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-slate-900 mb-1">Science Fair Submissions Due</h4>
+                                    <p class="text-xs text-slate-500">Deadline: 5:00 PM • Science Dept</p>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span class="badge badge-warning">Deadline</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-4 p-3 bg-purple-50 border border-purple-100 rounded-xl">
+                                <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-purple-100 flex flex-col items-center justify-center">
+                                    <span class="text-sm font-black text-purple-600">DEC</span>
+                                    <span class="text-lg font-black text-purple-600">20</span>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-slate-900 mb-1">Winter Break Begins</h4>
+                                    <p class="text-xs text-slate-500">No classes until Jan 6</p>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span class="badge badge-success">Holiday</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="glass-card rounded-2xl p-6 animate-fadeInUp">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">Recent Activity</h3>
+                                <p class="text-slate-500">Latest updates and changes</p>
+                            </div>
+                            <button onclick="viewAllActivity()" class="px-4 py-2 text-indigo-600 font-bold rounded-xl hover:bg-indigo-50 transition">
+                                View All
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <div class="avatar avatar-md bg-gradient-to-br from-indigo-500 to-purple-500">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-slate-900">New teacher registration completed</p>
+                                    <p class="text-xs text-slate-500">Ms. Johnson joined as Math teacher • 2 hours ago</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-3">
+                                <div class="avatar avatar-md bg-gradient-to-br from-emerald-500 to-teal-500">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-slate-900">5 new students enrolled</p>
+                                    <p class="text-xs text-slate-500">Grade 10 admissions • 4 hours ago</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-3">
+                                <div class="avatar avatar-md bg-gradient-to-br from-amber-500 to-orange-500">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-slate-900">Attendance marked for 98.2% students</p>
+                                    <p class="text-xs text-slate-500">Today's attendance recorded • 6 hours ago</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-3">
+                                <div class="avatar avatar-md bg-gradient-to-br from-blue-500 to-cyan-500">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-slate-900">Monthly fees updated</p>
+                                    <p class="text-xs text-slate-500">Fee structure revised for next term • Yesterday</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toast Notification System
+        class Toast {
+            static show(message, type = 'info', duration = 5000) {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                const icons = {
+                    success: 'fa-check-circle',
+                    info: 'fa-info-circle',
+                    warning: 'fa-exclamation-triangle',
+                    error: 'fa-times-circle'
+                };
+                
+                toast.innerHTML = `
+                    <i class="fas ${icons[type]} toast-icon"></i>
+                    <div class="toast-content">${message}</div>
+                    <button class="toast-close" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translateX(0)';
+                }, 10);
+                
+                if (duration > 0) {
+                    setTimeout(() => {
+                        toast.classList.add('toast-exit');
+                        setTimeout(() => {
+                            if (toast.parentNode) {
+                                toast.remove();
+                            }
+                        }, 300);
+                    }, duration);
+                }
+                
+                return toast;
+            }
+            
+            static success(message, duration = 5000) {
+                return this.show(message, 'success', duration);
+            }
+            
+            static info(message, duration = 5000) {
+                return this.show(message, 'info', duration);
+            }
+            
+            static warning(message, duration = 5000) {
+                return this.show(message, 'warning', duration);
+            }
+            
+            static error(message, duration = 5000) {
+                return this.show(message, 'error', duration);
+            }
+        }
+
+        // Chart Instances
+        let attendanceChart = null;
+        let gradeDistributionChart = null;
+
+        // Initialize Charts
+        function initializeCharts() {
+            // Attendance Trend Chart
+            const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+            attendanceChart = new Chart(attendanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+                    datasets: [{
+                        label: 'Attendance Rate',
+                        data: [92.5, 93.2, 93.8, 94.1, 93.9, 94.2],
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Attendance: ${context.parsed.y}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 90,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            },
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Grade Distribution Chart
+            const gradeCtx = document.getElementById('gradeDistributionChart').getContext('2d');
+            gradeDistributionChart = new Chart(gradeCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+                    datasets: [{
+                        label: 'Students',
+                        data: [85, 92, 88, 96, 102, 98, 105, 112, 108, 115, 120, 105, 102],
+                        backgroundColor: [
+                            '#4f46e5', '#6366f1', '#818cf8', '#a5b4fc',
+                            '#10b981', '#34d399', '#6ee7b7',
+                            '#f59e0b', '#fbbf24', '#fcd34d',
+                            '#ef4444', '#f87171', '#fca5a5'
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 6,
+                        hoverBackgroundColor: '#3730a3'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Students: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 20
+                            },
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Mobile sidebar toggle
+        function mobileSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Show toast notification
+            Toast.info(`Switched to ${tabName} view`);
+            
+            // In a real app, you would load different content based on tab
+            console.log('Switched to tab:', tabName);
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Create announcement
+        function createAnnouncement() {
+            const title = document.getElementById('announcementTitle').value;
+            const content = document.getElementById('announcementContent').value;
+            const priority = document.querySelector('input[name="announcementPriority"]:checked').value;
+            
+            if (!title || !content) {
+                Toast.error('Please fill in all required fields');
+                return;
+            }
+            
+            Toast.success(`Announcement "${title}" created successfully!<br>It will be published at the scheduled time.`);
+            closeModal('newAnnouncementModal');
+            
+            // Reset form
+            document.getElementById('announcementTitle').value = '';
+            document.getElementById('announcementContent').value = '';
+        }
+
+        // Add new student
+        function addNewStudent() {
+            Toast.success('New student added successfully!<br>Parent account has been created and notified.');
+            closeModal('addStudentModal');
+        }
+
+        // Quick Actions
+        function takeAttendance() {
+            Toast.info('Opening attendance module...<br>You can mark attendance for all classes.');
+        }
+
+        function sendNotifications() {
+            Toast.info('Opening notification center...<br>Select recipients and compose your message.');
+        }
+
+        function generateReports() {
+            Toast.info('Opening report generator...<br>Select report type and parameters.');
+        }
+
+        function manageSchedule() {
+            Toast.info('Opening schedule editor...<br>You can modify class timings and rooms.');
+        }
+
+        // Export functions
+        function exportGradeData() {
+            Toast.success('Grade distribution data exported!<br>CSV file downloaded.');
+        }
+
+        function viewAllEvents() {
+            Toast.info('Opening events calendar...');
+        }
+
+        function viewAllActivity() {
+            Toast.info('Loading complete activity log...');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + N for new announcement
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                openModal('newAnnouncementModal');
+                Toast.info('New announcement modal opened (Ctrl+N)');
+            }
+            
+            // Ctrl/Cmd + S for add student
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                openModal('addStudentModal');
+                Toast.info('Add student modal opened (Ctrl+S)');
+            }
+            
+            // Esc to close modals
+            if (e.key === 'Escape') {
+                closeModal('newAnnouncementModal');
+                closeModal('addStudentModal');
+                Toast.info('All modals closed');
+            }
+            
+            // Ctrl/Cmd + A for attendance
+            if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+                e.preventDefault();
+                takeAttendance();
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            
+            // Add hover effects to quick actions
+            const quickActions = document.querySelectorAll('.quick-action');
+            quickActions.forEach(action => {
+                action.addEventListener('mouseenter', () => {
+                    action.style.transform = 'translateY(-4px)';
+                });
+                
+                action.addEventListener('mouseleave', () => {
+                    action.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // Add click effects to announcement cards
+            const announcementCards = document.querySelectorAll('.announcement-card');
+            announcementCards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateX(4px)';
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateX(0)';
+                });
+            });
+            
+            // Welcome toast
+            setTimeout(() => {
+                Toast.success('Welcome to Greenwood High School Dashboard!<br>You have 3 new announcements.', 4000);
+            }, 1000);
+            
+            // Check for overdue tasks
+            setTimeout(() => {
+                Toast.warning('Reminder: 15 student fee payments are overdue.<br>Please follow up.', 5000);
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

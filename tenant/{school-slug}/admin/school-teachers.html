@@ -1,0 +1,2588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Teachers Management | AcademixSuite School Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --school-primary: #4f46e5;
+            --school-secondary: #10b981;
+            --school-surface: #ffffff;
+            --school-bg: #f8fafc;
+            --teacher-math: #ef4444;
+            --teacher-science: #3b82f6;
+            --teacher-english: #10b981;
+            --teacher-history: #f59e0b;
+            --teacher-art: #8b5cf6;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--school-bg); 
+            color: #1e293b; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Glassmorphism effects */
+        .glass-header { 
+            background: rgba(255, 255, 255, 0.92); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+        
+        .toast {
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease forwards;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            border-left: 4px solid #059669;
+        }
+        
+        .toast-info {
+            background: linear-gradient(135deg, #4f46e5, #7c73e9);
+            color: white;
+            border-left: 4px solid #3730a3;
+        }
+        
+        .toast-warning {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+            border-left: 4px solid #d97706;
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+            border-left: 4px solid #dc2626;
+        }
+        
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+        
+        .toast-exit {
+            animation: fadeOut 0.3s ease forwards;
+        }
+        
+        .toast-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        
+        .toast-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Sidebar styling */
+        .sidebar-link { 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-left: 3px solid transparent; 
+            position: relative;
+        }
+        
+        .sidebar-link:hover { 
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%);
+            color: var(--school-primary); 
+            border-left-color: rgba(79, 70, 229, 0.3);
+        }
+        
+        .active-link { 
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.1) 0%, rgba(79, 70, 229, 0.05) 100%);
+            color: var(--school-primary); 
+            border-left-color: var(--school-primary); 
+            font-weight: 700;
+        }
+        
+        .active-link::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: var(--school-primary);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Teacher Card Styles */
+        .teacher-card {
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .teacher-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+        
+        .teacher-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        
+        .teacher-math::before { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .teacher-science::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .teacher-english::before { background: linear-gradient(90deg, #10b981, #34d399); }
+        .teacher-history::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .teacher-art::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .teacher-computer::before { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+        .teacher-pe::before { background: linear-gradient(90deg, #84cc16, #a3e635); }
+
+        /* Teacher Status Badge */
+        .teacher-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-active {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .status-on-leave {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        
+        .status-inactive {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .status-part-time {
+            background-color: #e0e7ff;
+            color: #3730a3;
+            border: 1px solid #c7d2fe;
+        }
+
+        /* Tab styling */
+        .tab-button {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-button:hover {
+            color: #4f46e5;
+        }
+        
+        .tab-button.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+            background: linear-gradient(to top, rgba(79, 70, 229, 0.05), transparent);
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--metric-color), transparent);
+        }
+        
+        .metric-primary {
+            --metric-color: #4f46e5;
+        }
+        
+        .metric-success {
+            --metric-color: #10b981;
+        }
+        
+        .metric-warning {
+            --metric-color: #f59e0b;
+        }
+        
+        .metric-danger {
+            --metric-color: #ef4444;
+        }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Action Buttons */
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .action-btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c73e9);
+            color: white;
+        }
+        
+        .action-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+        }
+        
+        .action-btn-secondary {
+            background: white;
+            color: #4f46e5;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .action-btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #4f46e5;
+        }
+        
+        .action-btn-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+        }
+        
+        .action-btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .action-btn-danger {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+        }
+        
+        .action-btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Search and Filter */
+        .search-box {
+            position: relative;
+            width: 100%;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        /* Filter Chips */
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-chip:hover {
+            background: #e2e8f0;
+        }
+        
+        .filter-chip.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+
+        /* Pagination */
+        .pagination-btn {
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .pagination-btn:hover {
+            background: #f8fafc;
+            border-color: #4f46e5;
+            color: #4f46e5;
+        }
+        
+        .pagination-btn.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+        
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th {
+            background: #f8fafc;
+            padding: 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .data-table td {
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Form Styles */
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            background: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+
+        /* Teacher Avatar */
+        .teacher-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 900;
+            color: white;
+            position: relative;
+        }
+        
+        .avatar-math { background: linear-gradient(135deg, #ef4444, #f87171); }
+        .avatar-science { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        .avatar-english { background: linear-gradient(135deg, #10b981, #34d399); }
+        .avatar-history { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+        .avatar-art { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+
+        /* Subject Tags */
+        .subject-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 2px;
+        }
+        
+        .tag-math {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .tag-science {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+        
+        .tag-english {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .tag-history {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        
+        .tag-art {
+            background: #f5f3ff;
+            color: #5b21b6;
+            border: 1px solid #ddd6fe;
+        }
+
+        /* Schedule Timeline */
+        .schedule-timeline {
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .schedule-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e2e8f0;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 16px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4f46e5;
+        }
+
+        /* Rating Stars */
+        .rating-stars {
+            display: inline-flex;
+            gap: 2px;
+        }
+        
+        .star {
+            color: #e2e8f0;
+        }
+        
+        .star.filled {
+            color: #fbbf24;
+        }
+
+        /* Bulk Edit Panel */
+        .bulk-edit-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+        }
+        
+        .bulk-edit-panel.show {
+            transform: translateY(0);
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .glass-header {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: white;
+            }
+            
+            .toast-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+            
+            .chart-container {
+                height: 250px !important;
+            }
+            
+            .teacher-card {
+                padding: 16px;
+            }
+            
+            .teacher-avatar {
+                width: 48px;
+                height: 48px;
+                font-size: 18px;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            body {
+                background: white;
+            }
+            
+            .glass-card {
+                box-shadow: none;
+                border: 1px solid #e2e8f0;
+            }
+        }
+
+        /* Loader Animation */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #f1f5f9;
+            border-top-color: #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Teacher Performance */
+        .performance-meter {
+            height: 8px;
+            border-radius: 4px;
+            background: #f1f5f9;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .performance-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .performance-excellent { background: linear-gradient(90deg, #10b981, #34d399); }
+        .performance-good { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .performance-average { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .performance-poor { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+        /* Calendar Availability */
+        .availability-day {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .availability-day.available {
+            background: #dcfce7;
+            color: #166534;
+            border: 2px solid #bbf7d0;
+        }
+        
+        .availability-day.unavailable {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #fecaca;
+        }
+        
+        .availability-day.partial {
+            background: #fef3c7;
+            color: #92400e;
+            border: 2px solid #fde68a;
+        }
+        
+        .availability-day:hover {
+            transform: scale(1.1);
+        }
+
+        /* Quick Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+        
+        .stat-item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: #1e293b;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[99] lg:hidden hidden" onclick="mobileSidebarToggle()"></div>
+
+    <!-- Add Teacher Modal -->
+    <div id="addTeacherModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Add New Teacher</h3>
+                    <button onclick="closeModal('addTeacherModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="form-label">First Name</label>
+                        <input type="text" id="teacherFirstName" class="form-input" placeholder="Enter first name" required>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Last Name</label>
+                        <input type="text" id="teacherLastName" class="form-input" placeholder="Enter last name" required>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Email Address</label>
+                        <input type="email" id="teacherEmail" class="form-input" placeholder="teacher@school.edu" required>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" id="teacherPhone" class="form-input" placeholder="(123) 456-7890">
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Department</label>
+                        <select id="teacherDepartment" class="form-select" required>
+                            <option value="">Select Department</option>
+                            <option value="math">Mathematics</option>
+                            <option value="science">Science</option>
+                            <option value="english">English</option>
+                            <option value="history">History & Social Studies</option>
+                            <option value="arts">Arts & Music</option>
+                            <option value="computer">Computer Science</option>
+                            <option value="pe">Physical Education</option>
+                            <option value="language">World Languages</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Employment Type</label>
+                        <select id="teacherType" class="form-select" required>
+                            <option value="full-time">Full-Time</option>
+                            <option value="part-time">Part-Time</option>
+                            <option value="substitute">Substitute</option>
+                            <option value="contract">Contract</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Join Date</label>
+                        <input type="date" id="teacherJoinDate" class="form-input" value="2024-12-04" required>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Status</label>
+                        <select id="teacherStatus" class="form-select" required>
+                            <option value="active">Active</option>
+                            <option value="on-leave">On Leave</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="form-label">Subjects Taught</label>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" class="rounded border-slate-300" value="math">
+                                <span>Mathematics</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" class="rounded border-slate-300" value="science">
+                                <span>Science</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" class="rounded border-slate-300" value="english">
+                                <span>English</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" class="rounded border-slate-300" value="history">
+                                <span>History</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" class="rounded border-slate-300" value="computer">
+                                <span>Computer Science</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="form-label">Qualifications & Notes</label>
+                        <textarea id="teacherQualifications" class="form-input h-24" placeholder="Enter qualifications, certifications, or notes..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl mb-6">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-info-circle text-blue-600"></i>
+                        <p class="text-sm text-blue-700">Teacher login credentials will be sent to the provided email address.</p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button onclick="closeModal('addTeacherModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="saveNewTeacher()" class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                        Add Teacher
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Teacher Modal -->
+    <div id="editTeacherModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Edit Teacher</h3>
+                    <button onclick="closeModal('editTeacherModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="editTeacherForm">
+                    <!-- Form will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Details Modal -->
+    <div id="teacherDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900" id="teacherDetailsName">Teacher Details</h3>
+                    <button onclick="closeModal('teacherDetailsModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="teacherDetailsContent">
+                    <!-- Details will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Teacher Modal -->
+    <div id="scheduleTeacherModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Schedule Teacher</h3>
+                    <button onclick="closeModal('scheduleTeacherModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="scheduleTeacherForm">
+                    <!-- Schedule form will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Edit Panel -->
+    <div class="bulk-edit-panel" id="bulkEditPanel">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <p class="font-bold text-slate-900" id="bulkEditCount">0 teachers selected</p>
+                    <p class="text-sm text-slate-500">Apply actions to all selected teachers</p>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <button onclick="sendBulkMessage()" class="px-3 py-2 bg-blue-100 text-blue-700 font-bold rounded-lg hover:bg-blue-200 transition text-sm">
+                            <i class="fas fa-envelope"></i> Message
+                        </button>
+                        <button onclick="updateBulkStatus('active')" class="px-3 py-2 bg-emerald-100 text-emerald-700 font-bold rounded-lg hover:bg-emerald-200 transition text-sm">
+                            <i class="fas fa-check"></i> Set Active
+                        </button>
+                        <button onclick="updateBulkStatus('inactive')" class="px-3 py-2 bg-red-100 text-red-700 font-bold rounded-lg hover:bg-red-200 transition text-sm">
+                            <i class="fas fa-ban"></i> Set Inactive
+                        </button>
+                        <button onclick="exportBulkData()" class="px-3 py-2 bg-purple-100 text-purple-700 font-bold rounded-lg hover:bg-purple-200 transition text-sm">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    
+                    <button onclick="closeBulkEdit()" class="action-btn action-btn-danger">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-[100] lg:relative lg:translate-x-0 -translate-x-full transition-transform duration-300 flex flex-col shadow-xl lg:shadow-none">
+            
+            <!-- School Header -->
+            <div class="h-20 flex items-center px-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-100">
+                            <i class="fas fa-school text-white text-lg"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div>
+                        <span class="text-xl font-black tracking-tight text-slate-900">Greenwood High</span>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">SCHOOL ADMIN</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- School Quick Info -->
+            <div class="p-6 border-b border-slate-100">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Active Teachers:</span>
+                        <span class="text-sm font-black text-emerald-600">42</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Departments:</span>
+                        <span class="text-sm font-bold text-blue-600">8</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">New This Year:</span>
+                        <span class="text-sm font-bold text-amber-600">6</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 space-y-8 custom-scrollbar">
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Dashboard</p>
+                    <nav class="space-y-1">
+                        <a href="school-dashboard.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <span>Overview</span>
+                        </a>
+                        <a href="school-announcements.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <span>Announcements</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Student Management</p>
+                    <nav class="space-y-1">
+                        <a href="school-students.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <span>Students Directory</span>
+                        </a>
+                        <a href="school-attendance.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <span>Attendance</span>
+                        </a>
+                        <a href="school-grades.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <span>Grades & Reports</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Staff Management</p>
+                    <nav class="space-y-1">
+                        <a href="school-teachers.html" class="sidebar-link active-link flex items-center gap-3 px-6 py-3 text-sm font-semibold">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                            <span>Teachers</span>
+                        </a>
+                        <a href="school-schedule.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <span>Timetable</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">School Operations</p>
+                    <nav class="space-y-1">
+                        <a href="school-fees.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            <span>Fee Management</span>
+                        </a>
+                        <a href="school-settings.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <span>School Settings</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- User Profile -->
+            <div class="p-6 border-t border-slate-100">
+                <div class="flex items-center gap-3 p-2 group cursor-pointer hover:bg-slate-50 rounded-xl transition">
+                    <div class="relative">
+                        <img src="https://ui-avatars.com/api/?name=Principal+Smith&background=4f46e5&color=fff&bold=true&size=128" class="w-10 h-10 rounded-xl shadow-sm">
+                        <div class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div class="overflow-hidden flex-1">
+                        <p class="text-[13px] font-black text-slate-900 truncate">Principal Smith</p>
+                        <p class="text-[10px] font-black text-indigo-600 uppercase tracking-wider italic">School_Admin</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- Header -->
+            <header class="h-20 glass-header px-6 lg:px-8 flex items-center justify-between shrink-0 z-40">
+                <div class="flex items-center gap-3">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition">
+                        <i class="fas fa-bars-staggered"></i>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-lg font-black text-slate-900 tracking-tight">Teachers Management</h1>
+                        <div class="hidden lg:flex items-center gap-2">
+                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            <span class="text-xs font-black text-emerald-600 uppercase tracking-widest">42 Active Teachers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Quick Stats -->
+                    <div class="hidden md:flex items-center gap-6 bg-white border border-slate-200 px-4 py-2 rounded-xl">
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">On Leave</p>
+                            <p class="text-sm font-black text-amber-600">3</p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">New This Month</p>
+                            <p class="text-sm font-black text-emerald-600">2</p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="importTeachers()" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                            <i class="fas fa-file-import"></i>
+                            <span class="hidden sm:inline">Import</span>
+                        </button>
+                        <button onclick="generateReports()" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                            <i class="fas fa-chart-bar"></i>
+                            <span class="hidden sm:inline">Reports</span>
+                        </button>
+                        <button onclick="openModal('addTeacherModal')" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                            <i class="fas fa-plus-circle"></i>
+                            <span class="hidden sm:inline">Add Teacher</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tabs Navigation -->
+            <div class="border-b border-slate-200 bg-white">
+                <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                    <div class="flex overflow-x-auto">
+                        <button class="tab-button active" onclick="switchTab('overview')" data-tab="overview">
+                            <i class="fas fa-chart-pie mr-2"></i>Overview
+                        </button>
+                        <button class="tab-button" onclick="switchTab('directory')" data-tab="directory">
+                            <i class="fas fa-list mr-2"></i>Directory
+                        </button>
+                        <button class="tab-button" onclick="switchTab('departments')" data-tab="departments">
+                            <i class="fas fa-building mr-2"></i>Departments
+                        </button>
+                        <button class="tab-button" onclick="switchTab('schedule')" data-tab="schedule">
+                            <i class="fas fa-calendar-alt mr-2"></i>Schedule
+                        </button>
+                        <button class="tab-button" onclick="switchTab('performance')" data-tab="performance">
+                            <i class="fas fa-chart-line mr-2"></i>Performance
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar">
+                <!-- Page Header & Filters -->
+                <div class="max-w-7xl mx-auto mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h2 class="text-2xl lg:text-3xl font-black text-slate-900 mb-2">Teachers Management System</h2>
+                            <p class="text-slate-500 font-medium">Manage teaching staff, schedules, and performance metrics</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="search-box">
+                                <input type="text" placeholder="Search teachers, subjects, or departments..." class="search-input" id="searchInput" onkeyup="filterTeachers()">
+                                <i class="fas fa-search search-icon"></i>
+                            </div>
+                            <button onclick="toggleFilters()" class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                                <i class="fas fa-filter"></i>
+                                <span class="hidden sm:inline">Filters</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Filters -->
+                    <div class="glass-card rounded-xl p-6 mt-6 hidden" id="advancedFilters">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-black text-slate-900">Advanced Filters</h3>
+                            <button onclick="toggleFilters()" class="text-slate-400 hover:text-slate-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div>
+                                <label class="form-label">Department</label>
+                                <select id="filterDepartment" class="form-select" onchange="applyFilters()">
+                                    <option value="">All Departments</option>
+                                    <option value="math">Mathematics</option>
+                                    <option value="science">Science</option>
+                                    <option value="english">English</option>
+                                    <option value="history">History</option>
+                                    <option value="arts">Arts</option>
+                                    <option value="computer">Computer Science</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="form-label">Employment Type</label>
+                                <select id="filterEmploymentType" class="form-select" onchange="applyFilters()">
+                                    <option value="">All Types</option>
+                                    <option value="full-time">Full-Time</option>
+                                    <option value="part-time">Part-Time</option>
+                                    <option value="substitute">Substitute</option>
+                                    <option value="contract">Contract</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="form-label">Status</label>
+                                <select id="filterStatus" class="form-select" onchange="applyFilters()">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="on-leave">On Leave</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="form-label">Years of Service</label>
+                                <select id="filterExperience" class="form-select" onchange="applyFilters()">
+                                    <option value="">All Experience</option>
+                                    <option value="0-2">0-2 Years</option>
+                                    <option value="3-5">3-5 Years</option>
+                                    <option value="6-10">6-10 Years</option>
+                                    <option value="10+">10+ Years</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center mt-6 pt-6 border-t border-slate-100">
+                            <button onclick="resetFilters()" class="px-4 py-2 text-slate-600 hover:text-slate-800 transition">
+                                Reset All Filters
+                            </button>
+                            <button onclick="exportFilteredData()" class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200">
+                                Export Filtered Data
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Chips -->
+                    <div class="flex flex-wrap gap-2 mt-6">
+                        <span class="filter-chip active" onclick="toggleFilter('all')" data-filter="all">
+                            <i class="fas fa-users"></i> All Teachers
+                        </span>
+                        <span class="filter-chip" onclick="toggleFilter('active')" data-filter="active">
+                            <i class="fas fa-check-circle"></i> Active (42)
+                        </span>
+                        <span class="filter-chip" onclick="toggleFilter('on-leave')" data-filter="on-leave">
+                            <i class="fas fa-umbrella-beach"></i> On Leave (3)
+                        </span>
+                        <span class="filter-chip" onclick="toggleFilter('math')" data-filter="math">
+                            <i class="fas fa-calculator"></i> Mathematics (8)
+                        </span>
+                        <span class="filter-chip" onclick="toggleFilter('science')" data-filter="science">
+                            <i class="fas fa-flask"></i> Science (6)
+                        </span>
+                        <span class="filter-chip" onclick="toggleFilter('english')" data-filter="english">
+                            <i class="fas fa-book"></i> English (5)
+                        </span>
+                        <span class="filter-chip" onclick="toggleFilter('new')" data-filter="new">
+                            <i class="fas fa-star"></i> New This Year (6)
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Teachers Card -->
+                    <div class="glass-card metric-card metric-primary rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.1s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">TOTAL TEACHERS</p>
+                                <p class="text-2xl font-black text-slate-900">48</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
+                                <i class="fas fa-chalkboard-teacher text-indigo-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-emerald-600 font-bold"><i class="fas fa-arrow-up mr-1"></i> 6</span>
+                            <span class="text-slate-500">new this year</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Active Teachers Card -->
+                    <div class="glass-card metric-card metric-success rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.2s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">ACTIVE TEACHERS</p>
+                                <p class="text-2xl font-black text-slate-900">42</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
+                                <i class="fas fa-user-check text-emerald-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="performance-meter">
+                            <div class="performance-fill performance-excellent" style="width: 87.5%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">87.5% active rate</p>
+                    </div>
+                    
+                    <!-- Average Experience Card -->
+                    <div class="glass-card metric-card metric-warning rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.3s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">AVG EXPERIENCE</p>
+                                <p class="text-2xl font-black text-slate-900">7.2 yrs</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center">
+                                <i class="fas fa-award text-amber-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-amber-600 font-bold"><i class="fas fa-chart-line mr-1"></i> 1.3 yrs</span>
+                            <span class="text-slate-500">increase since 2020</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Student-Teacher Ratio Card -->
+                    <div class="glass-card metric-card metric-success rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.4s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">STUDENT/TEACHER</p>
+                                <p class="text-2xl font-black text-slate-900">18:1</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+                                <i class="fas fa-balance-scale text-blue-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="performance-meter">
+                            <div class="performance-fill performance-good" style="width: 85%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">Excellent ratio</p>
+                    </div>
+                </div>
+
+                <!-- Department Overview & Quick Stats -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Department Distribution Chart -->
+                    <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">Department Distribution</h3>
+                                <p class="text-slate-500">Number of teachers per department</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="viewDepartmentDetails()" class="text-sm font-bold text-indigo-600 hover:text-indigo-800">
+                                    View Details <i class="fas fa-arrow-right ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="departmentChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats Grid -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-lg font-black text-slate-900 mb-6">Quick Stats</h3>
+                        
+                        <div class="stats-grid mb-6">
+                            <div class="stat-item">
+                                <span class="stat-value">8</span>
+                                <span class="stat-label">Departments</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">6</span>
+                                <span class="stat-label">Ph.D Holders</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">32</span>
+                                <span class="stat-label">Master's Degree</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">10</span>
+                                <span class="stat-label">Certified</span>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm font-medium text-slate-700">Full-Time Teachers</span>
+                                    <span class="text-sm font-bold text-emerald-600">38</span>
+                                </div>
+                                <div class="performance-meter">
+                                    <div class="performance-fill performance-excellent" style="width: 79%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm font-medium text-slate-700">Part-Time Teachers</span>
+                                    <span class="text-sm font-bold text-blue-600">8</span>
+                                </div>
+                                <div class="performance-meter">
+                                    <div class="performance-fill performance-good" style="width: 17%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm font-medium text-slate-700">Substitute Teachers</span>
+                                    <span class="text-sm font-bold text-amber-600">2</span>
+                                </div>
+                                <div class="performance-meter">
+                                    <div class="performance-fill performance-average" style="width: 4%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="viewEmploymentStats()" class="w-full mt-6 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                            View All Statistics
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Featured Teachers & Upcoming Events -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Featured Teachers -->
+                    <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Featured Teachers</h3>
+                            <button onclick="viewAllTeachers()" class="text-sm font-bold text-indigo-600 hover:text-indigo-800">
+                                View All <i class="fas fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="teacher-card teacher-math">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="teacher-avatar avatar-math">
+                                            <span>JD</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-black text-slate-900">Dr. Jane Davis</h4>
+                                            <p class="text-sm text-slate-600">Mathematics Department</p>
+                                        </div>
+                                    </div>
+                                    <span class="teacher-status status-active">Active</span>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-sm font-bold text-slate-700">Subjects:</span>
+                                        <span class="subject-tag tag-math">Algebra</span>
+                                        <span class="subject-tag tag-math">Calculus</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-bold text-slate-700">Experience:</span>
+                                        <span class="text-sm text-slate-600">12 years</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="rating-stars">
+                                            <i class="fas fa-star filled"></i>
+                                            <i class="fas fa-star filled"></i>
+                                            <i class="fas fa-star filled"></i>
+                                            <i class="fas fa-star filled"></i>
+                                            <i class="fas fa-star filled"></i>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mt-1">Student Rating</p>
+                                    </div>
+                                    <button onclick="viewTeacherDetails(1)" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                                        View Profile
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="teacher-card teacher-science">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="teacher-avatar avatar-science">
+                                            <span>RS</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-black text-slate-900">Robert Smith</h4>
+                                            <p class="text-sm text-slate-600">Science Department</p>
+                                        </div>
+                                    </div>
+                                    <span class="teacher-status status-active">Active</span>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-sm font-bold text-slate-700">Subjects:</span>
+                                        <span class="subject-tag tag-science">Biology</span>
+                                        <span class="subject-tag tag-science">Chemistry</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-bold text-slate-700">Experience:</span>
+                                        <span class="text-sm text-slate-600">8 years</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="rating-stars">
+                                            <i class="fas fa-star filled"></i>
+                                            <i class="fas fa-star filled"></i>
+                                            <i class="fas fa-star filled"></i>
+                                            <i class="fas fa-star filled"></i>
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mt-1">Student Rating</p>
+                                    </div>
+                                    <button onclick="viewTeacherDetails(2)" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                                        View Profile
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upcoming Events & Leaves -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Upcoming Events</h3>
+                            <span class="text-xs font-bold text-slate-400">December 2024</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                        <i class="fas fa-graduation-cap text-emerald-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900">Professional Development</p>
+                                        <p class="text-xs text-slate-500">Dec 10, 2024 • All Teachers</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                                        <i class="fas fa-calendar-check text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900">Department Meetings</p>
+                                        <p class="text-xs text-slate-500">Dec 15, 2024 • Department Heads</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                                        <i class="fas fa-umbrella-beach text-amber-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900">Winter Break</p>
+                                        <p class="text-xs text-slate-500">Dec 23-31, 2024 • School Closed</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 bg-red-50 border border-red-200 rounded-xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                                        <i class="fas fa-user-clock text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900">Upcoming Leaves</p>
+                                        <p class="text-xs text-slate-500">3 teachers on leave next week</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="viewAllEvents()" class="w-full mt-6 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                            View Calendar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Teachers Directory Table -->
+                <div class="max-w-7xl mx-auto glass-card rounded-2xl p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-black text-slate-900">Teachers Directory</h3>
+                        <div class="flex items-center gap-3">
+                            <div class="search-box" style="max-width: 300px;">
+                                <input type="text" placeholder="Search directory..." class="search-input" id="directorySearch" onkeyup="filterDirectory()">
+                                <i class="fas fa-search search-icon"></i>
+                            </div>
+                            <button onclick="openModal('addTeacherModal')" class="action-btn action-btn-primary">
+                                <i class="fas fa-plus"></i> Add Teacher
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-12">
+                                        <input type="checkbox" class="rounded border-slate-300" id="selectAllTeachers">
+                                    </th>
+                                    <th>Teacher</th>
+                                    <th>Department</th>
+                                    <th>Subjects</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Experience</th>
+                                    <th class="w-32">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teachersDirectoryBody">
+                                <!-- Teachers will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="flex items-center justify-between mt-6">
+                        <div class="text-sm text-slate-500">
+                            Showing <span id="showingCount">10</span> of <span id="totalCount">48</span> teachers
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="pagination-btn" onclick="previousPage()">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="pagination-btn active">1</button>
+                            <button class="pagination-btn" onclick="goToPage(2)">2</button>
+                            <button class="pagination-btn" onclick="goToPage(3)">3</button>
+                            <span class="px-2">...</span>
+                            <button class="pagination-btn" onclick="goToPage(5)">5</button>
+                            <button class="pagination-btn" onclick="nextPage()">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Panel -->
+                <div class="max-w-7xl mx-auto glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-black text-slate-900 mb-6">Quick Actions</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <button onclick="openModal('addTeacherModal')" class="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-200 rounded-xl text-left hover:bg-emerald-200 transition group">
+                            <div class="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                <i class="fas fa-user-plus text-emerald-600 text-lg"></i>
+                            </div>
+                            <p class="font-bold text-slate-900">Add New Teacher</p>
+                            <p class="text-sm text-slate-600 mt-1">Add a new teacher to the system</p>
+                        </button>
+                        
+                        <button onclick="scheduleMeeting()" class="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl text-left hover:bg-blue-200 transition group">
+                            <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                <i class="fas fa-calendar-plus text-blue-600 text-lg"></i>
+                            </div>
+                            <p class="font-bold text-slate-900">Schedule Meeting</p>
+                            <p class="text-sm text-slate-600 mt-1">Schedule staff meeting or PD</p>
+                        </button>
+                        
+                        <button onclick="sendAnnouncement()" class="p-6 bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl text-left hover:bg-purple-200 transition group">
+                            <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                <i class="fas fa-bullhorn text-purple-600 text-lg"></i>
+                            </div>
+                            <p class="font-bold text-slate-900">Send Announcement</p>
+                            <p class="text-sm text-slate-600 mt-1">Send announcement to all teachers</p>
+                        </button>
+                        
+                        <button onclick="generateReports()" class="p-6 bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-200 rounded-xl text-left hover:bg-amber-200 transition group">
+                            <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                <i class="fas fa-chart-bar text-amber-600 text-lg"></i>
+                            </div>
+                            <p class="font-bold text-slate-900">Generate Reports</p>
+                            <p class="text-sm text-slate-600 mt-1">Generate staff performance reports</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            // Set icon based on type
+            let icon = 'fa-info-circle';
+            switch(type) {
+                case 'success': icon = 'fa-check-circle'; break;
+                case 'warning': icon = 'fa-exclamation-triangle'; break;
+                case 'error': icon = 'fa-times-circle'; break;
+                default: icon = 'fa-info-circle';
+            }
+            
+            toast.innerHTML = `
+                <i class="fas ${icon} toast-icon"></i>
+                <div class="toast-content">${message}</div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add to container
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Auto remove after duration
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.classList.add('toast-exit');
+                    setTimeout(() => {
+                        if (toast.parentElement) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }, duration);
+            }
+        }
+
+        // Mobile Sidebar Toggle
+        function mobileSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            // Update active tab button
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Show appropriate content
+            showToast(`Switched to ${tabName} view`, 'info');
+        }
+
+        // Initialize Charts
+        let departmentChart;
+
+        function initCharts() {
+            // Department Distribution Chart
+            const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+            departmentChart = new Chart(departmentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Mathematics', 'Science', 'English', 'History', 'Arts', 'Computer Science', 'PE', 'Languages'],
+                    datasets: [{
+                        data: [8, 6, 5, 4, 4, 5, 3, 3],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(6, 182, 212, 0.7)',
+                            'rgba(132, 204, 22, 0.7)',
+                            'rgba(168, 85, 247, 0.7)'
+                        ],
+                        borderColor: [
+                            '#ef4444',
+                            '#3b82f6',
+                            '#10b981',
+                            '#f59e0b',
+                            '#8b5cf6',
+                            '#06b6d4',
+                            '#84cc16',
+                            '#a855f7'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Filter Functions
+        function toggleFilters() {
+            const filters = document.getElementById('advancedFilters');
+            filters.classList.toggle('hidden');
+        }
+
+        function resetFilters() {
+            document.getElementById('filterDepartment').value = '';
+            document.getElementById('filterEmploymentType').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterExperience').value = '';
+            applyFilters();
+            showToast('All filters reset', 'info');
+        }
+
+        function applyFilters() {
+            // Get filter values
+            const department = document.getElementById('filterDepartment').value;
+            const employmentType = document.getElementById('filterEmploymentType').value;
+            const status = document.getElementById('filterStatus').value;
+            const experience = document.getElementById('filterExperience').value;
+            
+            // In real app, this would filter the data
+            showToast(`Applied filters: ${department || 'All'} departments, ${employmentType || 'All'} types`, 'info');
+        }
+
+        function filterTeachers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            // This is where you would filter your actual data
+            // For demo, just show a toast
+            if (searchTerm) {
+                showToast(`Searching for: ${searchTerm}`, 'info');
+            }
+        }
+
+        function filterDirectory() {
+            const searchTerm = document.getElementById('directorySearch').value.toLowerCase();
+            // Filter directory table
+            showToast(`Searching directory: ${searchTerm}`, 'info');
+        }
+
+        function toggleFilter(filter) {
+            const chip = document.querySelector(`[data-filter="${filter}"]`);
+            const allChips = document.querySelectorAll('.filter-chip');
+            
+            // If clicking "all", deactivate others
+            if (filter === 'all') {
+                allChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+            } else {
+                // Remove active from "all"
+                document.querySelector('[data-filter="all"]').classList.remove('active');
+                // Toggle current filter
+                chip.classList.toggle('active');
+                
+                // If no filters active, activate "all"
+                const activeFilters = document.querySelectorAll('.filter-chip.active');
+                if (activeFilters.length === 0) {
+                    document.querySelector('[data-filter="all"]').classList.add('active');
+                }
+            }
+            
+            // In real app, filter data here
+            applyTeacherFilters();
+        }
+
+        function applyTeacherFilters() {
+            const activeFilters = Array.from(document.querySelectorAll('.filter-chip.active'))
+                .map(chip => chip.dataset.filter);
+            
+            showToast(`Applied ${activeFilters.length} teacher filters`, 'info');
+        }
+
+        // Teacher Management Functions
+        let selectedTeachers = new Set();
+
+        function loadTeachersDirectory() {
+            const tableBody = document.getElementById('teachersDirectoryBody');
+            const sampleTeachers = [
+                { id: 1, name: 'Dr. Jane Davis', department: 'Mathematics', subjects: 'Algebra, Calculus', type: 'Full-Time', status: 'active', experience: '12 years' },
+                { id: 2, name: 'Robert Smith', department: 'Science', subjects: 'Biology, Chemistry', type: 'Full-Time', status: 'active', experience: '8 years' },
+                { id: 3, name: 'Sarah Johnson', department: 'English', subjects: 'Literature, Writing', type: 'Full-Time', status: 'active', experience: '10 years' },
+                { id: 4, name: 'Michael Brown', department: 'History', subjects: 'World History, Civics', type: 'Full-Time', status: 'on-leave', experience: '15 years' },
+                { id: 5, name: 'Emily Wilson', department: 'Arts', subjects: 'Drawing, Painting', type: 'Part-Time', status: 'active', experience: '6 years' },
+                { id: 6, name: 'David Lee', department: 'Computer Science', subjects: 'Programming, Web Dev', type: 'Full-Time', status: 'active', experience: '7 years' },
+                { id: 7, name: 'Lisa Chen', department: 'Mathematics', subjects: 'Geometry, Statistics', type: 'Full-Time', status: 'active', experience: '9 years' },
+                { id: 8, name: 'Alex Garcia', department: 'Science', subjects: 'Physics, Astronomy', type: 'Full-Time', status: 'active', experience: '11 years' },
+                { id: 9, name: 'Maya Patel', department: 'Languages', subjects: 'Spanish, French', type: 'Part-Time', status: 'inactive', experience: '5 years' },
+                { id: 10, name: 'Ryan Kim', department: 'Physical Education', subjects: 'Health, Fitness', type: 'Full-Time', status: 'active', experience: '8 years' }
+            ];
+            
+            tableBody.innerHTML = sampleTeachers.map(teacher => {
+                const statusClass = getStatusClass(teacher.status);
+                const avatarClass = getAvatarClass(teacher.department);
+                const initials = getInitials(teacher.name);
+                
+                return `
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="teacher-checkbox rounded border-slate-300" 
+                                   data-id="${teacher.id}" onchange="toggleTeacherSelection(${teacher.id})">
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="teacher-avatar ${avatarClass}">
+                                    <span>${initials}</span>
+                                </div>
+                                <div>
+                                    <span class="font-medium">${teacher.name}</span>
+                                    <p class="text-xs text-slate-500">${teacher.department} Dept.</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="font-medium">${teacher.department}</td>
+                        <td>
+                            <div class="flex flex-wrap gap-1">
+                                ${teacher.subjects.split(', ').map(subject => {
+                                    const tagClass = getTagClass(subject.toLowerCase());
+                                    return `<span class="subject-tag ${tagClass}">${subject}</span>`;
+                                }).join('')}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-sm text-slate-600">${teacher.type}</span>
+                        </td>
+                        <td>
+                            <span class="teacher-status ${statusClass}">${teacher.status.charAt(0).toUpperCase() + teacher.status.slice(1)}</span>
+                        </td>
+                        <td class="text-sm text-slate-600">${teacher.experience}</td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <button onclick="viewTeacherDetails(${teacher.id})" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button onclick="editTeacher(${teacher.id})" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="scheduleTeacher(${teacher.id})" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Initialize select all checkbox
+            document.getElementById('selectAllTeachers').addEventListener('change', function(e) {
+                const checkboxes = document.querySelectorAll('.teacher-checkbox');
+                checkboxes.forEach(cb => {
+                    cb.checked = e.target.checked;
+                    const teacherId = parseInt(cb.dataset.id);
+                    if (e.target.checked) {
+                        selectedTeachers.add(teacherId);
+                    } else {
+                        selectedTeachers.delete(teacherId);
+                    }
+                });
+                updateBulkEditCount();
+            });
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'active': return 'status-active';
+                case 'on-leave': return 'status-on-leave';
+                case 'inactive': return 'status-inactive';
+                default: return 'status-active';
+            }
+        }
+
+        function getAvatarClass(department) {
+            switch(department.toLowerCase()) {
+                case 'mathematics': return 'avatar-math';
+                case 'science': return 'avatar-science';
+                case 'english': return 'avatar-english';
+                case 'history': return 'avatar-history';
+                case 'arts': return 'avatar-art';
+                case 'computer science': return 'avatar-science';
+                default: return 'avatar-math';
+            }
+        }
+
+        function getTagClass(subject) {
+            if (subject.includes('algebra') || subject.includes('calculus') || subject.includes('geometry') || subject.includes('math')) {
+                return 'tag-math';
+            } else if (subject.includes('biology') || subject.includes('chemistry') || subject.includes('physics') || subject.includes('science')) {
+                return 'tag-science';
+            } else if (subject.includes('literature') || subject.includes('writing') || subject.includes('english')) {
+                return 'tag-english';
+            } else if (subject.includes('history') || subject.includes('civics')) {
+                return 'tag-history';
+            } else if (subject.includes('drawing') || subject.includes('painting') || subject.includes('art')) {
+                return 'tag-art';
+            } else {
+                return 'tag-math';
+            }
+        }
+
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase();
+        }
+
+        function toggleTeacherSelection(teacherId) {
+            if (selectedTeachers.has(teacherId)) {
+                selectedTeachers.delete(teacherId);
+            } else {
+                selectedTeachers.add(teacherId);
+            }
+            updateBulkEditCount();
+        }
+
+        function updateBulkEditCount() {
+            const count = selectedTeachers.size;
+            document.getElementById('bulkEditCount').textContent = `${count} teachers selected`;
+            
+            // Show/hide bulk edit panel
+            const panel = document.getElementById('bulkEditPanel');
+            if (count > 0) {
+                panel.classList.add('show');
+            } else {
+                panel.classList.remove('show');
+            }
+        }
+
+        // Bulk Edit Functions
+        function sendBulkMessage() {
+            if (selectedTeachers.size === 0) {
+                showToast('Please select teachers first', 'warning');
+                return;
+            }
+            
+            const message = prompt(`Enter message for ${selectedTeachers.size} selected teachers:`);
+            if (message) {
+                showToast(`Message sent to ${selectedTeachers.size} teachers`, 'success');
+            }
+        }
+
+        function updateBulkStatus(status) {
+            if (selectedTeachers.size === 0) {
+                showToast('Please select teachers first', 'warning');
+                return;
+            }
+            
+            showToast(`Updated ${selectedTeachers.size} teachers to ${status}`, 'success');
+        }
+
+        function exportBulkData() {
+            if (selectedTeachers.size === 0) {
+                showToast('Please select teachers first', 'warning');
+                return;
+            }
+            
+            showToast(`Exporting data for ${selectedTeachers.size} teachers`, 'success');
+        }
+
+        function closeBulkEdit() {
+            selectedTeachers.clear();
+            updateBulkEditCount();
+        }
+
+        // Teacher CRUD Operations
+        function saveNewTeacher() {
+            const firstName = document.getElementById('teacherFirstName').value;
+            const lastName = document.getElementById('teacherLastName').value;
+            const email = document.getElementById('teacherEmail').value;
+            const department = document.getElementById('teacherDepartment').value;
+            const type = document.getElementById('teacherType').value;
+            const status = document.getElementById('teacherStatus').value;
+            
+            if (!firstName || !lastName || !email || !department) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            showToast(`Teacher ${firstName} ${lastName} added to ${department} department`, 'success');
+            closeModal('addTeacherModal');
+            resetTeacherForm();
+        }
+
+        function resetTeacherForm() {
+            document.getElementById('teacherFirstName').value = '';
+            document.getElementById('teacherLastName').value = '';
+            document.getElementById('teacherEmail').value = '';
+            document.getElementById('teacherPhone').value = '';
+            document.getElementById('teacherDepartment').value = '';
+            document.getElementById('teacherType').value = 'full-time';
+            document.getElementById('teacherJoinDate').value = '2024-12-04';
+            document.getElementById('teacherStatus').value = 'active';
+            document.getElementById('teacherQualifications').value = '';
+        }
+
+        function editTeacher(teacherId) {
+            // In real app, load teacher data and populate form
+            showToast(`Editing teacher #${teacherId}`, 'info');
+            openModal('editTeacherModal');
+            
+            // Sample edit form
+            document.getElementById('editTeacherForm').innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-input" value="Jane">
+                    </div>
+                    <div>
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-input" value="Davis">
+                    </div>
+                    <div>
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" value="jane.davis@school.edu">
+                    </div>
+                    <div>
+                        <label class="form-label">Department</label>
+                        <select class="form-select">
+                            <option value="math" selected>Mathematics</option>
+                            <option value="science">Science</option>
+                            <option value="english">English</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-input h-32">PhD in Mathematics from Stanford University. Specializes in advanced calculus and algebra.</textarea>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="closeModal('editTeacherModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="saveTeacherEdit(${teacherId})" class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                        Save Changes
+                    </button>
+                </div>
+            `;
+        }
+
+        function saveTeacherEdit(teacherId) {
+            showToast(`Teacher #${teacherId} updated successfully`, 'success');
+            closeModal('editTeacherModal');
+        }
+
+        function viewTeacherDetails(teacherId) {
+            // Load teacher details
+            const teacher = {
+                name: 'Dr. Jane Davis',
+                department: 'Mathematics',
+                subjects: ['Algebra', 'Calculus', 'Statistics'],
+                type: 'Full-Time',
+                status: 'Active',
+                experience: '12 years',
+                email: 'jane.davis@school.edu',
+                phone: '(555) 123-4567',
+                joinDate: '2012-08-15',
+                qualifications: 'PhD in Mathematics from Stanford University'
+            };
+            
+            document.getElementById('teacherDetailsName').textContent = teacher.name;
+            
+            document.getElementById('teacherDetailsContent').innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="lg:col-span-2">
+                        <div class="glass-card rounded-xl p-6">
+                            <div class="flex items-start gap-6 mb-6">
+                                <div class="teacher-avatar avatar-math" style="width: 80px; height: 80px;">
+                                    <span>JD</span>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-xl font-black text-slate-900 mb-2">${teacher.name}</h4>
+                                    <div class="flex flex-wrap gap-3">
+                                        <span class="teacher-status status-active">${teacher.status}</span>
+                                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-bold">${teacher.department} Department</span>
+                                        <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-lg text-sm font-bold">${teacher.type}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-400 mb-1">Email</p>
+                                    <p class="text-slate-900">${teacher.email}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-400 mb-1">Phone</p>
+                                    <p class="text-slate-900">${teacher.phone}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-400 mb-1">Join Date</p>
+                                    <p class="text-slate-900">${teacher.joinDate}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-400 mb-1">Experience</p>
+                                    <p class="text-slate-900">${teacher.experience}</p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <p class="text-sm font-bold text-slate-400 mb-2">Subjects Taught</p>
+                                <div class="flex flex-wrap gap-2">
+                                    ${teacher.subjects.map(subject => `
+                                        <span class="subject-tag tag-math">${subject}</span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="glass-card rounded-xl p-6 mb-6">
+                            <h5 class="text-lg font-black text-slate-900 mb-4">Performance Metrics</h5>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-sm font-medium text-slate-700">Student Rating</span>
+                                        <span class="text-sm font-bold text-emerald-600">4.8/5.0</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-excellent" style="width: 96%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-sm font-medium text-slate-700">Attendance</span>
+                                        <span class="text-sm font-bold text-emerald-600">98%</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-excellent" style="width: 98%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-sm font-medium text-slate-700">Grade Submission</span>
+                                        <span class="text-sm font-bold text-emerald-600">100%</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-excellent" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card rounded-xl p-6">
+                            <h5 class="text-lg font-black text-slate-900 mb-4">Quick Actions</h5>
+                            <div class="space-y-2">
+                                <button onclick="scheduleTeacher(${teacherId})" class="w-full p-3 border border-slate-200 rounded-xl text-left hover:bg-slate-50 transition">
+                                    <i class="fas fa-calendar-alt text-blue-600 mr-2"></i> Schedule
+                                </button>
+                                <button onclick="sendMessage(${teacherId})" class="w-full p-3 border border-slate-200 rounded-xl text-left hover:bg-slate-50 transition">
+                                    <i class="fas fa-envelope text-indigo-600 mr-2"></i> Send Message
+                                </button>
+                                <button onclick="viewSchedule(${teacherId})" class="w-full p-3 border border-slate-200 rounded-xl text-left hover:bg-slate-50 transition">
+                                    <i class="fas fa-clock text-amber-600 mr-2"></i> View Schedule
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card rounded-xl p-6">
+                    <h5 class="text-lg font-black text-slate-900 mb-4">Qualifications & Notes</h5>
+                    <p class="text-slate-700">${teacher.qualifications}</p>
+                </div>
+                
+                <div class="flex gap-3 mt-6">
+                    <button onclick="editTeacher(${teacherId})" class="action-btn action-btn-primary">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <button onclick="closeModal('teacherDetailsModal')" class="action-btn action-btn-secondary">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            openModal('teacherDetailsModal');
+        }
+
+        function scheduleTeacher(teacherId) {
+            showToast(`Scheduling teacher #${teacherId}`, 'info');
+            openModal('scheduleTeacherModal');
+            
+            document.getElementById('scheduleTeacherForm').innerHTML = `
+                <div class="space-y-6">
+                    <div>
+                        <label class="form-label">Teacher</label>
+                        <input type="text" class="form-input" value="Dr. Jane Davis" readonly>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Schedule Date</label>
+                        <input type="date" class="form-input" value="2024-12-10">
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Schedule Type</label>
+                        <select class="form-select">
+                            <option value="class">Regular Class</option>
+                            <option value="meeting">Meeting</option>
+                            <option value="training">Training</option>
+                            <option value="office-hours">Office Hours</option>
+                            <option value="substitute">Substitute Duty</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="form-label">Start Time</label>
+                            <input type="time" class="form-input" value="08:00">
+                        </div>
+                        <div>
+                            <label class="form-label">End Time</label>
+                            <input type="time" class="form-input" value="09:30">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-input h-32" placeholder="Add schedule notes..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-8">
+                    <button onclick="closeModal('scheduleTeacherModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="saveSchedule(${teacherId})" class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                        Save Schedule
+                    </button>
+                </div>
+            `;
+        }
+
+        function saveSchedule(teacherId) {
+            showToast(`Schedule saved for teacher #${teacherId}`, 'success');
+            closeModal('scheduleTeacherModal');
+        }
+
+        // View Functions
+        function viewDepartmentDetails() {
+            showToast('Opening department details', 'info');
+        }
+
+        function viewEmploymentStats() {
+            showToast('Loading employment statistics', 'info');
+        }
+
+        function viewAllTeachers() {
+            showToast('Loading all teachers', 'info');
+        }
+
+        function viewAllEvents() {
+            showToast('Opening events calendar', 'info');
+        }
+
+        // Action Functions
+        function importTeachers() {
+            showToast('Opening teacher import wizard', 'info');
+        }
+
+        function generateReports() {
+            showToast('Generating teacher performance reports', 'info');
+        }
+
+        function scheduleMeeting() {
+            showToast('Opening meeting scheduler', 'info');
+        }
+
+        function sendAnnouncement() {
+            const announcement = prompt('Enter announcement for all teachers:');
+            if (announcement) {
+                showToast('Announcement sent to all teachers', 'success');
+            }
+        }
+
+        function sendMessage(teacherId) {
+            const message = prompt(`Enter message for teacher #${teacherId}:`);
+            if (message) {
+                showToast(`Message sent to teacher #${teacherId}`, 'success');
+            }
+        }
+
+        function viewSchedule(teacherId) {
+            showToast(`Loading schedule for teacher #${teacherId}`, 'info');
+        }
+
+        // Pagination Functions
+        function previousPage() {
+            showToast('Loading previous page', 'info');
+        }
+
+        function nextPage() {
+            showToast('Loading next page', 'info');
+        }
+
+        function goToPage(page) {
+            showToast(`Loading page ${page}`, 'info');
+        }
+
+        // Export Functions
+        function exportFilteredData() {
+            showToast('Exporting filtered data to CSV', 'success');
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize charts
+            initCharts();
+            
+            // Load teachers directory
+            loadTeachersDirectory();
+            
+            // Initialize flatpickr for date inputs
+            flatpickr("#teacherJoinDate", {
+                dateFormat: "Y-m-d",
+                defaultDate: "today"
+            });
+            
+            // Show welcome toast
+            setTimeout(() => {
+                showToast('Welcome to Teachers Management System!', 'success', 3000);
+            }, 1000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Only trigger when not in input fields
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+            
+            // Ctrl/Cmd + N: Add new teacher
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                openModal('addTeacherModal');
+            }
+            
+            // Ctrl/Cmd + F: Open filters
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                toggleFilters();
+            }
+            
+            // Ctrl/Cmd + E: Export data
+            if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                e.preventDefault();
+                exportFilteredData();
+            }
+        });
+    </script>
+</body>
+</html>
