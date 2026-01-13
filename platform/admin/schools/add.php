@@ -1,8 +1,7 @@
 <?php
-
 /**
  * Add School Provisioning - Super Admin Interface
- * Now includes PHP session and DB connection
+ * Updated with all required fields and improved UI
  */
 
 // Start session and load required files
@@ -14,58 +13,94 @@ if (!$auth->isLoggedIn('super_admin')) {
     header("Location: /platform/login.php");
     exit;
 }
+
 // Get super admin data
 $superAdmin = $_SESSION['super_admin'];
 
-
 // Generate CSRF token
+if (!function_exists('generateCsrfToken')) {
+    function generateCsrfToken() {
+        return bin2hex(random_bytes(32));
+    }
+}
 $csrfToken = generateCsrfToken();
 
 // Fetch available plans from database
 $db = Database::getPlatformConnection();
-$stmt = $db->prepare("SELECT id, name, slug, price_monthly, student_limit FROM plans WHERE is_active = 1 ORDER BY sort_order");
+$stmt = $db->prepare("SELECT id, name, slug, price_monthly, price_yearly, student_limit, teacher_limit, storage_limit, features FROM plans WHERE is_active = 1 ORDER BY sort_order");
 $stmt->execute();
 $plans = $stmt->fetchAll();
 
-// Get Nigerian states
+// Get Nigerian states and cities
 $nigerianStates = [
-    'Abia',
-    'Adamawa',
-    'Akwa Ibom',
-    'Anambra',
-    'Bauchi',
-    'Bayelsa',
-    'Benue',
-    'Borno',
-    'Cross River',
-    'Delta',
-    'Ebonyi',
-    'Edo',
-    'Ekiti',
-    'Enugu',
-    'Gombe',
-    'Imo',
-    'Jigawa',
-    'Kaduna',
-    'Kano',
-    'Katsina',
-    'Kebbi',
-    'Kogi',
-    'Kwara',
-    'Lagos',
-    'Nasarawa',
-    'Niger',
-    'Ogun',
-    'Ondo',
-    'Osun',
-    'Oyo',
-    'Plateau',
-    'Rivers',
-    'Sokoto',
-    'Taraba',
-    'Yobe',
-    'Zamfara',
-    'FCT Abuja'
+    'Abia' => ['Umuahia', 'Aba', 'Owerri'],
+    'Adamawa' => ['Yola', 'Mubi', 'Jimeta'],
+    'Akwa Ibom' => ['Uyo', 'Eket', 'Ikot Ekpene'],
+    'Anambra' => ['Awka', 'Onitsha', 'Nnewi'],
+    'Bauchi' => ['Bauchi', 'Azare', 'Jama\'are'],
+    'Bayelsa' => ['Yenagoa', 'Brass', 'Ogbia'],
+    'Benue' => ['Makurdi', 'Gboko', 'Otukpo'],
+    'Borno' => ['Maiduguri', 'Bama', 'Biul'],
+    'Cross River' => ['Calabar', 'Ugep', 'Ogoja'],
+    'Delta' => ['Asaba', 'Warri', 'Sapele'],
+    'Ebonyi' => ['Abakaliki', 'Afikpo', 'Onueke'],
+    'Edo' => ['Benin City', 'Auchi', 'Ekpoma'],
+    'Ekiti' => ['Ado Ekiti', 'Ikere', 'Ise'],
+    'Enugu' => ['Enugu', 'Nsukka', 'Agbani'],
+    'Gombe' => ['Gombe', 'Bajoga', 'Kaltungo'],
+    'Imo' => ['Owerri', 'Okigwe', 'Orlu'],
+    'Jigawa' => ['Dutse', 'Hadejia', 'Kazaure'],
+    'Kaduna' => ['Kaduna', 'Zaria', 'Kafanchan'],
+    'Kano' => ['Kano', 'Dutse', 'Wudil'],
+    'Katsina' => ['Katsina', 'Funtua', 'Daura'],
+    'Kebbi' => ['Birnin Kebbi', 'Argungu', 'Yauri'],
+    'Kogi' => ['Lokoja', 'Okene', 'Idah'],
+    'Kwara' => ['Ilorin', 'Offa', 'Omu-Aran'],
+    'Lagos' => ['Lagos', 'Ikeja', 'Badagry'],
+    'Nasarawa' => ['Lafia', 'Keffi', 'Karu'],
+    'Niger' => ['Minna', 'Bida', 'Suleja'],
+    'Ogun' => ['Abeokuta', 'Sagamu', 'Ijebu-Ode'],
+    'Ondo' => ['Akure', 'Ondo', 'Owo'],
+    'Osun' => ['Osogbo', 'Ife', 'Ilesa'],
+    'Oyo' => ['Ibadan', 'Oyo', 'Ogbomoso'],
+    'Plateau' => ['Jos', 'Bukuru', 'Shendam'],
+    'Rivers' => ['Port Harcourt', 'Bonny', 'Degema'],
+    'Sokoto' => ['Sokoto', 'Tambuwal', 'Gwadabawa'],
+    'Taraba' => ['Jalingo', 'Bali', 'Wukari'],
+    'Yobe' => ['Damaturu', 'Potiskum', 'Gashua'],
+    'Zamfara' => ['Gusau', 'Kaura Namoda', 'Talata Mafara'],
+    'FCT Abuja' => ['Abuja', 'Gwagwalada', 'Kuje']
+];
+
+// School types with descriptions
+$schoolTypes = [
+    'nursery' => 'Nursery & Daycare',
+    'primary' => 'Primary School',
+    'secondary' => 'Secondary School',
+    'comprehensive' => 'Comprehensive School',
+    'international' => 'International School',
+    'montessori' => 'Montessori School',
+    'boarding' => 'Boarding School',
+    'day' => 'Day School'
+];
+
+// Campus types
+$campusTypes = [
+    'main' => 'Main Campus',
+    'branch' => 'Branch Campus',
+    'satellite' => 'Satellite Campus',
+    'virtual' => 'Virtual/Online Campus'
+];
+
+// Curriculum options
+$curriculums = [
+    'Nigerian' => 'Nigerian Curriculum',
+    'British' => 'British Curriculum',
+    'American' => 'American Curriculum',
+    'Montessori' => 'Montessori',
+    'IB' => 'International Baccalaureate',
+    'Bilingual' => 'Bilingual',
+    'Technical' => 'Technical/Vocational'
 ];
 ?>
 <!DOCTYPE html>
@@ -77,703 +112,812 @@ $nigerianStates = [
     <title>Provision New School | AcademixSuite Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-        :root {
-            --brand-primary: #2563eb;
-            --brand-surface: #ffffff;
-            --brand-bg: #f8fafc;
-        }
+    :root {
+        --brand-primary: #2563eb;
+        --brand-primary-dark: #1d4ed8;
+        --brand-secondary: #7c3aed;
+        --brand-accent: #dc2626;
+        --brand-surface: #ffffff;
+        --brand-bg: #f9fafb;
+        --brand-border: #e5e7eb;
+        --brand-text: #111827;
+        --brand-text-light: #6b7280;
+        --brand-success: #059669;
+        --brand-warning: #d97706;
+        --brand-info: #0284c7;
+    }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--brand-bg);
-            color: #1e293b;
-            -webkit-tap-highlight-color: transparent;
-        }
+    body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+        color: var(--brand-text);
+        -webkit-tap-highlight-color: transparent;
+        letter-spacing: -0.01em;
+    }
 
-        /* Mobile-optimized scrollbar */
-        ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+    }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
+    /* Header styling */
+    header {
+        background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        backdrop-filter: blur(10px);
+    }
 
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
+    /* Form container */
+    #provisionForm {
+        background: linear-gradient(135deg, #ffffff 0%, #fcfcfc 100%);
+        box-shadow: 
+            0 4px 6px -1px rgba(0, 0, 0, 0.05),
+            0 10px 15px -3px rgba(0, 0, 0, 0.08),
+            0 20px 40px -20px rgba(0, 0, 0, 0.12);
+        border: 1px solid var(--brand-border);
+    }
 
-        .sidebar-link {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            border-left: 3px solid transparent;
-        }
+    /* Professional form controls */
+    input, select, textarea {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+        background: #ffffff;
+        border: 1.5px solid var(--brand-border);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-        .sidebar-link:hover {
-            background: #f1f5f9;
-            color: var(--brand-primary);
-        }
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--brand-primary);
+        box-shadow: 
+            0 0 0 3px rgba(37, 99, 235, 0.1),
+            0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        outline: none;
+        background: #ffffff;
+    }
 
-        .active-link {
-            background: #eff6ff;
-            color: var(--brand-primary);
-            border-left-color: var(--brand-primary);
-            font-weight: 600;
-        }
+    input:hover, select:hover, textarea:hover {
+        border-color: #9ca3af;
+    }
 
-        .dropdown-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+    /* Professional labels */
+    label {
+        font-weight: 600;
+        color: var(--brand-text);
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
 
-        .dropdown-open .dropdown-content {
-            max-height: 500px;
-        }
+    /* Required field indicator */
+    .required-indicator {
+        color: var(--brand-accent);
+        font-weight: 600;
+        margin-left: 2px;
+    }
 
-        .dropdown-open .chevron {
-            transform: rotate(180deg);
-        }
+    /* Step progress - professional */
+    .step-progress {
+        position: relative;
+        padding: 0 2rem;
+    }
 
-        /* Mobile-first responsive design */
-        @media (max-width: 640px) {
-            .mobile-stack {
-                flex-direction: column;
-            }
+    .step-progress::before {
+        content: '';
+        position: absolute;
+        top: 28px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, 
+            var(--brand-primary) 0%, 
+            var(--brand-border) 100%);
+        z-index: 1;
+        opacity: 0.3;
+    }
 
-            .mobile-full {
-                width: 100%;
-            }
+    .step-progress.active::before {
+        background: linear-gradient(90deg, 
+            var(--brand-primary) 50%, 
+            var(--brand-border) 50%);
+        opacity: 1;
+    }
 
-            .mobile-text-center {
-                text-align: center;
-            }
+    .step-dot {
+        position: relative;
+        z-index: 2;
+        width: 56px;
+        height: 56px;
+        background: white;
+        border: 2px solid var(--brand-border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
 
-            .mobile-p-4 {
-                padding: 1rem;
-            }
+    .step-dot.active {
+        background: var(--brand-primary);
+        border-color: var(--brand-primary);
+        color: white;
+        transform: scale(1.05);
+        box-shadow: 
+            0 0 0 4px rgba(37, 99, 235, 0.1),
+            0 4px 6px rgba(37, 99, 235, 0.1);
+    }
 
-            .mobile-space-y-4>*+* {
-                margin-top: 1rem;
-            }
-        }
+    .step-dot.completed {
+        background: var(--brand-success);
+        border-color: var(--brand-success);
+        color: white;
+        box-shadow: 0 2px 8px rgba(5, 150, 105, 0.2);
+    }
 
-        @media (max-width: 768px) {
-            .tablet-hide {
-                display: none;
-            }
+    /* Professional plan cards */
+    .plan-card {
+        background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+        border: 2px solid var(--brand-border);
+        border-radius: 16px;
+        padding: 2rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+    }
 
-            .tablet-full {
-                width: 100%;
-            }
-        }
+    .plan-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--brand-primary);
+        box-shadow: 
+            0 10px 25px -5px rgba(0, 0, 0, 0.1),
+            0 20px 40px -20px rgba(0, 0, 0, 0.15);
+    }
 
-        /* Touch-friendly sizes */
-        .touch-target {
-            min-height: 44px;
-            min-width: 44px;
-        }
+    .plan-card.selected {
+        border-color: var(--brand-primary);
+        background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
+        box-shadow: 
+            0 0 0 1px var(--brand-primary),
+            0 10px 25px -5px rgba(37, 99, 235, 0.1);
+    }
 
-        .glass-header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
+    .plan-card.recommended::before {
+        content: 'RECOMMENDED';
+        position: absolute;
+        top: 15px;
+        right: -35px;
+        background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+        color: white;
+        padding: 4px 40px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transform: rotate(45deg);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-        .form-card {
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            border-radius: 20px;
-        }
+    /* Professional buttons */
+    .btn-primary {
+        background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-dark) 100%);
+        color: white;
+        font-weight: 600;
+        padding: 0.875rem 1.75rem;
+        border-radius: 12px;
+        border: none;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 
+            0 2px 4px rgba(37, 99, 235, 0.2),
+            0 4px 8px rgba(37, 99, 235, 0.1);
+    }
 
-        /* Step indicator */
-        .step-indicator {
-            position: relative;
-            z-index: 1;
-        }
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 
+            0 4px 12px rgba(37, 99, 235, 0.25),
+            0 8px 16px rgba(37, 99, 235, 0.1);
+    }
 
-        .step-indicator::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 32px;
-            height: 32px;
-            background: #f1f5f9;
-            border-radius: 50%;
-            z-index: -1;
-        }
+    .btn-secondary {
+        background: white;
+        color: var(--brand-text);
+        font-weight: 600;
+        padding: 0.875rem 1.75rem;
+        border-radius: 12px;
+        border: 1.5px solid var(--brand-border);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-        .step-indicator.active::before {
-            background: #2563eb;
-        }
+    .btn-secondary:hover {
+        background: #f9fafb;
+        border-color: var(--brand-primary);
+        color: var(--brand-primary);
+    }
 
-        .step-indicator.completed::before {
-            background: #10b981;
-        }
+    /* Capacity cards - professional */
+    .capacity-card {
+        background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+        border: 1.5px solid var(--brand-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 0.2s ease;
+    }
 
-        .step-line {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100%;
-            height: 2px;
-            background: #e2e8f0;
-            z-index: -2;
-        }
+    .capacity-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--brand-border);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
 
-        .step-line.active {
-            background: #2563eb;
-        }
+    /* File upload area - professional */
+    .file-upload-area {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 2px dashed var(--brand-border);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
 
-        .step-line.completed {
-            background: #10b981;
-        }
+    .file-upload-area:hover,
+    .file-upload-area.dragover {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-color: var(--brand-primary);
+        border-style: solid;
+    }
 
-        /* Form styling */
-        .form-group {
-            position: relative;
-        }
+    /* Summary cards - professional */
+    .summary-card {
+        background: linear-gradient(135deg, #ffffff 0%, #fcfcfc 100%);
+        border: 1.5px solid var(--brand-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
 
-        .form-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #475569;
-            margin-bottom: 6px;
-        }
+    /* Toast notifications - professional */
+    .toast {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        z-index: 9999;
+        transform: translateX(120%);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 
+            0 10px 25px -5px rgba(0, 0, 0, 0.1),
+            0 20px 40px -20px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(10px);
+    }
 
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #1e293b;
-            background: white;
-            transition: all 0.2s ease;
-        }
+    .toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
 
-        .form-input:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
+    .toast.success {
+        background: linear-gradient(135deg, var(--brand-success) 0%, #10b981 100%);
+    }
 
-        .form-input.error {
-            border-color: #ef4444;
-        }
+    .toast.error {
+        background: linear-gradient(135deg, var(--brand-accent) 0%, #ef4444 100%);
+    }
 
-        .error-message {
-            display: none;
-            font-size: 12px;
-            color: #ef4444;
-            margin-top: 4px;
-            font-weight: 500;
-        }
+    .toast.info {
+        background: linear-gradient(135deg, var(--brand-info) 0%, #0ea5e9 100%);
+    }
 
-        .error-message.show {
-            display: block;
-        }
-
-        /* Step transitions */
-        .step-content {
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            display: none;
-        }
-
-        .step-content.active {
+    /* Loading animation */
+    @keyframes pulse {
+        0%, 100% {
             opacity: 1;
-            transform: translateY(0);
-            display: block;
         }
-
-        /* File upload */
-        .file-upload {
-            border: 2px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .file-upload:hover {
-            border-color: #2563eb;
-            background: #eff6ff;
-        }
-
-        /* Success animation */
-        @keyframes successPulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .success-pulse {
-            animation: successPulse 0.6s ease-in-out;
-        }
-
-        /* Mobile menu overlay */
-        .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 99;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Toggle switch */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #cbd5e1;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.toggle-slider {
-            background-color: #2563eb;
-        }
-
-        input:checked+.toggle-slider:before {
-            transform: translateX(26px);
-        }
-
-        /* Add smooth transitions for step content */
-        .step-content {
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        /* Better focus states */
-        .form-input:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .form-input.error:focus {
-            border-color: #ef4444;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-        }
-
-        /* Button hover effects */
-        button:disabled {
+        50% {
             opacity: 0.5;
-            cursor: not-allowed;
         }
+    }
 
-        /* Loading animation */
-        @keyframes pulse {
+    .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
 
-            0%,
-            100% {
-                opacity: 1;
-            }
+    /* Professional modals */
+    .modal-overlay {
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
 
-            50% {
-                opacity: 0.5;
-            }
+    .modal-content {
+        background: linear-gradient(135deg, #ffffff 0%, #fcfcfc 100%);
+        border: 1px solid var(--brand-border);
+        box-shadow: 
+            0 25px 50px -12px rgba(0, 0, 0, 0.25),
+            0 20px 40px -20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Section dividers */
+    .section-divider {
+        border-top: 1.5px solid var(--brand-border);
+        opacity: 0.5;
+    }
+
+    /* Status indicators */
+    .status-badge {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-badge-new {
+        background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+        color: white;
+    }
+
+    /* Tooltips */
+    .tooltip {
+        position: relative;
+    }
+
+    .tooltip:hover::before {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--brand-text);
+        color: white;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        z-index: 100;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .step-progress {
+            padding: 0 1rem;
         }
-
-        .loading-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        
+        .step-dot {
+            width: 48px;
+            height: 48px;
         }
-
-        /* Alert messages */
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-weight: 500;
+        
+        .plan-card {
+            padding: 1.5rem;
         }
+    }
 
-        .alert-success {
-            background-color: #d1fae5;
-            border: 1px solid #10b981;
-            color: #065f46;
-        }
+    /* Focus states for accessibility */
+    *:focus-visible {
+        outline: 2px solid var(--brand-primary);
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
 
-        .alert-error {
-            background-color: #fee2e2;
-            border: 1px solid #ef4444;
-            color: #991b1b;
-        }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
 
-        .alert-info {
-            background-color: #dbeafe;
-            border: 1px solid #3b82f6;
-            color: #1e40af;
-        }
-    </style>
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+</style>
 </head>
 
-<body class="antialiased overflow-hidden selection:bg-blue-100">
-
-    <!-- Mobile Sidebar Overlay -->
-    <div id="sidebarOverlay" class="sidebar-overlay lg:hidden" onclick="mobileSidebarToggle()"></div>
-
+<body class="antialiased overflow-hidden">
     <div class="flex h-screen overflow-hidden">
-
-        <?php include '../filepath/sidebar.php'; ?>
+        <?php 
+        $sidebarPath = __DIR__ . '/../filepath/sidebar.php';
+        if (file_exists($sidebarPath)) {
+            include $sidebarPath;
+        } else {
+            echo '<div class="w-64 bg-slate-800"></div>';
+        }
+        ?>
 
         <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
-
-            <header class="h-16 glass-header border-b border-slate-200 px-4 lg:px-8 flex items-center justify-between shrink-0 z-40">
+            <!-- Header -->
+            <header class="h-16 bg-white border-b border-slate-200 px-4 lg:px-8 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
-                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-500 p-2 hover:bg-slate-100 rounded-lg transition touch-target">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-500 p-2 hover:bg-slate-100 rounded-lg transition">
                         <i class="fas fa-bars-staggered"></i>
                     </button>
                     <div class="flex items-center gap-2">
-                        <h1 class="text-sm font-black text-slate-800 uppercase tracking-widest">School Provisioning</h1>
-                        <span class="px-2 py-0.5 bg-emerald-600 text-[10px] text-white font-black rounded uppercase">Provisioning</span>
+                        <h1 class="text-sm font-black text-slate-800 uppercase tracking-widest">Provision New School</h1>
+                        <span class="px-2 py-0.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-[10px] text-white font-black rounded-full uppercase">
+                            New
+                        </span>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <a href="../index.php" class="hidden sm:flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-blue-600 text-sm font-medium transition">
+                    <a href="../index.php" class="hidden sm:flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-indigo-600 text-sm font-medium transition">
                         <i class="fas fa-arrow-left"></i>
-                        <span>Back to Registry</span>
+                        <span>Back to Dashboard</span>
                     </a>
-                    <div class="flex items-center gap-2 text-xs text-slate-500">
-                        <i class="fas fa-clock"></i>
-                        <span id="timestamp"><?php echo date('D, M d, Y h:i A'); ?></span>
+                    <div class="flex items-center gap-2 text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                        <i class="fas fa-user-shield"></i>
+                        <span><?php echo htmlspecialchars($superAdmin['name'] ?? 'Super Admin'); ?></span>
                     </div>
                 </div>
             </header>
 
-            <!-- Display any flash messages -->
-            <?php if (isset($_SESSION['flash'])): ?>
-                <div class="mx-4 lg:mx-8 mt-4">
-                    <?php foreach ($_SESSION['flash'] as $type => $message): ?>
-                        <div class="alert alert-<?php echo $type; ?>">
-                            <?php echo htmlspecialchars($message); ?>
-                        </div>
-                    <?php endforeach; ?>
-                    <?php unset($_SESSION['flash']); ?>
-                </div>
-            <?php endif; ?>
-
-            <div class="flex-1 overflow-y-auto p-4 lg:p-8">
-                <!-- Progress Steps -->
-                <div class="max-w-6xl mx-auto mb-8">
-                    <div class="relative">
-                        <div class="flex justify-between mb-6">
-                            <div class="step-indicator active" id="stepIndicator1">
-                                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-                                    <span class="text-white text-sm font-bold">1</span>
-                                </div>
-                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap">
-                                    <span class="text-xs font-bold text-blue-600">School Info</span>
-                                </div>
+            <!-- Progress Steps -->
+            <div class="bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+                <div class="max-w-6xl mx-auto">
+                    <div class="step-progress flex justify-between relative">
+                        <?php
+                        $steps = [
+                            1 => ['icon' => 'fa-school', 'title' => 'School Details', 'desc' => 'Basic information'],
+                            2 => ['icon' => 'fa-user-shield', 'title' => 'Admin Setup', 'desc' => 'Primary administrator'],
+                            3 => ['icon' => 'fa-credit-card', 'title' => 'Subscription', 'desc' => 'Choose plan'],
+                            4 => ['icon' => 'fa-check-circle', 'title' => 'Review', 'desc' => 'Confirm details']
+                        ];
+                        
+                        foreach ($steps as $num => $step):
+                        ?>
+                        <div class="text-center" id="step<?php echo $num; ?>Indicator">
+                            <div class="step-dot mx-auto mb-2" id="stepDot<?php echo $num; ?>">
+                                <i class="fas <?php echo $step['icon']; ?>"></i>
                             </div>
-                            <div class="step-indicator" id="stepIndicator2">
-                                <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
-                                    <span class="text-slate-500 text-sm font-bold">2</span>
-                                </div>
-                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap">
-                                    <span class="text-xs font-bold text-slate-400">Admin Setup</span>
-                                </div>
-                            </div>
-                            <div class="step-indicator" id="stepIndicator3">
-                                <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
-                                    <span class="text-slate-500 text-sm font-bold">3</span>
-                                </div>
-                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap">
-                                    <span class="text-xs font-bold text-slate-400">Subscription</span>
-                                </div>
-                            </div>
-                            <div class="step-indicator" id="stepIndicator4">
-                                <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
-                                    <span class="text-slate-500 text-sm font-bold">4</span>
-                                </div>
-                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 whitespace-nowrap">
-                                    <span class="text-xs font-bold text-slate-400">Review</span>
-                                </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Step <?php echo $num; ?></p>
+                                <p class="text-sm font-semibold text-slate-900"><?php echo $step['title']; ?></p>
+                                <p class="text-xs text-slate-400"><?php echo $step['desc']; ?></p>
                             </div>
                         </div>
-                        <div class="step-line absolute top-4 left-0 w-full" id="stepLine1"></div>
-                        <div class="step-line absolute top-4 left-1/3 w-1/3" id="stepLine2"></div>
-                        <div class="step-line absolute top-4 left-2/3 w-1/3" id="stepLine3"></div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
+            </div>
 
-                <!-- Form Container -->
+            <!-- Form Container -->
+            <div class="flex-1 overflow-y-auto p-4 lg:p-8">
                 <div class="max-w-6xl mx-auto">
-                    <form id="provisionForm" action="process_provision.php" method="POST" enctype="multipart/form-data" class="bg-white form-card p-6 lg:p-8">
+                    <form id="provisionForm" action="process_provision.php" method="POST" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-lg p-6 lg:p-8">
                         <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
-
-                        <div class="flex justify-between items-start mb-8">
-                            <div>
-                                <h2 class="text-xl font-black text-slate-900 mb-2" id="stepTitle">School Provisioning</h2>
-                                <p class="text-sm text-slate-500" id="stepDescription">Fill in the essential details to onboard a new school to AcademixSuite</p>
-                            </div>
-                            <div class="hidden lg:flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg">
-                                <i class="fas fa-bolt text-blue-600"></i>
-                                <span class="text-xs font-bold text-blue-600 uppercase">Auto-Slug: <span id="slugPreview">school-<?php echo time(); ?></span></span>
-                            </div>
-                        </div>
+                        <input type="hidden" name="provision_type" value="full">
 
                         <!-- Step 1: School Information -->
                         <div id="step1" class="step-content active">
+                            <div class="mb-8">
+                                <h2 class="text-2xl font-black text-slate-900 mb-2">
+                                    <i class="fas fa-school text-indigo-600 mr-2"></i>
+                                    School Information
+                                </h2>
+                                <p class="text-slate-500">Fill in the basic details about the school</p>
+                            </div>
+
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <!-- Left Column -->
                                 <div class="space-y-6">
-                                    <div class="form-group">
-                                        <label class="form-label">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
                                             School Name <span class="text-red-500">*</span>
                                         </label>
                                         <input type="text"
                                             id="schoolName"
-                                            name="school_name"
-                                            class="form-input"
+                                            name="name"  
+                                            class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
                                             placeholder="Enter full school name"
                                             required
-                                            onkeyup="updateSlugPreview()">
-                                        <div id="nameError" class="error-message"></div>
+                                            oninput="updateSlugPreview()">
+                                        <p class="text-xs text-slate-400 mt-2" id="slugPreviewText">
+                                            URL Slug: <span id="slugPreview" class="font-mono">school-<?php echo time(); ?></span>
+                                        </p>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            School Type <span class="text-red-500">*</span>
-                                        </label>
-                                        <select id="schoolType" name="school_type" class="form-input" required>
-                                            <option value="">Select school type</option>
-                                            <option value="university">University / College</option>
-                                            <option value="secondary" selected>Secondary School</option>
-                                            <option value="primary">Primary School</option>
-                                            <option value="vocational">Vocational Institute</option>
-                                            <option value="training">Training Center</option>
-                                            <option value="online">Online Academy</option>
-                                        </select>
-                                        <div id="typeError" class="error-message"></div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                School Type <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="schoolType" name="school_type" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
+                                                <option value="">Select type</option>
+                                                <?php foreach ($schoolTypes as $value => $label): ?>
+                                                <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Campus Type <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="campusType" name="campus_type" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
+                                                <option value="">Select campus type</option>
+                                                <?php foreach ($campusTypes as $value => $label): ?>
+                                                <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            Country & State <span class="text-red-500">*</span>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Curriculum <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="curriculum" name="curriculum" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
+                                                <option value="">Select curriculum</option>
+                                                <?php foreach ($curriculums as $value => $label): ?>
+                                                <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Establishment Year
+                                            </label>
+                                            <input type="number"
+                                                id="establishmentYear"
+                                                name="establishment_year"
+                                                min="1900"
+                                                max="<?php echo date('Y'); ?>"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="1990">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Address <span class="text-red-500">*</span>
                                         </label>
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <select id="country" name="country" class="form-input" required>
+                                        <textarea id="address"
+                                            name="address"
+                                            rows="3"
+                                            class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                            placeholder="Full physical address of the school"
+                                            required></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column -->
+                                <div class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Country <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="country" name="country" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
                                                 <option value="">Select country</option>
                                                 <option value="Nigeria" selected>Nigeria</option>
                                                 <option value="Ghana">Ghana</option>
                                                 <option value="Kenya">Kenya</option>
                                                 <option value="South Africa">South Africa</option>
                                             </select>
-                                            <select id="state" name="state" class="form-input" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                State <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="state" name="state" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
                                                 <option value="">Select state</option>
-                                                <?php foreach ($nigerianStates as $state): ?>
-                                                    <option value="<?php echo htmlspecialchars($state); ?>"><?php echo htmlspecialchars($state); ?></option>
+                                                <?php foreach ($nigerianStates as $state => $cities): ?>
+                                                <option value="<?php echo htmlspecialchars($state); ?>"><?php echo htmlspecialchars($state); ?></option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
-                                        <div id="locationError" class="error-message"></div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            Address <span class="text-red-500">*</span>
-                                        </label>
-                                        <textarea id="address"
-                                            name="address"
-                                            class="form-input"
-                                            rows="3"
-                                            placeholder="Full physical address of the school"
-                                            required></textarea>
-                                        <div id="addressError" class="error-message"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Right Column -->
-                                <div class="space-y-6">
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            School Email <span class="text-red-500">*</span>
-                                        </label>
-                                        <input type="email"
-                                            id="schoolEmail"
-                                            name="school_email"
-                                            class="form-input"
-                                            placeholder="contact@school.edu"
-                                            required>
-                                        <div id="emailError" class="error-message"></div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            Phone Number <span class="text-red-500">*</span>
-                                        </label>
-                                        <input type="tel"
-                                            id="phone"
-                                            name="phone"
-                                            class="form-input"
-                                            placeholder="+234 801 234 5678"
-                                            required>
-                                        <div id="phoneError" class="error-message"></div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            Website URL
-                                        </label>
-                                        <input type="url"
-                                            id="website"
-                                            name="website"
-                                            class="form-input"
-                                            placeholder="https://www.school.edu">
-                                        <div id="websiteError" class="error-message"></div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            School Logo
-                                        </label>
-                                        <div id="logoUpload" class="file-upload" onclick="document.getElementById('logoFile').click()">
-                                            <i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-3"></i>
-                                            <p class="text-sm font-medium text-slate-700 mb-1">Drop logo here or click to upload</p>
-                                            <p class="text-xs text-slate-500">PNG, JPG up to 5MB</p>
-                                            <input type="file"
-                                                id="logoFile"
-                                                name="logo"
-                                                class="hidden"
-                                                accept=".png,.jpg,.jpeg,.webp"
-                                                onchange="previewLogo(this)">
-                                        </div>
-                                        <div id="logoPreview" class="mt-4 hidden">
-                                            <div class="flex items-center gap-3">
-                                                <img id="previewImage" class="w-16 h-16 rounded-lg object-cover border border-slate-200">
-                                                <div>
-                                                    <p id="fileName" class="text-sm font-medium text-slate-700"></p>
-                                                    <button type="button"
-                                                        onclick="removeLogo()"
-                                                        class="text-xs text-red-500 hover:text-red-700 mt-1">
-                                                        Remove
-                                                    </button>
-                                                </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                City/Town <span class="text-red-500">*</span>
+                                            </label>
+                                            <div class="relative">
+                                                <input type="text"
+                                                    id="city"
+                                                    name="city"
+                                                    class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                    placeholder="Enter city or town"
+                                                    required>
+                                                <button type="button"
+                                                    onclick="openCitySelector()"
+                                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-indigo-600 hover:text-indigo-700 p-2">
+                                                    <i class="fas fa-list"></i>
+                                                </button>
                                             </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Postal Code
+                                            </label>
+                                            <input type="text"
+                                                id="postalCode"
+                                                name="postal_code"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="000000">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Email <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="email"
+                                                id="schoolEmail"
+                                                name="email"  
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="contact@school.edu"
+                                                required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Phone <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="tel"
+                                                id="phone"
+                                                name="phone"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="+234 801 234 5678"
+                                                required>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Estimated Capacity -->
-                            <div class="border-t border-slate-100 pt-8">
-                                <div class="mb-6">
-                                    <h3 class="text-lg font-bold text-slate-900">School Capacity</h3>
-                                    <p class="text-sm text-slate-500">Estimated capacity for resource allocation</p>
+                            <!-- School Description & Logo -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                        School Description
+                                    </label>
+                                    <textarea id="description"
+                                        name="description"
+                                        rows="4"
+                                        class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                        placeholder="Brief description of the school's mission, vision, and values..."></textarea>
                                 </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Estimated Students</label>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                        School Logo
+                                    </label>
+                                    <div class="file-upload-area" onclick="document.getElementById('logoFile').click()" id="logoUploadArea">
+                                        <i class="fas fa-cloud-upload-alt text-4xl text-slate-400 mb-4"></i>
+                                        <p class="text-sm font-medium text-slate-700 mb-1">Click to upload or drag & drop</p>
+                                        <p class="text-xs text-slate-500">PNG, JPG up to 5MB (Recommended: 500x500px)</p>
+                                        <input type="file"
+                                            id="logoFile"
+                                            name="logo_path" 
+                                            class="hidden"
+                                            accept=".png,.jpg,.jpeg,.webp"
+                                            onchange="previewLogo(this)">
+                                    </div>
+                                    <div id="logoPreview" class="mt-4 hidden">
+                                        <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
+                                            <img id="previewImage" class="w-16 h-16 rounded-lg object-cover border-2 border-slate-200">
+                                            <div class="flex-1">
+                                                <p id="fileName" class="text-sm font-medium text-slate-700"></p>
+                                                <p id="fileSize" class="text-xs text-slate-500"></p>
+                                            </div>
+                                            <button type="button"
+                                                onclick="removeLogo()"
+                                                class="text-red-500 hover:text-red-700 p-2">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Capacity Estimation -->
+                            <div class="mt-8 pt-8 border-t border-slate-200">
+                                <h3 class="text-lg font-semibold text-slate-900 mb-6">
+                                    <i class="fas fa-users text-indigo-600 mr-2"></i>
+                                    Capacity Estimation
+                                </h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                    <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-xl">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-semibold text-indigo-900">Students</span>
+                                            <i class="fas fa-graduation-cap text-indigo-600"></i>
+                                        </div>
                                         <div class="relative">
                                             <input type="number"
                                                 id="studentCount"
-                                                name="max_students"
-                                                class="form-input pr-12"
+                                                name="student_count"
                                                 min="1"
                                                 max="100000"
                                                 value="500"
-                                                required>
-                                            <span class="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-500">students</span>
+                                                class="w-full bg-transparent border-0 text-2xl font-bold text-indigo-900 focus:outline-none"
+                                                onchange="updateCapacityEstimate()">
+                                            <span class="absolute right-0 top-1/2 transform -translate-y-1/2 text-indigo-600 font-medium">students</span>
                                         </div>
+                                        <p class="text-xs text-indigo-700 mt-2">Estimated enrollment</p>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label class="form-label">Staff Members</label>
+                                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-semibold text-purple-900">Teachers</span>
+                                            <i class="fas fa-chalkboard-teacher text-purple-600"></i>
+                                        </div>
                                         <div class="relative">
                                             <input type="number"
-                                                id="staffCount"
-                                                name="max_staff"
-                                                class="form-input pr-12"
+                                                id="teacherCount"
+                                                name="teacher_count"
                                                 min="1"
-                                                max="5000"
+                                                max="10000"
                                                 value="50"
-                                                required>
-                                            <span class="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-500">staff</span>
+                                                class="w-full bg-transparent border-0 text-2xl font-bold text-purple-900 focus:outline-none"
+                                                onchange="updateCapacityEstimate()">
+                                            <span class="absolute right-0 top-1/2 transform -translate-y-1/2 text-purple-600 font-medium">teachers</span>
                                         </div>
+                                        <p class="text-xs text-purple-700 mt-2">Teaching staff</p>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label class="form-label">City/Town</label>
-                                        <input type="text"
-                                            id="city"
-                                            name="city"
-                                            class="form-input"
-                                            placeholder="Enter city/town"
-                                            required>
+                                    <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-semibold text-emerald-900">Classes</span>
+                                            <i class="fas fa-school text-emerald-600"></i>
+                                        </div>
+                                        <div class="relative">
+                                            <input type="number"
+                                                id="classCount"
+                                                name="class_count"
+                                                min="1"
+                                                max="1000"
+                                                value="20"
+                                                class="w-full bg-transparent border-0 text-2xl font-bold text-emerald-900 focus:outline-none"
+                                                onchange="updateCapacityEstimate()">
+                                            <span class="absolute right-0 top-1/2 transform -translate-y-1/2 text-emerald-600 font-medium">classes</span>
+                                        </div>
+                                        <p class="text-xs text-emerald-700 mt-2">Classrooms</p>
+                                    </div>
+
+                                    <div class="bg-gradient-to-br from-rose-50 to-rose-100 p-6 rounded-xl">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-semibold text-rose-900">Ratio</span>
+                                            <i class="fas fa-balance-scale text-rose-600"></i>
+                                        </div>
+                                        <div class="text-2xl font-bold text-rose-900" id="studentTeacherRatio">10:1</div>
+                                        <p class="text-xs text-rose-700 mt-2">Student-teacher ratio</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Navigation Buttons -->
-                            <div class="flex justify-between pt-8 border-t border-slate-100">
-                                <button type="button"
-                                    onclick="window.location.href='../index.php'"
-                                    class="px-6 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition touch-target">
-                                    Cancel Provision
-                                </button>
+                            <!-- Navigation -->
+                            <div class="flex justify-between mt-12 pt-8 border-t border-slate-200">
+                                <a href="../index.php" class="px-6 py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                                    <i class="fas fa-times"></i>
+                                    Cancel
+                                </a>
                                 <button type="button"
                                     onclick="nextStep(2)"
-                                    class="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition flex items-center gap-2 touch-target">
+                                    class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition flex items-center gap-2 shadow-lg shadow-indigo-100">
                                     Continue to Admin Setup
                                     <i class="fas fa-arrow-right"></i>
                                 </button>
@@ -781,135 +925,196 @@ $nigerianStates = [
                         </div>
 
                         <!-- Step 2: Admin Setup -->
-                        <div id="step2" class="step-content">
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                <!-- Primary Admin -->
-                                <div class="space-y-6">
-                                    <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Primary Administrator</h3>
+                        <div id="step2" class="step-content hidden">
+                            <div class="mb-8">
+                                <h2 class="text-2xl font-black text-slate-900 mb-2">
+                                    <i class="fas fa-user-shield text-indigo-600 mr-2"></i>
+                                    Primary Administrator
+                                </h2>
+                                <p class="text-slate-500">Set up the primary school administrator account</p>
+                            </div>
 
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            Full Name <span class="text-red-500">*</span>
-                                        </label>
-                                        <input type="text"
-                                            id="adminName"
-                                            name="admin_name"
-                                            class="form-input"
-                                            placeholder="Dr. Sarah Thompson"
-                                            required>
-                                        <div id="adminNameError" class="error-message"></div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <!-- Admin Details -->
+                                <div class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                First Name <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text"
+                                                id="adminFirstName"
+                                                name="admin_first_name"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="John"
+                                                required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Last Name <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text"
+                                                id="adminLastName"
+                                                name="admin_last_name"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="Doe"
+                                                required>
+                                        </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label class="form-label">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
                                             Email Address <span class="text-red-500">*</span>
                                         </label>
                                         <input type="email"
                                             id="adminEmail"
                                             name="admin_email"
-                                            class="form-input"
+                                            class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
                                             placeholder="admin@school.edu"
                                             required>
-                                        <div id="adminEmailError" class="error-message"></div>
+                                        <p class="text-xs text-slate-400 mt-2">Login credentials will be sent to this email</p>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            Phone Number <span class="text-red-500">*</span>
-                                        </label>
-                                        <input type="tel"
-                                            id="adminPhone"
-                                            name="admin_phone"
-                                            class="form-input"
-                                            placeholder="+234 801 234 5678"
-                                            required>
-                                        <div id="adminPhoneError" class="error-message"></div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Phone Number <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="tel"
+                                                id="adminPhone"
+                                                name="admin_phone"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="+234 801 234 5678"
+                                                required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Position <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="adminPosition" name="admin_position" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
+                                                <option value="">Select position</option>
+                                                <option value="principal">Principal</option>
+                                                <option value="headteacher">Head Teacher</option>
+                                                <option value="director">Director</option>
+                                                <option value="proprietor">Proprietor</option>
+                                                <option value="admin">Administrator</option>
+                                                <option value="owner" selected>Owner</option>
+                                            </select>
+                                        </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            Position / Title <span class="text-red-500">*</span>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Admin Role <span class="text-red-500">*</span>
                                         </label>
-                                        <select id="adminTitle" name="admin_title" class="form-input" required>
-                                            <option value="">Select position</option>
-                                            <option value="principal">Principal</option>
-                                            <option value="headteacher">Head Teacher</option>
+                                        <select id="adminRole" name="admin_role" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
+                                            <option value="">Select role</option>
+                                            <option value="owner" selected>Owner (Full Access)</option>
                                             <option value="administrator">Administrator</option>
-                                            <option value="director">Director</option>
-                                            <option value="proprietor">Proprietor</option>
+                                            <option value="principal">Principal</option>
+                                            <option value="accountant">Accountant</option>
                                         </select>
-                                        <div id="adminTitleError" class="error-message"></div>
                                     </div>
                                 </div>
 
-                                <!-- Additional Settings -->
+                                <!-- Security Settings -->
                                 <div class="space-y-6">
-                                    <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Access Configuration</h3>
-
-                                    <div class="form-group">
-                                        <label class="form-label">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
                                             Initial Password <span class="text-red-500">*</span>
                                         </label>
                                         <div class="relative">
                                             <input type="password"
                                                 id="adminPassword"
                                                 name="admin_password"
-                                                class="form-input pr-12"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition pr-12"
                                                 placeholder="Generate strong password"
                                                 required>
-                                            <button type="button"
-                                                onclick="generatePassword()"
-                                                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-700">
-                                                <i class="fas fa-redo"></i>
-                                            </button>
+                                            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex gap-2">
+                                                <button type="button"
+                                                    onclick="togglePasswordVisibility('adminPassword')"
+                                                    class="text-slate-400 hover:text-slate-600 p-1">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button type="button"
+                                                    onclick="generatePassword()"
+                                                    class="text-indigo-600 hover:text-indigo-700 p-1">
+                                                    <i class="fas fa-redo"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div class="text-xs text-slate-400 mt-2">Password will be sent via secure email</div>
-                                        <div id="passwordError" class="error-message"></div>
+                                        <div class="mt-2 flex items-center gap-2">
+                                            <div id="passwordStrength" class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                                <div id="passwordStrengthBar" class="h-full w-0 transition-all duration-300"></div>
+                                            </div>
+                                            <span id="passwordStrengthText" class="text-xs font-medium text-slate-500">Weak</span>
+                                        </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            Admin Role <span class="text-red-500">*</span>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Send Welcome Email
                                         </label>
-                                        <select id="adminRole" name="admin_role" class="form-input" required>
-                                            <option value="">Select role</option>
-                                            <option value="owner">Owner (Full Access)</option>
-                                            <option value="admin">Administrator</option>
-                                            <option value="principal">Principal</option>
-                                            <option value="accountant">Accountant</option>
-                                        </select>
-                                        <div id="roleError" class="error-message"></div>
+                                        <div class="flex items-center gap-3">
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox"
+                                                    id="sendWelcomeEmail"
+                                                    name="send_welcome_email"
+                                                    class="sr-only peer"
+                                                    checked>
+                                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                            </label>
+                                            <span class="text-sm text-slate-700">Send login credentials via email</span>
+                                        </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label class="form-label">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
                                             Security Settings
                                         </label>
                                         <div class="space-y-3">
-                                            <label class="flex items-center gap-3">
-                                                <input type="checkbox" id="twoFactor" name="two_factor" class="rounded border-slate-300">
+                                            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                                                <input type="checkbox"
+                                                    id="require2FA"
+                                                    name="require_2fa"
+                                                    class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500">
                                                 <span class="text-sm text-slate-700">Require Two-Factor Authentication</span>
                                             </label>
-                                            <label class="flex items-center gap-3">
-                                                <input type="checkbox" id="sessionTimeout" name="session_timeout" class="rounded border-slate-300" checked>
-                                                <span class="text-sm text-slate-700">Auto-logout after 30 minutes</span>
+                                            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                                                <input type="checkbox"
+                                                    id="forcePasswordChange"
+                                                    name="force_password_change"
+                                                    class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
+                                                    checked>
+                                                <span class="text-sm text-slate-700">Force password change on first login</span>
                                             </label>
                                         </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Additional Notes
+                                        </label>
+                                        <textarea id="adminNotes"
+                                            name="admin_notes"
+                                            rows="3"
+                                            class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                            placeholder="Any special instructions or notes..."></textarea>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Navigation Buttons -->
-                            <div class="flex justify-between pt-8 border-t border-slate-100">
+                            <!-- Navigation -->
+                            <div class="flex justify-between mt-12 pt-8 border-t border-slate-200">
                                 <button type="button"
                                     onclick="previousStep(1)"
-                                    class="px-6 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition touch-target flex items-center gap-2">
+                                    class="px-6 py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
                                     <i class="fas fa-arrow-left"></i>
                                     Back to School Info
                                 </button>
                                 <button type="button"
                                     onclick="nextStep(3)"
-                                    class="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition flex items-center gap-2 touch-target">
+                                    class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition flex items-center gap-2 shadow-lg shadow-indigo-100">
                                     Continue to Subscription
                                     <i class="fas fa-arrow-right"></i>
                                 </button>
@@ -917,215 +1122,342 @@ $nigerianStates = [
                         </div>
 
                         <!-- Step 3: Subscription -->
-                        <div id="step3" class="step-content">
-                            <div class="space-y-8">
-                                <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Subscription Plan Selection</h3>
+                        <div id="step3" class="step-content hidden">
+                            <div class="mb-8">
+                                <h2 class="text-2xl font-black text-slate-900 mb-2">
+                                    <i class="fas fa-credit-card text-indigo-600 mr-2"></i>
+                                    Subscription Plan
+                                </h2>
+                                <p class="text-slate-500">Choose the perfect plan for your school's needs</p>
+                            </div>
 
-                                <!-- Subscription Cards -->
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="planSelection">
-                                    <?php foreach ($plans as $index => $plan): ?>
-                                        <div class="border-2 <?php echo $plan['slug'] === 'growth' ? 'border-blue-500 bg-blue-50' : 'border-slate-200'; ?> rounded-2xl p-6 hover:border-blue-500 transition-colors cursor-pointer"
-                                            onclick="selectPlan('<?php echo $plan['slug']; ?>', <?php echo $plan['id']; ?>, <?php echo $plan['price_monthly']; ?>, <?php echo $plan['student_limit']; ?>)">
-                                            <?php if ($plan['slug'] === 'growth'): ?>
-                                                <div class="absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                                                    RECOMMENDED
-                                                </div>
+                            <!-- Plan Cards -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" id="planSelection">
+                                <?php foreach ($plans as $index => $plan): 
+                                    $features = json_decode($plan['features'] ?? '[]', true) ?: [];
+                                    $isRecommended = in_array($plan['slug'], ['growth', 'premium']);
+                                ?>
+                                <div class="plan-card <?php echo $isRecommended ? 'recommended' : ''; ?>"
+                                    onclick="selectPlan('<?php echo $plan['slug']; ?>', <?php echo $plan['id']; ?>, <?php echo $plan['price_monthly']; ?>, <?php echo $plan['student_limit']; ?>)"
+                                    id="planCard<?php echo $plan['slug']; ?>">
+                                    <div class="flex justify-between items-start mb-6">
+                                        <div>
+                                            <h3 class="text-xl font-black text-slate-900"><?php echo htmlspecialchars($plan['name']); ?></h3>
+                                            <p class="text-sm text-slate-500">
+                                                <?php echo $plan['slug'] === 'starter' ? 'Perfect for small schools' : 
+                                                      ($plan['slug'] === 'growth' ? 'For growing schools' : 
+                                                      ($plan['slug'] === 'enterprise' ? 'For large institutions' : 'Custom solution')); ?>
+                                            </p>
+                                        </div>
+                                        <div class="w-6 h-6 rounded-full border-2 border-slate-300"></div>
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <div class="flex items-baseline">
+                                            <span class="text-3xl font-black text-slate-900">₦<?php echo number_format($plan['price_monthly'], 2); ?></span>
+                                            <span class="text-slate-500 ml-2">/month</span>
+                                        </div>
+                                        <?php if ($plan['price_yearly']): ?>
+                                        <p class="text-xs text-slate-400 mt-1">
+                                            ₦<?php echo number_format($plan['price_yearly'], 2); ?> billed yearly
+                                            <?php if ($plan['price_yearly'] < ($plan['price_monthly'] * 12)): ?>
+                                            (save <?php echo round((1 - ($plan['price_yearly'] / ($plan['price_monthly'] * 12))) * 100); ?>%)
                                             <?php endif; ?>
-                                            <div class="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <h4 class="font-bold text-slate-900 text-lg"><?php echo htmlspecialchars($plan['name']); ?></h4>
-                                                    <p class="text-slate-500 text-sm"><?php echo $plan['slug'] === 'starter' ? 'Perfect for small schools' : ($plan['slug'] === 'growth' ? 'For growing schools' : 'For large institutions'); ?></p>
-                                                </div>
-                                                <div class="w-6 h-6 rounded-full border-2 <?php echo $plan['slug'] === 'growth' ? 'border-blue-500 bg-blue-500' : 'border-slate-300'; ?>"></div>
-                                            </div>
-                                            <div class="mb-6">
-                                                <div class="text-3xl font-black text-slate-900">₦<?php echo number_format($plan['price_monthly'], 2); ?><span class="text-sm text-slate-500 font-normal">/month</span></div>
-                                                <p class="text-xs text-slate-400 mt-1">Billed annually at ₦<?php echo number_format($plan['price_monthly'] * 12 * 0.85, 2); ?></p>
-                                            </div>
-                                            <ul class="space-y-3 mb-6">
-                                                <li class="flex items-center gap-2 text-sm">
-                                                    <i class="fas fa-check text-emerald-500"></i>
-                                                    <span>Up to <?php echo number_format($plan['student_limit']); ?> students</span>
-                                                </li>
-                                                <li class="flex items-center gap-2 text-sm">
-                                                    <i class="fas fa-check text-emerald-500"></i>
-                                                    <span><?php echo $plan['slug'] === 'enterprise' ? 'Premium' : ($plan['slug'] === 'growth' ? 'Advanced' : 'Basic'); ?> analytics</span>
-                                                </li>
-                                                <li class="flex items-center gap-2 text-sm">
-                                                    <i class="fas fa-check text-emerald-500"></i>
-                                                    <span><?php echo $plan['slug'] === 'enterprise' ? '24/7 dedicated' : ($plan['slug'] === 'growth' ? 'Priority' : 'Email'); ?> support</span>
-                                                </li>
-                                                <?php if ($plan['slug'] === 'enterprise'): ?>
-                                                    <li class="flex items-center gap-2 text-sm">
-                                                        <i class="fas fa-check text-emerald-500"></i>
-                                                        <span>API access</span>
-                                                    </li>
-                                                <?php endif; ?>
-                                            </ul>
+                                        </p>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <div class="space-y-3 mb-6">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-slate-700">Students</span>
+                                            <span class="text-sm font-semibold text-slate-900"><?php echo number_format($plan['student_limit']); ?></span>
                                         </div>
-                                    <?php endforeach; ?>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-slate-700">Teachers</span>
+                                            <span class="text-sm font-semibold text-slate-900"><?php echo number_format($plan['teacher_limit']); ?></span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-slate-700">Storage</span>
+                                            <span class="text-sm font-semibold text-slate-900"><?php echo number_format($plan['storage_limit']); ?> MB</span>
+                                        </div>
+                                    </div>
+
+                                    <ul class="space-y-2 mb-6">
+                                        <?php foreach ($features as $feature): ?>
+                                        <li class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-emerald-500"></i>
+                                            <span class="text-slate-700"><?php echo htmlspecialchars($feature); ?></span>
+                                        </li>
+                                        <?php endforeach; ?>
+                                    </ul>
                                 </div>
+                                <?php endforeach; ?>
+                            </div>
 
-                                <!-- Hidden plan input -->
-                                <input type="hidden" id="planId" name="plan_id" value="2">
-                                <input type="hidden" id="planSlug" name="plan_slug" value="growth">
+                            <!-- Hidden plan inputs -->
+                            <input type="hidden" id="planId" name="plan_id" value="<?php echo $plans[0]['id'] ?? 1; ?>">
+                            <input type="hidden" id="planSlug" name="plan_slug" value="<?php echo $plans[0]['slug'] ?? 'starter'; ?>">
 
-                                <!-- Billing Options -->
-                                <div class="border-t border-slate-100 pt-8">
-                                    <h4 class="font-bold text-slate-900 mb-4">Billing Configuration</h4>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div class="form-group">
-                                            <label class="form-label">Billing Cycle</label>
-                                            <div class="flex gap-4">
-                                                <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="radio" name="billing_cycle" value="monthly" class="text-blue-600">
-                                                    <span class="text-sm">Monthly</span>
-                                                </label>
-                                                <label class="flex items-center gap-2 cursor-pointer">
-                                                    <input type="radio" name="billing_cycle" value="yearly" class="text-blue-600" checked>
-                                                    <span class="text-sm">Yearly (Save 15%)</span>
-                                                </label>
-                                            </div>
+                            <!-- Billing Options -->
+                            <div class="bg-gradient-to-r from-slate-50 to-slate-100 rounded-2xl p-6 mb-8">
+                                <h3 class="text-lg font-semibold text-slate-900 mb-6">Billing Configuration</h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Billing Cycle</label>
+                                        <div class="flex gap-4">
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="radio"
+                                                    name="billing_cycle"
+                                                    value="monthly"
+                                                    class="text-indigo-600 focus:ring-indigo-500"
+                                                    checked>
+                                                <span class="text-sm text-slate-700">Monthly</span>
+                                            </label>
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="radio"
+                                                    name="billing_cycle"
+                                                    value="yearly"
+                                                    class="text-indigo-600 focus:ring-indigo-500">
+                                                <span class="text-sm text-slate-700">Yearly</span>
+                                            </label>
                                         </div>
+                                    </div>
 
-                                        <div class="form-group">
-                                            <label class="form-label">Trial Period</label>
-                                            <select id="trialPeriod" name="trial_period" class="form-input">
-                                                <option value="0">No Trial</option>
-                                                <option value="7" selected>7 Days</option>
-                                                <option value="14">14 Days</option>
-                                                <option value="30">30 Days</option>
-                                            </select>
-                                        </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Trial Period</label>
+                                        <select id="trialPeriod" name="trial_period" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition">
+                                            <option value="0">No Trial</option>
+                                            <option value="7" selected>7 Days Free Trial</option>
+                                            <option value="14">14 Days Free Trial</option>
+                                            <option value="30">30 Days Free Trial</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Payment Method</label>
+                                        <select id="paymentMethod" name="payment_method" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition">
+                                            <option value="paystack">Paystack (Recommended)</option>
+                                            <option value="flutterwave">Flutterwave</option>
+                                            <option value="manual">Manual Payment</option>
+                                        </select>
                                     </div>
                                 </div>
 
-                                <!-- Navigation Buttons -->
-                                <div class="flex justify-between pt-8 border-t border-slate-100">
-                                    <button type="button"
-                                        onclick="previousStep(2)"
-                                        class="px-6 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition touch-target flex items-center gap-2">
-                                        <i class="fas fa-arrow-left"></i>
-                                        Back to Admin Setup
-                                    </button>
-                                    <button type="button"
-                                        onclick="nextStep(4)"
-                                        class="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition flex items-center gap-2 touch-target">
-                                        Continue to Review
-                                        <i class="fas fa-arrow-right"></i>
-                                    </button>
+                                <!-- Estimated Cost -->
+                                <div class="mt-6 p-4 bg-white rounded-xl border border-slate-200">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="text-sm text-slate-500">Estimated Monthly Cost</p>
+                                            <p class="text-2xl font-black text-slate-900" id="estimatedCost">₦<?php echo number_format($plans[0]['price_monthly'] ?? 49.99, 2); ?></p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm text-slate-500">Estimated Yearly Cost</p>
+                                            <p class="text-xl font-bold text-emerald-600" id="estimatedYearlyCost">₦<?php echo number_format(($plans[0]['price_yearly'] ?? ($plans[0]['price_monthly'] ?? 49.99) * 12), 2); ?></p>
+                                        </div>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <!-- Navigation -->
+                            <div class="flex justify-between mt-12 pt-8 border-t border-slate-200">
+                                <button type="button"
+                                    onclick="previousStep(2)"
+                                    class="px-6 py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Back to Admin Setup
+                                </button>
+                                <button type="button"
+                                    onclick="nextStep(4)"
+                                    class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition flex items-center gap-2 shadow-lg shadow-indigo-100">
+                                    Continue to Review
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
                             </div>
                         </div>
 
                         <!-- Step 4: Review -->
-                        <div id="step4" class="step-content">
-                            <div class="space-y-8">
-                                <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Review & Provision</h3>
+                        <div id="step4" class="step-content hidden">
+                            <div class="mb-8">
+                                <h2 class="text-2xl font-black text-slate-900 mb-2">
+                                    <i class="fas fa-check-circle text-emerald-600 mr-2"></i>
+                                    Review & Confirm
+                                </h2>
+                                <p class="text-slate-500">Review all details before provisioning the school</p>
+                            </div>
 
-                                <!-- Summary Cards -->
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    <!-- School Summary -->
-                                    <div class="bg-slate-50 rounded-xl p-6">
-                                        <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                            <i class="fas fa-school text-blue-600"></i>
-                                            School Details
-                                        </h4>
-                                        <div class="space-y-4">
+                            <!-- Summary Cards -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                                <!-- School Summary -->
+                                <div class="bg-gradient-to-br from-indigo-50 to-white rounded-2xl p-6 border border-indigo-100">
+                                    <h3 class="text-lg font-semibold text-indigo-900 mb-4 flex items-center gap-2">
+                                        <i class="fas fa-school"></i>
+                                        School Details
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <p class="text-xs text-indigo-600 uppercase font-bold">Name</p>
+                                            <p id="reviewSchoolName" class="text-sm font-medium text-slate-900">-</p>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
                                             <div>
-                                                <p class="text-xs text-slate-500 uppercase font-bold">Name</p>
-                                                <p id="reviewSchoolName" class="text-sm font-medium">-</p>
+                                                <p class="text-xs text-indigo-600 uppercase font-bold">Type</p>
+                                                <p id="reviewSchoolType" class="text-sm font-medium text-slate-900">-</p>
                                             </div>
                                             <div>
-                                                <p class="text-xs text-slate-500 uppercase font-bold">Type & Location</p>
-                                                <p id="reviewSchoolType" class="text-sm font-medium">-</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-xs text-slate-500 uppercase font-bold">Contact</p>
-                                                <p id="reviewContact" class="text-sm font-medium">-</p>
+                                                <p class="text-xs text-indigo-600 uppercase font-bold">Campus Type</p>
+                                                <p id="reviewCampusType" class="text-sm font-medium text-slate-900">-</p>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <!-- Admin Summary -->
-                                    <div class="bg-slate-50 rounded-xl p-6">
-                                        <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                            <i class="fas fa-user-shield text-blue-600"></i>
-                                            Administrator
-                                        </h4>
-                                        <div class="space-y-4">
+                                        <div class="grid grid-cols-2 gap-4">
                                             <div>
-                                                <p class="text-xs text-slate-500 uppercase font-bold">Primary Admin</p>
-                                                <p id="reviewAdminName" class="text-sm font-medium">-</p>
+                                                <p class="text-xs text-indigo-600 uppercase font-bold">Curriculum</p>
+                                                <p id="reviewCurriculum" class="text-sm font-medium text-slate-900">-</p>
                                             </div>
                                             <div>
-                                                <p class="text-xs text-slate-500 uppercase font-bold">Contact</p>
-                                                <p id="reviewAdminContact" class="text-sm font-medium">-</p>
+                                                <p class="text-xs text-indigo-600 uppercase font-bold">Location</p>
+                                                <p id="reviewLocation" class="text-sm font-medium text-slate-900">-</p>
                                             </div>
-                                            <div>
-                                                <p class="text-xs text-slate-500 uppercase font-bold">Role</p>
-                                                <p id="reviewAdminRole" class="text-sm font-medium">-</p>
-                                            </div>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-indigo-600 uppercase font-bold">Contact</p>
+                                            <p id="reviewContact" class="text-sm font-medium text-slate-900">-</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Subscription Summary -->
-                                <div class="bg-blue-50 rounded-xl p-6">
-                                    <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                        <i class="fas fa-credit-card text-blue-600"></i>
-                                        Subscription & Billing
-                                    </h4>
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Admin Summary -->
+                                <div class="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-6 border border-purple-100">
+                                    <h3 class="text-lg font-semibold text-purple-900 mb-4 flex items-center gap-2">
+                                        <i class="fas fa-user-shield"></i>
+                                        Administrator
+                                    </h3>
+                                    <div class="space-y-4">
                                         <div>
-                                            <p class="text-xs text-slate-500 uppercase font-bold">Plan Selected</p>
-                                            <p id="reviewPlan" class="text-sm font-medium">-</p>
+                                            <p class="text-xs text-purple-600 uppercase font-bold">Primary Admin</p>
+                                            <p id="reviewAdminName" class="text-sm font-medium text-slate-900">-</p>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <p class="text-xs text-purple-600 uppercase font-bold">Role</p>
+                                                <p id="reviewAdminRole" class="text-sm font-medium text-slate-900">-</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs text-purple-600 uppercase font-bold">Position</p>
+                                                <p id="reviewAdminPosition" class="text-sm font-medium text-slate-900">-</p>
+                                            </div>
                                         </div>
                                         <div>
-                                            <p class="text-xs text-slate-500 uppercase font-bold">Billing Cycle</p>
-                                            <p id="reviewBilling" class="text-sm font-medium">-</p>
+                                            <p class="text-xs text-purple-600 uppercase font-bold">Email</p>
+                                            <p id="reviewAdminEmail" class="text-sm font-medium text-slate-900">-</p>
                                         </div>
                                         <div>
-                                            <p class="text-xs text-slate-500 uppercase font-bold">Monthly Cost</p>
-                                            <p id="reviewCost" class="text-sm font-medium">-</p>
+                                            <p class="text-xs text-purple-600 uppercase font-bold">Phone</p>
+                                            <p id="reviewAdminPhone" class="text-sm font-medium text-slate-900">-</p>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Final Notes -->
-                                <div class="border border-slate-200 rounded-xl p-6">
-                                    <h4 class="font-bold text-slate-900 mb-4">Additional Notes</h4>
-                                    <textarea id="finalNotes"
-                                        name="notes"
-                                        class="form-input w-full"
-                                        rows="3"
-                                        placeholder="Add any special instructions or notes for the school setup..."></textarea>
+                            <!-- Subscription Summary -->
+                            <div class="bg-gradient-to-br from-emerald-50 to-white rounded-2xl p-6 border border-emerald-100 mb-8">
+                                <h3 class="text-lg font-semibold text-emerald-900 mb-4 flex items-center gap-2">
+                                    <i class="fas fa-credit-card"></i>
+                                    Subscription & Billing
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <p class="text-xs text-emerald-600 uppercase font-bold">Plan Selected</p>
+                                        <p id="reviewPlan" class="text-lg font-black text-slate-900">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-emerald-600 uppercase font-bold">Billing Cycle</p>
+                                        <p id="reviewBilling" class="text-lg font-black text-slate-900">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-emerald-600 uppercase font-bold">Monthly Cost</p>
+                                        <p id="reviewCost" class="text-lg font-black text-slate-900">-</p>
+                                    </div>
                                 </div>
+                                <div class="mt-4">
+                                    <p class="text-xs text-emerald-600 uppercase font-bold">Features</p>
+                                    <p id="reviewFeatures" class="text-sm text-slate-700">-</p>
+                                </div>
+                            </div>
 
-                                <!-- Terms & Conditions -->
-                                <div class="border-t border-slate-100 pt-6">
+                            <!-- Technical Details -->
+                            <div class="bg-slate-50 rounded-2xl p-6 mb-8">
+                                <h3 class="text-lg font-semibold text-slate-900 mb-4">Technical Details</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <p class="text-xs text-slate-500 uppercase font-bold">Database Name</p>
+                                        <p id="reviewDatabaseName" class="text-sm font-mono text-slate-900">school_XXXX</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-500 uppercase font-bold">Access URL</p>
+                                        <p id="reviewAccessURL" class="text-sm font-mono text-slate-900">/academixsuite/tenant/school-slug</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-500 uppercase font-bold">Estimated Setup Time</p>
+                                        <p class="text-sm font-medium text-slate-900">15-30 seconds</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Terms & Conditions -->
+                            <div class="border border-slate-200 rounded-2xl p-6 mb-8">
+                                <h3 class="text-lg font-semibold text-slate-900 mb-4">Terms & Conditions</h3>
+                                <div class="space-y-4">
                                     <label class="flex items-start gap-3 cursor-pointer">
-                                        <input type="checkbox" id="termsAgreement" name="terms_agreed" class="mt-1" required>
+                                        <input type="checkbox"
+                                            id="termsAgreement"
+                                            name="terms_agreed"
+                                            class="mt-1 w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
+                                            required>
                                         <div>
                                             <span class="text-sm text-slate-700">
-                                                I confirm that all provided information is accurate and I have permission to onboard this school. I understand that this provisioning request will create a new school database with separate credentials.
+                                                I confirm that I have permission to provision this school and all information provided is accurate. I understand that:
                                             </span>
-                                            <div id="termsError" class="error-message mt-2"></div>
+                                            <ul class="text-sm text-slate-600 mt-2 space-y-1">
+                                                <li class="flex items-center gap-2">
+                                                    <i class="fas fa-check text-emerald-500 text-xs"></i>
+                                                    <span>A new database will be created</span>
+                                                </li>
+                                                <li class="flex items-center gap-2">
+                                                    <i class="fas fa-check text-emerald-500 text-xs"></i>
+                                                    <span>Administrator credentials will be generated</span>
+                                                </li>
+                                                <li class="flex items-center gap-2">
+                                                    <i class="fas fa-check text-emerald-500 text-xs"></i>
+                                                    <span>System will send welcome emails</span>
+                                                </li>
+                                                <li class="flex items-center gap-2">
+                                                    <i class="fas fa-check text-emerald-500 text-xs"></i>
+                                                    <span>Provisioning cannot be automatically reversed</span>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </label>
+                                    <div id="termsError" class="text-red-500 text-sm hidden"></div>
                                 </div>
+                            </div>
 
-                                <!-- Navigation Buttons -->
-                                <div class="flex justify-between pt-8 border-t border-slate-100">
+                            <!-- Final Actions -->
+                            <div class="flex justify-between items-center pt-8 border-t border-slate-200">
+                                <div class="text-sm text-slate-500">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Ready to create your new school instance
+                                </div>
+                                <div class="flex gap-4">
                                     <button type="button"
                                         onclick="previousStep(3)"
-                                        class="px-6 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition touch-target flex items-center gap-2">
+                                        class="px-6 py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
                                         <i class="fas fa-arrow-left"></i>
                                         Back to Subscription
                                     </button>
                                     <button type="submit"
                                         id="submitBtn"
-                                        class="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition flex items-center gap-2 touch-target">
+                                        class="px-8 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl hover:from-emerald-700 hover:to-emerald-600 transition flex items-center gap-2 shadow-lg shadow-emerald-100">
                                         <i class="fas fa-rocket"></i>
                                         Provision School
                                     </button>
@@ -1138,39 +1470,101 @@ $nigerianStates = [
         </main>
     </div>
 
+    <!-- City Selector Modal -->
+    <div id="citySelectorModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] hidden">
+        <div class="bg-white rounded-2xl p-6 max-w-md mx-4 w-full">
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-slate-900">Select City or Enter Custom</h3>
+                <p class="text-sm text-slate-500 mt-1">Choose from list or type your own</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Select from List</label>
+                    <select id="citySelect" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition">
+                        <option value="">Select a city</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Or Enter Custom City</label>
+                    <input type="text"
+                        id="customCity"
+                        class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                        placeholder="Enter city name">
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button type="button"
+                    onclick="closeCitySelector()"
+                    class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                    Cancel
+                </button>
+                <button type="button"
+                    onclick="applyCitySelection()"
+                    class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition">
+                    Apply
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Modal -->
-    <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+    <div id="loadingModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] hidden">
         <div class="bg-white rounded-2xl p-8 max-w-md mx-4">
             <div class="text-center">
-                <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-spinner fa-spin text-blue-600 text-3xl"></i>
+                <div class="w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-spinner fa-spin text-indigo-600 text-3xl"></i>
                 </div>
-                <h3 class="text-xl font-black text-slate-900 mb-2">Processing Provisioning</h3>
-                <p class="text-slate-600 mb-4">Setting up school database and accounts. This may take a moment...</p>
+                <h3 class="text-xl font-black text-slate-900 mb-2">Provisioning School</h3>
+                <p class="text-slate-600 mb-4" id="loadingMessage">Setting up database and accounts...</p>
                 <div class="w-full bg-slate-100 rounded-full h-2">
-                    <div id="progressBar" class="bg-blue-600 h-2 rounded-full w-0 transition-all duration-500"></div>
+                    <div id="progressBar" class="bg-gradient-to-r from-indigo-600 to-purple-600 h-2 rounded-full w-0 transition-all duration-300"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Success Modal -->
-    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
-        <div class="bg-white rounded-2xl p-8 max-w-md mx-4 transform transition-all">
+    <div id="successModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-2xl mx-4">
             <div class="text-center">
-                <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 success-pulse">
-                    <i class="fas fa-check text-emerald-600 text-3xl"></i>
+                <div class="w-24 h-24 bg-gradient-to-br from-emerald-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-check text-emerald-600 text-4xl"></i>
                 </div>
-                <h3 class="text-xl font-black text-slate-900 mb-2">School Provisioned Successfully!</h3>
-                <p class="text-slate-600 mb-4" id="successMessage"></p>
-                <div class="space-y-3">
-                    <button onclick="closeSuccessModal()"
-                        class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition touch-target">
-                        Continue to Schools Registry
-                    </button>
+                <h3 class="text-2xl font-black text-slate-900 mb-2">School Successfully Provisioned!</h3>
+                <p class="text-slate-600 mb-6" id="successMessage"></p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-slate-50 p-4 rounded-xl">
+                        <p class="text-sm text-slate-500 mb-1">School URL</p>
+                        <p id="successSchoolURL" class="font-mono text-sm text-slate-900 truncate"></p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl">
+                        <p class="text-sm text-slate-500 mb-1">Admin Email</p>
+                        <p id="successAdminEmail" class="font-mono text-sm text-slate-900 truncate"></p>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-exclamation-triangle text-amber-600 text-xl"></i>
+                        <div class="text-left">
+                            <p class="text-sm font-medium text-amber-900">Important Note</p>
+                            <p class="text-xs text-amber-700">Login credentials have been sent to the administrator's email. They should check their inbox (and spam folder).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
                     <button onclick="window.location.href='../index.php'"
-                        class="w-full py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition touch-target">
-                        View All Schools
+                        class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Back to Dashboard
+                    </button>
+                    <button onclick="copySchoolURL()"
+                        class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition">
+                        Copy School URL
                     </button>
                 </div>
             </div>
@@ -1178,845 +1572,674 @@ $nigerianStates = [
     </div>
 
     <!-- Error Modal -->
-    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+    <div id="errorModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] hidden">
         <div class="bg-white rounded-2xl p-8 max-w-md mx-4">
             <div class="text-center">
-                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
+                <div class="w-20 h-20 bg-gradient-to-br from-rose-100 to-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-exclamation-triangle text-rose-600 text-3xl"></i>
                 </div>
                 <h3 class="text-xl font-black text-slate-900 mb-2" id="errorTitle">Provisioning Failed</h3>
                 <p class="text-slate-600 mb-4" id="errorMessage"></p>
-                <button onclick="closeErrorModal()"
-                    class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition touch-target">
-                    Try Again
-                </button>
+                <div class="space-y-3">
+                    <button onclick="closeErrorModal()"
+                        class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition">
+                        Try Again
+                    </button>
+                    <button onclick="window.location.reload()"
+                        class="w-full py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Refresh Page
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[9998] space-y-2"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
+        // Global state
         let currentStep = 1;
         let selectedPlan = {
-            slug: 'growth',
-            id: 2,
-            price: <?php echo $plans[1]['price_monthly'] ?? 49.99; ?>,
-            name: 'Growth'
+            slug: '<?php echo $plans[0]['slug'] ?? 'starter'; ?>',
+            id: <?php echo $plans[0]['id'] ?? 1; ?>,
+            price: <?php echo $plans[0]['price_monthly'] ?? 49.99; ?>,
+            name: '<?php echo htmlspecialchars($plans[0]['name'] ?? 'Starter'); ?>',
+            features: <?php echo json_encode(json_decode($plans[0]['features'] ?? '[]', true) ?: []); ?>
         };
         let formData = {};
+        let stateCities = <?php echo json_encode($nigerianStates); ?>;
 
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Provisioning form initialized');
-
-            // Set initial timestamp
-            updateTimestamp();
-            setInterval(updateTimestamp, 60000);
-
-            // Set default school type if not already set
-            const schoolTypeSelect = document.getElementById('schoolType');
-            if (schoolTypeSelect && !schoolTypeSelect.value) {
-                schoolTypeSelect.value = 'secondary';
-                console.log('Set default school type to:', schoolTypeSelect.value);
-            }
-
-            // Set default admin role
-            const adminRoleSelect = document.getElementById('adminRole');
-            if (adminRoleSelect && !adminRoleSelect.value) {
-                adminRoleSelect.value = 'owner';
-            }
-
-            // Set default admin title
-            const adminTitleSelect = document.getElementById('adminTitle');
-            if (adminTitleSelect && !adminTitleSelect.value) {
-                adminTitleSelect.value = 'principal';
-            }
-
-            // Initialize plan selection - FIXED: Use correct plan data
-            const growthPlanPrice = <?php echo isset($plans[1]) ? $plans[1]['price_monthly'] : 49.99; ?>;
-            const growthPlanLimit = <?php echo isset($plans[1]) ? $plans[1]['student_limit'] : 500; ?>;
-            selectPlan('growth', 2, growthPlanPrice, growthPlanLimit);
-
-            // Add event listeners for better UX
-            initializeEventListeners();
-
-            // Debug: Log all form fields
-            console.log('Initial form state:');
-            console.log('School Name:', document.getElementById('schoolName')?.value);
-            console.log('School Type:', document.getElementById('schoolType')?.value);
-            console.log('Current Step:', currentStep);
-
-            // Make sure step 1 is visible
-            showStep(1);
+            
+            // Initialize Select2 for select elements
+            initializeSelect2();
+            
+            // Set default plan
+            selectPlan(selectedPlan.slug, selectedPlan.id, selectedPlan.price, 100);
+            
+            // Update slug preview
+            updateSlugPreview();
+            
+            // Update progress indicators
+            updateProgressIndicators();
+            
+            // Password strength indicator
+            document.getElementById('adminPassword')?.addEventListener('input', checkPasswordStrength);
+            
+            // Generate initial password
+            generatePassword();
+            
+            // Update billing costs when billing cycle changes
+            document.querySelectorAll('input[name="billing_cycle"]').forEach(radio => {
+                radio.addEventListener('change', updateEstimatedCosts);
+            });
         });
 
-        // Show specific step
-        function showStep(step) {
-            // Hide all steps
-            document.querySelectorAll('.step-content').forEach(el => {
-                el.classList.remove('active');
-                el.style.display = 'none';
+        function initializeSelect2() {
+            // Initialize select2 for select elements
+            $('select').select2({
+                width: '100%',
+                theme: 'bootstrap4',
+                minimumResultsForSearch: 10
+            }).on('select2:open', function() {
+                document.querySelector('.select2-search__field').focus();
             });
-
-            // Hide all indicators
-            document.querySelectorAll('.step-indicator').forEach(el => {
-                el.classList.remove('active', 'completed');
+            
+            // State change updates city options in modal
+            $('#state').on('change', function() {
+                const state = $(this).val();
+                const citySelect = $('#citySelect');
+                
+                if (state && stateCities[state]) {
+                    citySelect.empty();
+                    citySelect.append('<option value="">Select a city</option>');
+                    
+                    stateCities[state].forEach(city => {
+                        citySelect.append(`<option value="${city}">${city}</option>`);
+                    });
+                    
+                    // Reinitialize select2
+                    citySelect.select2('destroy').select2({
+                        width: '100%',
+                        theme: 'bootstrap4'
+                    });
+                } else {
+                    citySelect.empty();
+                    citySelect.append('<option value="">No cities available for this state</option>');
+                    citySelect.prop('disabled', true);
+                }
             });
+        }
 
-            // Hide all lines
-            document.querySelectorAll('.step-line').forEach(el => {
-                el.classList.remove('completed');
-            });
-
-            // Show requested step
-            const stepEl = document.getElementById(`step${step}`);
-            const indicator = document.getElementById(`stepIndicator${step}`);
-
-            if (stepEl) {
-                stepEl.style.display = 'block';
-                setTimeout(() => {
-                    stepEl.classList.add('active');
-                }, 50);
+        // City selector functions
+        function openCitySelector() {
+            const modal = document.getElementById('citySelectorModal');
+            const state = document.getElementById('state').value;
+            
+            if (!state) {
+                showToast('Please select a state first', 'error');
+                return;
             }
-
-            if (indicator) {
-                indicator.classList.add('active');
+            
+            // Populate city select if state is selected
+            if (state && stateCities[state]) {
+                const citySelect = document.getElementById('citySelect');
+                citySelect.innerHTML = '<option value="">Select a city</option>';
+                
+                stateCities[state].forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
             }
+            
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
 
-            // Mark previous steps as completed
-            for (let i = 1; i < step; i++) {
-                const prevIndicator = document.getElementById(`stepIndicator${i}`);
-                const prevLine = document.getElementById(`stepLine${i}`);
+        function closeCitySelector() {
+            const modal = document.getElementById('citySelectorModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
 
-                if (prevIndicator) prevIndicator.classList.add('completed');
-                if (prevLine) prevLine.classList.add('completed');
+        function applyCitySelection() {
+            const modal = document.getElementById('citySelectorModal');
+            const citySelect = document.getElementById('citySelect');
+            const customCity = document.getElementById('customCity');
+            
+            let selectedCity = '';
+            
+            if (customCity.value.trim()) {
+                selectedCity = customCity.value.trim();
+            } else if (citySelect.value) {
+                selectedCity = citySelect.value;
             }
+            
+            if (selectedCity) {
+                document.getElementById('city').value = selectedCity;
+                closeCitySelector();
+                showToast(`City set to: ${selectedCity}`, 'success');
+            } else {
+                showToast('Please select or enter a city', 'error');
+            }
+        }
 
+        // Step navigation
+        function nextStep(step) {
+            console.log(`Moving from step ${currentStep} to step ${step}`);
+            
+            // Validate current step
+            if (!validateStep(currentStep)) {
+                showToast('Please fill in all required fields correctly.', 'error');
+                return false;
+            }
+            
+            // Save current step data
+            saveStepData(currentStep);
+            
+            // Hide current step
+            document.getElementById(`step${currentStep}`).classList.add('hidden');
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            
+            // Show next step
+            document.getElementById(`step${step}`).classList.remove('hidden');
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            // Update progress indicators
             currentStep = step;
-            updateStepHeader();
-
-            // Populate review data if step 4
+            updateProgressIndicators();
+            
+            // Update review data if step 4
             if (step === 4) {
                 populateReviewData();
             }
-
-            console.log(`Now showing step ${step}`);
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            return true;
         }
 
-        // Update timestamp
-        function updateTimestamp() {
-            const now = new Date();
-            const options = {
-                weekday: 'short',
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            };
-            document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', options);
+        function previousStep(step) {
+            console.log(`Moving back to step ${step}`);
+            
+            // Hide current step
+            document.getElementById(`step${currentStep}`).classList.add('hidden');
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            
+            // Show previous step
+            document.getElementById(`step${step}`).classList.remove('hidden');
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            // Update progress indicators
+            currentStep = step;
+            updateProgressIndicators();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            return true;
         }
 
-        // Generate slug preview
+        function updateProgressIndicators() {
+            // Reset all
+            for (let i = 1; i <= 4; i++) {
+                const dot = document.getElementById(`stepDot${i}`);
+                const indicator = document.getElementById(`step${i}Indicator`);
+                
+                if (dot) {
+                    dot.classList.remove('active', 'completed');
+                    indicator.classList.remove('active', 'completed');
+                }
+            }
+            
+            // Mark current and previous steps
+            for (let i = 1; i <= currentStep; i++) {
+                const dot = document.getElementById(`stepDot${i}`);
+                const indicator = document.getElementById(`step${i}Indicator`);
+                
+                if (dot) {
+                    if (i === currentStep) {
+                        dot.classList.add('active');
+                        indicator.classList.add('active');
+                    } else {
+                        dot.classList.add('completed');
+                        indicator.classList.add('completed');
+                    }
+                }
+            }
+        }
+
+        function validateStep(step) {
+            let isValid = true;
+            const errorFields = [];
+            
+            if (step === 1) {
+                // Validate school information
+                const requiredFields = [
+                    { id: 'schoolName', name: 'School Name' },
+                    { id: 'schoolType', name: 'School Type' },
+                    { id: 'campusType', name: 'Campus Type' },
+                    { id: 'curriculum', name: 'Curriculum' },
+                    { id: 'country', name: 'Country' },
+                    { id: 'state', name: 'State' },
+                    { id: 'city', name: 'City' },
+                    { id: 'schoolEmail', name: 'School Email' },
+                    { id: 'phone', name: 'Phone Number' },
+                    { id: 'address', name: 'Address' }
+                ];
+                
+                requiredFields.forEach(field => {
+                    const element = document.getElementById(field.id);
+                    if (element && !element.value.trim()) {
+                        element.classList.add('border-red-500');
+                        errorFields.push(field.name);
+                        isValid = false;
+                    } else if (element) {
+                        element.classList.remove('border-red-500');
+                    }
+                });
+                
+                // Validate email format
+                const emailField = document.getElementById('schoolEmail');
+                if (emailField && emailField.value) {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(emailField.value)) {
+                        emailField.classList.add('border-red-500');
+                        errorFields.push('Valid School Email');
+                        isValid = false;
+                    }
+                }
+                
+                if (errorFields.length > 0) {
+                    showToast(`Missing: ${errorFields.join(', ')}`, 'error');
+                }
+            } else if (step === 2) {
+                // Validate admin information
+                const requiredFields = [
+                    { id: 'adminFirstName', name: 'Admin First Name' },
+                    { id: 'adminLastName', name: 'Admin Last Name' },
+                    { id: 'adminEmail', name: 'Admin Email' },
+                    { id: 'adminPhone', name: 'Admin Phone' },
+                    { id: 'adminRole', name: 'Admin Role' },
+                    { id: 'adminPassword', name: 'Admin Password' }
+                ];
+                
+                requiredFields.forEach(field => {
+                    const element = document.getElementById(field.id);
+                    if (element && !element.value.trim()) {
+                        element.classList.add('border-red-500');
+                        errorFields.push(field.name);
+                        isValid = false;
+                    } else if (element) {
+                        element.classList.remove('border-red-500');
+                    }
+                });
+                
+                // Validate email format
+                const adminEmailField = document.getElementById('adminEmail');
+                if (adminEmailField && adminEmailField.value) {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(adminEmailField.value)) {
+                        adminEmailField.classList.add('border-red-500');
+                        errorFields.push('Valid Admin Email');
+                        isValid = false;
+                    }
+                }
+                
+                // Validate password strength
+                const password = document.getElementById('adminPassword')?.value;
+                if (password && password.length < 8) {
+                    document.getElementById('adminPassword').classList.add('border-red-500');
+                    errorFields.push('Stronger Password (min 8 chars)');
+                    isValid = false;
+                }
+                
+                if (errorFields.length > 0) {
+                    showToast(`Missing: ${errorFields.join(', ')}`, 'error');
+                }
+            } else if (step === 4) {
+                // Validate terms agreement
+                const termsAgreed = document.getElementById('termsAgreement')?.checked;
+                if (!termsAgreed) {
+                    document.getElementById('termsError').textContent = 'You must agree to the terms and conditions';
+                    document.getElementById('termsError').classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('termsError').classList.add('hidden');
+                }
+            }
+            
+            return isValid;
+        }
+
+        function saveStepData(step) {
+            if (step === 1) {
+                formData.school = {
+                    name: document.getElementById('schoolName')?.value || '',
+                    type: document.getElementById('schoolType')?.value || '',
+                    campusType: document.getElementById('campusType')?.value || '',
+                    curriculum: document.getElementById('curriculum')?.value || '',
+                    country: document.getElementById('country')?.value || '',
+                    state: document.getElementById('state')?.value || '',
+                    city: document.getElementById('city')?.value || '',
+                    postalCode: document.getElementById('postalCode')?.value || '',
+                    address: document.getElementById('address')?.value || '',
+                    email: document.getElementById('schoolEmail')?.value || '',
+                    phone: document.getElementById('phone')?.value || '',
+                    description: document.getElementById('description')?.value || '',
+                    establishmentYear: document.getElementById('establishmentYear')?.value || '',
+                    studentCount: parseInt(document.getElementById('studentCount')?.value) || 500,
+                    teacherCount: parseInt(document.getElementById('teacherCount')?.value) || 50,
+                    classCount: parseInt(document.getElementById('classCount')?.value) || 20
+                };
+            } else if (step === 2) {
+                formData.admin = {
+                    firstName: document.getElementById('adminFirstName')?.value || '',
+                    lastName: document.getElementById('adminLastName')?.value || '',
+                    email: document.getElementById('adminEmail')?.value || '',
+                    phone: document.getElementById('adminPhone')?.value || '',
+                    position: document.getElementById('adminPosition')?.value || '',
+                    role: document.getElementById('adminRole')?.value || '',
+                    password: document.getElementById('adminPassword')?.value || '',
+                    require2FA: document.getElementById('require2FA')?.checked || false,
+                    forcePasswordChange: document.getElementById('forcePasswordChange')?.checked || false,
+                    sendWelcomeEmail: document.getElementById('sendWelcomeEmail')?.checked || true,
+                    notes: document.getElementById('adminNotes')?.value || ''
+                };
+            }
+        }
+
         function updateSlugPreview() {
-            const name = document.getElementById('schoolName').value;
+            const name = document.getElementById('schoolName')?.value;
             if (name) {
                 let slug = name.toLowerCase()
                     .replace(/[^a-z0-9\s-]/g, '')
                     .replace(/\s+/g, '-')
                     .replace(/-+/g, '-')
                     .trim();
-                document.getElementById('slugPreview').textContent = slug.substring(0, 50);
+                
+                // Add timestamp to ensure uniqueness
+                slug = slug.substring(0, 30);
+                document.getElementById('slugPreview').textContent = slug;
             }
         }
 
-        // Initialize event listeners
-        function initializeEventListeners() {
-            console.log('Initializing event listeners...');
-
-            // School name to city auto-fill
-            document.getElementById('schoolName')?.addEventListener('blur', function() {
-                const name = this.value;
-                if (name && !document.getElementById('city').value) {
-                    const cityMatch = name.match(/(?:^|\s)(\w+)(?:\s+(?:School|Academy|College|University|Institute))?$/i);
-                    if (cityMatch && cityMatch[1]) {
-                        document.getElementById('city').value = cityMatch[1];
-                    }
-                }
-            });
-
-            // Auto-fill country if not set
-            document.getElementById('country')?.addEventListener('focus', function() {
-                if (!this.value) {
-                    this.value = 'Nigeria';
-                }
-            });
-
-            // Fix: Add proper click handlers for ALL navigation buttons
-            setupNavigationButtons();
-
-            // Real-time validation for step 1
-            const step1Fields = ['schoolName', 'schoolType', 'country', 'state', 'city', 'schoolEmail', 'phone', 'address'];
-            step1Fields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (field) {
-                    field.addEventListener('blur', validateField);
-                    if (field.tagName === 'SELECT') {
-                        field.addEventListener('change', validateField);
-                    }
-                }
-            });
-
-            // Password generator button
-            document.querySelector('button[onclick="generatePassword()"]')?.addEventListener('click', function(e) {
-                e.preventDefault();
-                generatePassword();
-            });
-
-            // Logo upload
-            document.getElementById('logoUpload')?.addEventListener('click', function() {
-                document.getElementById('logoFile').click();
-            });
-
-            document.getElementById('logoFile')?.addEventListener('change', function(e) {
-                previewLogo(this);
-            });
-        }
-
-        // Setup navigation buttons
-        function setupNavigationButtons() {
-            console.log('Setting up navigation buttons...');
-
-            // Remove existing onclick handlers and add proper event listeners
-            const buttons = [{
-                    selector: '[onclick*="nextStep(2)"]',
-                    step: 2,
-                    label: 'Continue to Admin Setup'
-                },
-                {
-                    selector: '[onclick*="nextStep(3)"]',
-                    step: 3,
-                    label: 'Continue to Subscription'
-                },
-                {
-                    selector: '[onclick*="nextStep(4)"]',
-                    step: 4,
-                    label: 'Continue to Review'
-                }
-            ];
-
-            buttons.forEach(btn => {
-                const button = document.querySelector(btn.selector);
-                if (button) {
-                    console.log(`Found button: ${btn.label}`);
-                    // Remove old onclick
-                    button.removeAttribute('onclick');
-                    // Add new event listener
-                    button.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        console.log(`${btn.label} clicked, current step: ${currentStep}, target step: ${btn.step}`);
-                        nextStep(btn.step);
-                    });
-                } else {
-                    console.warn(`Button not found: ${btn.selector}`);
-                }
-            });
-
-            // Back buttons
-            document.querySelectorAll('[onclick*="previousStep"]').forEach(btn => {
-                const onclick = btn.getAttribute('onclick');
-                const match = onclick?.match(/previousStep\((\d+)\)/);
-                if (match) {
-                    const step = parseInt(match[1]);
-                    btn.removeAttribute('onclick');
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        console.log(`Back button clicked, going to step ${step}`);
-                        previousStep(step);
-                    });
-                }
-            });
-
-            // Cancel button
-            document.querySelector('[onclick*="window.location.href"]')?.addEventListener('click', function(e) {
-                e.preventDefault();
-                const match = this.getAttribute('onclick')?.match(/window\.location\.href='([^']+)'/);
-                if (match) {
-                    window.location.href = match[1];
-                }
-            });
-        }
-
-        // Real-time field validation
-        function validateField(e) {
-            const field = e.target;
-            const fieldId = field.id;
-            const value = field.value.trim();
-
-            // Clear previous error for this field
-            const errorElement = document.getElementById(fieldId + 'Error');
-            if (errorElement) {
-                errorElement.classList.remove('show');
-                errorElement.textContent = '';
-            }
-            field.classList.remove('error');
-            field.style.borderColor = '';
-            field.style.boxShadow = '';
-        }
-
-        // Step Navigation - FIXED: Proper step transitions
-        function nextStep(step) {
-            console.log(`nextStep called: from ${currentStep} to ${step}`);
-
-            // Don't allow going to same step
-            if (step === currentStep) {
-                console.warn(`Already on step ${step}, not moving`);
-                return false;
-            }
-
-            // Validate current step before moving
-            if (!validateCurrentStep()) {
-                console.log(`Validation failed for step ${currentStep}`);
-                highlightInvalidFields();
-                return false;
-            }
-
-            // Save data from current step
-            saveStepData(currentStep);
-            console.log('Step data saved:', formData);
-
-            // Transition to next step
-            showStep(step);
-
-            console.log(`Successfully moved to step ${step}`);
-            return true;
-        }
-
-        function previousStep(step) {
-            console.log(`previousStep: from ${currentStep} to ${step}`);
-
-            // Don't allow going to same step
-            if (step === currentStep) {
-                console.warn(`Already on step ${step}, not moving`);
-                return false;
-            }
-
-            // No validation needed when going back
-            showStep(step);
-            return true;
-        }
-
-        function updateStepHeader() {
-            const titles = {
-                1: 'School Provisioning',
-                2: 'Administrator Setup',
-                3: 'Subscription Plan Selection',
-                4: 'Review & Finalize Provisioning'
-            };
-
-            const descriptions = {
-                1: 'Fill in the essential details to onboard a new school to AcademixSuite',
-                2: 'Configure primary administrator access and security settings',
-                3: 'Select the appropriate subscription plan based on your school\'s needs',
-                4: 'Review all details before launching the provisioning process'
-            };
-
-            const titleEl = document.getElementById('stepTitle');
-            const descEl = document.getElementById('stepDescription');
-
-            if (titleEl) titleEl.textContent = titles[currentStep] || 'School Provisioning';
-            if (descEl) descEl.textContent = descriptions[currentStep] || '';
-        }
-
-        function saveStepData(step) {
-            try {
-                if (step === 1) {
-                    formData.school = {
-                        name: document.getElementById('schoolName')?.value || '',
-                        type: document.getElementById('schoolType')?.value || '',
-                        country: document.getElementById('country')?.value || '',
-                        state: document.getElementById('state')?.value || '',
-                        city: document.getElementById('city')?.value || '',
-                        address: document.getElementById('address')?.value || '',
-                        email: document.getElementById('schoolEmail')?.value || '',
-                        phone: document.getElementById('phone')?.value || '',
-                        website: document.getElementById('website')?.value || '',
-                        max_students: document.getElementById('studentCount')?.value || 500,
-                        max_staff: document.getElementById('staffCount')?.value || 50
-                    };
-                    console.log('Saved school data:', formData.school);
-                } else if (step === 2) {
-                    formData.admin = {
-                        name: document.getElementById('adminName')?.value || '',
-                        email: document.getElementById('adminEmail')?.value || '',
-                        phone: document.getElementById('adminPhone')?.value || '',
-                        title: document.getElementById('adminTitle')?.value || '',
-                        role: document.getElementById('adminRole')?.value || '',
-                        password: document.getElementById('adminPassword')?.value || '',
-                        twoFactor: document.getElementById('twoFactor')?.checked || false,
-                        sessionTimeout: document.getElementById('sessionTimeout')?.checked || false
-                    };
-                    console.log('Saved admin data:', formData.admin);
-                }
-            } catch (error) {
-                console.error('Error saving step data:', error);
-            }
-        }
-
-        function validateCurrentStep() {
-            console.log(`Validating step ${currentStep}...`);
-
-            // Clear previous errors
-            document.querySelectorAll('.error-message').forEach(el => {
-                el.classList.remove('show');
-                el.textContent = '';
-            });
-
-            document.querySelectorAll('.form-input').forEach(el => {
-                el.classList.remove('error');
-                el.style.borderColor = '';
-                el.style.boxShadow = '';
-            });
-
-            if (currentStep === 1) {
-                return validateStep1();
-            } else if (currentStep === 2) {
-                return validateStep2();
-            } else if (currentStep === 4) {
-                return validateStep4();
-            }
-
-            // Step 3 doesn't need validation
-            return true;
-        }
-
-        function highlightInvalidFields() {
-            // This function visually highlights all invalid fields
-            if (currentStep === 1) {
-                const fields = ['schoolName', 'schoolType', 'country', 'state', 'city', 'schoolEmail', 'phone', 'address'];
-                fields.forEach(fieldId => {
-                    const field = document.getElementById(fieldId);
-                    const errorElement = document.getElementById(fieldId + 'Error');
-
-                    if (field && !field.value.trim() && fieldId !== 'website') {
-                        const fieldName = fieldId === 'schoolType' ? 'School type' :
-                            fieldId === 'schoolEmail' ? 'School email' :
-                            fieldId.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-
-                        if (errorElement) {
-                            errorElement.textContent = `${fieldName} is required`;
-                            errorElement.classList.add('show');
-                        }
-                        field.classList.add('error');
-                        field.style.borderColor = '#ef4444';
-                        field.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
-                    }
-                });
-            }
-        }
-
-        function validateStep1() {
-            let isValid = true;
-            const errors = [];
-
-            // School Name
-            const name = document.getElementById('schoolName')?.value.trim();
-            if (!name) {
-                showError('schoolName', 'School name is required');
-                errors.push('School name is required');
-                isValid = false;
-            }
-
-            // School Type
-            const type = document.getElementById('schoolType')?.value;
-            if (!type) {
-                showError('schoolType', 'Please select a school type');
-                errors.push('School type is required');
-                isValid = false;
-            }
-
-            // Country
-            const country = document.getElementById('country')?.value;
-            if (!country) {
-                showError('country', 'Please select a country');
-                errors.push('Country is required');
-                isValid = false;
-            }
-
-            // State
-            const state = document.getElementById('state')?.value;
-            if (!state) {
-                showError('state', 'Please select a state');
-                errors.push('State is required');
-                isValid = false;
-            }
-
-            // City
-            const city = document.getElementById('city')?.value.trim();
-            if (!city) {
-                showError('city', 'City/town is required');
-                errors.push('City/town is required');
-                isValid = false;
-            }
-
-            // School Email
-            const email = document.getElementById('schoolEmail')?.value.trim();
-            if (!email) {
-                showError('schoolEmail', 'School email is required');
-                errors.push('School email is required');
-                isValid = false;
-            } else if (!isValidEmail(email)) {
-                showError('schoolEmail', 'Please enter a valid email address');
-                errors.push('Invalid email format');
-                isValid = false;
-            }
-
-            // Phone
-            const phone = document.getElementById('phone')?.value.trim();
-            if (!phone) {
-                showError('phone', 'Phone number is required');
-                errors.push('Phone number is required');
-                isValid = false;
-            }
-
-            // Address
-            const address = document.getElementById('address')?.value.trim();
-            if (!address) {
-                showError('address', 'Address is required');
-                errors.push('Address is required');
-                isValid = false;
-            }
-
-            if (!isValid) {
-                console.log('Step 1 validation errors:', errors);
-            } else {
-                console.log('Step 1 validation passed!');
-            }
-
-            return isValid;
-        }
-
-        function validateStep2() {
-            let isValid = true;
-            const errors = [];
-
-            // Admin Name
-            const adminName = document.getElementById('adminName')?.value.trim();
-            if (!adminName) {
-                showError('adminName', 'Administrator name is required');
-                errors.push('Administrator name is required');
-                isValid = false;
-            }
-
-            // Admin Email
-            const adminEmail = document.getElementById('adminEmail')?.value.trim();
-            if (!adminEmail) {
-                showError('adminEmail', 'Administrator email is required');
-                errors.push('Administrator email is required');
-                isValid = false;
-            } else if (!isValidEmail(adminEmail)) {
-                showError('adminEmail', 'Please enter a valid email address');
-                errors.push('Invalid admin email format');
-                isValid = false;
-            }
-
-            // Admin Role
-            const adminRole = document.getElementById('adminRole')?.value;
-            if (!adminRole) {
-                showError('adminRole', 'Please select an admin role');
-                errors.push('Admin role is required');
-                isValid = false;
-            }
-
-            // Password
-            const password = document.getElementById('adminPassword')?.value;
-            if (!password) {
-                showError('adminPassword', 'Administrator password is required');
-                errors.push('Password is required');
-                isValid = false;
-            } else if (password.length < 6) {
-                showError('adminPassword', 'Password must be at least 6 characters');
-                errors.push('Password too short');
-                isValid = false;
-            }
-
-            // Admin Phone
-            const adminPhone = document.getElementById('adminPhone')?.value.trim();
-            if (!adminPhone) {
-                showError('adminPhone', 'Administrator phone is required');
-                errors.push('Administrator phone is required');
-                isValid = false;
-            }
-
-            // Admin Title
-            const adminTitle = document.getElementById('adminTitle')?.value;
-            if (!adminTitle) {
-                showError('adminTitle', 'Administrator title is required');
-                errors.push('Administrator title is required');
-                isValid = false;
-            }
-
-            if (!isValid) {
-                console.log('Step 2 validation errors:', errors);
-            } else {
-                console.log('Step 2 validation passed!');
-            }
-
-            return isValid;
-        }
-
-        function validateStep4() {
-            let isValid = true;
-
-            // Terms agreement
-            const termsAgreed = document.getElementById('termsAgreement')?.checked;
-            if (!termsAgreed) {
-                const termsError = document.getElementById('termsError');
-                if (termsError) {
-                    termsError.textContent = 'You must agree to the terms to proceed';
-                    termsError.classList.add('show');
-                }
-                isValid = false;
-            }
-
-            return isValid;
-        }
-
-        function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-
-        function showError(fieldId, message) {
-            const errorElement = document.getElementById(fieldId + 'Error');
-            const inputElement = document.getElementById(fieldId);
-
-            if (errorElement && inputElement) {
-                errorElement.textContent = message;
-                errorElement.classList.add('show');
-                inputElement.classList.add('error');
-                inputElement.style.borderColor = '#ef4444';
-                inputElement.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
-
-                // Focus on first error
-                if (!document.querySelector('.form-input.error:focus')) {
-                    inputElement.focus();
-                }
+        function updateCapacityEstimate() {
+            const students = parseInt(document.getElementById('studentCount')?.value) || 0;
+            const teachers = parseInt(document.getElementById('teacherCount')?.value) || 0;
+            
+            if (teachers > 0) {
+                const ratio = Math.round(students / teachers);
+                document.getElementById('studentTeacherRatio').textContent = `${ratio}:1`;
             }
         }
 
         function selectPlan(planSlug, planId, planPrice, studentLimit) {
-            console.log('Selecting plan:', {
-                planSlug,
-                planId,
-                planPrice,
-                studentLimit
-            });
-
-            selectedPlan = {
-                slug: planSlug,
-                id: planId,
-                price: planPrice,
-                studentLimit: studentLimit,
-                name: planSlug === 'starter' ? 'Starter' : planSlug === 'growth' ? 'Growth' : 'Enterprise'
-            };
-
-            console.log('Selected plan:', selectedPlan);
-
+            console.log('Selecting plan:', planSlug);
+            
+            // Update selected plan
+            selectedPlan.slug = planSlug;
+            selectedPlan.id = planId;
+            selectedPlan.price = planPrice;
+            
+            // Get plan name and features from the selected card
+            const selectedCard = document.getElementById(`planCard${planSlug}`);
+            if (selectedCard) {
+                selectedPlan.name = selectedCard.querySelector('h3')?.textContent || planSlug;
+                // Extract features from the list items
+                const features = [];
+                selectedCard.querySelectorAll('ul li span').forEach(span => {
+                    features.push(span.textContent);
+                });
+                selectedPlan.features = features;
+            }
+            
             // Update hidden inputs
-            const planIdInput = document.getElementById('planId');
-            const planSlugInput = document.getElementById('planSlug');
-
-            if (planIdInput) planIdInput.value = planId;
-            if (planSlugInput) planSlugInput.value = planSlug;
-
-            console.log('Updated hidden inputs:', {
-                planId: planIdInput?.value,
-                planSlug: planSlugInput?.value
-            });
-
-            // Update UI - remove all selections first
-            const planCards = document.querySelectorAll('#planSelection > div');
-            console.log(`Found ${planCards.length} plan cards`);
-
-            planCards.forEach(card => {
-                card.classList.remove('border-blue-500', 'bg-blue-50');
+            document.getElementById('planId').value = planId;
+            document.getElementById('planSlug').value = planSlug;
+            
+            // Update UI
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.classList.remove('selected');
                 const indicator = card.querySelector('.rounded-full');
                 if (indicator) {
-                    indicator.classList.remove('border-blue-500', 'bg-blue-500');
+                    indicator.classList.remove('border-indigo-600', 'bg-indigo-600');
                     indicator.classList.add('border-slate-300');
                 }
             });
-
-            // Add selection to clicked card
-            const selectedCard = document.querySelector(`[onclick*="${planSlug}"]`);
+            
             if (selectedCard) {
-                console.log('Found selected card:', selectedCard);
-                selectedCard.classList.add('border-blue-500', 'bg-blue-50');
-                const selectedIndicator = selectedCard.querySelector('.rounded-full');
-                if (selectedIndicator) {
-                    selectedIndicator.classList.add('border-blue-500', 'bg-blue-500');
-                    selectedIndicator.classList.remove('border-slate-300');
+                selectedCard.classList.add('selected');
+                const indicator = selectedCard.querySelector('.rounded-full');
+                if (indicator) {
+                    indicator.classList.add('border-indigo-600', 'bg-indigo-600');
+                    indicator.classList.remove('border-slate-300');
                 }
-            } else {
-                console.warn(`Could not find card for plan: ${planSlug}`);
-                // Try alternative selector
-                const altCard = document.querySelector(`[onclick*="selectPlan('${planSlug}')"]`);
-                if (altCard) {
-                    console.log('Found card with alternative selector');
-                    altCard.classList.add('border-blue-500', 'bg-blue-50');
-                    const indicator = altCard.querySelector('.rounded-full');
-                    if (indicator) {
-                        indicator.classList.add('border-blue-500', 'bg-blue-500');
-                        indicator.classList.remove('border-slate-300');
+            }
+            
+            // Update estimated costs
+            updateEstimatedCosts();
+        }
+
+        function updateEstimatedCosts() {
+            const price = selectedPlan.price || 49.99;
+            const billingCycle = document.querySelector('input[name="billing_cycle"]:checked')?.value || 'monthly';
+            
+            let monthlyCost = price;
+            let yearlyCost = price * 12;
+            
+            // If yearly plan price exists in database, use it
+            const selectedPlanCard = document.getElementById(`planCard${selectedPlan.slug}`);
+            if (selectedPlanCard) {
+                const yearlyText = selectedPlanCard.querySelector('p.text-xs.text-slate-400')?.textContent;
+                if (yearlyText && yearlyText.includes('₦')) {
+                    const yearlyMatch = yearlyText.match(/₦([\d,]+\.?\d*)/);
+                    if (yearlyMatch) {
+                        yearlyCost = parseFloat(yearlyMatch[1].replace(/,/g, ''));
                     }
                 }
             }
-
-            // Update student count if needed
-            const studentCountInput = document.getElementById('studentCount');
-            if (studentCountInput) {
-                if (studentCountInput.value > studentLimit) {
-                    studentCountInput.value = studentLimit;
-                }
-                studentCountInput.max = studentLimit;
-                console.log('Updated student count max to:', studentLimit);
-            }
-        }
-
-        function populateReviewData() {
-            console.log('Populating review data with:', formData);
-
-            // School details
-            if (formData.school) {
-                const schoolNameEl = document.getElementById('reviewSchoolName');
-                const schoolTypeEl = document.getElementById('reviewSchoolType');
-                const contactEl = document.getElementById('reviewContact');
-
-                if (schoolNameEl) schoolNameEl.textContent = formData.school.name || 'Not provided';
-                if (schoolTypeEl) schoolTypeEl.textContent =
-                    `${(formData.school.type || '').toUpperCase()} • ${formData.school.city || ''}, ${formData.school.state || ''}`;
-                if (contactEl) contactEl.textContent =
-                    `${formData.school.email || ''} • ${formData.school.phone || ''}`;
-            }
-
-            // Admin details
-            if (formData.admin) {
-                const adminNameEl = document.getElementById('reviewAdminName');
-                const adminContactEl = document.getElementById('reviewAdminContact');
-                const adminRoleEl = document.getElementById('reviewAdminRole');
-
-                if (adminNameEl) adminNameEl.textContent =
-                    `${formData.admin.name || ''} (${formData.admin.title || ''})`;
-                if (adminContactEl) adminContactEl.textContent =
-                    `${formData.admin.email || ''} • ${formData.admin.phone || ''}`;
-                if (adminRoleEl) adminRoleEl.textContent =
-                    (formData.admin.role || '').toUpperCase();
-            }
-
-            // Subscription details
-            const planName = selectedPlan.name || 'Growth';
-            const planPrice = selectedPlan.price || 49.99;
-            const planEl = document.getElementById('reviewPlan');
-            const costEl = document.getElementById('reviewCost');
-            const billingEl = document.getElementById('reviewBilling');
-
-            if (planEl) planEl.textContent = planName;
-            if (costEl) costEl.textContent =
-                `₦${planPrice.toLocaleString('en-US', {minimumFractionDigits: 2})}/month`;
-
-            // Billing cycle
-            const billingCycle = document.querySelector('input[name="billing_cycle"]:checked');
-            if (billingEl) {
-                billingEl.textContent = billingCycle ? billingCycle.value.toUpperCase() : 'YEARLY';
-            }
-
-            console.log('Review data populated:', {
-                plan: planName,
-                price: planPrice,
-                billing: billingEl?.textContent
-            });
+            
+            document.getElementById('estimatedCost').textContent = `₦${monthlyCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('estimatedYearlyCost').textContent = `₦${yearlyCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         }
 
         function generatePassword() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
             let password = '';
-            for (let i = 0; i < 12; i++) {
+            
+            // Ensure at least one of each required character type
+            password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(Math.floor(Math.random() * 26));
+            password += 'abcdefghijklmnopqrstuvwxyz'.charAt(Math.floor(Math.random() * 26));
+            password += '0123456789'.charAt(Math.floor(Math.random() * 10));
+            password += '!@#$%^&*'.charAt(Math.floor(Math.random() * 8));
+            
+            // Fill remaining characters
+            for (let i = 4; i < 12; i++) {
                 password += chars.charAt(Math.floor(Math.random() * chars.length));
             }
+            
+            // Shuffle the password
+            password = password.split('').sort(() => 0.5 - Math.random()).join('');
+            
             const passwordInput = document.getElementById('adminPassword');
             if (passwordInput) {
                 passwordInput.value = password;
-                passwordInput.type = 'text'; // Show password temporarily
-                setTimeout(() => {
-                    passwordInput.type = 'password';
-                }, 2000);
+                checkPasswordStrength();
             }
         }
 
-        // Logo upload preview
+        function checkPasswordStrength() {
+            const password = document.getElementById('adminPassword')?.value || '';
+            const strengthBar = document.getElementById('passwordStrengthBar');
+            const strengthText = document.getElementById('passwordStrengthText');
+            
+            let strength = 0;
+            let messages = [];
+            
+            // Length check
+            if (password.length >= 8) strength += 25;
+            else messages.push('At least 8 characters');
+            
+            // Upper case check
+            if (/[A-Z]/.test(password)) strength += 25;
+            else messages.push('One uppercase letter');
+            
+            // Lower case check
+            if (/[a-z]/.test(password)) strength += 25;
+            else messages.push('One lowercase letter');
+            
+            // Number check
+            if (/[0-9]/.test(password)) strength += 15;
+            else messages.push('One number');
+            
+            // Special character check
+            if (/[^A-Za-z0-9]/.test(password)) strength += 10;
+            else messages.push('One special character');
+            
+            // Set strength bar
+            if (strengthBar) {
+                strengthBar.style.width = `${strength}%`;
+                
+                if (strength < 50) {
+                    strengthBar.className = 'h-full bg-red-500';
+                    strengthText.textContent = 'Weak';
+                    strengthText.className = 'text-xs font-medium text-red-600';
+                } else if (strength < 80) {
+                    strengthBar.className = 'h-full bg-amber-500';
+                    strengthText.textContent = 'Good';
+                    strengthText.className = 'text-xs font-medium text-amber-600';
+                } else {
+                    strengthBar.className = 'h-full bg-emerald-500';
+                    strengthText.textContent = 'Strong';
+                    strengthText.className = 'text-xs font-medium text-emerald-600';
+                }
+            }
+        }
+
+        function togglePasswordVisibility(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.type = field.type === 'password' ? 'text' : 'password';
+            }
+        }
+
         function previewLogo(input) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
-                if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                    alert('File size must be less than 5MB');
+                
+                // Validate file size
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('File size must be less than 5MB', 'error');
                     input.value = '';
                     return;
                 }
-
+                
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    showToast('Please upload a valid image file (JPEG, PNG, WebP)', 'error');
+                    input.value = '';
+                    return;
+                }
+                
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const previewImage = document.getElementById('previewImage');
-                    const fileName = document.getElementById('fileName');
-                    const logoPreview = document.getElementById('logoPreview');
-                    const logoUpload = document.getElementById('logoUpload');
-
-                    if (previewImage) previewImage.src = e.target.result;
-                    if (fileName) fileName.textContent = file.name;
-                    if (logoPreview) logoPreview.classList.remove('hidden');
-                    if (logoUpload) logoUpload.style.display = 'none';
+                    document.getElementById('previewImage').src = e.target.result;
+                    document.getElementById('fileName').textContent = file.name;
+                    document.getElementById('fileSize').textContent = formatFileSize(file.size);
+                    document.getElementById('logoPreview').classList.remove('hidden');
+                    document.getElementById('logoUploadArea').style.display = 'none';
                 };
                 reader.readAsDataURL(file);
             }
         }
 
         function removeLogo() {
-            const logoFile = document.getElementById('logoFile');
-            const logoPreview = document.getElementById('logoPreview');
-            const logoUpload = document.getElementById('logoUpload');
-
-            if (logoFile) logoFile.value = '';
-            if (logoPreview) logoPreview.classList.add('hidden');
-            if (logoUpload) logoUpload.style.display = 'block';
+            document.getElementById('logoFile').value = '';
+            document.getElementById('logoPreview').classList.add('hidden');
+            document.getElementById('logoUploadArea').style.display = 'block';
         }
 
-        // Update the error handling part:
-        document.getElementById('provisionForm')?.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            console.log('Form submission started');
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
 
-            if (!validateCurrentStep()) {
-                console.log('Final validation failed');
+        function populateReviewData() {
+            // School details
+            if (formData.school) {
+                document.getElementById('reviewSchoolName').textContent = formData.school.name;
+                document.getElementById('reviewSchoolType').textContent = 
+                    document.querySelector(`#schoolType option[value="${formData.school.type}"]`)?.textContent || formData.school.type;
+                document.getElementById('reviewCampusType').textContent = 
+                    document.querySelector(`#campusType option[value="${formData.school.campusType}"]`)?.textContent || formData.school.campusType;
+                document.getElementById('reviewCurriculum').textContent = 
+                    document.querySelector(`#curriculum option[value="${formData.school.curriculum}"]`)?.textContent || formData.school.curriculum;
+                document.getElementById('reviewLocation').textContent = 
+                    `${formData.school.city}, ${formData.school.state}, ${formData.school.country}`;
+                document.getElementById('reviewContact').textContent = 
+                    `${formData.school.email} • ${formData.school.phone}`;
+            }
+            
+            // Admin details
+            if (formData.admin) {
+                document.getElementById('reviewAdminName').textContent = 
+                    `${formData.admin.firstName} ${formData.admin.lastName}`;
+                document.getElementById('reviewAdminRole').textContent = 
+                    document.querySelector(`#adminRole option[value="${formData.admin.role}"]`)?.textContent || formData.admin.role;
+                document.getElementById('reviewAdminPosition').textContent = 
+                    document.querySelector(`#adminPosition option[value="${formData.admin.position}"]`)?.textContent || formData.admin.position;
+                document.getElementById('reviewAdminEmail').textContent = formData.admin.email;
+                document.getElementById('reviewAdminPhone').textContent = formData.admin.phone;
+            }
+            
+            // Subscription details
+            document.getElementById('reviewPlan').textContent = selectedPlan.name;
+            document.getElementById('reviewCost').textContent = 
+                `₦${selectedPlan.price.toLocaleString('en-US', {minimumFractionDigits: 2})}/month`;
+            
+            const billingCycle = document.querySelector('input[name="billing_cycle"]:checked')?.value || 'monthly';
+            document.getElementById('reviewBilling').textContent = 
+                billingCycle.charAt(0).toUpperCase() + billingCycle.slice(1);
+            
+            // Features
+            document.getElementById('reviewFeatures').textContent = 
+                selectedPlan.features?.slice(0, 3).join(', ') + (selectedPlan.features?.length > 3 ? '...' : '');
+            
+            // Database name and URL
+            const slug = document.getElementById('slugPreview').textContent;
+            document.getElementById('reviewDatabaseName').textContent = `school_${Date.now()}`;
+            document.getElementById('reviewAccessURL').textContent = 
+                `/academixsuite/tenant/${slug}`;
+        }
+
+        // Form submission
+        document.getElementById('provisionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!validateStep(4)) {
+                showToast('Please agree to the terms and conditions', 'error');
                 return;
             }
-
-            // Save all data
-            saveStepData(1);
-            saveStepData(2);
-
+            
             // Show loading modal
             showLoadingModal();
-
+            
             try {
                 const formDataObj = new FormData(this);
-
-                // Log form data for debugging
-                console.log('Submitting form data:');
-                for (let [key, value] of formDataObj.entries()) {
-                    if (key !== 'admin_password') { // Don't log passwords
-                        console.log(`${key}: ${value}`);
-                    }
-                }
-
-                console.log('Sending actual form data...');
+                
                 const response = await fetch('process_provision.php', {
                     method: 'POST',
                     body: formDataObj,
@@ -2024,64 +2247,17 @@ $nigerianStates = [
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
-
-                console.log('Response status:', response.status);
-
-                // Get the raw text first
-                const rawText = await response.text();
-                console.log('Raw response text (first 500 chars):', rawText.substring(0, 500));
-
-                let result;
-                try {
-                    result = JSON.parse(rawText);
-                    console.log('Parsed JSON response:', result);
-                } catch (jsonError) {
-                    console.error('Failed to parse JSON response:', jsonError);
-
-                    // Try to extract error from HTML
-                    let errorMessage = 'Server returned invalid JSON. ';
-                    if (rawText.includes('<b>Warning</b>') || rawText.includes('<b>Fatal error</b>')) {
-                        // Extract PHP error from HTML
-                        const match = rawText.match(/<b>(.*?)<\/b>:\s*(.*?) in .*? on line/);
-                        if (match) {
-                            errorMessage += 'PHP Error: ' + match[1] + ' - ' + match[2];
-                        } else {
-                            errorMessage += 'Check PHP error logs.';
-                        }
-                    }
-
-                    hideLoadingModal();
-                    showErrorModal(
-                        'Server Error',
-                        errorMessage + '<br><br>' +
-                        '<details><summary>Raw Response</summary><pre>' +
-                        rawText.substring(0, 1000) + '</pre></details>'
-                    );
-                    return;
-                }
-
+                
+                const result = await response.json();
+                
                 if (result.success) {
-                    showSuccessModal(result.message, result.school_slug, result.admin_email);
+                    showSuccessModal(result);
                 } else {
-                    showErrorModal(
-                        'Provisioning Failed',
-                        result.message + '<br><br>' +
-                        (result.debug ? '<details><summary>Debug Info</summary><pre>' +
-                            JSON.stringify(result.debug, null, 2) + '</pre></details>' : '')
-                    );
+                    showErrorModal('Provisioning Failed', result.message || 'An unknown error occurred');
                 }
-
             } catch (error) {
-                console.error('Network error:', error);
-                showErrorModal(
-                    'Network Error',
-                    'Unable to connect to server:<br><br>' +
-                    error.message + '<br><br>' +
-                    'Please check:<br>' +
-                    '1. PHP is running<br>' +
-                    '2. File exists at process_provision.php<br>' +
-                    '3. Check browser console for details'
-                );
+                console.error('Error:', error);
+                showErrorModal('Network Error', 'Unable to connect to server. Please check your internet connection.');
             } finally {
                 hideLoadingModal();
             }
@@ -2092,20 +2268,18 @@ $nigerianStates = [
             if (modal) {
                 modal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
-
+                
                 // Animate progress bar
-                const progressBar = document.getElementById('progressBar');
-                if (progressBar) {
-                    let progress = 0;
-                    const interval = setInterval(() => {
-                        progress += 10;
-                        progressBar.style.width = `${progress}%`;
-
-                        if (progress >= 90) {
-                            clearInterval(interval);
-                        }
-                    }, 500);
-                }
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 10;
+                    if (progress > 90) progress = 90;
+                    
+                    document.getElementById('progressBar').style.width = `${progress}%`;
+                }, 500);
+                
+                // Store interval ID for cleanup
+                modal.dataset.intervalId = interval;
             }
         }
 
@@ -2114,42 +2288,36 @@ $nigerianStates = [
             if (modal) {
                 modal.classList.add('hidden');
                 document.body.style.overflow = 'auto';
-
-                const progressBar = document.getElementById('progressBar');
-                if (progressBar) {
-                    progressBar.style.width = '0%';
+                
+                // Clear progress bar animation
+                const intervalId = modal.dataset.intervalId;
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    document.getElementById('progressBar').style.width = '0%';
                 }
             }
         }
 
-        function showSuccessModal(message, schoolSlug, adminEmail) {
+        function showSuccessModal(result) {
             const modal = document.getElementById('successModal');
-            const successMessage = document.getElementById('successMessage');
-
-            if (modal && successMessage) {
-                successMessage.innerHTML = `
-                <strong>${formData.school?.name || 'School'}</strong> has been successfully provisioned.<br><br>
-                <strong>School URL:</strong> /school/${schoolSlug || 'school-slug'}<br>
-                <strong>Admin Email:</strong> ${adminEmail || formData.admin?.email || ''}<br><br>
-                Credentials have been sent to the administrator.
-            `;
+            const message = document.getElementById('successMessage');
+            const schoolURL = document.getElementById('successSchoolURL');
+            const adminEmail = document.getElementById('successAdminEmail');
+            
+            if (modal && message && schoolURL && adminEmail) {
+                message.textContent = result.message || `"${formData.school?.name}" has been successfully provisioned and is ready to use.`;
+                schoolURL.textContent = result.school_url || window.location.origin + '/academixsuite/tenant/' + result.school_slug;
+                adminEmail.textContent = result.admin_email || formData.admin?.email;
+                
                 modal.classList.remove('hidden');
             }
-        }
-
-        function closeSuccessModal() {
-            const modal = document.getElementById('successModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-            window.location.href = '../index.php';
         }
 
         function showErrorModal(title, message) {
             const modal = document.getElementById('errorModal');
             const errorTitle = document.getElementById('errorTitle');
             const errorMessage = document.getElementById('errorMessage');
-
+            
             if (modal && errorTitle && errorMessage) {
                 errorTitle.textContent = title;
                 errorMessage.textContent = message;
@@ -2164,64 +2332,48 @@ $nigerianStates = [
             }
         }
 
-        // Debug helper - expose functions to console
-        window.debugForm = {
-            getCurrentStep: () => currentStep,
-            getFormData: () => formData,
-            getSelectedPlan: () => selectedPlan,
-            validateStep1: () => validateStep1(),
-            validateStep2: () => validateStep2(),
-            nextStep: (step) => nextStep(step),
-            previousStep: (step) => previousStep(step),
-            showStep: (step) => showStep(step),
-            selectPlan: (slug, id, price, limit) => selectPlan(slug, id, price, limit)
-        };
-
-        // Quick test function
-        function autoFillTestData() {
-            console.log('Auto-filling test data...');
-
-            // School data
-            document.getElementById('schoolName').value = 'Test Academy School';
-            document.getElementById('schoolType').value = 'secondary';
-            document.getElementById('country').value = 'Nigeria';
-            document.getElementById('state').value = 'Lagos';
-            document.getElementById('city').value = 'Lagos';
-            document.getElementById('schoolEmail').value = 'test@academy.edu';
-            document.getElementById('phone').value = '+2348012345678';
-            document.getElementById('address').value = '123 Test Street, Lagos';
-            document.getElementById('website').value = 'https://testacademy.edu';
-            document.getElementById('studentCount').value = '300';
-            document.getElementById('staffCount').value = '30';
-
-            // Admin data
-            document.getElementById('adminName').value = 'John Doe';
-            document.getElementById('adminEmail').value = 'john@academy.edu';
-            document.getElementById('adminPhone').value = '+2348012345679';
-            document.getElementById('adminTitle').value = 'principal';
-            document.getElementById('adminRole').value = 'owner';
-            document.getElementById('adminPassword').value = 'Test@123';
-
-            // Update slug preview
-            updateSlugPreview();
-
-            console.log('Test data filled. You can now navigate through steps.');
+        function copySchoolURL() {
+            const url = document.getElementById('successSchoolURL')?.textContent;
+            if (url) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast('School URL copied to clipboard!', 'success');
+                });
+            }
         }
 
-        // Expose test function
-        window.autoFillTestData = autoFillTestData;
-
-        // Quick navigation test
-        function testNavigation() {
-            console.log('Testing navigation...');
-            autoFillTestData();
-            setTimeout(() => nextStep(2), 100);
-            setTimeout(() => nextStep(3), 500);
-            setTimeout(() => nextStep(4), 1000);
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    container.removeChild(toast);
+                }, 300);
+            }, 5000);
         }
 
-        window.testNavigation = testNavigation;
+        // Mobile sidebar toggle
+        function mobileSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar && overlay) {
+                const isOpen = sidebar.classList.contains('translate-x-0');
+                sidebar.classList.toggle('translate-x-0', !isOpen);
+                sidebar.classList.toggle('-translate-x-full', isOpen);
+                overlay.classList.toggle('hidden', isOpen);
+                overlay.classList.toggle('flex', !isOpen);
+            }
+        }
     </script>
 </body>
-
 </html>

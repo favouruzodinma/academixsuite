@@ -2,6 +2,27 @@
 /**
  * Auto-load classes and dependencies
  */
+ class ErrorHandler {
+    public static function register() {
+        set_error_handler([self::class, 'handleError']);
+        set_exception_handler([self::class, 'handleException']);
+    }
+
+    public static function handleError($errno, $errstr, $errfile, $errline) {
+        error_log("Error [$errno]: $errstr in $errfile on line $errline");
+        http_response_code(500);
+        echo "An error occurred. Please try again later.";
+        exit;
+    }
+
+    public static function handleException($exception) {
+        error_log("Uncaught Exception: " . $exception->getMessage());
+        http_response_code(500);
+        echo "An unexpected error occurred. Please try again later.";
+        exit;
+    }
+}
+
 
 spl_autoload_register(function ($className) {
     $baseDir = __DIR__ . '/';
@@ -32,6 +53,7 @@ require_once __DIR__ . '/Session.php';
 require_once __DIR__ . '/Tenant.php';
 require_once __DIR__ . '/SchoolSession.php';
 require_once __DIR__ . '/Utils.php';
+//require_once __DIR__ . '/AppRouter.php'; // NEW: Add router class
 
 // Initialize session if not already started
 if (session_status() === PHP_SESSION_NONE && !defined('NO_SESSION')) {

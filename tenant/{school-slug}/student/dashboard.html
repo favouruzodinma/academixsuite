@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>My Dashboard | AcademiXSuite Student Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --surface-white: #ffffff;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-light); 
+            color: var(--text-dark); 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Glassmorphism effects */
+        .glass-header { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+        
+        .toast {
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease forwards;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            border-left: 4px solid #059669;
+        }
+        
+        .toast-info {
+            background: linear-gradient(135deg, #4f46e5, #7c73e9);
+            color: white;
+            border-left: 4px solid #3730a3;
+        }
+        
+        .toast-warning {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+            border-left: 4px solid #d97706;
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+            border-left: 4px solid #dc2626;
+        }
+        
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+        
+        .toast-exit {
+            animation: fadeOut 0.3s ease forwards;
+        }
+        
+        .toast-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        
+        .toast-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Sidebar styling */
+        .sidebar-link { 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-left: 3px solid transparent; 
+            position: relative;
+        }
+        
+        .sidebar-link:hover { 
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+            color: var(--primary-blue); 
+            border-left-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .active-link { 
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+            color: var(--primary-blue); 
+            border-left-color: var(--primary-blue); 
+            font-weight: 700;
+        }
+        
+        .active-link::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: var(--primary-blue);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Subject Cards */
+        .subject-card {
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .subject-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subject-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        
+        .subject-math::before { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .subject-science::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .subject-english::before { background: linear-gradient(90deg, #10b981, #34d399); }
+        .subject-history::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .subject-art::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .subject-computer::before { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+        .subject-physics::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .subject-chemistry::before { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+        .subject-biology::before { background: linear-gradient(90deg, #10b981, #34d399); }
+
+        /* Assignment Status */
+        .assignment-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-completed {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        
+        .status-overdue {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .status-upcoming {
+            background-color: #e0e7ff;
+            color: #3730a3;
+            border: 1px solid #c7d2fe;
+        }
+
+        /* Tab styling */
+        .tab-button {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-button:hover {
+            color: var(--primary-blue);
+        }
+        
+        .tab-button.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+            background: linear-gradient(to top, rgba(59, 130, 246, 0.05), transparent);
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--metric-color), transparent);
+        }
+        
+        .metric-primary {
+            --metric-color: var(--primary-blue);
+        }
+        
+        .metric-success {
+            --metric-color: var(--accent-green);
+        }
+        
+        .metric-warning {
+            --metric-color: var(--accent-orange);
+        }
+        
+        .metric-danger {
+            --metric-color: var(--accent-red);
+        }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Action Buttons */
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .action-btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+            color: white;
+        }
+        
+        .action-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .action-btn-secondary {
+            background: white;
+            color: var(--primary-blue);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .action-btn-secondary:hover {
+            background: #f8fafc;
+            border-color: var(--primary-blue);
+        }
+
+        /* Performance Meter */
+        .performance-meter {
+            height: 8px;
+            border-radius: 4px;
+            background: #f1f5f9;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .performance-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .performance-excellent { background: linear-gradient(90deg, #10b981, #34d399); }
+        .performance-good { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .performance-average { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .performance-poor { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+        /* Grade Badge */
+        .grade-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 16px;
+            color: white;
+        }
+        
+        .grade-a { background: linear-gradient(135deg, #10b981, #34d399); }
+        .grade-b { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        .grade-c { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+        .grade-d { background: linear-gradient(135deg, #ef4444, #f87171); }
+        .grade-f { background: linear-gradient(135deg, #991b1b, #dc2626); }
+
+        /* Timetable Period */
+        .period-card {
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 8px;
+            border-left: 4px solid;
+            transition: all 0.2s ease;
+        }
+        
+        .period-card:hover {
+            transform: translateX(4px);
+        }
+        
+        .period-math { 
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05)); 
+            border-left-color: #ef4444;
+        }
+        .period-science { 
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05)); 
+            border-left-color: #3b82f6;
+        }
+        .period-english { 
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05)); 
+            border-left-color: #10b981;
+        }
+        .period-history { 
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05)); 
+            border-left-color: #f59e0b;
+        }
+
+        /* Assignment Card */
+        .assignment-card {
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .assignment-card:hover {
+            border-color: var(--primary-blue);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+        }
+        
+        .assignment-card.completed {
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.02));
+        }
+        
+        .assignment-card.upcoming {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.02));
+        }
+        
+        .assignment-card.overdue {
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.05), rgba(239, 68, 68, 0.02));
+        }
+
+        /* Attendance Dot */
+        .attendance-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        
+        .dot-present { background-color: #10b981; }
+        .dot-absent { background-color: #ef4444; }
+        .dot-late { background-color: #f59e0b; }
+        .dot-excused { background-color: #8b5cf6; }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .glass-header {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: white;
+            }
+            
+            .toast-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+            
+            .chart-container {
+                height: 250px !important;
+            }
+            
+            .subject-card {
+                padding: 16px;
+            }
+        }
+
+        /* Loader Animation */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #f1f5f9;
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Progress Circle */
+        .progress-circle {
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+        
+        .progress-circle svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        
+        .progress-circle-bg {
+            fill: none;
+            stroke: #f1f5f9;
+            stroke-width: 6;
+        }
+        
+        .progress-circle-fill {
+            fill: none;
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+        
+        .progress-circle-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: 900;
+            font-size: 18px;
+            color: var(--text-dark);
+        }
+
+        /* Calendar Day */
+        .calendar-day {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .calendar-day:hover {
+            background: #f1f5f9;
+        }
+        
+        .calendar-day.today {
+            background: var(--primary-blue);
+            color: white;
+        }
+        
+        .calendar-day.has-assignment {
+            background: #fef3c7;
+            color: #92400e;
+            position: relative;
+        }
+        
+        .calendar-day.has-assignment::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            width: 4px;
+            height: 4px;
+            background: #f59e0b;
+            border-radius: 50%;
+        }
+        
+        .calendar-day.has-exam {
+            background: #fee2e2;
+            color: #991b1b;
+            position: relative;
+        }
+        
+        .calendar-day.has-exam::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            width: 4px;
+            height: 4px;
+            background: #ef4444;
+            border-radius: 50%;
+        }
+
+        /* Quick Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+        
+        .stat-item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--text-dark);
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Resource Card */
+        .resource-card {
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .resource-card:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+        
+        .resource-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .resource-pdf { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .resource-video { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .resource-doc { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .resource-link { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[99] lg:hidden hidden" onclick="mobileSidebarToggle()"></div>
+
+    <!-- Assignment Submission Modal -->
+    <div id="submitAssignmentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Submit Assignment</h3>
+                    <button onclick="closeModal('submitAssignmentModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="submitAssignmentForm">
+                    <div class="mb-6">
+                        <h4 class="font-bold text-slate-900 mb-2" id="assignmentTitle">Mathematics Assignment</h4>
+                        <p class="text-slate-600">Due: <span id="assignmentDueDate">December 15, 2024</span></p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="form-label">Upload Files</label>
+                            <div class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center">
+                                <i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-4"></i>
+                                <p class="font-bold text-slate-700">Drop files here or click to upload</p>
+                                <p class="text-sm text-slate-500 mt-2">PDF, DOC, JPG, PNG up to 10MB</p>
+                                <input type="file" class="hidden" id="fileUpload" multiple>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Additional Notes</label>
+                            <textarea class="form-input h-32" placeholder="Add any notes for your teacher..."></textarea>
+                        </div>
+                        
+                        <div class="flex items-center gap-2 text-sm text-slate-600">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                            <p>Your submission will be timestamped automatically</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-8">
+                    <button onclick="closeModal('submitAssignmentModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="submitAssignment()" class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                        Submit Assignment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Assignment Modal -->
+    <div id="viewAssignmentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Assignment Details</h3>
+                    <button onclick="closeModal('viewAssignmentModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="assignmentDetailsContent">
+                    <!-- Assignment details loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resource Center Modal -->
+    <div id="resourceCenterModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Resource Center</h3>
+                    <button onclick="closeModal('resourceCenterModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="resourceCenterContent">
+                    <!-- Resources loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-[100] lg:relative lg:translate-x-0 -translate-x-full transition-transform duration-300 flex flex-col shadow-xl lg:shadow-none">
+            
+            <!-- Student Header -->
+            <div class="h-20 flex items-center px-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-100">
+                            <i class="fas fa-user-graduate text-white text-lg"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div>
+                        <span class="text-lg font-black tracking-tight text-slate-900">Alex Johnson</span>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">GRADE 11 • SECTION A</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Quick Info -->
+            <div class="p-6 border-b border-slate-100">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Current GPA:</span>
+                        <span class="text-sm font-black text-emerald-600">3.8</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Attendance:</span>
+                        <span class="text-sm font-bold text-blue-600">96%</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Pending Assignments:</span>
+                        <span class="text-sm font-bold text-amber-600">3</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 space-y-8 custom-scrollbar">
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Dashboard</p>
+                    <nav class="space-y-1">
+                        <a href="#" class="sidebar-link active-link flex items-center gap-3 px-6 py-3 text-sm font-semibold">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <span>Overview</span>
+                        </a>
+                        <a href="student-schedule.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <span>Schedule</span>
+                        </a>
+                        <a href="student-grades.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <span>Grades & Progress</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Academic</p>
+                    <nav class="space-y-1">
+                        <a href="student-assignments.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <span>Assignments</span>
+                            <span class="ml-auto bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-full">3</span>
+                        </a>
+                        <a href="student-exams.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <span>Exams</span>
+                        </a>
+                        <a href="student-resources.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <span>Resources</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">School Life</p>
+                    <nav class="space-y-1">
+                        <a href="student-attendance.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <span>Attendance</span>
+                        </a>
+                        <a href="student-events.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-day"></i>
+                            </div>
+                            <span>Events & Activities</span>
+                        </a>
+                        <a href="student-messages.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <span>Messages</span>
+                            <span class="ml-auto bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full">2</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Account</p>
+                    <nav class="space-y-1">
+                        <a href="student-profile.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span>Profile</span>
+                        </a>
+                        <a href="student-settings.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <span>Settings</span>
+                        </a>
+                        <a href="#" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </div>
+                            <span>Logout</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Upcoming Class -->
+            <div class="p-6 border-t border-slate-100">
+                <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-clock text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400">NEXT CLASS</p>
+                            <p class="text-sm font-black text-slate-900">Mathematics</p>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-500">
+                        <i class="fas fa-map-marker-alt mr-1"></i> Room 304 • 10:30 AM
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- Header -->
+            <header class="h-20 glass-header px-6 lg:px-8 flex items-center justify-between shrink-0 z-40">
+                <div class="flex items-center gap-3">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition">
+                        <i class="fas fa-bars-staggered"></i>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-lg font-black text-slate-900 tracking-tight">Student Dashboard</h1>
+                        <div class="hidden lg:flex items-center gap-2">
+                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            <span class="text-xs font-black text-emerald-600 uppercase tracking-widest">Welcome back, Alex!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Quick Stats -->
+                    <div class="hidden md:flex items-center gap-6 bg-white border border-slate-200 px-4 py-2 rounded-xl">
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">GPA</p>
+                            <p class="text-sm font-black text-emerald-600">3.8</p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pending</p>
+                            <p class="text-sm font-black text-amber-600">3</p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Attendance</p>
+                            <p class="text-sm font-black text-blue-600">96%</p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="openResourceCenter()" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                            <i class="fas fa-book-open"></i>
+                            <span class="hidden sm:inline">Resources</span>
+                        </button>
+                        <button onclick="viewMessages()" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                            <i class="fas fa-envelope"></i>
+                            <span class="hidden sm:inline">Messages</span>
+                            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full">2</span>
+                        </button>
+                        <button onclick="viewAllAssignments()" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                            <i class="fas fa-tasks"></i>
+                            <span class="hidden sm:inline">Assignments</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tabs Navigation -->
+            <div class="border-b border-slate-200 bg-white">
+                <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                    <div class="flex overflow-x-auto">
+                        <button class="tab-button active" onclick="switchTab('overview')" data-tab="overview">
+                            <i class="fas fa-home mr-2"></i>Overview
+                        </button>
+                        <button class="tab-button" onclick="switchTab('assignments')" data-tab="assignments">
+                            <i class="fas fa-tasks mr-2"></i>Assignments
+                        </button>
+                        <button class="tab-button" onclick="switchTab('grades')" data-tab="grades">
+                            <i class="fas fa-chart-line mr-2"></i>Grades
+                        </button>
+                        <button class="tab-button" onclick="switchTab('schedule')" data-tab="schedule">
+                            <i class="fas fa-calendar-alt mr-2"></i>Schedule
+                        </button>
+                        <button class="tab-button" onclick="switchTab('resources')" data-tab="resources">
+                            <i class="fas fa-book mr-2"></i>Resources
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar">
+                <!-- Welcome Section -->
+                <div class="max-w-7xl mx-auto mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h2 class="text-2xl lg:text-3xl font-black text-slate-900 mb-2">Welcome back, <span class="text-blue-600">Alex Johnson</span>!</h2>
+                            <p class="text-slate-500 font-medium">Grade 11 • Section A • Student ID: STU2024-001</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-slate-600">Today's Date</p>
+                                <p class="text-lg font-black text-slate-900" id="currentDate">December 4, 2024</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                                <i class="fas fa-calendar-day text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="flex flex-wrap gap-2 mt-6">
+                        <div class="px-4 py-2 bg-blue-50 border border-blue-200 rounded-xl">
+                            <span class="text-sm font-bold text-blue-700">3.8 GPA</span>
+                        </div>
+                        <div class="px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl">
+                            <span class="text-sm font-bold text-emerald-700">96% Attendance</span>
+                        </div>
+                        <div class="px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+                            <span class="text-sm font-bold text-amber-700">3 Pending Assignments</span>
+                        </div>
+                        <div class="px-4 py-2 bg-purple-50 border border-purple-200 rounded-xl">
+                            <span class="text-sm font-bold text-purple-700">2 Unread Messages</span>
+                        </div>
+                        <div class="px-4 py-2 bg-red-50 border border-red-200 rounded-xl">
+                            <span class="text-sm font-bold text-red-700">1 Upcoming Exam</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Overall GPA -->
+                    <div class="glass-card metric-card metric-primary rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.1s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">OVERALL GPA</p>
+                                <p class="text-2xl font-black text-slate-900">3.8</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+                                <i class="fas fa-award text-blue-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-emerald-600 font-bold"><i class="fas fa-arrow-up mr-1"></i> 0.2</span>
+                            <span class="text-slate-500">from last term</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Attendance Rate -->
+                    <div class="glass-card metric-card metric-success rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.2s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">ATTENDANCE RATE</p>
+                                <p class="text-2xl font-black text-slate-900">96%</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-emerald-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="performance-meter">
+                            <div class="performance-fill performance-excellent" style="width: 96%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">Present 24/25 days</p>
+                    </div>
+                    
+                    <!-- Pending Assignments -->
+                    <div class="glass-card metric-card metric-warning rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.3s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">PENDING ASSIGNMENTS</p>
+                                <p class="text-2xl font-black text-slate-900">3</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center">
+                                <i class="fas fa-tasks text-amber-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-red-600 font-bold"><i class="fas fa-exclamation-circle mr-1"></i> 1 overdue</span>
+                            <span class="text-slate-500">2 upcoming</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Class Rank -->
+                    <div class="glass-card metric-card metric-success rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.4s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">CLASS RANK</p>
+                                <p class="text-2xl font-black text-slate-900">#8</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center">
+                                <i class="fas fa-trophy text-purple-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="performance-meter">
+                            <div class="performance-fill performance-good" style="width: 80%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">Top 15% of class</p>
+                    </div>
+                </div>
+
+                <!-- Subjects Overview & Today's Schedule -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Subjects Overview -->
+                    <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">My Subjects</h3>
+                                <p class="text-slate-500">Current grades and performance</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="viewAllGrades()" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                                    View All <i class="fas fa-arrow-right ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Mathematics Card -->
+                            <div class="subject-card subject-math">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <h4 class="font-black text-slate-900">Mathematics</h4>
+                                        <p class="text-sm text-slate-600">Mr. Davis</p>
+                                    </div>
+                                    <div class="grade-badge grade-a">A</div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-bold text-slate-700">Current Grade:</span>
+                                        <span class="text-sm font-bold text-emerald-600">94%</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-excellent" style="width: 94%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between text-sm">
+                                    <div>
+                                        <span class="text-slate-600">Next:</span>
+                                        <span class="font-bold text-slate-900">Assignment #5</span>
+                                    </div>
+                                    <button onclick="viewSubjectDetails('math')" class="text-blue-600 hover:text-blue-800 font-bold">
+                                        Details
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Science Card -->
+                            <div class="subject-card subject-science">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <h4 class="font-black text-slate-900">Science</h4>
+                                        <p class="text-sm text-slate-600">Mr. Smith</p>
+                                    </div>
+                                    <div class="grade-badge grade-b">B+</div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-bold text-slate-700">Current Grade:</span>
+                                        <span class="text-sm font-bold text-blue-600">87%</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-good" style="width: 87%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between text-sm">
+                                    <div>
+                                        <span class="text-slate-600">Next:</span>
+                                        <span class="font-bold text-slate-900">Lab Report</span>
+                                    </div>
+                                    <button onclick="viewSubjectDetails('science')" class="text-blue-600 hover:text-blue-800 font-bold">
+                                        Details
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- English Card -->
+                            <div class="subject-card subject-english">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <h4 class="font-black text-slate-900">English</h4>
+                                        <p class="text-sm text-slate-600">Ms. Johnson</p>
+                                    </div>
+                                    <div class="grade-badge grade-a">A-</div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-bold text-slate-700">Current Grade:</span>
+                                        <span class="text-sm font-bold text-emerald-600">90%</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-excellent" style="width: 90%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between text-sm">
+                                    <div>
+                                        <span class="text-slate-600">Next:</span>
+                                        <span class="font-bold text-slate-900">Essay Draft</span>
+                                    </div>
+                                    <button onclick="viewSubjectDetails('english')" class="text-blue-600 hover:text-blue-800 font-bold">
+                                        Details
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- History Card -->
+                            <div class="subject-card subject-history">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <h4 class="font-black text-slate-900">History</h4>
+                                        <p class="text-sm text-slate-600">Mr. Brown</p>
+                                    </div>
+                                    <div class="grade-badge grade-b">B</div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-bold text-slate-700">Current Grade:</span>
+                                        <span class="text-sm font-bold text-blue-600">85%</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-good" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between text-sm">
+                                    <div>
+                                        <span class="text-slate-600">Next:</span>
+                                        <span class="font-bold text-slate-900">Research Paper</span>
+                                    </div>
+                                    <button onclick="viewSubjectDetails('history')" class="text-blue-600 hover:text-blue-800 font-bold">
+                                        Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Today's Schedule -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Today's Schedule</h3>
+                            <span class="text-xs font-bold text-slate-400">Wednesday, Dec 4</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="period-card period-math">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-bold text-slate-900">Mathematics</span>
+                                    <span class="text-sm font-bold text-slate-600">08:30 - 09:30</span>
+                                </div>
+                                <div class="flex items-center text-sm text-slate-500">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>
+                                    <span>Room 304 • Mr. Davis</span>
+                                </div>
+                            </div>
+                            
+                            <div class="period-card period-science">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-bold text-slate-900">Science</span>
+                                    <span class="text-sm font-bold text-slate-600">09:45 - 10:45</span>
+                                </div>
+                                <div class="flex items-center text-sm text-slate-500">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>
+                                    <span>Lab 205 • Mr. Smith</span>
+                                </div>
+                            </div>
+                            
+                            <div class="period-card period-english">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-bold text-slate-900">English</span>
+                                    <span class="text-sm font-bold text-slate-600">11:00 - 12:00</span>
+                                </div>
+                                <div class="flex items-center text-sm text-slate-500">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>
+                                    <span>Room 102 • Ms. Johnson</span>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                                        <i class="fas fa-utensils text-slate-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900">Lunch Break</p>
+                                        <p class="text-xs text-slate-500">12:00 - 13:00</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="period-card period-history">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-bold text-slate-900">History</span>
+                                    <span class="text-sm font-bold text-slate-600">13:15 - 14:15</span>
+                                </div>
+                                <div class="flex items-center text-sm text-slate-500">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>
+                                    <span>Room 201 • Mr. Brown</span>
+                                </div>
+                            </div>
+                            
+                            <div class="period-card period-math">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-bold text-slate-900">Mathematics (Tutorial)</span>
+                                    <span class="text-sm font-bold text-slate-600">14:30 - 15:30</span>
+                                </div>
+                                <div class="flex items-center text-sm text-slate-500">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>
+                                    <span>Room 304 • Mr. Davis</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="viewFullSchedule()" class="w-full mt-6 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                            View Full Schedule
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upcoming Assignments & Quick Stats -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Upcoming Assignments -->
+                    <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Upcoming Assignments</h3>
+                            <button onclick="viewAllAssignments()" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                                View All <i class="fas fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <!-- Overdue Assignment -->
+                            <div class="assignment-card overdue">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-900">Mathematics Assignment #4</h4>
+                                            <p class="text-sm text-slate-600">Algebra & Calculus</p>
+                                        </div>
+                                    </div>
+                                    <span class="assignment-status status-overdue">Overdue</span>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div class="text-sm text-slate-600">
+                                        <i class="fas fa-calendar-times mr-2"></i>
+                                        Due: Dec 1, 2024
+                                    </div>
+                                    <button onclick="submitAssignmentPrompt(1)" class="px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold rounded-xl hover:shadow-lg transition-all">
+                                        Submit Now
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Upcoming Assignment -->
+                            <div class="assignment-card upcoming">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                                            <i class="fas fa-flask text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-900">Science Lab Report</h4>
+                                            <p class="text-sm text-slate-600">Chemistry Experiment</p>
+                                        </div>
+                                    </div>
+                                    <span class="assignment-status status-upcoming">Due in 3 days</span>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div class="text-sm text-slate-600">
+                                        <i class="fas fa-calendar-alt mr-2"></i>
+                                        Due: Dec 7, 2024
+                                    </div>
+                                    <button onclick="viewAssignment(2)" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                                        View Details
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Upcoming Assignment -->
+                            <div class="assignment-card upcoming">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                                            <i class="fas fa-book text-amber-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-900">English Essay Draft</h4>
+                                            <p class="text-sm text-slate-600">Modern Literature Analysis</p>
+                                        </div>
+                                    </div>
+                                    <span class="assignment-status status-upcoming">Due in 5 days</span>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div class="text-sm text-slate-600">
+                                        <i class="fas fa-calendar-alt mr-2"></i>
+                                        Due: Dec 9, 2024
+                                    </div>
+                                    <button onclick="viewAssignment(3)" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                                        View Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats & Attendance -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-lg font-black text-slate-900 mb-6">Monthly Overview</h3>
+                        
+                        <div class="stats-grid mb-6">
+                            <div class="stat-item">
+                                <span class="stat-value">3</span>
+                                <span class="stat-label">Assignments</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">1</span>
+                                <span class="stat-label">Exams</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">24</span>
+                                <span class="stat-label">Classes</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">96%</span>
+                                <span class="stat-label">Attendance</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Attendance Overview -->
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="font-bold text-slate-900">December Attendance</span>
+                                <span class="text-sm font-bold text-emerald-600">96%</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1 mb-3">
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-present"></span>
+                                <span class="attendance-dot dot-absent"></span>
+                                <span class="attendance-dot dot-present"></span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm text-slate-600">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-1">
+                                        <span class="attendance-dot dot-present"></span>
+                                        <span>Present</span>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <span class="attendance-dot dot-absent"></span>
+                                        <span>Absent</span>
+                                    </div>
+                                </div>
+                                <span>24/25 days</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Upcoming Exam -->
+                        <div class="p-4 bg-red-50 border border-red-200 rounded-xl mb-6">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                                    <i class="fas fa-file-alt text-red-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Mathematics Final Exam</p>
+                                    <p class="text-xs text-slate-500">Dec 15, 2024 • 09:00 AM</p>
+                                </div>
+                            </div>
+                            <div class="text-sm text-slate-600">
+                                <i class="fas fa-clock mr-2"></i>
+                                11 days remaining
+                            </div>
+                        </div>
+                        
+                        <button onclick="viewAttendanceDetails()" class="w-full py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                            View Attendance Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activities & Quick Resources -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Recent Activities -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Recent Activities</h3>
+                            <span class="text-xs font-bold text-slate-400">Last 7 days</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink: 0">
+                                    <i class="fas fa-check text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Submitted Mathematics Assignment</p>
+                                    <p class="text-xs text-slate-500">2 days ago • 94% grade</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-3 p-3 bg-emerald-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink: 0">
+                                    <i class="fas fa-chart-line text-emerald-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Science Quiz Score Updated</p>
+                                    <p class="text-xs text-slate-500">3 days ago • 88% score</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-3 p-3 bg-amber-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink: 0">
+                                    <i class="fas fa-comment-alt text-amber-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Teacher Feedback Received</p>
+                                    <p class="text-xs text-slate-500">4 days ago • English Essay</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-3 p-3 bg-purple-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink: 0">
+                                    <i class="fas fa-calendar-check text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Marked Present All Week</p>
+                                    <p class="text-xs text-slate-500">5 days ago • Perfect attendance</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-3 p-3 bg-red-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink: 0">
+                                    <i class="fas fa-exclamation-circle text-red-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Assignment Deadline Missed</p>
+                                    <p class="text-xs text-slate-500">6 days ago • Mathematics #4</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="viewAllActivities()" class="w-full mt-6 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                            View All Activities
+                        </button>
+                    </div>
+                    
+                    <!-- Quick Resources -->
+                    <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Quick Resources</h3>
+                            <button onclick="openResourceCenter()" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                                View All <i class="fas fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Math Resources -->
+                            <div class="resource-card">
+                                <div class="resource-icon resource-pdf">
+                                    <i class="fas fa-file-pdf"></i>
+                                </div>
+                                <h4 class="font-bold text-slate-900 mb-2">Calculus Study Guide</h4>
+                                <p class="text-sm text-slate-600 mb-4">Complete guide for upcoming exam with practice problems</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-slate-500">Mathematics • Updated today</span>
+                                    <button onclick="downloadResource(1)" class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Science Resources -->
+                            <div class="resource-card">
+                                <div class="resource-icon resource-video">
+                                    <i class="fas fa-video"></i>
+                                </div>
+                                <h4 class="font-bold text-slate-900 mb-2">Chemistry Lab Tutorial</h4>
+                                <p class="text-sm text-slate-600 mb-4">Video guide for the upcoming chemistry experiment</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-slate-500">Science • 2 days ago</span>
+                                    <button onclick="viewResource(2)" class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- English Resources -->
+                            <div class="resource-card">
+                                <div class="resource-icon resource-doc">
+                                    <i class="fas fa-file-word"></i>
+                                </div>
+                                <h4 class="font-bold text-slate-900 mb-2">Essay Writing Template</h4>
+                                <p class="text-sm text-slate-600 mb-4">Template and guidelines for literature analysis essays</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-slate-500">English • 3 days ago</span>
+                                    <button onclick="downloadResource(3)" class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- History Resources -->
+                            <div class="resource-card">
+                                <div class="resource-icon resource-link">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <h4 class="font-bold text-slate-900 mb-2">Historical Timeline</h4>
+                                <p class="text-sm text-slate-600 mb-4">Interactive timeline for World War II research paper</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-slate-500">History • 1 week ago</span>
+                                    <button onclick="openResourceLink(4)" class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions & Calendar -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Quick Actions -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-lg font-black text-slate-900 mb-6">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <button onclick="submitAssignmentPrompt(1)" class="w-full p-4 bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl text-left hover:bg-red-200 transition group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center group-hover:bg-white">
+                                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900">Submit Overdue Assignment</p>
+                                        <p class="text-sm text-slate-600">Mathematics #4 • Due Dec 1</p>
+                                    </div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="viewMessages()" class="w-full p-4 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl text-left hover:bg-blue-200 transition group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-white">
+                                        <i class="fas fa-envelope text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900">Check Messages</p>
+                                        <p class="text-sm text-slate-600">2 unread messages from teachers</p>
+                                    </div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="viewUpcomingExams()" class="w-full p-4 bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-xl text-left hover:bg-purple-200 transition group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center group-hover:bg-white">
+                                        <i class="fas fa-calendar-alt text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900">Upcoming Exams</p>
+                                        <p class="text-sm text-slate-600">Mathematics final on Dec 15</p>
+                                    </div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="viewGradesReport()" class="w-full p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 border border-emerald-200 rounded-xl text-left hover:bg-emerald-200 transition group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center group-hover:bg-white">
+                                        <i class="fas fa-chart-bar text-emerald-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900">View Grades Report</p>
+                                        <p class="text-sm text-slate-600">Current GPA: 3.8</p>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Mini Calendar -->
+                    <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">December 2024</h3>
+                            <div class="flex items-center gap-2">
+                                <button onclick="prevMonth()" class="p-2 hover:bg-slate-100 rounded-lg">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button onclick="nextMonth()" class="p-2 hover:bg-slate-100 rounded-lg">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-7 gap-2 mb-4">
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Sun</div>
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Mon</div>
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Tue</div>
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Wed</div>
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Thu</div>
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Fri</div>
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Sat</div>
+                            
+                            <!-- Calendar days will be populated by JavaScript -->
+                            <div id="calendarDays" class="col-span-7 grid grid-cols-7 gap-2">
+                                <!-- Calendar will be generated here -->
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between pt-6 border-t border-slate-100">
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="calendar-day today" style="width: 16px; height: 16px;"></span>
+                                    <span class="text-sm text-slate-600">Today</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="calendar-day has-assignment" style="width: 16px; height: 16px;"></span>
+                                    <span class="text-sm text-slate-600">Assignment</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="calendar-day has-exam" style="width: 16px; height: 16px;"></span>
+                                    <span class="text-sm text-slate-600">Exam</span>
+                                </div>
+                            </div>
+                            <button onclick="viewFullCalendar()" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                                View Full Calendar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            // Set icon based on type
+            let icon = 'fa-info-circle';
+            switch(type) {
+                case 'success': icon = 'fa-check-circle'; break;
+                case 'warning': icon = 'fa-exclamation-triangle'; break;
+                case 'error': icon = 'fa-times-circle'; break;
+                default: icon = 'fa-info-circle';
+            }
+            
+            toast.innerHTML = `
+                <i class="fas ${icon} toast-icon"></i>
+                <div class="toast-content">${message}</div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add to container
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Auto remove after duration
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.classList.add('toast-exit');
+                    setTimeout(() => {
+                        if (toast.parentElement) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }, duration);
+            }
+        }
+
+        // Mobile Sidebar Toggle
+        function mobileSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            // Update active tab button
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Show appropriate content
+            showToast(`Switched to ${tabName}`, 'info');
+        }
+
+        // Current Date Display
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Calendar Generation
+        function generateCalendar() {
+            const container = document.getElementById('calendarDays');
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth(); // December is 11
+            
+            // Get first day of month
+            const firstDay = new Date(year, month, 1);
+            // Get last day of month
+            const lastDay = new Date(year, month + 1, 0);
+            // Get starting day (0 = Sunday, 1 = Monday, etc.)
+            const startDay = firstDay.getDay();
+            // Get number of days in month
+            const daysInMonth = lastDay.getDate();
+            
+            let calendarHTML = '';
+            
+            // Add empty cells for days before the first day of the month
+            for (let i = 0; i < startDay; i++) {
+                calendarHTML += `<div class="calendar-day"></div>`;
+            }
+            
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayOfWeek = date.getDay();
+                let dayClass = 'calendar-day';
+                
+                // Check if today
+                if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    dayClass += ' today';
+                }
+                
+                // Add assignment markers (example data)
+                if (day === 1 || day === 7 || day === 9 || day === 15) {
+                    dayClass += ' has-assignment';
+                }
+                
+                // Add exam markers (example data)
+                if (day === 15) {
+                    dayClass += ' has-exam';
+                }
+                
+                calendarHTML += `<div class="${dayClass}" onclick="viewDayDetails(${day})">${day}</div>`;
+            }
+            
+            container.innerHTML = calendarHTML;
+        }
+
+        function prevMonth() {
+            showToast('Viewing previous month', 'info');
+            // In real app, update calendar to previous month
+        }
+
+        function nextMonth() {
+            showToast('Viewing next month', 'info');
+            // In real app, update calendar to next month
+        }
+
+        // Assignment Functions
+        function submitAssignmentPrompt(assignmentId) {
+            // Set assignment details in modal
+            const assignments = {
+                1: { title: 'Mathematics Assignment #4', dueDate: 'December 1, 2024' },
+                2: { title: 'Science Lab Report', dueDate: 'December 7, 2024' },
+                3: { title: 'English Essay Draft', dueDate: 'December 9, 2024' }
+            };
+            
+            const assignment = assignments[assignmentId];
+            if (assignment) {
+                document.getElementById('assignmentTitle').textContent = assignment.title;
+                document.getElementById('assignmentDueDate').textContent = assignment.dueDate;
+                openModal('submitAssignmentModal');
+            }
+        }
+
+        function submitAssignment() {
+            showToast('Assignment submitted successfully!', 'success');
+            closeModal('submitAssignmentModal');
+        }
+
+        function viewAssignment(assignmentId) {
+            const assignments = {
+                1: {
+                    title: 'Mathematics Assignment #4',
+                    subject: 'Mathematics',
+                    teacher: 'Mr. Davis',
+                    dueDate: 'December 1, 2024',
+                    status: 'Overdue',
+                    description: 'Complete problems 1-20 from Chapter 5. Show all work for full credit.',
+                    points: 100
+                },
+                2: {
+                    title: 'Science Lab Report',
+                    subject: 'Science',
+                    teacher: 'Mr. Smith',
+                    dueDate: 'December 7, 2024',
+                    status: 'Upcoming',
+                    description: 'Write a detailed report on the chemical reaction experiment conducted in class last week.',
+                    points: 150
+                },
+                3: {
+                    title: 'English Essay Draft',
+                    subject: 'English',
+                    teacher: 'Ms. Johnson',
+                    dueDate: 'December 9, 2024',
+                    status: 'Upcoming',
+                    description: 'Draft of your analysis of modern literature themes in contemporary novels.',
+                    points: 200
+                }
+            };
+            
+            const assignment = assignments[assignmentId];
+            if (assignment) {
+                document.getElementById('assignmentDetailsContent').innerHTML = `
+                    <div class="mb-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h4 class="text-xl font-black text-slate-900">${assignment.title}</h4>
+                                <p class="text-slate-600">${assignment.subject} • ${assignment.teacher}</p>
+                            </div>
+                            <span class="assignment-status ${assignment.status === 'Overdue' ? 'status-overdue' : 'status-upcoming'}">
+                                ${assignment.status}
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="p-4 bg-slate-50 rounded-xl">
+                                <p class="text-sm font-bold text-slate-400 mb-1">Due Date</p>
+                                <p class="text-lg font-black text-slate-900">${assignment.dueDate}</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl">
+                                <p class="text-sm font-bold text-slate-400 mb-1">Points</p>
+                                <p class="text-lg font-black text-slate-900">${assignment.points}</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl">
+                                <p class="text-sm font-bold text-slate-400 mb-1">Status</p>
+                                <p class="text-lg font-black text-slate-900">${assignment.status}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h5 class="font-bold text-slate-900 mb-2">Assignment Description</h5>
+                            <p class="text-slate-700">${assignment.description}</p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h5 class="font-bold text-slate-900 mb-2">Submission Requirements</h5>
+                            <ul class="list-disc list-inside text-slate-700 space-y-2">
+                                <li>Submit as PDF or DOC file</li>
+                                <li>Include your name and student ID</li>
+                                <li>Show all calculations/work</li>
+                                <li>Submit before due date for full credit</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        ${assignment.status === 'Overdue' ? 
+                            `<button onclick="submitAssignmentPrompt(${assignmentId})" class="action-btn action-btn-primary">
+                                <i class="fas fa-paper-plane"></i> Submit Now
+                            </button>` : 
+                            `<button onclick="submitAssignmentPrompt(${assignmentId})" class="action-btn action-btn-primary">
+                                <i class="fas fa-paper-plane"></i> Submit Assignment
+                            </button>`
+                        }
+                        <button onclick="closeModal('viewAssignmentModal')" class="action-btn action-btn-secondary">
+                            Close
+                        </button>
+                    </div>
+                `;
+                
+                openModal('viewAssignmentModal');
+            }
+        }
+
+        function viewAllAssignments() {
+            showToast('Opening all assignments', 'info');
+        }
+
+        // Resource Functions
+        function openResourceCenter() {
+            document.getElementById('resourceCenterContent').innerHTML = `
+                <div class="mb-6">
+                    <h4 class="text-lg font-black text-slate-900 mb-4">Available Resources</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <button onclick="filterResources('all')" class="p-4 bg-blue-50 border border-blue-200 rounded-xl text-center hover:bg-blue-100 transition">
+                            <i class="fas fa-book text-2xl text-blue-600 mb-2"></i>
+                            <p class="font-bold text-slate-900">All Resources</p>
+                            <p class="text-sm text-slate-600">24 items</p>
+                        </button>
+                        
+                        <button onclick="filterResources('math')" class="p-4 bg-red-50 border border-red-200 rounded-xl text-center hover:bg-red-100 transition">
+                            <i class="fas fa-calculator text-2xl text-red-600 mb-2"></i>
+                            <p class="font-bold text-slate-900">Mathematics</p>
+                            <p class="text-sm text-slate-600">8 items</p>
+                        </button>
+                        
+                        <button onclick="filterResources('science')" class="p-4 bg-blue-50 border border-blue-200 rounded-xl text-center hover:bg-blue-100 transition">
+                            <i class="fas fa-flask text-2xl text-blue-600 mb-2"></i>
+                            <p class="font-bold text-slate-900">Science</p>
+                            <p class="text-sm text-slate-600">6 items</p>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="resource-icon resource-pdf">
+                                    <i class="fas fa-file-pdf"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Calculus Study Guide</p>
+                                    <p class="text-sm text-slate-600">Mathematics • Updated today</p>
+                                </div>
+                            </div>
+                            <button onclick="downloadResource(1)" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition">
+                                Download
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="resource-icon resource-video">
+                                    <i class="fas fa-video"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Chemistry Lab Tutorial</p>
+                                    <p class="text-sm text-slate-600">Science • 2 days ago</p>
+                                </div>
+                            </div>
+                            <button onclick="viewResource(2)" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition">
+                                Watch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            openModal('resourceCenterModal');
+        }
+
+        function filterResources(category) {
+            showToast(`Filtering resources by ${category}`, 'info');
+        }
+
+        function downloadResource(resourceId) {
+            showToast(`Downloading resource #${resourceId}`, 'success');
+        }
+
+        function viewResource(resourceId) {
+            showToast(`Opening resource #${resourceId}`, 'info');
+        }
+
+        function openResourceLink(resourceId) {
+            showToast(`Opening resource link #${resourceId}`, 'info');
+        }
+
+        // View Functions
+        function viewSubjectDetails(subject) {
+            showToast(`Opening ${subject} details`, 'info');
+        }
+
+        function viewFullSchedule() {
+            showToast('Opening full schedule', 'info');
+        }
+
+        function viewAttendanceDetails() {
+            showToast('Opening attendance details', 'info');
+        }
+
+        function viewAllActivities() {
+            showToast('Opening all activities', 'info');
+        }
+
+        function viewDayDetails(day) {
+            showToast(`Viewing details for December ${day}, 2024`, 'info');
+        }
+
+        function viewFullCalendar() {
+            showToast('Opening full calendar', 'info');
+        }
+
+        function viewMessages() {
+            showToast('Opening messages', 'info');
+        }
+
+        function viewUpcomingExams() {
+            showToast('Opening upcoming exams', 'info');
+        }
+
+        function viewGradesReport() {
+            showToast('Opening grades report', 'info');
+        }
+
+        function viewAllGrades() {
+            showToast('Opening all grades', 'info');
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update current date
+            updateCurrentDate();
+            
+            // Generate calendar
+            generateCalendar();
+            
+            // Show welcome toast
+            setTimeout(() => {
+                showToast('Welcome to your student dashboard!', 'success', 3000);
+            }, 1000);
+            
+            // Show overdue assignment reminder
+            setTimeout(() => {
+                showToast('You have 1 overdue assignment!', 'warning', 5000);
+            }, 2000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Only trigger when not in input fields
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+            
+            // Ctrl/Cmd + A: View assignments
+            if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+                e.preventDefault();
+                viewAllAssignments();
+            }
+            
+            // Ctrl/Cmd + G: View grades
+            if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+                e.preventDefault();
+                viewGradesReport();
+            }
+            
+            // Ctrl/Cmd + M: View messages
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+                e.preventDefault();
+                viewMessages();
+            }
+            
+            // Ctrl/Cmd + R: Open resources
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                openResourceCenter();
+            }
+        });
+    </script>
+</body>
+</html>

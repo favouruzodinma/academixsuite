@@ -72,6 +72,7 @@ define('BACKUP_DIR', __DIR__ . '/../backups');
 define('BACKUP_RETENTION_DAYS', 7);
 // Add this at the end:
 // Global database functions (legacy support)
+
 // function getDBConnection($database = null) {
 //     return $database ? Database::getSchoolConnection($database) : Database::getPlatformConnection();
 // }

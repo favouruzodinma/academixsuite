@@ -105,6 +105,7 @@
             border-bottom: 3px solid transparent;
             cursor: pointer;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
         
         .tab-button:hover {
@@ -115,6 +116,21 @@
             color: #2563eb;
             border-bottom-color: #2563eb;
             background: linear-gradient(to top, rgba(37, 99, 235, 0.05), transparent);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Form styling */
@@ -333,6 +349,16 @@
             opacity: 1;
             visibility: visible;
         }
+        
+        /* Notification animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-in-out;
+        }
     </style>
 </head>
 <body class="antialiased overflow-hidden selection:bg-blue-100">
@@ -459,19 +485,19 @@
             <div class="border-b border-slate-200 bg-white">
                 <div class="max-w-7xl mx-auto px-4 lg:px-8">
                     <div class="flex overflow-x-auto">
-                        <button class="tab-button active" onclick="switchTab('basic')">
+                        <button class="tab-button active" data-tab="basic">
                             <i class="fas fa-info-circle mr-2"></i>Basic Info
                         </button>
-                        <button class="tab-button" onclick="switchTab('contact')">
+                        <button class="tab-button" data-tab="contact">
                             <i class="fas fa-user-shield mr-2"></i>Contact & Admin
                         </button>
-                        <button class="tab-button" onclick="switchTab('subscription')">
+                        <button class="tab-button" data-tab="subscription">
                             <i class="fas fa-credit-card mr-2"></i>Subscription
                         </button>
-                        <button class="tab-button" onclick="switchTab('advanced')">
+                        <button class="tab-button" data-tab="advanced">
                             <i class="fas fa-cogs mr-2"></i>Advanced
                         </button>
-                        <button class="tab-button" onclick="switchTab('danger')">
+                        <button class="tab-button" data-tab="danger">
                             <i class="fas fa-exclamation-triangle mr-2"></i>Danger Zone
                         </button>
                     </div>
@@ -1236,43 +1262,68 @@
         let currentTab = 'basic';
 
         function switchTab(tabName) {
+            currentTab = tabName;
+            
             // Update tab buttons
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
             
-            // Hide current tab content
+            // Add active class to clicked button
+            const clickedButton = document.querySelector(`[data-tab="${tabName}"]`);
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+            
+            // Hide all tab content
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             
             // Show selected tab content
-            document.getElementById(`${tabName}Tab`).classList.add('active');
-            currentTab = tabName;
+            const tabContent = document.getElementById(`${tabName}Tab`);
+            if (tabContent) {
+                tabContent.classList.add('active');
+            }
         }
+
+        // Initialize tab click events
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    switchTab(tabName);
+                });
+            });
+            
+            // Set initial tab as active
+            switchTab('basic');
+        });
 
         // File upload handling
         const logoUpload = document.getElementById('logoUpload');
         const logoFile = document.getElementById('logoFile');
 
-        logoUpload.addEventListener('click', () => logoFile.click());
-        
-        logoUpload.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            logoUpload.classList.add('dragover');
-        });
-        
-        logoUpload.addEventListener('dragleave', () => {
-            logoUpload.classList.remove('dragover');
-        });
-        
-        logoFile.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                handleFile(file);
-            }
-        });
+        if (logoUpload && logoFile) {
+            logoUpload.addEventListener('click', () => logoFile.click());
+            
+            logoUpload.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                logoUpload.classList.add('dragover');
+            });
+            
+            logoUpload.addEventListener('dragleave', () => {
+                logoUpload.classList.remove('dragover');
+            });
+            
+            logoFile.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    handleFile(file);
+                }
+            });
+        }
 
         function handleFile(file) {
             if (file.size > 5 * 1024 * 1024) {
@@ -1285,9 +1336,11 @@
                 const previewImage = document.getElementById('previewImage');
                 const fileName = document.getElementById('fileName');
                 
-                previewImage.src = e.target.result;
-                fileName.textContent = file.name;
-                showNotification('Logo uploaded successfully', 'success');
+                if (previewImage && fileName) {
+                    previewImage.src = e.target.result;
+                    fileName.textContent = file.name;
+                    showNotification('Logo uploaded successfully', 'success');
+                }
             };
             reader.readAsDataURL(file);
         }
@@ -1296,43 +1349,56 @@
             const previewImage = document.getElementById('previewImage');
             const fileName = document.getElementById('fileName');
             
-            previewImage.src = 'https://ui-avatars.com/api/?name=Greenwood+High&background=2563eb&color=fff';
-            fileName.textContent = 'Current logo';
-            logoFile.value = '';
-            showNotification('Logo removed', 'info');
+            if (previewImage && fileName) {
+                previewImage.src = 'https://ui-avatars.com/api/?name=Greenwood+High&background=2563eb&color=fff';
+                fileName.textContent = 'Current logo';
+                if (logoFile) logoFile.value = '';
+                showNotification('Logo removed', 'info');
+            }
         }
 
         function changeLogo() {
-            logoFile.click();
+            if (logoFile) {
+                logoFile.click();
+            }
         }
 
         // Plan selection
         function selectPlan(plan) {
             // Update UI
             document.querySelectorAll('[onclick^="selectPlan"]').forEach(card => {
-                card.classList.remove('border-blue-500', 'bg-blue-50');
-                const indicator = card.querySelector('.rounded-full');
-                indicator.classList.remove('border-blue-500', 'bg-blue-500');
-                indicator.classList.add('border-slate-300');
-                
-                // Remove "CURRENT" badge
-                const badge = card.querySelector('.bg-blue-600');
-                if (badge && badge.textContent === 'CURRENT') {
-                    badge.remove();
+                if (card) {
+                    card.classList.remove('border-blue-500', 'bg-blue-50');
+                    const indicator = card.querySelector('.rounded-full');
+                    if (indicator) {
+                        indicator.classList.remove('border-blue-500', 'bg-blue-500');
+                        indicator.classList.add('border-slate-300');
+                    }
+                    
+                    // Remove "CURRENT" badge
+                    const badge = card.querySelector('.bg-blue-600');
+                    if (badge && badge.textContent === 'CURRENT') {
+                        badge.remove();
+                    }
                 }
             });
             
             const selectedCard = document.querySelector(`[onclick="selectPlan('${plan}')"]`);
-            selectedCard.classList.add('border-blue-500', 'bg-blue-50');
-            selectedCard.querySelector('.rounded-full').classList.add('border-blue-500', 'bg-blue-500');
-            selectedCard.querySelector('.rounded-full').classList.remove('border-slate-300');
-            
-            // Add "CURRENT" badge to enterprise if selected
-            if (plan === 'enterprise') {
-                const badge = document.createElement('div');
-                badge.className = 'absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full';
-                badge.textContent = 'CURRENT';
-                selectedCard.appendChild(badge);
+            if (selectedCard) {
+                selectedCard.classList.add('border-blue-500', 'bg-blue-50');
+                const indicator = selectedCard.querySelector('.rounded-full');
+                if (indicator) {
+                    indicator.classList.add('border-blue-500', 'bg-blue-500');
+                    indicator.classList.remove('border-slate-300');
+                }
+                
+                // Add "CURRENT" badge to enterprise if selected
+                if (plan === 'enterprise') {
+                    const badge = document.createElement('div');
+                    badge.className = 'absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full';
+                    badge.textContent = 'CURRENT';
+                    selectedCard.appendChild(badge);
+                }
             }
         }
 
@@ -1343,8 +1409,11 @@
             for (let i = 0; i < 12; i++) {
                 password += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            document.getElementById('adminPassword').value = password;
-            showNotification('Password generated', 'success');
+            const adminPassword = document.getElementById('adminPassword');
+            if (adminPassword) {
+                adminPassword.value = password;
+                showNotification('Password generated', 'success');
+            }
         }
 
         // Contact management
@@ -1394,43 +1463,46 @@
 
             if (currentTab === 'basic') {
                 // Validate basic info
-                const name = document.getElementById('institutionName').value.trim();
-                if (!name) {
+                const name = document.getElementById('institutionName');
+                if (name && !name.value.trim()) {
                     showError('institutionName', 'Institution name is required');
                     isValid = false;
                 }
 
-                const type = document.getElementById('institutionType').value;
-                if (!type) {
+                const type = document.getElementById('institutionType');
+                if (type && !type.value) {
                     showError('institutionType', 'Please select an institution type');
                     isValid = false;
                 }
 
-                const domain = document.getElementById('emailDomain').value.trim();
-                if (!domain) {
+                const domain = document.getElementById('emailDomain');
+                if (domain && !domain.value.trim()) {
                     showError('emailDomain', 'Email domain is required');
                     isValid = false;
                 }
 
             } else if (currentTab === 'contact') {
                 // Validate contact info
-                const adminName = document.getElementById('adminName').value.trim();
-                if (!adminName) {
+                const adminName = document.getElementById('adminName');
+                if (adminName && !adminName.value.trim()) {
                     showError('adminName', 'Administrator name is required');
                     isValid = false;
                 }
 
-                const adminEmail = document.getElementById('adminEmail').value.trim();
-                if (!adminEmail) {
-                    showError('adminEmail', 'Administrator email is required');
-                    isValid = false;
-                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail)) {
-                    showError('adminEmail', 'Please enter a valid email address');
-                    isValid = false;
+                const adminEmail = document.getElementById('adminEmail');
+                if (adminEmail) {
+                    const emailValue = adminEmail.value.trim();
+                    if (!emailValue) {
+                        showError('adminEmail', 'Administrator email is required');
+                        isValid = false;
+                    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+                        showError('adminEmail', 'Please enter a valid email address');
+                        isValid = false;
+                    }
                 }
 
-                const accessLevel = document.getElementById('accessLevel').value;
-                if (!accessLevel) {
+                const accessLevel = document.getElementById('accessLevel');
+                if (accessLevel && !accessLevel.value) {
                     showError('accessLevel', 'Please select an access level');
                     isValid = false;
                 }
@@ -1461,11 +1533,16 @@
         }
 
         function updateStatusBadge() {
-            const status = document.getElementById('status').value;
+            const statusSelect = document.getElementById('status');
+            if (!statusSelect) return;
+            
+            const status = statusSelect.value;
             const badge = document.querySelector('.status-badge');
             
-            badge.className = `status-badge status-${status}`;
-            badge.innerHTML = `<i class="fas fa-circle text-[8px] mr-1"></i> ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+            if (badge) {
+                badge.className = `status-badge status-${status}`;
+                badge.innerHTML = `<i class="fas fa-circle text-[8px] mr-1"></i> ${status.charAt(0).toUpperCase() + status.slice(1)}`;
+            }
         }
 
         // Preview changes
@@ -1532,13 +1609,19 @@
 
         // Modal functions
         function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-            document.body.style.overflow = 'hidden';
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-            document.body.style.overflow = 'auto';
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
         }
 
         // Notification system
@@ -1558,7 +1641,9 @@
             document.body.appendChild(notification);
             
             setTimeout(() => {
-                notification.remove();
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
             }, 3000);
         }
 
@@ -1566,13 +1651,17 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('active');
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('active');
+            }
         }
 
         function toggleDropdown(id) {
             const dropdown = document.getElementById(id);
-            dropdown.classList.toggle('dropdown-open');
+            if (dropdown) {
+                dropdown.classList.toggle('dropdown-open');
+            }
         }
 
         function mobileSidebarToggle() {
@@ -1584,6 +1673,8 @@
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             if (window.innerWidth < 1024 && 
+                sidebar && 
+                overlay && 
                 !sidebar.contains(e.target) && 
                 !e.target.closest('[onclick*="mobileSidebarToggle"]')) {
                 sidebar.classList.add('-translate-x-full');
@@ -1594,8 +1685,12 @@
         // Handle escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                document.getElementById('sidebar').classList.add('-translate-x-full');
-                document.getElementById('sidebarOverlay').classList.remove('active');
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (sidebar && overlay) {
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.remove('active');
+                }
                 
                 // Close modals
                 document.querySelectorAll('.modal-overlay.active').forEach(modal => {

@@ -1,44 +1,63 @@
 <?php
 /**
- * AcademixSuite - Main Entry Point
+ * AcademixSuite - Main Entry Point - SIMPLIFIED
  */
 
-// Prevent direct access to includes
-define('ACADEMIXSUITE', true);
+// Define application root
+define('ROOT_PATH', __DIR__);
 
-// Load autoloader
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('AcademixSuite_session');
+    session_start();
+}
+
+// Load core classes
 require_once __DIR__ . '/includes/autoload.php';
 
-// Detect school from request
-$school = Tenant::detect();
+// Initialize error handler
+ErrorHandler::register();
 
-if ($school) {
-    // School-specific access
-    define('CURRENT_SCHOOL', $school['id']);
-    define('CURRENT_SCHOOL_SLUG', $school['slug']);
-    
-    // Check if user is logged in
-    if (SchoolSession::validate()) {
-        // User is logged in, redirect to dashboard
-        header('Location: ' . SchoolSession::getDashboardUrl());
-        exit;
+// Get request
+$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+$requestUri = strtok($requestUri, '?');
+
+// Simple routing - let .htaccess handle most things
+if (strpos($requestUri, '/platform/') === 0) {
+    // Platform admin
+    require_once __DIR__ . '/platform/index.php';
+    exit;
+} elseif ($requestUri === '/login' || $requestUri === '/login.php') {
+    // Global login
+    if (isset($_SESSION['super_admin'])) {
+        header('Location: /academixsuite/platform/admin/dashboard.php');
+    } elseif (isset($_SESSION['school_auth'])) {
+        $schoolSlug = $_SESSION['school_auth']['school_slug'];
+        $userType = $_SESSION['school_auth']['user_type'];
+        header("Location: /academixsuite/tenant/{$schoolSlug}/{$userType}/school-dashboard.php");
     } else {
-        // Show school login page
-        include __DIR__ . '/school/login.php';
+        header('Location: /academixsuite/tenant/login.php');
     }
+    exit;
 } else {
-    // Platform access (super admin or school signup)
-    if (strpos($_SERVER['REQUEST_URI'], '/platform/') !== false) {
-        // Platform admin area
-        $auth = new Auth();
-        if (!$auth->isLoggedIn('super_admin')) {
-            header('Location: /platform/login.php');
-            exit;
+    // Default to public
+    $publicPath = __DIR__ . '/public' . $requestUri;
+    
+    if (file_exists($publicPath) && is_file($publicPath)) {
+        $ext = pathinfo($publicPath, PATHINFO_EXTENSION);
+        if (in_array($ext, ['php', 'html', 'htm'])) {
+            require_once $publicPath;
+        } else {
+            header('Content-Type: ' . mime_content_type($publicPath));
+            readfile($publicPath);
         }
-        include __DIR__ . '/platform/admin/dashboard.php';
+    } elseif (file_exists($publicPath . '.php')) {
+        require_once $publicPath . '.php';
+    } elseif (file_exists($publicPath . '/index.php')) {
+        require_once $publicPath . '/index.php';
     } else {
-        // Public landing page
-        include __DIR__ . '/public/index.html';
+        require_once __DIR__ . '/public/index.php';
     }
+    exit;
 }
 ?>

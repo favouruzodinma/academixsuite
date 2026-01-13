@@ -418,19 +418,25 @@ function escapeSQL($string) {
 }
 
 /**
- * Get current academic year
+ * Get current academic year - FIXED VERSION
  * @param int $schoolId
  * @return array|null
  */
 function getCurrentAcademicYear($schoolId) {
-    $db = getDBConnection(DB_SCHOOL_PREFIX . $schoolId);
-    $stmt = $db->prepare("
-        SELECT * FROM academic_years 
-        WHERE school_id = ? AND status = 'active' 
-        ORDER BY is_default DESC, id DESC LIMIT 1
-    ");
-    $stmt->execute([$schoolId]);
-    return $stmt->fetch();
+    try {
+        // Use the Database class directly instead of getDBConnection()
+        $db = Database::getSchoolConnection(DB_SCHOOL_PREFIX . $schoolId);
+        $stmt = $db->prepare("
+            SELECT * FROM academic_years 
+            WHERE school_id = ? AND status = 'active' 
+            ORDER BY is_default DESC, id DESC LIMIT 1
+        ");
+        $stmt->execute([$schoolId]);
+        return $stmt->fetch();
+    } catch (Exception $e) {
+        error_log("Error getting academic year: " . $e->getMessage());
+        return null;
+    }
 }
 
 // Initialize session

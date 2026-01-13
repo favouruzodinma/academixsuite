@@ -245,19 +245,19 @@ class Auth
     {
         switch ($userType) {
             case ROLE_SCHOOL_ADMIN:
-                return "/school/$schoolSlug/admin/dashboard.php";
+                return "/tenant/$schoolSlug/admin/dashboard.php";
             case ROLE_TEACHER:
-                return "/school/$schoolSlug/teacher/dashboard.php";
+                return "/tenant/$schoolSlug/teacher/dashboard.php";
             case ROLE_STUDENT:
-                return "/school/$schoolSlug/student/dashboard.php";
+                return "/tenant/$schoolSlug/student/dashboard.php";
             case ROLE_PARENT:
-                return "/school/$schoolSlug/parent/dashboard.php";
+                return "/tenant/$schoolSlug/parent/dashboard.php";
             case ROLE_ACCOUNTANT:
-                return "/school/$schoolSlug/accountant/dashboard.php";
+                return "/tenant/$schoolSlug/accountant/dashboard.php";
             case ROLE_LIBRARIAN:
-                return "/school/$schoolSlug/librarian/dashboard.php";
+                return "/tenant/$schoolSlug/librarian/dashboard.php";
             default:
-                return "/school/$schoolSlug/dashboard.php";
+                return "/tenant/$schoolSlug/dashboard.php";
         }
     }
 

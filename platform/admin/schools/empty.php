@@ -1,1606 +1,2156 @@
 <?php
-// platform/admin/schools/view.php
+
+/**
+ * Add School Provisioning - Super Admin Interface
+ * Updated to match the database schema
+ */
+
+// Start session and load required files
 require_once __DIR__ . '/../../../includes/autoload.php';
 
-// Require super admin login
+// Check if super admin is logged in
 $auth = new Auth();
-$auth->requireLogin('super_admin');
-
-
-
-// Get school ID from query parameter
-$schoolId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-
-if ($schoolId <= 0) {
-    header("Location: ../index.php");
+if (!$auth->isLoggedIn('super_admin')) {
+    header("Location: /platform/login.php");
     exit;
 }
 
-// Get school data from platform database
+// Get super admin data
+$superAdmin = $_SESSION['super_admin'];
+
+// Generate CSRF token
+$csrfToken = generateCsrfToken();
+
+// Fetch available plans from database
 $db = Database::getPlatformConnection();
-$stmt = $db->prepare("SELECT * FROM schools WHERE id = ?");
-$stmt->execute([$schoolId]);
-$school = $stmt->fetch();
+$stmt = $db->prepare("SELECT id, name, slug, price_monthly, price_yearly, student_limit, teacher_limit, campus_limit, storage_limit, features FROM plans WHERE is_active = 1 ORDER BY sort_order");
+$stmt->execute();
+$plans = $stmt->fetchAll();
 
-if (!$school) {
-    header("Location: ../index.php?error=school_not_found");
-    exit;
-}
-
-// Get school statistics - FIXED: Check if Tenant exists
-$stats = ['students' => 0, 'teachers' => 0, 'admins' => 0, 'parents' => 0];
-try {
-    if (class_exists('Tenant')) {
-        $tenant = new Tenant();
-        $tenantStats = $tenant->getSchoolStatistics($schoolId);
-        if (is_array($tenantStats)) {
-            $stats = $tenantStats;
-        }
-    }
-} catch (Exception $e) {
-    error_log("Error getting school statistics: " . $e->getMessage());
-}
-
-// Get current subscription
-$subscription = null;
-try {
-    $subStmt = $db->prepare("
-        SELECT s.*, p.name as plan_name, p.price_monthly 
-        FROM subscriptions s 
-        LEFT JOIN plans p ON s.plan_id = p.id 
-        WHERE s.school_id = ? 
-        ORDER BY s.created_at DESC 
-        LIMIT 1
-    ");
-    $subStmt->execute([$schoolId]);
-    $subscription = $subStmt->fetch();
-} catch (Exception $e) {
-    error_log("Error getting subscription: " . $e->getMessage());
-}
-
-// Try to get admin user from school's database
-$admin = null;
-$recentActivities = [];
-try {
-    // Connect to school's database
-    if (!empty($school['database_name'])) {
-        // FIXED: Use safer connection method
-        if (Database::schoolDatabaseExists($school['database_name'])) {
-            $schoolDb = Database::getSchoolConnection($school['database_name']);
-            
-            // Get admin user (first user with admin role)
-            $adminStmt = $schoolDb->prepare("
-                SELECT u.* FROM users u 
-                WHERE u.user_type = 'admin' AND u.is_active = 1 
-                ORDER BY u.id ASC 
-                LIMIT 1
-            ");
-            $adminStmt->execute();
-            $admin = $adminStmt->fetch();
-            
-            // Get recent activities - FIXED: Safer table existence check
-            try {
-                $checkTable = $schoolDb->prepare("SHOW TABLES LIKE ?");
-                $checkTable->execute(['audit_logs']);
-                if ($checkTable->fetch()) {
-                    $activitiesStmt = $schoolDb->prepare("
-                        SELECT * FROM audit_logs 
-                        WHERE school_id = ? 
-                        ORDER BY created_at DESC 
-                        LIMIT 5
-                    ");
-                    $activitiesStmt->execute([$schoolId]);
-                    $recentActivities = $activitiesStmt->fetchAll();
-                }
-            } catch (Exception $e) {
-                error_log("Error checking audit logs table: " . $e->getMessage());
-            }
-        }
-    }
-} catch (Exception $e) {
-    // Log error but don't crash the page
-    error_log("Error accessing school database for school ID {$schoolId}: " . $e->getMessage());
-}
-
-// Get recent activities from platform audit_logs as fallback
-if (empty($recentActivities)) {
-    try {
-        // FIXED: Check if platform_audit_logs table exists
-        $checkTable = $db->prepare("SHOW TABLES LIKE ?");
-        $checkTable->execute(['platform_audit_logs']);
-        
-        if ($checkTable->fetch()) {
-            $activitiesStmt = $db->prepare("
-                SELECT * FROM platform_audit_logs 
-                WHERE school_id = ? 
-                ORDER BY created_at DESC 
-                LIMIT 5
-            ");
-            $activitiesStmt->execute([$schoolId]);
-            $recentActivities = $activitiesStmt->fetchAll();
-        }
-    } catch (Exception $e) {
-        error_log("Error accessing platform audit logs: " . $e->getMessage());
-        $recentActivities = [];
-    }
-}
-
-// Format data for display
-$statusClass = '';
-$statusText = 'Pending';
-switch($school['status'] ?? 'pending') {
-    case 'active':
-        $statusClass = 'status-active';
-        $statusText = 'Operational';
-        break;
-    case 'trial':
-        $statusClass = 'status-trial';
-        $statusText = 'Trial';
-        break;
-    case 'suspended':
-        $statusClass = 'status-suspended';
-        $statusText = 'Suspended';
-        break;
-    case 'pending':
-        $statusClass = 'status-pending';
-        $statusText = 'Pending';
-        break;
-    default:
-        $statusClass = 'status-pending';
-        $statusText = ucfirst($school['status'] ?? 'pending');
-}
-
-// Calculate renewal date
-$renewalDate = null;
-if ($subscription && isset($subscription['current_period_end']) && $subscription['current_period_end']) {
-    $renewalDate = date('F j, Y', strtotime($subscription['current_period_end']));
-}
-
-// Calculate uptime (simulated)
-$uptime = 94.7 + (rand(-10, 10) / 10);
-
-// Prepare JSON data for charts
-$chartData = [
-    'labels' => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    'users' => [],
-    'apiCalls' => []
+// Get Nigerian states and cities
+$nigerianStates = [
+    'Abia' => ['Umuahia', 'Aba', 'Owerri'],
+    'Adamawa' => ['Yola', 'Mubi', 'Jimeta'],
+    'Akwa Ibom' => ['Uyo', 'Eket', 'Ikot Ekpene'],
+    'Anambra' => ['Awka', 'Onitsha', 'Nnewi'],
+    'Bauchi' => ['Bauchi', 'Azare', 'Jama\'are'],
+    'Bayelsa' => ['Yenagoa', 'Brass', 'Ogbia'],
+    'Benue' => ['Makurdi', 'Gboko', 'Otukpo'],
+    'Borno' => ['Maiduguri', 'Bama', 'Biul'],
+    'Cross River' => ['Calabar', 'Ugep', 'Ogoja'],
+    'Delta' => ['Asaba', 'Warri', 'Sapele'],
+    'Ebonyi' => ['Abakaliki', 'Afikpo', 'Onueke'],
+    'Edo' => ['Benin City', 'Auchi', 'Ekpoma'],
+    'Ekiti' => ['Ado Ekiti', 'Ikere', 'Ise'],
+    'Enugu' => ['Enugu', 'Nsukka', 'Agbani'],
+    'Gombe' => ['Gombe', 'Bajoga', 'Kaltungo'],
+    'Imo' => ['Owerri', 'Okigwe', 'Orlu'],
+    'Jigawa' => ['Dutse', 'Hadejia', 'Kazaure'],
+    'Kaduna' => ['Kaduna', 'Zaria', 'Kafanchan'],
+    'Kano' => ['Kano', 'Dutse', 'Wudil'],
+    'Katsina' => ['Katsina', 'Funtua', 'Daura'],
+    'Kebbi' => ['Birnin Kebbi', 'Argungu', 'Yauri'],
+    'Kogi' => ['Lokoja', 'Okene', 'Idah'],
+    'Kwara' => ['Ilorin', 'Offa', 'Omu-Aran'],
+    'Lagos' => ['Lagos', 'Ikeja', 'Badagry'],
+    'Nasarawa' => ['Lafia', 'Keffi', 'Karu'],
+    'Niger' => ['Minna', 'Bida', 'Suleja'],
+    'Ogun' => ['Abeokuta', 'Sagamu', 'Ijebu-Ode'],
+    'Ondo' => ['Akure', 'Ondo', 'Owo'],
+    'Osun' => ['Osogbo', 'Ife', 'Ilesa'],
+    'Oyo' => ['Ibadan', 'Oyo', 'Ogbomoso'],
+    'Plateau' => ['Jos', 'Bukuru', 'Shendam'],
+    'Rivers' => ['Port Harcourt', 'Bonny', 'Degema'],
+    'Sokoto' => ['Sokoto', 'Tambuwal', 'Gwadabawa'],
+    'Taraba' => ['Jalingo', 'Bali', 'Wukari'],
+    'Yobe' => ['Damaturu', 'Potiskum', 'Gashua'],
+    'Zamfara' => ['Gusau', 'Kaura Namoda', 'Talata Mafara'],
+    'FCT Abuja' => ['Abuja', 'Gwagwalada', 'Kuje']
 ];
 
-// User distribution based on stats
-$userDistribution = [
-    'labels' => ['Teachers', 'Students', 'Administrators', 'Parents'],
-    'data' => [
-        $stats['teachers'] ?? 0,
-        $stats['students'] ?? 0,
-        $stats['admins'] ?? 0,
-        $stats['parents'] ?? 0
-    ]
+// School types from database schema
+$schoolTypes = [
+    'nursery' => 'Nursery & Daycare',
+    'primary' => 'Primary School',
+    'secondary' => 'Secondary School',
+    'comprehensive' => 'Comprehensive School',
+    'international' => 'International School',
+    'montessori' => 'Montessori School',
+    'boarding' => 'Boarding School',
+    'day' => 'Day School'
 ];
 
-// Generate simulated data for charts
-for ($i = 0; $i < 7; $i++) {
-    $baseUsers = ($stats['students'] ?? 0) + ($stats['teachers'] ?? 0) + ($stats['admins'] ?? 0);
-    $chartData['users'][] = $baseUsers + rand(-200, 200);
-    $chartData['apiCalls'][] = rand(40000, 80000);
-}
+// Curriculum options from database schema
+$curriculums = [
+    'Nigerian' => 'Nigerian Curriculum',
+    'British' => 'British Curriculum',
+    'American' => 'American Curriculum',
+    'Montessori' => 'Montessori',
+    'IB' => 'International Baccalaureate',
+    'Bilingual' => 'Bilingual',
+    'Technical' => 'Technical/Vocational'
+];
+
+// Campus types from database schema
+$campusTypes = [
+    'main' => 'Main Campus',
+    'branch' => 'Branch Campus'
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title><?php echo htmlspecialchars($school['name'] ?? 'School Details'); ?> | AcademixSuite Admin</title>
+    <title>Provision New School | AcademixSuite Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Chart.js for analytics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
+
         :root {
-            --brand-primary: #2563eb;
+            --brand-primary: #4f46e5;
+            --brand-secondary: #7c3aed;
+            --brand-accent: #f43f5e;
             --brand-surface: #ffffff;
             --brand-bg: #f8fafc;
         }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--brand-bg); 
-            color: #1e293b; 
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--brand-bg);
+            color: #1e293b;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Mobile-optimized scrollbar */
-        ::-webkit-scrollbar { 
-            width: 4px; 
-            height: 4px; 
-        }
-        ::-webkit-scrollbar-track { 
-            background: #f1f5f9; 
-        }
-        ::-webkit-scrollbar-thumb { 
-            background: #cbd5e1; 
-            border-radius: 10px; 
+        /* Select2 custom styling */
+        .select2-container--default .select2-selection--single {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            height: 48px;
+            padding: 8px 12px;
         }
 
-        .sidebar-link { 
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-            border-left: 3px solid transparent; 
-        }
-        .sidebar-link:hover { 
-            background: #f1f5f9; 
-            color: var(--brand-primary); 
-        }
-        .active-link { 
-            background: #eff6ff; 
-            color: var(--brand-primary); 
-            border-left-color: var(--brand-primary); 
-            font-weight: 600; 
-        }
-        
-        .dropdown-content { 
-            max-height: 0; 
-            overflow: hidden; 
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-        .dropdown-open .dropdown-content { 
-            max-height: 500px; 
-        }
-        .dropdown-open .chevron { 
-            transform: rotate(180deg); 
-        }
-
-        /* Mobile-first responsive design */
-        @media (max-width: 640px) {
-            .mobile-stack { flex-direction: column; }
-            .mobile-full { width: 100%; }
-            .mobile-text-center { text-align: center; }
-            .mobile-p-4 { padding: 1rem; }
-            .mobile-space-y-4 > * + * { margin-top: 1rem; }
-        }
-
-        @media (max-width: 768px) {
-            .tablet-hide { display: none; }
-            .tablet-full { width: 100%; }
-        }
-
-        /* Touch-friendly sizes */
-        .touch-target {
-            min-height: 44px;
-            min-width: 44px;
-        }
-
-        .glass-header { 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px);
-        }
-        
-        .detail-card { 
-            border: 1px solid #e2e8f0; 
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); 
-            border-radius: 20px;
-        }
-
-        /* Status indicators */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        .status-active {
-            background-color: #dcfce7;
-            color: #166534;
-            border: 1px solid #bbf7d0;
-        }
-        
-        .status-trial {
-            background-color: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fde68a;
-        }
-        
-        .status-suspended {
-            background-color: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-        
-        .status-pending {
-            background-color: #e0e7ff;
-            color: #3730a3;
-            border: 1px solid #c7d2fe;
-        }
-
-        /* Progress bars */
-        .progress-container {
-            width: 100%;
-            height: 8px;
-            background-color: #f1f5f9;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        
-        .progress-success {
-            background: linear-gradient(90deg, #10b981, #34d399);
-        }
-        
-        .progress-warning {
-            background: linear-gradient(90deg, #f59e0b, #fbbf24);
-        }
-        
-        .progress-danger {
-            background: linear-gradient(90deg, #ef4444, #f87171);
-        }
-
-        /* Timeline */
-        .timeline-item {
-            position: relative;
-            padding-left: 24px;
-            margin-bottom: 20px;
-        }
-        
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 8px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid #2563eb;
-            background: white;
-        }
-        
-        .timeline-item::after {
-            content: '';
-            position: absolute;
-            left: 5px;
-            top: 20px;
-            width: 2px;
-            height: calc(100% + 12px);
-            background: #e2e8f0;
-        }
-        
-        .timeline-item:last-child::after {
-            display: none;
-        }
-
-        /* Tabs */
-        .tab-button {
-            padding: 12px 24px;
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 32px;
             font-size: 14px;
-            font-weight: 600;
-            color: #64748b;
-            background: transparent;
-            border: none;
-            border-bottom: 3px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .tab-button:hover {
-            color: #2563eb;
-        }
-        
-        .tab-button.active {
-            color: #2563eb;
-            border-bottom-color: #2563eb;
-            background: linear-gradient(to top, rgba(37, 99, 235, 0.05), transparent);
         }
 
-        /* Card hover effects */
-        .hover-lift {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        .hover-lift:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
 
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
+        .select2-dropdown {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Form steps */
+        .step-progress {
+            position: relative;
+            padding: 0 20px;
+        }
+
+        .step-progress::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e2e8f0;
+            z-index: 1;
+        }
+
+        .step-progress.active::before {
+            background: linear-gradient(to right, var(--brand-primary) 50%, #e2e8f0 50%);
+        }
+
+        .step-dot {
+            position: relative;
+            z-index: 2;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
             transition: all 0.3s ease;
         }
-        
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
-        }
-        
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
+
+        .step-dot.active {
+            background: var(--brand-primary);
+            border-color: var(--brand-primary);
+            color: white;
+            transform: scale(1.1);
         }
 
-        /* Mobile menu overlay */
-        .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 99;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .sidebar-overlay.active {
-            opacity: 1;
-            visibility: visible;
+        .step-dot.completed {
+            background: #10b981;
+            border-color: #10b981;
+            color: white;
         }
 
-        /* Form elements */
-        .form-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #475569;
-            margin-bottom: 6px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
+        /* Plan cards */
+        .plan-card {
             border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #1e293b;
-            background: white;
-            transition: all 0.2s ease;
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
 
-        .form-input:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        .plan-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--brand-primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .plan-card.selected {
+            border-color: var(--brand-primary);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .plan-card.recommended::before {
+            content: 'RECOMMENDED';
+            position: absolute;
+            top: 15px;
+            right: -35px;
+            background: var(--brand-primary);
+            color: white;
+            padding: 4px 40px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transform: rotate(45deg);
+        }
+
+        /* File upload */
+        .file-upload-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .file-upload-area:hover,
+        .file-upload-area.dragover {
+            border-color: var(--brand-primary);
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        /* Loading animation */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-primary);
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 9999;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+        }
+
+        .toast.info {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .mobile-stack {
+                flex-direction: column;
+            }
+            .mobile-full {
+                width: 100%;
+            }
+            .plan-card {
+                padding: 16px;
+            }
         }
     </style>
 </head>
-<body class="antialiased overflow-hidden selection:bg-blue-100">
 
-    <!-- Mobile Sidebar Overlay -->
-    <div id="sidebarOverlay" class="sidebar-overlay lg:hidden" onclick="mobileSidebarToggle()"></div>
-
-    <!-- Edit Modal -->
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black text-slate-900">Edit School Details</h3>
-                <button onclick="closeModal('editModal')" class="text-slate-400 hover:text-slate-600 touch-target">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            
-            <form id="editSchoolForm" method="POST" action="update_school.php">
-                <input type="hidden" name="school_id" value="<?php echo $schoolId; ?>">
-                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                
-                <div class="space-y-4">
-                    <div class="form-group">
-                        <label class="form-label">Institution Name</label>
-                        <input type="text" name="name" class="form-input" value="<?php echo htmlspecialchars($school['name'] ?? ''); ?>" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-input">
-                            <option value="active" <?php echo ($school['status'] ?? '') == 'active' ? 'selected' : ''; ?>>Active</option>
-                            <option value="trial" <?php echo ($school['status'] ?? '') == 'trial' ? 'selected' : ''; ?>>Trial</option>
-                            <option value="suspended" <?php echo ($school['status'] ?? '') == 'suspended' ? 'selected' : ''; ?>>Suspended</option>
-                            <option value="pending" <?php echo ($school['status'] ?? '') == 'pending' ? 'selected' : ''; ?>>Pending</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-input" value="<?php echo htmlspecialchars($school['email'] ?? ''); ?>">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Phone</label>
-                        <input type="tel" name="phone" class="form-input" value="<?php echo htmlspecialchars($school['phone'] ?? ''); ?>">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Address</label>
-                        <textarea name="address" class="form-input" rows="3"><?php echo htmlspecialchars($school['address'] ?? ''); ?></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">City</label>
-                        <input type="text" name="city" class="form-input" value="<?php echo htmlspecialchars($school['city'] ?? ''); ?>">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">State</label>
-                        <input type="text" name="state" class="form-input" value="<?php echo htmlspecialchars($school['state'] ?? ''); ?>">
-                    </div>
-                </div>
-                
-                <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
-                    <button type="button" onclick="closeModal('editModal')" class="px-6 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition touch-target">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition touch-target">
-                        Save Changes
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Actions Modal -->
-    <div id="actionsModal" class="modal-overlay">
-        <div class="modal-content p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black text-slate-900">School Actions</h3>
-                <button onclick="closeModal('actionsModal')" class="text-slate-400 hover:text-slate-600 touch-target">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            
-            <div class="space-y-3">
-                <button onclick="performAction('backup', <?php echo $schoolId; ?>)" class="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-emerald-200 hover:bg-emerald-50 transition flex items-center gap-3 touch-target">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                        <i class="fas fa-database text-emerald-600"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-slate-900">Create Backup</h4>
-                        <p class="text-sm text-slate-500">Generate system backup</p>
-                    </div>
-                </button>
-                
-                <button onclick="performAction('restart', <?php echo $schoolId; ?>)" class="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-amber-200 hover:bg-amber-50 transition flex items-center gap-3 touch-target">
-                    <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                        <i class="fas fa-redo text-amber-600"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-slate-900">Restart Services</h4>
-                        <p class="text-sm text-slate-500">Restart school services</p>
-                    </div>
-                </button>
-                
-                <button onclick="performAction('suspend', <?php echo $schoolId; ?>)" class="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-red-200 hover:bg-red-50 transition flex items-center gap-3 touch-target">
-                    <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-                        <i class="fas fa-pause text-red-600"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-slate-900">Suspend Account</h4>
-                        <p class="text-sm text-slate-500">Temporarily suspend school</p>
-                    </div>
-                </button>
-                
-                <button onclick="performAction('terminate', <?php echo $schoolId; ?>)" class="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-red-200 hover:bg-red-50 transition flex items-center gap-3 touch-target">
-                    <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-                        <i class="fas fa-trash text-red-600"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-slate-900">Terminate Account</h4>
-                        <p class="text-sm text-slate-500">Permanently delete school</p>
-                    </div>
-                </button>
-            </div>
-        </div>
-    </div>
-
+<body class="antialiased overflow-hidden">
     <div class="flex h-screen overflow-hidden">
-
-        <?php 
-        // FIXED: Use proper path for sidebar
-        $sidebarPath = __DIR__ . '/../filepath/sidebar.php';
-        if (file_exists($sidebarPath)) {
-            include $sidebarPath;
-        } else {
-            // Fallback minimal sidebar
-            echo '<div class="w-64 bg-white border-r border-slate-200 p-4">Sidebar not found</div>';
-        }
-        ?>
+        <?php include '../filepath/sidebar.php'; ?>
 
         <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
-            
-            <header class="h-16 glass-header border-b border-slate-200 px-4 lg:px-8 flex items-center justify-between shrink-0 z-40">
+            <!-- Header -->
+            <header class="h-16 bg-white border-b border-slate-200 px-4 lg:px-8 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
-                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-500 p-2 hover:bg-slate-100 rounded-lg transition touch-target">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-500 p-2 hover:bg-slate-100 rounded-lg transition">
                         <i class="fas fa-bars-staggered"></i>
                     </button>
                     <div class="flex items-center gap-2">
-                        <h1 class="text-sm font-black text-slate-800 uppercase tracking-widest">School Performance</h1>
-                        <span class="px-2 py-0.5 bg-blue-600 text-[10px] text-white font-black rounded uppercase">Live</span>
+                        <h1 class="text-sm font-black text-slate-800 uppercase tracking-widest">Provision New School</h1>
+                        <span class="px-2 py-0.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-[10px] text-white font-black rounded-full uppercase">
+                            New
+                        </span>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <a href="../index.php" class="hidden sm:flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-blue-600 text-sm font-medium transition">
+                    <a href="../index.php" class="hidden sm:flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-indigo-600 text-sm font-medium transition">
                         <i class="fas fa-arrow-left"></i>
-                        <span>Back to Registry</span>
+                        <span>Back to Dashboard</span>
                     </a>
-                    <div class="flex items-center gap-2 text-xs text-slate-500">
-                        <i class="fas fa-clock"></i>
-                        <span id="timestamp">Loading...</span>
+                    <div class="flex items-center gap-2 text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                        <i class="fas fa-user-shield"></i>
+                        <span><?php echo htmlspecialchars($superAdmin['name'] ?? 'Super Admin'); ?></span>
                     </div>
                 </div>
             </header>
 
-            <!-- Tabs Navigation -->
-            <div class="border-b border-slate-200 bg-white">
-                <div class="max-w-7xl mx-auto px-4 lg:px-8">
-                    <div class="flex overflow-x-auto">
-                        <button class="tab-button active" onclick="switchTab(event, 'overview')">
-                            <i class="fas fa-chart-bar mr-2"></i>Overview
-                        </button>
-                        <button class="tab-button" onclick="switchTab(event, 'users')">
-                            <i class="fas fa-users mr-2"></i>Users
-                        </button>
-                        <button class="tab-button" onclick="switchTab(event, 'analytics')">
-                            <i class="fas fa-chart-line mr-2"></i>Analytics
-                        </button>
-                        <button class="tab-button" onclick="switchTab(event, 'settings')">
-                            <i class="fas fa-cog mr-2"></i>Settings
-                        </button>
-                        <button class="tab-button" onclick="switchTab(event, 'logs')">
-                            <i class="fas fa-history mr-2"></i>Activity Logs
-                        </button>
+            <!-- Progress Steps -->
+            <div class="bg-white border-b border-slate-200 px-4 lg:px-8 py-4">
+                <div class="max-w-6xl mx-auto">
+                    <div class="step-progress flex justify-between relative">
+                        <?php
+                        $steps = [
+                            1 => ['icon' => 'fa-school', 'title' => 'School Details', 'desc' => 'Basic information'],
+                            2 => ['icon' => 'fa-user-shield', 'title' => 'Admin Setup', 'desc' => 'Primary administrator'],
+                            3 => ['icon' => 'fa-credit-card', 'title' => 'Subscription', 'desc' => 'Choose plan'],
+                            4 => ['icon' => 'fa-check-circle', 'title' => 'Review', 'desc' => 'Confirm details']
+                        ];
+                        
+                        foreach ($steps as $num => $step):
+                        ?>
+                        <div class="text-center" id="step<?php echo $num; ?>Indicator">
+                            <div class="step-dot mx-auto mb-2" id="stepDot<?php echo $num; ?>">
+                                <i class="fas <?php echo $step['icon']; ?>"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Step <?php echo $num; ?></p>
+                                <p class="text-sm font-semibold text-slate-900"><?php echo $step['title']; ?></p>
+                                <p class="text-xs text-slate-400"><?php echo $step['desc']; ?></p>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-4 lg:p-8">
-                <!-- School Header -->
-                <div class="max-w-7xl mx-auto mb-8">
-                    <div class="bg-white detail-card p-6">
-                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
-                            <div class="flex items-center gap-4">
-                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                                    <i class="fas fa-university text-white text-2xl"></i>
+            <!-- Form Container -->
+            <div class="flex-1 overflow-y-auto p-4 lg:p-8 custom-scrollbar">
+                <div class="max-w-6xl mx-auto">
+                    <form id="provisionForm" action="process_provision.php" method="POST" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-lg p-6 lg:p-8">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="provision_type" value="full">
+
+                        <!-- Step 1: School Information -->
+                        <div id="step1" class="step-content active">
+                            <div class="mb-8">
+                                <h2 class="text-2xl font-black text-slate-900 mb-2">
+                                    <i class="fas fa-school text-indigo-600 mr-2"></i>
+                                    School Information
+                                </h2>
+                                <p class="text-slate-500">Fill in the basic details about the school</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <!-- Left Column -->
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            School Name <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text"
+                                            id="schoolName"
+                                            name="name"
+                                            class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                            placeholder="Enter full school name"
+                                            required
+                                            oninput="updateSlugPreview()">
+                                        <p class="text-xs text-slate-400 mt-2" id="slugPreviewText">
+                                            URL Slug: <span id="slugPreview" class="font-mono">school-<?php echo time(); ?></span>
+                                        </p>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                School Type <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="schoolType" name="school_type" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
+                                                <option value="">Select type</option>
+                                                <?php foreach ($schoolTypes as $value => $label): ?>
+                                                <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Curriculum <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="curriculum" name="curriculum" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
+                                                <option value="">Select curriculum</option>
+                                                <?php foreach ($curriculums as $value => $label): ?>
+                                                <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Campus Type <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="campusType" name="campus_type" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
+                                                <option value="">Select type</option>
+                                                <?php foreach ($campusTypes as $value => $label): ?>
+                                                <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Address <span class="text-red-500">*</span>
+                                        </label>
+                                        <textarea id="address"
+                                            name="address"
+                                            rows="3"
+                                            class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                            placeholder="Full physical address of the school"
+                                            required></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Campus Code (Optional)
+                                        </label>
+                                        <input type="text"
+                                            id="campusCode"
+                                            name="campus_code"
+                                            class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                            placeholder="e.g., MAIN001, BRANCH001"
+                                            maxlength="50">
+                                        <p class="text-xs text-slate-400 mt-2">Unique identifier for this campus (auto-generated if empty)</p>
+                                    </div>
                                 </div>
+
+                                <!-- Right Column -->
+                                <div class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Country <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="country" name="country" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
+                                                <option value="">Select country</option>
+                                                <option value="Nigeria" selected>Nigeria</option>
+                                                <option value="Ghana">Ghana</option>
+                                                <option value="Kenya">Kenya</option>
+                                                <option value="South Africa">South Africa</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                State <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="state" name="state" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
+                                                <option value="">Select state</option>
+                                                <?php foreach ($nigerianStates as $state => $cities): ?>
+                                                <option value="<?php echo htmlspecialchars($state); ?>"><?php echo htmlspecialchars($state); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                City/Town <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text"
+                                                id="city"
+                                                name="city"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="Enter city or town name"
+                                                required>
+                                            <p class="text-xs text-slate-400 mt-2">Enter the city or town where the school is located</p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Postal Code
+                                            </label>
+                                            <input type="text"
+                                                id="postalCode"
+                                                name="postal_code"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="000000"
+                                                maxlength="20">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Email <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="email"
+                                                id="schoolEmail"
+                                                name="email"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="contact@school.edu"
+                                                required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Phone <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="tel"
+                                                id="phone"
+                                                name="phone"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="+234 801 234 5678"
+                                                required
+                                                maxlength="20">
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Establishment Year (Optional)
+                                        </label>
+                                        <input type="number"
+                                            id="establishmentYear"
+                                            name="establishment_year"
+                                            class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                            placeholder="e.g., 1990"
+                                            min="1800"
+                                            max="<?php echo date('Y'); ?>"
+                                            maxlength="4">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- School Description & Logo -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
                                 <div>
-                                    <h2 class="text-2xl font-black text-slate-900 mb-1"><?php echo htmlspecialchars($school['name'] ?? 'Unnamed School'); ?></h2>
-                                    <div class="flex items-center gap-3">
-                                        <span class="status-badge <?php echo $statusClass; ?>">
-                                            <i class="fas fa-circle text-[8px] mr-1"></i> <?php echo $statusText; ?>
-                                        </span>
-                                        <span class="text-sm text-slate-500 font-medium">
-                                            <i class="fas fa-hashtag mr-1"></i><?php echo $school['id']; ?>
-                                        </span>
-                                        <span class="text-sm text-slate-500 font-medium">
-                                            <i class="fas fa-map-marker-alt mr-1"></i><?php echo htmlspecialchars(($school['city'] ?? '') . ', ' . ($school['state'] ?? '')); ?>
-                                        </span>
-                                    </div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                        School Description (Optional)
+                                    </label>
+                                    <textarea id="description"
+                                        name="description"
+                                        rows="4"
+                                        class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                        placeholder="Brief description of the school's mission, vision, and values..."></textarea>
                                 </div>
-                            </div>
-                            
-                            <div class="flex flex-wrap gap-3">
-                                <button onclick="openModal('editModal')" class="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2 touch-target">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                                <button onclick="openModal('actionsModal')" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition flex items-center gap-2 touch-target">
-                                    <i class="fas fa-cog"></i> Actions
-                                </button>
-                                <button onclick="generateReport(<?php echo $schoolId; ?>)" class="px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition flex items-center gap-2 touch-target">
-                                    <i class="fas fa-file-export"></i> Export Report
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Quick Stats -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="bg-slate-50 rounded-xl p-4">
-                                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Active Users</p>
-                                <div class="flex items-end justify-between">
-                                    <p class="text-2xl font-black text-slate-900"><?php echo ($stats['students'] ?? 0) + ($stats['teachers'] ?? 0) + ($stats['admins'] ?? 0) + ($stats['parents'] ?? 0); ?></p>
-                                    <span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded">+12%</span>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-slate-50 rounded-xl p-4">
-                                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Engagement Rate</p>
-                                <div class="flex items-end justify-between">
-                                    <p class="text-2xl font-black text-slate-900">87.3%</p>
-                                    <span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded">+3.2%</span>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-slate-50 rounded-xl p-4">
-                                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Avg Session</p>
-                                <div class="flex items-end justify-between">
-                                    <p class="text-2xl font-black text-slate-900">34m</p>
-                                    <span class="text-xs font-bold text-amber-600 bg-amber-100 px-2 py-1 rounded">-2%</span>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-slate-50 rounded-xl p-4">
-                                <p class="text-xs font-bold text-slate-500 uppercase mb-1">Health Score</p>
-                                <div class="flex items-end justify-between">
-                                    <p class="text-2xl font-black text-slate-900"><?php echo number_format($uptime, 1); ?>%</p>
-                                    <div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Tab Content: Overview -->
-                <div id="overviewTab" class="max-w-7xl mx-auto space-y-6 tab-content active">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <!-- Left Column -->
-                        <div class="lg:col-span-2 space-y-6">
-                            <!-- Performance Metrics -->
-                            <div class="bg-white detail-card p-6 hover-lift">
-                                <div class="flex justify-between items-center mb-6">
-                                    <h3 class="text-lg font-bold text-slate-900">Performance Metrics</h3>
-                                    <select class="text-sm border border-slate-200 rounded-lg px-3 py-1">
-                                        <option>Last 7 days</option>
-                                        <option>Last 30 days</option>
-                                        <option>Last quarter</option>
-                                    </select>
-                                </div>
-                                <div class="h-64">
-                                    <canvas id="performanceChart"></canvas>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                        School Logo (Optional)
+                                    </label>
+                                    <div class="file-upload-area" onclick="document.getElementById('logoFile').click()" id="logoUploadArea">
+                                        <i class="fas fa-cloud-upload-alt text-4xl text-slate-400 mb-4"></i>
+                                        <p class="text-sm font-medium text-slate-700 mb-1">Click to upload or drag & drop</p>
+                                        <p class="text-xs text-slate-500">PNG, JPG up to 5MB (Recommended: 500x500px)</p>
+                                        <input type="file"
+                                            id="logoFile"
+                                            name="logo_path"
+                                            class="hidden"
+                                            accept=".png,.jpg,.jpeg,.webp"
+                                            onchange="previewLogo(event)">
+                                    </div>
+                                    <div id="logoPreview" class="mt-4 hidden">
+                                        <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
+                                            <img id="previewImage" class="w-16 h-16 rounded-lg object-cover border-2 border-slate-200">
+                                            <div class="flex-1">
+                                                <p id="fileName" class="text-sm font-medium text-slate-700"></p>
+                                                <p id="fileSize" class="text-xs text-slate-500"></p>
+                                            </div>
+                                            <button type="button"
+                                                onclick="removeLogo()"
+                                                class="text-red-500 hover:text-red-700 p-2">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <!-- Resource Utilization -->
-                            <div class="bg-white detail-card p-6 hover-lift">
-                                <h3 class="text-lg font-bold text-slate-900 mb-6">Resource Utilization</h3>
-                                <div class="space-y-4">
-                                    <div>
-                                        <div class="flex justify-between text-sm mb-1">
-                                            <span class="font-medium text-slate-700">Database Size</span>
-                                            <span class="font-bold">
-                                                <?php 
-                                                    $dbSize = 0;
-                                                    if (!empty($school['database_name'])) {
-                                                        $dbSize = rand(50, 200);
-                                                    }
-                                                    echo $dbSize; ?> MB / 200 MB
-                                            </span>
+
+                            <!-- Mission and Vision Statements -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                        Mission Statement (Optional)
+                                    </label>
+                                    <textarea id="missionStatement"
+                                        name="mission_statement"
+                                        rows="3"
+                                        class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                        placeholder="The school's mission statement..."></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                        Vision Statement (Optional)
+                                    </label>
+                                    <textarea id="visionStatement"
+                                        name="vision_statement"
+                                        rows="3"
+                                        class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                        placeholder="The school's vision statement..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Principal Information -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                        Principal Name (Optional)
+                                    </label>
+                                    <input type="text"
+                                        id="principalName"
+                                        name="principal_name"
+                                        class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                        placeholder="Name of the principal"
+                                        maxlength="255">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                        Principal Message (Optional)
+                                    </label>
+                                    <textarea id="principalMessage"
+                                        name="principal_message"
+                                        rows="3"
+                                        class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                        placeholder="Principal's welcome message..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Capacity Estimation -->
+                            <div class="mt-8 pt-8 border-t border-slate-200">
+                                <h3 class="text-lg font-semibold text-slate-900 mb-6">
+                                    <i class="fas fa-users text-indigo-600 mr-2"></i>
+                                    Capacity Estimation
+                                </h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                    <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-xl">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-semibold text-indigo-900">Students</span>
+                                            <i class="fas fa-graduation-cap text-indigo-600"></i>
                                         </div>
-                                        <div class="progress-container">
-                                            <div class="progress-bar progress-success" style="width: <?php echo ($dbSize / 200) * 100; ?>%"></div>
+                                        <div class="relative">
+                                            <input type="number"
+                                                id="studentCount"
+                                                name="student_count"
+                                                min="0"
+                                                max="100000"
+                                                value="0"
+                                                class="w-full bg-transparent border-0 text-2xl font-bold text-indigo-900 focus:outline-none"
+                                                onchange="updateCapacityEstimate()">
+                                            <span class="absolute right-0 top-1/2 transform -translate-y-1/2 text-indigo-600 font-medium">students</span>
                                         </div>
+                                        <p class="text-xs text-indigo-700 mt-2">Current enrollment</p>
                                     </div>
-                                    
-                                    <div>
-                                        <div class="flex justify-between text-sm mb-1">
-                                            <span class="font-medium text-slate-700">Storage Usage</span>
-                                            <span class="font-bold">145 GB / 200 GB</span>
+
+                                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-semibold text-purple-900">Teachers</span>
+                                            <i class="fas fa-chalkboard-teacher text-purple-600"></i>
                                         </div>
-                                        <div class="progress-container">
-                                            <div class="progress-bar progress-warning" style="width: 72.5%"></div>
+                                        <div class="relative">
+                                            <input type="number"
+                                                id="teacherCount"
+                                                name="teacher_count"
+                                                min="0"
+                                                max="10000"
+                                                value="0"
+                                                class="w-full bg-transparent border-0 text-2xl font-bold text-purple-900 focus:outline-none"
+                                                onchange="updateCapacityEstimate()">
+                                            <span class="absolute right-0 top-1/2 transform -translate-y-1/2 text-purple-600 font-medium">teachers</span>
                                         </div>
+                                        <p class="text-xs text-purple-700 mt-2">Teaching staff</p>
                                     </div>
-                                    
-                                    <div>
-                                        <div class="flex justify-between text-sm mb-1">
-                                            <span class="font-medium text-slate-700">Bandwidth</span>
-                                            <span class="font-bold">18.2 TB / 25 TB</span>
+
+                                    <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-semibold text-emerald-900">Classes</span>
+                                            <i class="fas fa-school text-emerald-600"></i>
                                         </div>
-                                        <div class="progress-container">
-                                            <div class="progress-bar progress-success" style="width: 72.8%"></div>
+                                        <div class="relative">
+                                            <input type="number"
+                                                id="classCount"
+                                                name="class_count"
+                                                min="0"
+                                                max="1000"
+                                                value="0"
+                                                class="w-full bg-transparent border-0 text-2xl font-bold text-emerald-900 focus:outline-none"
+                                                onchange="updateCapacityEstimate()">
+                                            <span class="absolute right-0 top-1/2 transform -translate-y-1/2 text-emerald-600 font-medium">classes</span>
                                         </div>
+                                        <p class="text-xs text-emerald-700 mt-2">Classrooms</p>
+                                    </div>
+
+                                    <div class="bg-gradient-to-br from-rose-50 to-rose-100 p-6 rounded-xl">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-semibold text-rose-900">Ratio</span>
+                                            <i class="fas fa-balance-scale text-rose-600"></i>
+                                        </div>
+                                        <div class="text-2xl font-bold text-rose-900" id="studentTeacherRatio">0:0</div>
+                                        <p class="text-xs text-rose-700 mt-2">Student-teacher ratio</p>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- Navigation -->
+                            <div class="flex justify-between mt-12 pt-8 border-t border-slate-200">
+                                <a href="../index.php" class="px-6 py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                                    <i class="fas fa-times"></i>
+                                    Cancel
+                                </a>
+                                <button type="button"
+                                    onclick="nextStep(2)"
+                                    class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition flex items-center gap-2 shadow-lg shadow-indigo-100">
+                                    Continue to Admin Setup
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
                             </div>
                         </div>
-                        
-                        <!-- Right Column -->
-                        <div class="space-y-6">
-                            <!-- School Details -->
-                            <div class="bg-white detail-card p-6 hover-lift">
-                                <h3 class="text-lg font-bold text-slate-900 mb-4">Institution Details</h3>
-                                <div class="space-y-4">
-                                    <div>
-                                        <p class="text-xs font-bold text-slate-500 uppercase">Type</p>
-                                        <p class="text-sm font-medium"><?php echo ucfirst($school['type'] ?? 'Secondary'); ?> School</p>
+
+                        <!-- Step 2: Admin Setup -->
+                        <div id="step2" class="step-content hidden">
+                            <div class="mb-8">
+                                <h2 class="text-2xl font-black text-slate-900 mb-2">
+                                    <i class="fas fa-user-shield text-indigo-600 mr-2"></i>
+                                    Primary Administrator
+                                </h2>
+                                <p class="text-slate-500">Set up the primary school administrator account</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <!-- Admin Details -->
+                                <div class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                First Name <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text"
+                                                id="adminFirstName"
+                                                name="admin_first_name"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="John"
+                                                required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Last Name <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text"
+                                                id="adminLastName"
+                                                name="admin_last_name"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="Doe"
+                                                required>
+                                        </div>
                                     </div>
+
                                     <div>
-                                        <p class="text-xs font-bold text-slate-500 uppercase">Subscription</p>
-                                        <span class="inline-block px-3 py-1 bg-slate-900 text-white text-xs font-bold rounded-lg">
-                                            <?php echo $subscription['plan_name'] ?? 'No Subscription'; ?>
-                                        </span>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Email Address <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="email"
+                                            id="adminEmail"
+                                            name="admin_email"
+                                            class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                            placeholder="admin@school.edu"
+                                            required>
+                                        <p class="text-xs text-slate-400 mt-2">Login credentials will be sent to this email</p>
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-bold text-slate-500 uppercase">Onboarded</p>
-                                        <p class="text-sm font-medium"><?php echo date('F j, Y', strtotime($school['created_at'] ?? 'now')); ?></p>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Phone Number <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="tel"
+                                                id="adminPhone"
+                                                name="admin_phone"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                                placeholder="+234 801 234 5678"
+                                                required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                                Position <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="adminPosition" name="admin_position" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
+                                                <option value="">Select position</option>
+                                                <option value="principal">Principal</option>
+                                                <option value="headteacher">Head Teacher</option>
+                                                <option value="director">Director</option>
+                                                <option value="proprietor">Proprietor</option>
+                                                <option value="admin">Administrator</option>
+                                                <option value="owner">Owner</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <?php if ($renewalDate): ?>
+
                                     <div>
-                                        <p class="text-xs font-bold text-slate-500 uppercase">Renewal Date</p>
-                                        <p class="text-sm font-medium"><?php echo $renewalDate; ?></p>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Admin Role <span class="text-red-500">*</span>
+                                        </label>
+                                        <select id="adminRole" name="admin_role" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
+                                            <option value="">Select role</option>
+                                            <option value="owner">Owner (Full Access)</option>
+                                            <option value="admin">Administrator</option>
+                                            <option value="accountant">Accountant</option>
+                                            <option value="principal">Principal</option>
+                                        </select>
+                                        <p class="text-xs text-slate-400 mt-2">This will determine the admin's permissions</p>
                                     </div>
-                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Security Settings -->
+                                <div class="space-y-6">
                                     <div>
-                                        <p class="text-xs font-bold text-slate-500 uppercase">Monthly Cost</p>
-                                        <p class="text-sm font-bold text-slate-900">₦<?php echo number_format($subscription['price_monthly'] ?? 0, 2); ?></p>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Initial Password <span class="text-red-500">*</span>
+                                        </label>
+                                        <div class="relative">
+                                            <input type="password"
+                                                id="adminPassword"
+                                                name="admin_password"
+                                                class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition pr-12"
+                                                placeholder="Generate strong password"
+                                                required>
+                                            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex gap-2">
+                                                <button type="button"
+                                                    onclick="togglePasswordVisibility('adminPassword')"
+                                                    class="text-slate-400 hover:text-slate-600">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button type="button"
+                                                    onclick="generatePassword()"
+                                                    class="text-indigo-600 hover:text-indigo-700">
+                                                    <i class="fas fa-redo"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 flex items-center gap-2">
+                                            <div id="passwordStrength" class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                                <div id="passwordStrengthBar" class="h-full w-0 transition-all duration-300"></div>
+                                            </div>
+                                            <span id="passwordStrengthText" class="text-xs font-medium text-slate-500">Weak</span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Send Welcome Email
+                                        </label>
+                                        <div class="flex items-center gap-3">
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox"
+                                                    id="sendWelcomeEmail"
+                                                    name="send_welcome_email"
+                                                    class="sr-only peer"
+                                                    checked>
+                                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                            </label>
+                                            <span class="text-sm text-slate-700">Send login credentials via email</span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Security Settings
+                                        </label>
+                                        <div class="space-y-3">
+                                            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                                                <input type="checkbox"
+                                                    id="require2FA"
+                                                    name="require_2fa"
+                                                    class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500">
+                                                <span class="text-sm text-slate-700">Require Two-Factor Authentication</span>
+                                            </label>
+                                            <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                                                <input type="checkbox"
+                                                    id="forcePasswordChange"
+                                                    name="force_password_change"
+                                                    class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
+                                                    checked>
+                                                <span class="text-sm text-slate-700">Force password change on first login</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                                            Additional Notes (Optional)
+                                        </label>
+                                        <textarea id="adminNotes"
+                                            name="admin_notes"
+                                            rows="3"
+                                            class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition"
+                                            placeholder="Any special instructions or notes..."></textarea>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Admin Contact -->
-                            <div class="bg-white detail-card p-6 hover-lift">
-                                <h3 class="text-lg font-bold text-slate-900 mb-4">Primary Administrator</h3>
-                                <?php if ($admin): ?>
-                                <div class="flex items-center gap-3 mb-4">
-                                    <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($admin['name'] ?? 'Admin'); ?>&background=2563eb&color=fff" class="w-12 h-12 rounded-xl">
-                                    <div>
-                                        <p class="font-bold text-slate-900"><?php echo htmlspecialchars($admin['name'] ?? 'Administrator'); ?></p>
-                                        <p class="text-sm text-slate-500"><?php echo ucfirst($admin['user_type'] ?? 'Administrator'); ?></p>
-                                    </div>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center gap-2 text-sm">
-                                        <i class="fas fa-envelope text-slate-400"></i>
-                                        <span><?php echo htmlspecialchars($admin['email'] ?? ''); ?></span>
-                                    </div>
-                                    <?php if (!empty($admin['phone'])): ?>
-                                    <div class="flex items-center gap-2 text-sm">
-                                        <i class="fas fa-phone text-slate-400"></i>
-                                        <span><?php echo htmlspecialchars($admin['phone']); ?></span>
-                                    </div>
-                                    <?php endif; ?>
-                                    <div class="flex items-center gap-2 text-sm">
-                                        <i class="fas fa-calendar text-slate-400"></i>
-                                        <span>Last active: <?php echo !empty($admin['last_login_at']) ? date('M j, Y', strtotime($admin['last_login_at'])) : 'Never'; ?></span>
-                                    </div>
-                                </div>
-                                <?php else: ?>
-                                <p class="text-slate-500 text-sm">No admin assigned</p>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <!-- Quick Actions -->
-                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 detail-card p-6 text-white">
-                                <h3 class="text-lg font-bold mb-4">Quick Actions</h3>
-                                <div class="space-y-3">
-                                    <button onclick="sendMessage(<?php echo $schoolId; ?>)" class="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition flex items-center gap-3 touch-target">
-                                        <i class="fas fa-comment"></i>
-                                        <span>Send Message</span>
-                                    </button>
-                                    <button onclick="scheduleCall(<?php echo $schoolId; ?>)" class="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition flex items-center gap-3 touch-target">
-                                        <i class="fas fa-phone"></i>
-                                        <span>Schedule Call</span>
-                                    </button>
-                                    <button onclick="viewBilling(<?php echo $schoolId; ?>)" class="w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 transition flex items-center gap-3 touch-target">
-                                        <i class="fas fa-receipt"></i>
-                                        <span>View Billing</span>
-                                    </button>
-                                </div>
+
+                            <!-- Navigation -->
+                            <div class="flex justify-between mt-12 pt-8 border-t border-slate-200">
+                                <button type="button"
+                                    onclick="previousStep(1)"
+                                    class="px-6 py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Back to School Info
+                                </button>
+                                <button type="button"
+                                    onclick="nextStep(3)"
+                                    class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition flex items-center gap-2 shadow-lg shadow-indigo-100">
+                                    Continue to Subscription
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Recent Activity -->
-                    <div class="bg-white detail-card p-6 hover-lift">
-                        <h3 class="text-lg font-bold text-slate-900 mb-6">Recent Activity</h3>
-                        <div class="timeline">
-                            <?php if (!empty($recentActivities)): ?>
-                                <?php foreach ($recentActivities as $activity): ?>
-                                <div class="timeline-item">
-                                    <div class="bg-slate-50 rounded-xl p-4">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <p class="font-bold text-slate-900"><?php echo htmlspecialchars($activity['event'] ?? 'Activity'); ?></p>
-                                            <span class="text-xs text-slate-500"><?php echo date('M j, H:i', strtotime($activity['created_at'] ?? 'now')); ?></span>
+
+                        <!-- Step 3: Subscription -->
+                        <div id="step3" class="step-content hidden">
+                            <div class="mb-8">
+                                <h2 class="text-2xl font-black text-slate-900 mb-2">
+                                    <i class="fas fa-credit-card text-indigo-600 mr-2"></i>
+                                    Subscription Plan
+                                </h2>
+                                <p class="text-slate-500">Choose the perfect plan for your school's needs</p>
+                            </div>
+
+                            <!-- Plan Cards -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" id="planSelection">
+                                <?php foreach ($plans as $index => $plan): 
+                                    $features = json_decode($plan['features'] ?? '[]', true) ?: [];
+                                ?>
+                                <div class="plan-card <?php echo $plan['slug'] === 'growth' ? 'recommended' : ''; ?>"
+                                    onclick="selectPlan('<?php echo $plan['slug']; ?>', <?php echo $plan['id']; ?>, <?php echo $plan['price_monthly']; ?>, <?php echo $plan['price_yearly']; ?>, <?php echo $plan['student_limit']; ?>, <?php echo $plan['teacher_limit']; ?>, <?php echo $plan['campus_limit'] ?? 1; ?>, <?php echo $plan['storage_limit']; ?>)"
+                                    id="planCard<?php echo $plan['slug']; ?>">
+                                    <div class="flex justify-between items-start mb-6">
+                                        <div>
+                                            <h3 class="text-xl font-black text-slate-900"><?php echo htmlspecialchars($plan['name']); ?></h3>
+                                            <p class="text-sm text-slate-500">
+                                                <?php echo $plan['slug'] === 'starter' ? 'Perfect for small schools' : 
+                                                      ($plan['slug'] === 'growth' ? 'For growing schools' : 
+                                                      ($plan['slug'] === 'enterprise' ? 'For large institutions' : 'Custom solution')); ?>
+                                            </p>
                                         </div>
-                                        <p class="text-sm text-slate-600"><?php echo htmlspecialchars($activity['description'] ?? ''); ?></p>
-                                        <?php if (!empty($activity['user_type'])): ?>
-                                        <p class="text-xs text-slate-500 mt-1">By: <?php echo htmlspecialchars($activity['user_type']); ?></p>
-                                        <?php endif; ?>
+                                        <div class="w-6 h-6 rounded-full border-2 border-slate-300"></div>
                                     </div>
+
+                                    <div class="mb-6">
+                                        <div class="flex items-baseline">
+                                            <span class="text-3xl font-black text-slate-900">₦<?php echo number_format($plan['price_monthly'], 2); ?></span>
+                                            <span class="text-slate-500 ml-2">/month</span>
+                                        </div>
+                                        <p class="text-xs text-slate-400 mt-1">
+                                            ₦<?php echo number_format($plan['price_yearly'], 2); ?> billed yearly (save <?php echo round((($plan['price_monthly'] * 12 - $plan['price_yearly']) / ($plan['price_monthly'] * 12)) * 100); ?>%)
+                                        </p>
+                                    </div>
+
+                                    <div class="space-y-3 mb-6">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-slate-700">Students</span>
+                                            <span class="text-sm font-semibold text-slate-900"><?php echo number_format($plan['student_limit']); ?></span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-slate-700">Teachers</span>
+                                            <span class="text-sm font-semibold text-slate-900"><?php echo number_format($plan['teacher_limit']); ?></span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-slate-700">Campuses</span>
+                                            <span class="text-sm font-semibold text-slate-900"><?php echo number_format($plan['campus_limit'] ?? 1); ?></span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-slate-700">Storage</span>
+                                            <span class="text-sm font-semibold text-slate-900"><?php echo number_format($plan['storage_limit'] / 1024, 1); ?> GB</span>
+                                        </div>
+                                    </div>
+
+                                    <ul class="space-y-2 mb-6">
+                                        <?php foreach ($features as $feature): ?>
+                                        <li class="flex items-center gap-2 text-sm">
+                                            <i class="fas fa-check text-emerald-500"></i>
+                                            <span class="text-slate-700"><?php echo htmlspecialchars($feature); ?></span>
+                                        </li>
+                                        <?php endforeach; ?>
+                                    </ul>
                                 </div>
                                 <?php endforeach; ?>
-                            <?php else: ?>
-                                <p class="text-slate-500 text-center py-4">No recent activity</p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
+                            </div>
 
-                <!-- Tab Content: Users -->
-                <div id="usersTab" class="max-w-7xl mx-auto space-y-6 tab-content">
-                    <div class="bg-white detail-card p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-lg font-bold text-slate-900">User Management</h3>
-                            <button onclick="addUser(<?php echo $schoolId; ?>)" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition touch-target">
-                                <i class="fas fa-user-plus mr-2"></i>Add User
-                            </button>
-                        </div>
-                        
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead>
-                                    <tr class="border-b border-slate-100">
-                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">User</th>
-                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Role</th>
-                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Status</th>
-                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Last Active</th>
-                                        <th class="text-left py-3 px-4 text-sm font-bold text-slate-500">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-50">
-                                    <?php if ($admin): ?>
-                                    <tr class="hover:bg-slate-50 transition">
-                                        <td class="py-4 px-4">
-                                            <div class="flex items-center gap-3">
-                                                <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($admin['name'] ?? 'Admin'); ?>&background=2563eb&color=fff" class="w-8 h-8 rounded-lg">
-                                                <div>
-                                                    <p class="font-medium text-slate-900"><?php echo htmlspecialchars($admin['name'] ?? 'Administrator'); ?></p>
-                                                    <p class="text-sm text-slate-500"><?php echo htmlspecialchars($admin['email'] ?? ''); ?></p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="py-4 px-4">
-                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded"><?php echo ucfirst($admin['user_type'] ?? 'admin'); ?></span>
-                                        </td>
-                                        <td class="py-4 px-4">
-                                            <span class="flex items-center gap-2">
-                                                <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
-                                                <span class="text-sm text-slate-700">Active</span>
-                                            </span>
-                                        </td>
-                                        <td class="py-4 px-4">
-                                            <span class="text-sm text-slate-600"><?php echo !empty($admin['last_login_at']) ? date('M j, Y', strtotime($admin['last_login_at'])) : 'Never'; ?></span>
-                                        </td>
-                                        <td class="py-4 px-4">
-                                            <button onclick="editUser(<?php echo $admin['id'] ?? 0; ?>)" class="text-blue-600 hover:text-blue-700 touch-target">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <?php endif; ?>
-                                    <!-- Additional users would be fetched from the school's database -->
-                                    <tr class="hover:bg-slate-50 transition">
-                                        <td class="py-4 px-4">
-                                            <div class="flex items-center gap-3">
-                                                <img src="https://ui-avatars.com/api/?name=Teacher+Sample&background=059669&color=fff" class="w-8 h-8 rounded-lg">
-                                                <div>
-                                                    <p class="font-medium text-slate-900">Sample Teacher</p>
-                                                    <p class="text-sm text-slate-500">teacher@<?php echo htmlspecialchars($school['slug'] ?? 'school'); ?>.edu</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="py-4 px-4">
-                                            <span class="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded">Teacher</span>
-                                        </td>
-                                        <td class="py-4 px-4">
-                                            <span class="flex items-center gap-2">
-                                                <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
-                                                <span class="text-sm text-slate-700">Active</span>
-                                            </span>
-                                        </td>
-                                        <td class="py-4 px-4">
-                                            <span class="text-sm text-slate-600">Yesterday</span>
-                                        </td>
-                                        <td class="py-4 px-4">
-                                            <button onclick="editUser(2)" class="text-blue-600 hover:text-blue-700 touch-target">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                            <!-- Hidden plan inputs -->
+                            <input type="hidden" id="planId" name="plan_id" value="2">
+                            <input type="hidden" id="planSlug" name="plan_slug" value="growth">
 
-                <!-- Tab Content: Analytics -->
-                <div id="analyticsTab" class="max-w-7xl mx-auto space-y-6 tab-content">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white detail-card p-6 hover-lift">
-                            <h3 class="text-lg font-bold text-slate-900 mb-6">Usage Trends</h3>
-                            <div class="h-64">
-                                <canvas id="usageChart"></canvas>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white detail-card p-6 hover-lift">
-                            <h3 class="text-lg font-bold text-slate-900 mb-6">User Distribution</h3>
-                            <div class="h-64">
-                                <canvas id="distributionChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white detail-card p-6 hover-lift">
-                        <h3 class="text-lg font-bold text-slate-900 mb-6">Key Performance Indicators</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                            <div class="text-center">
-                                <div class="text-3xl font-black text-blue-600 mb-2"><?php echo number_format($uptime, 1); ?>%</div>
-                                <p class="text-sm text-slate-600">Uptime (30 days)</p>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl font-black text-emerald-600 mb-2">1.2s</div>
-                                <p class="text-sm text-slate-600">Avg Response Time</p>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl font-black text-amber-600 mb-2">0.03%</div>
-                                <p class="text-sm text-slate-600">Error Rate</p>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl font-black text-purple-600 mb-2">99.1%</div>
-                                <p class="text-sm text-slate-600">Satisfaction Score</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            <!-- Billing Options -->
+                            <div class="bg-gradient-to-r from-slate-50 to-slate-100 rounded-2xl p-6 mb-8">
+                                <h3 class="text-lg font-semibold text-slate-900 mb-6">Billing Configuration</h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Billing Cycle</label>
+                                        <div class="flex gap-4">
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="radio"
+                                                    name="billing_cycle"
+                                                    value="monthly"
+                                                    class="text-indigo-600 focus:ring-indigo-500">
+                                                <span class="text-sm text-slate-700">Monthly</span>
+                                            </label>
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="radio"
+                                                    name="billing_cycle"
+                                                    value="yearly"
+                                                    class="text-indigo-600 focus:ring-indigo-500"
+                                                    checked>
+                                                <span class="text-sm text-slate-700">Yearly (Save <?php echo round((($plan['price_monthly'] * 12 - $plan['price_yearly']) / ($plan['price_monthly'] * 12)) * 100); ?>%)</span>
+                                            </label>
+                                        </div>
+                                    </div>
 
-                <!-- Tab Content: Settings -->
-                <div id="settingsTab" class="max-w-7xl mx-auto space-y-6 tab-content">
-                    <div class="bg-white detail-card p-6">
-                        <h3 class="text-lg font-bold text-slate-900 mb-6">System Configuration</h3>
-                        
-                        <div class="space-y-6">
-                            <div>
-                                <h4 class="font-bold text-slate-900 mb-4">General Settings</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div class="form-group">
-                                        <label class="form-label">API Rate Limit</label>
-                                        <select class="form-input">
-                                            <option>100 requests/min</option>
-                                            <option selected>500 requests/min</option>
-                                            <option>1000 requests/min</option>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Trial Period</label>
+                                        <select id="trialPeriod" name="trial_period" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition">
+                                            <option value="0">No Trial</option>
+                                            <option value="7" selected>7 Days Free Trial</option>
+                                            <option value="14">14 Days Free Trial</option>
+                                            <option value="30">30 Days Free Trial</option>
                                         </select>
                                     </div>
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label">Data Retention</label>
-                                        <select class="form-input">
-                                            <option>30 days</option>
-                                            <option selected>90 days</option>
-                                            <option>365 days</option>
+
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-2">Payment Method</label>
+                                        <select id="paymentMethod" name="payment_method" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition">
+                                            <option value="paystack">Paystack (Recommended)</option>
+                                            <option value="flutterwave">Flutterwave</option>
+                                            <option value="manual">Manual Payment</option>
                                         </select>
                                     </div>
                                 </div>
+
+                                <!-- Estimated Cost -->
+                                <div class="mt-6 p-4 bg-white rounded-xl border border-slate-200">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="text-sm text-slate-500">Estimated Monthly Cost</p>
+                                            <p class="text-2xl font-black text-slate-900" id="estimatedCost">₦<?php echo number_format($plans[1]['price_monthly'] ?? 49.99, 2); ?></p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm text-slate-500">Estimated Yearly Cost</p>
+                                            <p class="text-xl font-bold text-emerald-600" id="estimatedYearlyCost">₦<?php echo number_format($plans[1]['price_yearly'] ?? 509.90, 2); ?></p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <div>
-                                <h4 class="font-bold text-slate-900 mb-4">Security Settings</h4>
+
+                            <!-- Navigation -->
+                            <div class="flex justify-between mt-12 pt-8 border-t border-slate-200">
+                                <button type="button"
+                                    onclick="previousStep(2)"
+                                    class="px-6 py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Back to Admin Setup
+                                </button>
+                                <button type="button"
+                                    onclick="nextStep(4)"
+                                    class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition flex items-center gap-2 shadow-lg shadow-indigo-100">
+                                    Continue to Review
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Review -->
+                        <div id="step4" class="step-content hidden">
+                            <div class="mb-8">
+                                <h2 class="text-2xl font-black text-slate-900 mb-2">
+                                    <i class="fas fa-check-circle text-emerald-600 mr-2"></i>
+                                    Review & Confirm
+                                </h2>
+                                <p class="text-slate-500">Review all details before provisioning the school</p>
+                            </div>
+
+                            <!-- Summary Cards -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                                <!-- School Summary -->
+                                <div class="bg-gradient-to-br from-indigo-50 to-white rounded-2xl p-6 border border-indigo-100">
+                                    <h3 class="text-lg font-semibold text-indigo-900 mb-4 flex items-center gap-2">
+                                        <i class="fas fa-school"></i>
+                                        School Details
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <p class="text-xs text-indigo-600 uppercase font-bold">Name</p>
+                                            <p id="reviewSchoolName" class="text-sm font-medium text-slate-900">-</p>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <p class="text-xs text-indigo-600 uppercase font-bold">Type</p>
+                                                <p id="reviewSchoolType" class="text-sm font-medium text-slate-900">-</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs text-indigo-600 uppercase font-bold">Curriculum</p>
+                                                <p id="reviewCurriculum" class="text-sm font-medium text-slate-900">-</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-indigo-600 uppercase font-bold">Location</p>
+                                            <p id="reviewLocation" class="text-sm font-medium text-slate-900">-</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-indigo-600 uppercase font-bold">Contact</p>
+                                            <p id="reviewContact" class="text-sm font-medium text-slate-900">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Admin Summary -->
+                                <div class="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-6 border border-purple-100">
+                                    <h3 class="text-lg font-semibold text-purple-900 mb-4 flex items-center gap-2">
+                                        <i class="fas fa-user-shield"></i>
+                                        Administrator
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <p class="text-xs text-purple-600 uppercase font-bold">Primary Admin</p>
+                                            <p id="reviewAdminName" class="text-sm font-medium text-slate-900">-</p>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <p class="text-xs text-purple-600 uppercase font-bold">Role</p>
+                                                <p id="reviewAdminRole" class="text-sm font-medium text-slate-900">-</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs text-purple-600 uppercase font-bold">Position</p>
+                                                <p id="reviewAdminPosition" class="text-sm font-medium text-slate-900">-</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-purple-600 uppercase font-bold">Email</p>
+                                            <p id="reviewAdminEmail" class="text-sm font-medium text-slate-900">-</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-purple-600 uppercase font-bold">Phone</p>
+                                            <p id="reviewAdminPhone" class="text-sm font-medium text-slate-900">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Subscription Summary -->
+                            <div class="bg-gradient-to-br from-emerald-50 to-white rounded-2xl p-6 border border-emerald-100 mb-8">
+                                <h3 class="text-lg font-semibold text-emerald-900 mb-4 flex items-center gap-2">
+                                    <i class="fas fa-credit-card"></i>
+                                    Subscription & Billing
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <p class="text-xs text-emerald-600 uppercase font-bold">Plan Selected</p>
+                                        <p id="reviewPlan" class="text-lg font-black text-slate-900">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-emerald-600 uppercase font-bold">Billing Cycle</p>
+                                        <p id="reviewBilling" class="text-lg font-black text-slate-900">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-emerald-600 uppercase font-bold">Monthly Cost</p>
+                                        <p id="reviewCost" class="text-lg font-black text-slate-900">-</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <p class="text-xs text-emerald-600 uppercase font-bold">Limits</p>
+                                    <p id="reviewLimits" class="text-sm text-slate-700">-</p>
+                                </div>
+                            </div>
+
+                            <!-- Technical Details -->
+                            <div class="bg-slate-50 rounded-2xl p-6 mb-8">
+                                <h3 class="text-lg font-semibold text-slate-900 mb-4">Technical Details</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <p class="text-xs text-slate-500 uppercase font-bold">Database Name</p>
+                                        <p id="reviewDatabaseName" class="text-sm font-mono text-slate-900">school_XXXX</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-500 uppercase font-bold">Access URL</p>
+                                        <p id="reviewAccessURL" class="text-sm font-mono text-slate-900">/academixsuite/tenant/school-slug</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-500 uppercase font-bold">Estimated Setup Time</p>
+                                        <p class="text-sm font-medium text-slate-900">15-30 seconds</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Terms & Conditions -->
+                            <div class="border border-slate-200 rounded-2xl p-6 mb-8">
+                                <h3 class="text-lg font-semibold text-slate-900 mb-4">Terms & Conditions</h3>
                                 <div class="space-y-4">
-                                    <label class="flex items-center justify-between p-4 border border-slate-200 rounded-xl">
+                                    <label class="flex items-start gap-3 cursor-pointer">
+                                        <input type="checkbox"
+                                            id="termsAgreement"
+                                            name="terms_agreed"
+                                            class="mt-1 w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500"
+                                            required>
                                         <div>
-                                            <p class="font-medium text-slate-900">Two-Factor Authentication</p>
-                                            <p class="text-sm text-slate-500">Require 2FA for all admin accounts</p>
+                                            <span class="text-sm text-slate-700">
+                                                I confirm that I have permission to provision this school and all information provided is accurate. I understand that:
+                                            </span>
+                                            <ul class="text-sm text-slate-600 mt-2 space-y-1">
+                                                <li class="flex items-center gap-2">
+                                                    <i class="fas fa-check text-emerald-500 text-xs"></i>
+                                                    <span>A new database will be created</span>
+                                                </li>
+                                                <li class="flex items-center gap-2">
+                                                    <i class="fas fa-check text-emerald-500 text-xs"></i>
+                                                    <span>Administrator credentials will be generated</span>
+                                                </li>
+                                                <li class="flex items-center gap-2">
+                                                    <i class="fas fa-check text-emerald-500 text-xs"></i>
+                                                    <span>System will send welcome emails</span>
+                                                </li>
+                                                <li class="flex items-center gap-2">
+                                                    <i class="fas fa-check text-emerald-500 text-xs"></i>
+                                                    <span>Provisioning cannot be automatically reversed</span>
+                                                </li>
+                                            </ul>
                                         </div>
-                                        <input type="checkbox" class="toggle-switch" checked>
                                     </label>
-                                    
-                                    <label class="flex items-center justify-between p-4 border border-slate-200 rounded-xl">
-                                        <div>
-                                            <p class="font-medium text-slate-900">IP Whitelisting</p>
-                                            <p class="text-sm text-slate-500">Restrict access to specific IP ranges</p>
-                                        </div>
-                                        <input type="checkbox" class="toggle-switch">
-                                    </label>
+                                    <div id="termsError" class="text-red-500 text-sm hidden"></div>
                                 </div>
                             </div>
-                            
-                            <div class="pt-6 border-t border-slate-100">
-                                <button onclick="saveSettings(<?php echo $schoolId; ?>)" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition touch-target">
-                                    Save Configuration
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Tab Content: Logs -->
-                <div id="logsTab" class="max-w-7xl mx-auto space-y-6 tab-content">
-                    <div class="bg-white detail-card p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-lg font-bold text-slate-900">Activity Logs</h3>
-                            <div class="flex gap-3">
-                                <select class="text-sm border border-slate-200 rounded-lg px-3 py-1">
-                                    <option>All Activities</option>
-                                    <option>User Actions</option>
-                                    <option>System Events</option>
-                                    <option>Security Events</option>
-                                </select>
-                                <button onclick="exportLogs(<?php echo $schoolId; ?>)" class="px-4 py-2 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition touch-target">
-                                    <i class="fas fa-download mr-2"></i>Export
-                                </button>
+                            <!-- Final Actions -->
+                            <div class="flex justify-between items-center pt-8 border-t border-slate-200">
+                                <div class="text-sm text-slate-500">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Ready to create your new school instance
+                                </div>
+                                <div class="flex gap-4">
+                                    <button type="button"
+                                        onclick="previousStep(3)"
+                                        class="px-6 py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Back to Subscription
+                                    </button>
+                                    <button type="submit"
+                                        id="submitBtn"
+                                        class="px-8 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl hover:from-emerald-700 hover:to-emerald-600 transition flex items-center gap-2 shadow-lg shadow-emerald-100">
+                                        <i class="fas fa-rocket"></i>
+                                        Provision School
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="space-y-4">
-                            <?php if (!empty($recentActivities)): ?>
-                                <?php foreach ($recentActivities as $activity): ?>
-                                <div class="flex items-center justify-between p-4 border border-slate-100 rounded-xl hover:bg-slate-50 transition">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                            <?php 
-                                                $icon = 'fa-history';
-                                                $event = $activity['event'] ?? '';
-                                                if (stripos($event, 'login') !== false) $icon = 'fa-sign-in-alt';
-                                                elseif (stripos($event, 'logout') !== false) $icon = 'fa-sign-out-alt';
-                                                elseif (stripos($event, 'create') !== false) $icon = 'fa-plus';
-                                                elseif (stripos($event, 'update') !== false) $icon = 'fa-edit';
-                                                elseif (stripos($event, 'delete') !== false) $icon = 'fa-trash';
-                                            ?>
-                                            <i class="fas <?php echo $icon; ?> text-blue-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium text-slate-900"><?php echo htmlspecialchars($activity['event'] ?? 'Activity'); ?></p>
-                                            <p class="text-sm text-slate-500"><?php echo htmlspecialchars($activity['description'] ?? ''); ?></p>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-sm font-medium text-slate-900"><?php echo date('h:i A', strtotime($activity['created_at'] ?? 'now')); ?></p>
-                                        <p class="text-xs text-slate-500"><?php echo date('M j, Y', strtotime($activity['created_at'] ?? 'now')); ?></p>
-                                    </div>
-                                </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <p class="text-slate-500 text-center py-4">No activity logs found</p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-md mx-4">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-spinner fa-spin text-indigo-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-2">Provisioning School</h3>
+                <p class="text-slate-600 mb-4" id="loadingMessage">Setting up database and accounts...</p>
+                <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div id="progressBar" class="bg-gradient-to-r from-indigo-600 to-purple-600 h-2 rounded-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-2xl mx-4">
+            <div class="text-center">
+                <div class="w-24 h-24 bg-gradient-to-br from-emerald-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-check text-emerald-600 text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-900 mb-2">School Successfully Provisioned!</h3>
+                <p class="text-slate-600 mb-6" id="successMessage"></p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-slate-50 p-4 rounded-xl">
+                        <p class="text-sm text-slate-500 mb-1">School URL</p>
+                        <p id="successSchoolURL" class="font-mono text-sm text-slate-900 truncate"></p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl">
+                        <p class="text-sm text-slate-500 mb-1">Admin Email</p>
+                        <p id="successAdminEmail" class="font-mono text-sm text-slate-900 truncate"></p>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-exclamation-triangle text-amber-600 text-xl"></i>
+                        <div class="text-left">
+                            <p class="text-sm font-medium text-amber-900">Important Note</p>
+                            <p class="text-xs text-amber-700">Login credentials have been sent to the administrator's email. They should check their inbox (and spam folder).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="window.location.href='../index.php'"
+                        class="flex-1 py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Back to Dashboard
+                    </button>
+                    <button onclick="copySchoolURL()"
+                        class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition">
+                        Copy School URL
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] hidden">
+        <div class="bg-white rounded-2xl p-8 max-w-md mx-4">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-gradient-to-br from-rose-100 to-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-exclamation-triangle text-rose-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 mb-2" id="errorTitle">Provisioning Failed</h3>
+                <p class="text-slate-600 mb-4" id="errorMessage"></p>
+                <div class="space-y-3">
+                    <button onclick="closeErrorModal()"
+                        class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition">
+                        Try Again
+                    </button>
+                    <button onclick="window.location.reload()"
+                        class="w-full py-3 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Refresh Page
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[9998] space-y-2"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <!-- JavaScript Functions - Defined before they're used -->
     <script>
-        // Initialize timestamp
-        function updateTimestamp() {
-            const now = new Date();
-            const options = { 
-                weekday: 'short', 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            };
-            document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', options);
-        }
+        // Global state
+        let currentStep = 1;
+        let selectedPlan = {
+            slug: 'growth',
+            id: 2,
+            priceMonthly: <?php echo isset($plans[1]) ? $plans[1]['price_monthly'] : 49.99; ?>,
+            priceYearly: <?php echo isset($plans[1]) ? $plans[1]['price_yearly'] : 509.90; ?>,
+            studentLimit: <?php echo isset($plans[1]) ? $plans[1]['student_limit'] : 500; ?>,
+            teacherLimit: <?php echo isset($plans[1]) ? $plans[1]['teacher_limit'] : 50; ?>,
+            campusLimit: <?php echo isset($plans[1]) ? ($plans[1]['campus_limit'] ?? 1) : 1; ?>,
+            storageLimit: <?php echo isset($plans[1]) ? $plans[1]['storage_limit'] : 1024; ?>,
+            name: 'Growth'
+        };
+        let formData = {};
+        let stateCities = <?php echo json_encode($nigerianStates); ?>;
+
+        // ========== BASIC FUNCTIONS ==========
         
-        updateTimestamp();
-        setInterval(updateTimestamp, 1000);
+        function updateSlugPreview() {
+            const name = document.getElementById('schoolName')?.value;
+            if (name) {
+                let slug = name.toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-')
+                    .trim();
+                
+                // Ensure slug is not too long
+                slug = slug.substring(0, 50);
+                document.getElementById('slugPreview').textContent = slug;
+            }
+        }
 
-        // Tab switching - FIXED: Added tabName parameter
-        function switchTab(event, tabName) {
-            // Update tab buttons
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+        function updateCapacityEstimate() {
+            const students = parseInt(document.getElementById('studentCount')?.value) || 0;
+            const teachers = parseInt(document.getElementById('teacherCount')?.value) || 0;
             
-            // Show selected tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
+            if (students > 0 && teachers > 0) {
+                const ratio = Math.round(students / teachers);
+                document.getElementById('studentTeacherRatio').textContent = `${ratio}:1`;
+            } else {
+                document.getElementById('studentTeacherRatio').textContent = `${students}:${teachers}`;
+            }
+        }
+
+        function previewLogo(event) {
+            const input = event.target;
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Validate file size
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('File size must be less than 5MB', 'error');
+                    input.value = '';
+                    return;
+                }
+                
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    showToast('Please upload a valid image file (JPEG, PNG, WebP)', 'error');
+                    input.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImage').src = e.target.result;
+                    document.getElementById('fileName').textContent = file.name;
+                    document.getElementById('fileSize').textContent = formatFileSize(file.size);
+                    document.getElementById('logoPreview').classList.remove('hidden');
+                    document.getElementById('logoUploadArea').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeLogo() {
+            document.getElementById('logoFile').value = '';
+            document.getElementById('logoPreview').classList.add('hidden');
+            document.getElementById('logoUploadArea').style.display = 'block';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // ========== STEP NAVIGATION ==========
+        
+        function nextStep(step) {
+            console.log(`Moving from step ${currentStep} to step ${step}`);
+            
+            // Validate current step
+            if (!validateStep(currentStep)) {
+                showToast('Please fill in all required fields correctly.', 'error');
+                return false;
+            }
+            
+            // Save current step data
+            saveStepData(currentStep);
+            
+            // Hide current step
+            document.getElementById(`step${currentStep}`).classList.add('hidden');
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            
+            // Show next step
+            document.getElementById(`step${step}`).classList.remove('hidden');
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            // Update progress indicators
+            currentStep = step;
+            updateProgressIndicators();
+            
+            // Update review data if step 4
+            if (step === 4) {
+                populateReviewData();
+            }
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            return true;
+        }
+
+        function previousStep(step) {
+            console.log(`Moving back to step ${step}`);
+            
+            // Hide current step
+            document.getElementById(`step${currentStep}`).classList.add('hidden');
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            
+            // Show previous step
+            document.getElementById(`step${step}`).classList.remove('hidden');
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            // Update progress indicators
+            currentStep = step;
+            updateProgressIndicators();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            return true;
+        }
+
+        function updateProgressIndicators() {
+            // Reset all
+            for (let i = 1; i <= 4; i++) {
+                const dot = document.getElementById(`stepDot${i}`);
+                const indicator = document.getElementById(`step${i}Indicator`);
+                
+                if (dot) {
+                    dot.classList.remove('active', 'completed');
+                    indicator.classList.remove('active', 'completed');
+                }
+            }
+            
+            // Mark current and previous steps
+            for (let i = 1; i <= currentStep; i++) {
+                const dot = document.getElementById(`stepDot${i}`);
+                const indicator = document.getElementById(`step${i}Indicator`);
+                
+                if (dot) {
+                    if (i === currentStep) {
+                        dot.classList.add('active');
+                        indicator.classList.add('active');
+                    } else {
+                        dot.classList.add('completed');
+                        indicator.classList.add('completed');
+                    }
+                }
+            }
+        }
+
+        // ========== VALIDATION ==========
+        
+        function validateStep(step) {
+            let isValid = true;
+            
+            if (step === 1) {
+                // Validate school information
+                const requiredFields = [
+                    'schoolName', 'schoolType', 'country', 'state', 'city',
+                    'schoolEmail', 'phone', 'address', 'campusType'
+                ];
+                
+                requiredFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field && !field.value.trim()) {
+                        field.classList.add('border-red-500');
+                        isValid = false;
+                    } else if (field) {
+                        field.classList.remove('border-red-500');
+                    }
+                });
+                
+                // Validate email format
+                const emailField = document.getElementById('schoolEmail');
+                if (emailField && emailField.value) {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(emailField.value)) {
+                        emailField.classList.add('border-red-500');
+                        isValid = false;
+                    }
+                }
+                
+                // Validate student count is not negative
+                const studentCount = parseInt(document.getElementById('studentCount')?.value) || 0;
+                if (studentCount < 0) {
+                    document.getElementById('studentCount').classList.add('border-red-500');
+                    isValid = false;
+                }
+            } else if (step === 2) {
+                // Validate admin information
+                const requiredFields = [
+                    'adminFirstName', 'adminLastName', 'adminEmail',
+                    'adminPhone', 'adminRole', 'adminPassword'
+                ];
+                
+                requiredFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field && !field.value.trim()) {
+                        field.classList.add('border-red-500');
+                        isValid = false;
+                    } else if (field) {
+                        field.classList.remove('border-red-500');
+                    }
+                });
+                
+                // Validate password strength
+                const password = document.getElementById('adminPassword')?.value;
+                if (password && password.length < 8) {
+                    document.getElementById('adminPassword').classList.add('border-red-500');
+                    isValid = false;
+                }
+            } else if (step === 4) {
+                // Validate terms agreement
+                const termsAgreed = document.getElementById('termsAgreement')?.checked;
+                if (!termsAgreed) {
+                    document.getElementById('termsError').textContent = 'You must agree to the terms and conditions';
+                    document.getElementById('termsError').classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    document.getElementById('termsError').classList.add('hidden');
+                }
+            }
+            
+            return isValid;
+        }
+
+        function saveStepData(step) {
+            if (step === 1) {
+                formData.school = {
+                    name: document.getElementById('schoolName')?.value || '',
+                    type: document.getElementById('schoolType')?.value || '',
+                    curriculum: document.getElementById('curriculum')?.value || '',
+                    campusType: document.getElementById('campusType')?.value || '',
+                    campusCode: document.getElementById('campusCode')?.value || '',
+                    country: document.getElementById('country')?.value || '',
+                    state: document.getElementById('state')?.value || '',
+                    city: document.getElementById('city')?.value || '',
+                    postalCode: document.getElementById('postalCode')?.value || '',
+                    address: document.getElementById('address')?.value || '',
+                    email: document.getElementById('schoolEmail')?.value || '',
+                    phone: document.getElementById('phone')?.value || '',
+                    description: document.getElementById('description')?.value || '',
+                    missionStatement: document.getElementById('missionStatement')?.value || '',
+                    visionStatement: document.getElementById('visionStatement')?.value || '',
+                    principalName: document.getElementById('principalName')?.value || '',
+                    principalMessage: document.getElementById('principalMessage')?.value || '',
+                    establishmentYear: document.getElementById('establishmentYear')?.value || null,
+                    studentCount: parseInt(document.getElementById('studentCount')?.value) || 0,
+                    teacherCount: parseInt(document.getElementById('teacherCount')?.value) || 0,
+                    classCount: parseInt(document.getElementById('classCount')?.value) || 0
+                };
+            } else if (step === 2) {
+                formData.admin = {
+                    firstName: document.getElementById('adminFirstName')?.value || '',
+                    lastName: document.getElementById('adminLastName')?.value || '',
+                    email: document.getElementById('adminEmail')?.value || '',
+                    phone: document.getElementById('adminPhone')?.value || '',
+                    position: document.getElementById('adminPosition')?.value || '',
+                    role: document.getElementById('adminRole')?.value || '',
+                    password: document.getElementById('adminPassword')?.value || '',
+                    require2FA: document.getElementById('require2FA')?.checked || false,
+                    forcePasswordChange: document.getElementById('forcePasswordChange')?.checked || false,
+                    sendWelcomeEmail: document.getElementById('sendWelcomeEmail')?.checked || true,
+                    notes: document.getElementById('adminNotes')?.value || ''
+                };
+            }
+        }
+
+        // ========== PLAN SELECTION ==========
+        
+        function selectPlan(planSlug, planId, priceMonthly, priceYearly, studentLimit, teacherLimit, campusLimit, storageLimit) {
+            console.log('Selecting plan:', planSlug);
+            
+            // Update selected plan
+            selectedPlan.slug = planSlug;
+            selectedPlan.id = planId;
+            selectedPlan.priceMonthly = priceMonthly;
+            selectedPlan.priceYearly = priceYearly;
+            selectedPlan.studentLimit = studentLimit;
+            selectedPlan.teacherLimit = teacherLimit;
+            selectedPlan.campusLimit = campusLimit;
+            selectedPlan.storageLimit = storageLimit;
+            selectedPlan.name = planSlug === 'starter' ? 'Starter' : 
+                              planSlug === 'growth' ? 'Growth' : 
+                              planSlug === 'enterprise' ? 'Enterprise' : 'Custom';
+            
+            // Update hidden inputs
+            document.getElementById('planId').value = planId;
+            document.getElementById('planSlug').value = planSlug;
+            
+            // Update UI
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.classList.remove('selected');
+                const indicator = card.querySelector('.rounded-full');
+                if (indicator) {
+                    indicator.classList.remove('border-indigo-600', 'bg-indigo-600');
+                    indicator.classList.add('border-slate-300');
+                }
             });
-            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            const selectedCard = document.getElementById(`planCard${planSlug}`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+                const indicator = selectedCard.querySelector('.rounded-full');
+                if (indicator) {
+                    indicator.classList.add('border-indigo-600', 'bg-indigo-600');
+                    indicator.classList.remove('border-slate-300');
+                }
+            }
+            
+            // Update estimated costs
+            updateEstimatedCosts();
         }
 
-        // Modal functions
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-            document.body.style.overflow = 'hidden';
+        function updateEstimatedCosts() {
+            const billingCycle = document.querySelector('input[name="billing_cycle"]:checked')?.value || 'yearly';
+            
+            let monthlyCost = selectedPlan.priceMonthly || 49.99;
+            let yearlyCost = selectedPlan.priceYearly || 509.90;
+            
+            if (billingCycle === 'monthly') {
+                document.getElementById('estimatedCost').textContent = `₦${monthlyCost.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                document.getElementById('estimatedYearlyCost').textContent = `₦${yearlyCost.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            } else {
+                document.getElementById('estimatedCost').textContent = `₦${monthlyCost.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+                document.getElementById('estimatedYearlyCost').textContent = `₦${yearlyCost.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            }
         }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-            document.body.style.overflow = 'auto';
+        // ========== PASSWORD MANAGEMENT ==========
+        
+        function generatePassword() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+            let password = '';
+            
+            // Ensure at least one of each required character type
+            password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(Math.floor(Math.random() * 26));
+            password += 'abcdefghijklmnopqrstuvwxyz'.charAt(Math.floor(Math.random() * 26));
+            password += '0123456789'.charAt(Math.floor(Math.random() * 10));
+            password += '!@#$%^&*'.charAt(Math.floor(Math.random() * 8));
+            
+            // Fill remaining characters
+            for (let i = 4; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            // Shuffle the password
+            password = password.split('').sort(() => 0.5 - Math.random()).join('');
+            
+            const passwordInput = document.getElementById('adminPassword');
+            if (passwordInput) {
+                passwordInput.value = password;
+                checkPasswordStrength();
+            }
         }
 
-        // Handle form submission
-        document.getElementById('editSchoolForm')?.addEventListener('submit', async function(e) {
+        function checkPasswordStrength() {
+            const password = document.getElementById('adminPassword')?.value || '';
+            const strengthBar = document.getElementById('passwordStrengthBar');
+            const strengthText = document.getElementById('passwordStrengthText');
+            
+            let strength = 0;
+            let messages = [];
+            
+            // Length check
+            if (password.length >= 8) strength += 25;
+            else messages.push('At least 8 characters');
+            
+            // Upper case check
+            if (/[A-Z]/.test(password)) strength += 25;
+            else messages.push('One uppercase letter');
+            
+            // Lower case check
+            if (/[a-z]/.test(password)) strength += 25;
+            else messages.push('One lowercase letter');
+            
+            // Number check
+            if (/[0-9]/.test(password)) strength += 15;
+            else messages.push('One number');
+            
+            // Special character check
+            if (/[^A-Za-z0-9]/.test(password)) strength += 10;
+            else messages.push('One special character');
+            
+            // Set strength bar
+            if (strengthBar) {
+                strengthBar.style.width = `${strength}%`;
+                
+                if (strength < 50) {
+                    strengthBar.className = 'h-full bg-red-500';
+                    strengthText.textContent = 'Weak';
+                    strengthText.className = 'text-xs font-medium text-red-600';
+                } else if (strength < 80) {
+                    strengthBar.className = 'h-full bg-amber-500';
+                    strengthText.textContent = 'Good';
+                    strengthText.className = 'text-xs font-medium text-amber-600';
+                } else {
+                    strengthBar.className = 'h-full bg-emerald-500';
+                    strengthText.textContent = 'Strong';
+                    strengthText.className = 'text-xs font-medium text-emerald-600';
+                }
+            }
+        }
+
+        function togglePasswordVisibility(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.type = field.type === 'password' ? 'text' : 'password';
+            }
+        }
+
+        // ========== REVIEW DATA ==========
+        
+        function populateReviewData() {
+            // School details
+            if (formData.school) {
+                document.getElementById('reviewSchoolName').textContent = formData.school.name;
+                document.getElementById('reviewSchoolType').textContent = 
+                    document.querySelector(`#schoolType option[value="${formData.school.type}"]`)?.textContent || formData.school.type;
+                document.getElementById('reviewCurriculum').textContent = 
+                    document.querySelector(`#curriculum option[value="${formData.school.curriculum}"]`)?.textContent || formData.school.curriculum;
+                document.getElementById('reviewLocation').textContent = 
+                    `${formData.school.city}, ${formData.school.state}, ${formData.school.country}`;
+                document.getElementById('reviewContact').textContent = 
+                    `${formData.school.email} • ${formData.school.phone}`;
+            }
+            
+            // Admin details
+            if (formData.admin) {
+                document.getElementById('reviewAdminName').textContent = 
+                    `${formData.admin.firstName} ${formData.admin.lastName}`;
+                document.getElementById('reviewAdminRole').textContent = 
+                    document.querySelector(`#adminRole option[value="${formData.admin.role}"]`)?.textContent || formData.admin.role;
+                document.getElementById('reviewAdminPosition').textContent = 
+                    document.querySelector(`#adminPosition option[value="${formData.admin.position}"]`)?.textContent || formData.admin.position;
+                document.getElementById('reviewAdminEmail').textContent = formData.admin.email;
+                document.getElementById('reviewAdminPhone').textContent = formData.admin.phone;
+            }
+            
+            // Subscription details
+            document.getElementById('reviewPlan').textContent = selectedPlan.name;
+            
+            const billingCycle = document.querySelector('input[name="billing_cycle"]:checked')?.value || 'yearly';
+            const cost = billingCycle === 'monthly' ? selectedPlan.priceMonthly : selectedPlan.priceYearly / 12;
+            document.getElementById('reviewCost').textContent = 
+                `₦${cost.toLocaleString('en-US', {minimumFractionDigits: 2})}/month`;
+            
+            document.getElementById('reviewBilling').textContent = 
+                billingCycle.charAt(0).toUpperCase() + billingCycle.slice(1);
+            
+            document.getElementById('reviewLimits').textContent = 
+                `${selectedPlan.studentLimit.toLocaleString()} students, ${selectedPlan.teacherLimit.toLocaleString()} teachers, ${selectedPlan.campusLimit} campus(es), ${(selectedPlan.storageLimit / 1024).toFixed(1)} GB storage`;
+            
+            // Database name and URL
+            const slug = document.getElementById('slugPreview').textContent;
+            document.getElementById('reviewDatabaseName').textContent = `school_${Date.now()}`;
+            document.getElementById('reviewAccessURL').textContent = 
+                `/academixsuite/tenant/${slug}`;
+        }
+
+        // ========== FORM SUBMISSION ==========
+        
+        // Form submission
+        document.getElementById('provisionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const formData = new FormData(this);
+            if (!validateStep(4)) {
+                showToast('Please agree to the terms and conditions', 'error');
+                return;
+            }
+            
+            // Show loading modal
+            showLoadingModal();
             
             try {
-                const response = await fetch('update_school.php', {
+                const formDataObj = new FormData(this);
+                
+                const response = await fetch('process_provision.php', {
                     method: 'POST',
-                    body: formData
+                    body: formDataObj,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
                 
                 const result = await response.json();
                 
                 if (result.success) {
-                    showNotification('School updated successfully', 'success');
-                    closeModal('editModal');
-                    
-                    // Reload page to show updated data
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
+                    showSuccessModal(result);
                 } else {
-                    showNotification(result.message || 'Failed to update school', 'error');
+                    showErrorModal('Provisioning Failed', result.message || 'An unknown error occurred');
                 }
             } catch (error) {
-                showNotification('Network error: ' + error.message, 'error');
+                console.error('Error:', error);
+                showErrorModal('Network Error', 'Unable to connect to server. Please check your internet connection.');
+            } finally {
+                hideLoadingModal();
             }
         });
 
-        async function performAction(action, schoolId) {
-            const actions = {
-                backup: { message: 'Creating backup...', endpoint: 'backup_school.php' },
-                restart: { message: 'Restarting services...', endpoint: 'restart_school.php' },
-                suspend: { message: 'Suspending school...', endpoint: 'suspend_school.php' },
-                terminate: { message: 'Terminating school...', endpoint: 'terminate_school.php' }
-            };
-            
-            const actionInfo = actions[action];
-            if (!actionInfo) return;
-            
-            showNotification(actionInfo.message, 'info');
-            closeModal('actionsModal');
-            
-            try {
-                const response = await fetch(actionInfo.endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        school_id: schoolId,
-                        csrf_token: '<?php echo generateCsrfToken(); ?>' 
-                    })
-                });
+        function showLoadingModal() {
+            const modal = document.getElementById('loadingModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
                 
-                const result = await response.json();
-                
-                if (result.success) {
-                    showNotification(`${action} completed successfully`, 'success');
+                // Animate progress bar
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 10;
+                    if (progress > 90) progress = 90;
                     
-                    // Reload page for suspend/terminate actions
-                    if (action === 'suspend' || action === 'terminate') {
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    }
-                } else {
-                    showNotification(result.message || `Failed to ${action}`, 'error');
-                }
-            } catch (error) {
-                showNotification('Network error: ' + error.message, 'error');
+                    document.getElementById('progressBar').style.width = `${progress}%`;
+                }, 500);
+                
+                // Store interval ID for cleanup
+                modal.dataset.intervalId = interval;
             }
         }
 
-        function showNotification(message, type) {
-            // Remove existing notifications
-            document.querySelectorAll('[data-notification]').forEach(n => n.remove());
+        function hideLoadingModal() {
+            const modal = document.getElementById('loadingModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                
+                // Clear progress bar animation
+                const intervalId = modal.dataset.intervalId;
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    document.getElementById('progressBar').style.width = '0%';
+                }
+            }
+        }
+
+        function showSuccessModal(result) {
+            const modal = document.getElementById('successModal');
+            const message = document.getElementById('successMessage');
+            const schoolURL = document.getElementById('successSchoolURL');
+            const adminEmail = document.getElementById('successAdminEmail');
             
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-xl shadow-lg z-[1001] ${
-                type === 'success' ? 'bg-emerald-500 text-white' :
-                type === 'error' ? 'bg-red-500 text-white' :
-                'bg-blue-500 text-white'
-            }`;
-            notification.setAttribute('data-notification', 'true');
-            notification.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation' : 'info'}"></i>
-                    <span>${message}</span>
-                </div>
-            `;
-            document.body.appendChild(notification);
+            if (modal && message && schoolURL && adminEmail) {
+                message.textContent = result.message || `"${formData.school?.name}" has been successfully provisioned and is ready to use.`;
+                schoolURL.textContent = result.school_url || window.location.origin + '/academixsuite/tenant/' + result.school_slug;
+                adminEmail.textContent = result.admin_email || formData.admin?.email;
+                
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function showErrorModal(title, message) {
+            const modal = document.getElementById('errorModal');
+            const errorTitle = document.getElementById('errorTitle');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            if (modal && errorTitle && errorMessage) {
+                errorTitle.textContent = title;
+                errorMessage.textContent = message;
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeErrorModal() {
+            const modal = document.getElementById('errorModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function copySchoolURL() {
+            const url = document.getElementById('successSchoolURL')?.textContent;
+            if (url) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showToast('School URL copied to clipboard!', 'success');
+                });
+            }
+        }
+
+        // ========== NOTIFICATIONS ==========
+        
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            container.appendChild(toast);
             
             setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-
-        // Chart initialization
-        function initCharts() {
-            // Performance Chart
-            const perfCanvas = document.getElementById('performanceChart');
-            if (perfCanvas) {
-                const perfCtx = perfCanvas.getContext('2d');
-                new Chart(perfCtx, {
-                    type: 'line',
-                    data: {
-                        labels: <?php echo json_encode($chartData['labels']); ?>,
-                        datasets: [{
-                            label: 'Active Users',
-                            data: <?php echo json_encode($chartData['users']); ?>,
-                            borderColor: '#2563eb',
-                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    drawBorder: false
-                                }
-                            },
-                            x: {
-                                grid: {
-                                    display: false
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-
-            // Usage Chart
-            const usageCanvas = document.getElementById('usageChart');
-            if (usageCanvas) {
-                const usageCtx = usageCanvas.getContext('2d');
-                new Chart(usageCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: <?php echo json_encode($chartData['labels']); ?>,
-                        datasets: [{
-                            label: 'API Calls',
-                            data: <?php echo json_encode($chartData['apiCalls']); ?>,
-                            backgroundColor: '#3b82f6'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            }
-
-            // Distribution Chart
-            const distCanvas = document.getElementById('distributionChart');
-            if (distCanvas) {
-                const distCtx = distCanvas.getContext('2d');
-                new Chart(distCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: <?php echo json_encode($userDistribution['labels']); ?>,
-                        datasets: [{
-                            data: <?php echo json_encode($userDistribution['data']); ?>,
-                            backgroundColor: [
-                                '#3b82f6',
-                                '#10b981',
-                                '#8b5cf6',
-                                '#f59e0b'
-                            ]
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        // Generate report
-        async function generateReport(schoolId) {
-            showNotification('Generating report...', 'info');
+                toast.classList.add('show');
+            }, 10);
             
-            try {
-                const response = await fetch('generate_report.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        school_id: schoolId,
-                        csrf_token: '<?php echo generateCsrfToken(); ?>' 
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success && result.download_url) {
-                    showNotification('Report generated successfully', 'success');
-                    
-                    // Download report
-                    const link = document.createElement('a');
-                    link.href = result.download_url;
-                    link.download = result.filename || 'school_report.pdf';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                } else {
-                    showNotification(result.message || 'Failed to generate report', 'error');
-                }
-            } catch (error) {
-                showNotification('Network error: ' + error.message, 'error');
-            }
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    container.removeChild(toast);
+                }, 300);
+            }, 5000);
         }
 
-        // Sidebar functionality
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            if (sidebar && overlay) {
-                sidebar.classList.toggle('-translate-x-full');
-                overlay.classList.toggle('active');
-            }
-        }
-
-        function toggleDropdown(id) {
-            const dropdown = document.getElementById(id);
-            if (dropdown) {
-                dropdown.classList.toggle('dropdown-open');
-            }
-        }
-
-        function mobileSidebarToggle() {
-            toggleSidebar();
-        }
-
-        // Initialize everything when page loads
+        // ========== INITIALIZATION ==========
+        
+        // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            initCharts();
+            console.log('Provisioning form initialized');
+            
+            // Initialize Select2
+            $('#state, #city, #schoolType, #curriculum, #adminRole, #adminPosition, #campusType').select2({
+                width: '100%',
+                theme: 'bootstrap4',
+                minimumResultsForSearch: 10
+            });
+
+            // Initialize event listeners
+            initializeEventListeners();
+            
+            // Set default plan
+            selectPlan('growth', 2, selectedPlan.priceMonthly, selectedPlan.priceYearly, selectedPlan.studentLimit, selectedPlan.teacherLimit, selectedPlan.campusLimit, selectedPlan.storageLimit);
+            
+            // Update slug preview
+            updateSlugPreview();
+            
+            // Update progress indicators
+            updateProgressIndicators();
+            
+            // Password strength indicator
+            document.getElementById('adminPassword')?.addEventListener('input', checkPasswordStrength);
+            
+            // Update capacity estimate initially
+            updateCapacityEstimate();
         });
 
-        // Utility functions for quick actions
-        function sendMessage(schoolId) {
-            showNotification(`Opening message interface for school ${schoolId}...`, 'info');
-        }
-
-        function scheduleCall(schoolId) {
-            showNotification('Schedule call feature coming soon', 'info');
-        }
-
-        function viewBilling(schoolId) {
-            window.open(`billing.php?school_id=${schoolId}`, '_blank');
-        }
-
-        function addUser(schoolId) {
-            window.open(`add_user.php?school_id=${schoolId}`, '_blank');
-        }
-
-        function editUser(userId) {
-            showNotification(`Editing user ${userId}...`, 'info');
-        }
-
-        async function saveSettings(schoolId) {
-            // Collect settings
-            const settings = {
-                api_limit: document.querySelector('select:nth-of-type(1)')?.value || '500 requests/min',
-                data_retention: document.querySelector('select:nth-of-type(2)')?.value || '90 days',
-                two_factor: document.querySelector('input[type="checkbox"]:nth-of-type(1)')?.checked || false,
-                ip_whitelisting: document.querySelector('input[type="checkbox"]:nth-of-type(2)')?.checked || false
-            };
-            
-            try {
-                const response = await fetch('save_settings.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        school_id: schoolId, 
-                        ...settings,
-                        csrf_token: '<?php echo generateCsrfToken(); ?>' 
-                    })
-                });
+        function initializeEventListeners() {
+            // State change updates city suggestions (optional)
+            $('#state').on('change', function() {
+                const state = $(this).val();
+                const cityInput = document.getElementById('city');
                 
-                const result = await response.json();
-                
-                if (result.success) {
-                    showNotification('Settings saved successfully', 'success');
-                } else {
-                    showNotification(result.message || 'Failed to save settings', 'error');
+                if (state && stateCities[state]) {
+                    // You could show suggestions but user can type any city
+                    // For now, just update placeholder with suggestion
+                    const suggestedCity = stateCities[state][0];
+                    cityInput.placeholder = `e.g., ${suggestedCity}`;
                 }
-            } catch (error) {
-                showNotification('Network error: ' + error.message, 'error');
-            }
-        }
+            });
 
-        async function exportLogs(schoolId) {
-            showNotification('Exporting activity logs...', 'info');
-            
-            try {
-                const response = await fetch('export_logs.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        school_id: schoolId,
-                        csrf_token: '<?php echo generateCsrfToken(); ?>' 
-                    })
+            // File upload drag and drop
+            const logoUploadArea = document.getElementById('logoUploadArea');
+            if (logoUploadArea) {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    logoUploadArea.addEventListener(eventName, preventDefaults, false);
                 });
-                
-                const result = await response.json();
-                
-                if (result.success && result.download_url) {
-                    showNotification('Logs exported successfully', 'success');
+
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    logoUploadArea.addEventListener(eventName, highlight, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    logoUploadArea.addEventListener(eventName, unhighlight, false);
+                });
+
+                function highlight() {
+                    logoUploadArea.classList.add('dragover');
+                }
+
+                function unhighlight() {
+                    logoUploadArea.classList.remove('dragover');
+                }
+
+                logoUploadArea.addEventListener('drop', handleDrop, false);
+
+                function handleDrop(e) {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
                     
-                    // Download logs
-                    const link = document.createElement('a');
-                    link.href = result.download_url;
-                    link.download = result.filename || 'activity_logs.csv';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                } else {
-                    showNotification(result.message || 'Failed to export logs', 'error');
+                    if (files.length > 0) {
+                        document.getElementById('logoFile').files = files;
+                        // Create a synthetic event object
+                        const event = { target: document.getElementById('logoFile') };
+                        previewLogo(event);
+                    }
                 }
-            } catch (error) {
-                showNotification('Network error: ' + error.message, 'error');
             }
+            
+            // Billing cycle change updates estimated costs
+            document.querySelectorAll('input[name="billing_cycle"]').forEach(radio => {
+                radio.addEventListener('change', updateEstimatedCosts);
+            });
         }
 
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', (e) => {
+        // ========== MOBILE SIDEBAR ==========
+        
+        function mobileSidebarToggle() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            if (window.innerWidth < 1024 && 
-                sidebar && 
-                !sidebar.contains(e.target) && 
-                !e.target.closest('[onclick*="mobileSidebarToggle"]')) {
-                sidebar.classList.add('-translate-x-full');
-                if (overlay) overlay.classList.remove('active');
+            
+            if (sidebar && overlay) {
+                const isOpen = sidebar.classList.contains('translate-x-0');
+                sidebar.classList.toggle('translate-x-0', !isOpen);
+                sidebar.classList.toggle('-translate-x-full', isOpen);
+                overlay.classList.toggle('hidden', isOpen);
+                overlay.classList.toggle('flex', !isOpen);
             }
-        });
+        }
 
-        // Handle escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                const sidebar = document.getElementById('sidebar');
-                const overlay = document.getElementById('sidebarOverlay');
-                if (sidebar) sidebar.classList.add('-translate-x-full');
-                if (overlay) overlay.classList.remove('active');
-                
-                // Close modals
-                document.querySelectorAll('.modal-overlay.active').forEach(modal => {
-                    modal.classList.remove('active');
-                });
-                document.body.style.overflow = 'auto';
-            }
-        });
+        // ========== DEBUGGING ==========
+        
+        // Expose functions for debugging
+        window.debugForm = {
+            getCurrentStep: () => currentStep,
+            getFormData: () => formData,
+            getSelectedPlan: () => selectedPlan,
+            validateStep: (step) => validateStep(step),
+            nextStep: (step) => nextStep(step),
+            previousStep: (step) => previousStep(step)
+        };
     </script>
 </body>
 </html>

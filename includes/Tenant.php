@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tenant Management
  * Handles multi-tenancy, school detection, and isolation
@@ -9,13 +10,13 @@ class Tenant
     private static $currentSchool = null;
     private static $schoolDb = null;
     private static $schoolCache = [];
-    
+
     // Performance metrics tracking
     private static $performanceMetrics = [];
-    
+
     // Rate limiting storage
     private static $rateLimits = [];
-    
+
     // Storage limits
     private static $storageLimits = [
         'free' => 1073741824, // 1GB
@@ -90,7 +91,7 @@ class Tenant
     {
         $requestUri = $_SERVER['REQUEST_URI'] ?? '';
 
-        // Pattern: /school/{slug}/...
+        // Pattern: /tenant/{slug}/...
         if (preg_match('/^\/school\/([a-z0-9-]+)(\/|$)/i', $requestUri, $matches)) {
             return self::getSchoolBySlug($matches[1]);
         }
@@ -153,11 +154,11 @@ class Tenant
      * @param int $id
      * @return array|null
      */
-public static function getSchoolById($id)
-{
-    try {
-        $db = Database::getPlatformConnection();
-        $stmt = $db->prepare("
+    public static function getSchoolById($id)
+    {
+        try {
+            $db = Database::getPlatformConnection();
+            $stmt = $db->prepare("
             SELECT 
                 s.*,
                 p.name as plan_name,
@@ -166,13 +167,13 @@ public static function getSchoolById($id)
             LEFT JOIN plans p ON s.plan_id = p.id
             WHERE s.id = ? AND s.status IN ('active', 'trial')
         ");
-        $stmt->execute([$id]);
-        return $stmt->fetch();
-    } catch (Exception $e) {
-        self::logError("Failed to get school by ID", $e);
-        return null;
+            $stmt->execute([$id]);
+            return $stmt->fetch();
+        } catch (Exception $e) {
+            self::logError("Failed to get school by ID", $e);
+            return null;
+        }
     }
-}
 
     /**
      * Get current school
@@ -314,10 +315,10 @@ public static function getSchoolById($id)
     private static function createCompleteSchema($db, $schoolId)
     {
         self::logInfo("Creating COMPLETE schema with ALL tables for school ID: " . $schoolId);
-        
+
         // Disable foreign key checks temporarily
         $db->exec("SET FOREIGN_KEY_CHECKS = 0");
-        
+
         // Array of ALL table creation SQL
         $tables = [
             // Core educational tables (from your original schema)
@@ -346,42 +347,42 @@ public static function getSchoolById($id)
             self::getTimetablesTableSql(),
             self::getUsersTableSql(),
             self::getUserRolesTableSql(),
-            
+
             // NEW TABLES FOR ENHANCED FEATURES
-            
+
             // 1. Subscription & Billing Management
             self::getSubscriptionsTableSql(),
             self::getBillingHistoryTableSql(),
             self::getPaymentMethodsTableSql(),
             self::getInvoicesV2TableSql(),
-            
+
             // 2. Storage & Usage Tracking
             self::getStorageUsageTableSql(),
             self::getFileStorageTableSql(),
-            
+
             // 3. Performance & Monitoring
             self::getPerformanceMetricsTableSql(),
             self::getApiLogsTableSql(),
             self::getAuditLogsTableSql(),
-            
+
             // 4. Security & Rate Limiting
             self::getSecurityLogsTableSql(),
             self::getRateLimitsTableSql(),
             self::getLoginAttemptsTableSql(),
-            
+
             // 5. Backup & Recovery
             self::getBackupHistoryTableSql(),
             self::getRecoveryPointsTableSql(),
-            
+
             // 6. Communication & Notifications
             self::getNotificationsTableSql(),
             self::getEmailTemplatesTableSql(),
             self::getSmsLogsTableSql(),
-            
+
             // 7. API Management
             self::getApiKeysTableSql(),
             self::getApiUsageTableSql(),
-            
+
             // 8. System Maintenance
             self::getMaintenanceLogsTableSql(),
             self::getSystemAlertsTableSql()
@@ -393,7 +394,7 @@ public static function getSchoolById($id)
             try {
                 $db->exec($sql);
                 $createdCount++;
-                
+
                 // Extract table name for logging
                 preg_match('/CREATE TABLE (?:IF NOT EXISTS )?`?(\w+)`?/', $sql, $matches);
                 if (isset($matches[1])) {
@@ -407,18 +408,597 @@ public static function getSchoolById($id)
 
         // Insert default data
         self::insertDefaultData($db, $schoolId);
-        
+
         // Create indexes for performance
         self::createPerformanceIndexes($db);
-        
+
         // Re-enable foreign key checks
         $db->exec("SET FOREIGN_KEY_CHECKS = 1");
-        
+
         self::logInfo("Created " . $createdCount . " tables successfully");
-        
+
         return $createdCount;
     }
+    public static function createSchoolConfig($schoolPortalDir, $school)
+    {
+        $configFile = $schoolPortalDir . 'config.php';
+        if (!file_exists($configFile)) {
+            $templateFile = __DIR__ . '/../../tenant/$slug/config.php';
+            if (!copy($templateFile, $configFile)) {
+                throw new Exception("Failed to create school config file: $configFile");
+            }
+        }
 
+        // Replace placeholders in config file
+        $configContent = file_get_contents($configFile);
+        $configContent = str_replace(array_keys($school), array_values($school), $configContent);
+        file_put_contents($configFile, $configContent);
+    }
+
+    public static function processTemplateFile($srcPath, $dstPath, $school)
+    {
+        $content = file_get_contents($srcPath);
+        $content = str_replace(array_keys($school), array_values($school), $content);
+        file_put_contents($dstPath, $content);
+    }
+
+    /**
+     * Create or update school portal structure
+     * @param array $school
+     * @return bool
+     */
+    public static function createOrUpdateSchoolPortal($school)
+    {
+        try {
+            $schoolId = $school['id'];
+            $schoolSlug = $school['slug'];
+
+            // Base paths
+            $tenantDir = __DIR__ . '/../../tenant/';
+            $templateDir = __DIR__ . '/../../templates/school-portal/';
+            $schoolPortalDir = $tenantDir . $schoolSlug . '/';
+
+            self::logInfo("Creating/updating portal for school: $schoolSlug at $schoolPortalDir");
+
+            // Check if template exists
+            if (!is_dir($templateDir)) {
+                throw new Exception("Template directory not found: $templateDir");
+            }
+
+            // Create school portal directory if it doesn't exist
+            if (!is_dir($schoolPortalDir)) {
+                if (!mkdir($schoolPortalDir, 0755, true)) {
+                    throw new Exception("Failed to create school portal directory: $schoolPortalDir");
+                }
+                self::logInfo("Created school portal directory: $schoolPortalDir");
+            }
+
+            // Copy template files to school portal
+            self::copyTemplateFiles($templateDir, $schoolPortalDir, $school);
+
+            // Create school-specific config file
+            self::createSchoolConfig($schoolPortalDir, $school);
+
+            // Create school assets directory
+            self::createSchoolAssets($schoolPortalDir, $school);
+
+            self::logInfo("School portal created successfully for: $schoolSlug");
+            return true;
+        } catch (Exception $e) {
+            self::logError("Failed to create school portal", $e);
+            return false;
+        }
+    }
+
+    /**
+     * Copy template files to school portal
+     * @param string $source
+     * @param string $destination
+     * @param array $school
+     */
+    private static function copyTemplateFiles($source, $destination, $school)
+    {
+        $dir = opendir($source);
+
+        while (($file = readdir($dir)) !== false) {
+            if ($file == '.' || $file == '..') {
+                continue;
+            }
+
+            $srcPath = $source . '/' . $file;
+            $dstPath = $destination . '/' . $file;
+
+            if (is_dir($srcPath)) {
+                // Create directory
+                if (!is_dir($dstPath)) {
+                    mkdir($dstPath, 0755, true);
+                }
+                // Recursively copy directory
+                self::copyTemplateFiles($srcPath, $dstPath, $school);
+            } else {
+                // Copy and process template file
+                self::processTemplateFile($srcPath, $dstPath, $school);
+            }
+        }
+
+        closedir($dir);
+    }
+// Add these methods to Tenant.php class
+// ====================================================
+
+    /**
+     * Ensure school portal exists, create if missing
+     * @param array $school
+     * @return bool
+     */
+    public static function ensureSchoolPortal($school)
+    {
+        try {
+            $schoolSlug = $school['slug'];
+            $tenantDir = __DIR__ . '/../../tenant/';
+            $portalDir = $tenantDir . $schoolSlug . '/';
+
+            self::logInfo("Ensuring portal for: $schoolSlug");
+
+            // Check if portal already exists
+            if (is_dir($portalDir) && file_exists($portalDir . 'config.php')) {
+                self::logInfo("Portal already exists: $portalDir");
+                return true;
+            }
+
+            // Create portal directory
+            if (!is_dir($portalDir)) {
+                if (!mkdir($portalDir, 0755, true)) {
+                    self::logError("Failed to create portal directory: $portalDir");
+                    return false;
+                }
+            }
+
+            // Create portal structure
+            return self::createPortalStructure($school, $portalDir);
+        } catch (Exception $e) {
+            self::logError("Failed to ensure school portal", $e);
+            return false;
+        }
+    }
+
+    /**
+     * Create portal structure for a school
+     * @param array $school
+     * @param string $portalDir
+     * @return bool
+     */
+    private static function createPortalStructure($school, $portalDir)
+    {
+        try {
+            // Create subdirectories
+            $subdirs = ['admin', 'teacher', 'student', 'parent', 'assets/css', 'assets/js', 'assets/images'];
+
+            foreach ($subdirs as $dir) {
+                $dirPath = $portalDir . $dir . '/';
+                if (!is_dir($dirPath)) {
+                    if (!mkdir($dirPath, 0755, true)) {
+                        self::logError("Failed to create directory: $dirPath");
+                        return false;
+                    }
+                }
+            }
+
+            // Create config.php
+            $configContent = self::generateSchoolConfig($school);
+            if (file_put_contents($portalDir . 'config.php', $configContent) === false) {
+                self::logError("Failed to create config.php");
+                return false;
+            }
+
+            // Create index.php (school homepage)
+            $indexContent = self::generateIndexPage($school);
+            if (file_put_contents($portalDir . 'index.php', $indexContent) === false) {
+                self::logError("Failed to create index.php");
+                return false;
+            }
+
+            // Create login.php (school-specific login)
+            $loginContent = self::generateLoginPage($school);
+            if (file_put_contents($portalDir . 'login.php', $loginContent) === false) {
+                self::logError("Failed to create login.php");
+                return false;
+            }
+
+            // Create basic dashboard files
+            self::createDashboardFiles($school, $portalDir);
+
+            // Create school assets
+            self::createSchoolAssets($school, $portalDir);
+
+            self::logInfo("School portal created successfully: $portalDir");
+            return true;
+        } catch (Exception $e) {
+            self::logError("Failed to create portal structure", $e);
+            return false;
+        }
+    }
+
+    /**
+     * Generate school config content
+     * @param array $school
+     * @return string
+     */
+    private static function generateSchoolConfig($school)
+    {
+        $content = "<?php\n";
+        $content .= "/**\n";
+        $content .= " * School Configuration: {$school['name']}\n";
+        $content .= " * Auto-generated on: " . date('Y-m-d H:i:s') . "\n";
+        $content .= " */\n\n";
+
+        $content .= "// Load core configuration\n";
+        $content .= "require_once __DIR__ . '/../../includes/autoload.php';\n\n";
+
+        $content .= "// School Information\n";
+        $content .= "\$school = [\n";
+        $content .= "    'id' => {$school['id']},\n";
+        $content .= "    'slug' => '{$school['slug']}',\n";
+        $content .= "    'name' => '" . addslashes($school['name']) . "',\n";
+        $content .= "    'database_name' => '{$school['database_name']}',\n";
+        $content .= "    'email' => '" . addslashes($school['email'] ?? '') . "',\n";
+        $content .= "    'phone' => '" . addslashes($school['phone'] ?? '') . "',\n";
+        $content .= "    'address' => '" . addslashes($school['address'] ?? '') . "',\n";
+        $content .= "    'logo_path' => '" . addslashes($school['logo_path'] ?? '') . "',\n";
+        $content .= "    'primary_color' => '" . addslashes($school['primary_color'] ?? '#3B82F6') . "',\n";
+        $content .= "    'secondary_color' => '" . addslashes($school['secondary_color'] ?? '#1E40AF') . "',\n";
+        $content .= "    'status' => '{$school['status']}',\n";
+        $content .= "    'plan_id' => " . ($school['plan_id'] ?? 'null') . ",\n";
+        $content .= "    'created_at' => '{$school['created_at']}',\n";
+        $content .= "    'trial_ends_at' => '" . ($school['trial_ends_at'] ?? '') . "'\n";
+        $content .= "];\n\n";
+
+        $content .= "// School Constants\n";
+        $content .= "define('SCHOOL_ID', {$school['id']});\n";
+        $content .= "define('SCHOOL_SLUG', '{$school['slug']}');\n";
+        $content .= "define('SCHOOL_NAME', '" . addslashes($school['name']) . "');\n";
+        $content .= "define('SCHOOL_DB_NAME', '{$school['database_name']}');\n";
+        $content .= "define('SCHOOL_UPLOAD_PATH', __DIR__ . '/../../assets/uploads/schools/{$school['id']}/');\n";
+        $content .= "define('SCHOOL_ASSETS_URL', '/assets/uploads/schools/{$school['id']}/');\n";
+        $content .= "define('SCHOOL_PORTAL_URL', APP_URL . '/tenant/{$school['slug']}');\n\n";
+
+        $content .= "// School-specific functions\n";
+        $content .= "function getSchoolDb() {\n";
+        $content .= "    try {\n";
+        $content .= "        return Database::getSchoolConnection(SCHOOL_DB_NAME);\n";
+        $content .= "    } catch (Exception \$e) {\n";
+        $content .= "        error_log('School DB Error: ' . \$e->getMessage());\n";
+        $content .= "        return null;\n";
+        $content .= "    }\n";
+        $content .= "}\n\n";
+
+        $content .= "function isSchoolUserAuthenticated() {\n";
+        $content .= "    if (!isset(\$_SESSION['school_auth'])) {\n";
+        $content .= "        return false;\n";
+        $content .= "    }\n";
+        $content .= "    \$sessionSchoolId = \$_SESSION['school_auth']['school_id'] ?? null;\n";
+        $content .= "    \$sessionSchoolSlug = \$_SESSION['school_auth']['school_slug'] ?? null;\n";
+        $content .= "    return (\$sessionSchoolId == SCHOOL_ID && \$sessionSchoolSlug == SCHOOL_SLUG);\n";
+        $content .= "}\n\n";
+
+        $content .= "function requireSchoolAuth() {\n";
+        $content .= "    if (!isSchoolUserAuthenticated()) {\n";
+        $content .= "        header('Location: /tenant/' . SCHOOL_SLUG . '/login');\n";
+        $content .= "        exit;\n";
+        $content .= "    }\n";
+        $content .= "}\n\n";
+
+        $content .= "function getCurrentSchoolUser() {\n";
+        $content .= "    if (isSchoolUserAuthenticated()) {\n";
+        $content .= "        return \$_SESSION['school_auth'];\n";
+        $content .= "    }\n";
+        $content .= "    return null;\n";
+        $content .= "}\n\n";
+
+        $content .= "function redirectToSchoolDashboard() {\n";
+        $content .= "    \$user = getCurrentSchoolUser();\n";
+        $content .= "    if (\$user) {\n";
+        $content .= "        \$userType = \$user['user_type'];\n";
+        $content .= "        header('Location: /tenant/' . SCHOOL_SLUG . '/' . \$userType . '/dashboard.php');\n";
+        $content .= "        exit;\n";
+        $content .= "    }\n";
+        $content .= "}\n";
+
+        $content .= "?>";
+
+        return $content;
+    }
+
+    /**
+     * Generate index.php content for school
+     * @param array $school
+     * @return string
+     */
+    private static function generateIndexPage($school)
+    {
+        $content = "<?php\n";
+        $content .= "/**\n";
+        $content .= " * School Homepage: {$school['name']}\n";
+        $content .= " * Redirects to tenant login page\n";
+        $content .= " */\n\n";
+        $content .= "// Redirect to tenant login with school slug\n";
+        $content .= "header('Location: /tenant/login.php?school_slug={$school['slug']}');\n";
+        $content .= "exit;\n";
+        $content .= "?>\n";
+
+        return $content;
+    }
+    /**
+     * Generate login.php content for school
+     * @param array $school
+     * @return string
+     */
+    private static function generateLoginPage($school)
+    {
+        $content = "<?php\n";
+        $content .= "/**\n";
+        $content .= " * School Login Page\n";
+        $content .= " * Redirects to main tenant login with school slug\n";
+        $content .= " */\n\n";
+        $content .= "// Redirect to main tenant login with school slug\n";
+        $content .= "header('Location: /tenant/login.php?school_slug={$school['slug']}');\n";
+        $content .= "exit;\n";
+        $content .= "?>\n";
+
+        return $content;
+    }
+
+    /**
+     * Create basic dashboard files
+     * @param array $school
+     * @param string $portalDir
+     */
+    private static function createDashboardFiles($school, $portalDir)
+    {
+        $dashboards = ['admin', 'teacher', 'student', 'parent'];
+
+        foreach ($dashboards as $type) {
+            // Use 'school-dashboard.php' as the filename
+            $dashboardFile = $portalDir . $type . '/school-dashboard.php';
+
+            $content = "<?php\n";
+            $content .= "/**\n";
+            $content .= " * {$type} Dashboard - {$school['name']}\n";
+            $content .= " * File: school-dashboard.php\n";
+            $content .= " * URL: /tenant/{$school['slug']}/{$type}/school-dashboard.php\n";
+            $content .= " */\n\n";
+            $content .= "// Start session\n";
+            $content .= "if (session_status() === PHP_SESSION_NONE) {\n";
+            $content .= "    session_start();\n";
+            $content .= "}\n\n";
+            $content .= "require_once __DIR__ . '/../config.php';\n";
+            $content .= "requireSchoolAuth();\n\n";
+            $content .= "// Check user type\n";
+            $content .= "\$user = getCurrentSchoolUser();\n";
+            $content .= "if (\$user['user_type'] !== '$type') {\n";
+            $content .= "    // Redirect to correct user type dashboard\n";
+            $content .= "    header('Location: /tenant/' . SCHOOL_SLUG . '/' . \$user['user_type'] . '/school-dashboard.php');\n";
+            $content .= "    exit;\n";
+            $content .= "}\n\n";
+            $content .= "// School database connection\n";
+            $content .= "\$db = getSchoolDb();\n";
+            $content .= "if (!\$db) {\n";
+            $content .= "    die('Unable to connect to school database');\n";
+            $content .= "}\n\n";
+            $content .= "// Get school statistics\n";
+            $content .= "\$stats = [];\n";
+            $content .= "try {\n";
+            $content .= "    // Add your statistics queries here\n";
+            $content .= "} catch (Exception \$e) {\n";
+            $content .= "    error_log('Stats error: ' . \$e->getMessage());\n";
+            $content .= "}\n";
+            $content .= "?>\n";
+
+            $content .= "<!DOCTYPE html>\n";
+            $content .= "<html lang=\"en\">\n";
+            $content .= "<head>\n";
+            $content .= "    <meta charset=\"UTF-8\">\n";
+            $content .= "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
+            $content .= "    <title><?php echo htmlspecialchars(SCHOOL_NAME); ?> - " . ucfirst($type) . " Dashboard</title>\n";
+            $content .= "    <script src=\"https://cdn.tailwindcss.com\"></script>\n";
+            $content .= "    <link href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\" rel=\"stylesheet\">\n";
+            $content .= "    <link rel=\"stylesheet\" href=\"../assets/css/school-style.css\">\n";
+            $content .= "</head>\n";
+            $content .= "<body class=\"bg-gray-50\">\n";
+            $content .= "    <div class=\"min-h-screen flex\">\n";
+            $content .= "        <!-- Sidebar -->\n";
+            $content .= "        <div class=\"w-64 bg-white shadow-lg\">\n";
+            $content .= "            <div class=\"p-6 border-b\">\n";
+            $content .= "                <h2 class=\"text-xl font-bold text-gray-800\"><?php echo htmlspecialchars(SCHOOL_NAME); ?></h2>\n";
+            $content .= "                <p class=\"text-gray-600 text-sm mt-1\">" . ucfirst($type) . " Portal</p>\n";
+            $content .= "                <div class=\"mt-4 p-3 bg-blue-50 rounded-lg\">\n";
+            $content .= "                    <p class=\"text-sm text-gray-700\">Logged in as:</p>\n";
+            $content .= "                    <p class=\"font-semibold text-blue-700\"><?php echo htmlspecialchars(\$user['user_name']); ?></p>\n";
+            $content .= "                    <p class=\"text-xs text-gray-600 mt-1\"><?php echo ucfirst(\$user['user_type']); ?></p>\n";
+            $content .= "                </div>\n";
+            $content .= "            </div>\n";
+            $content .= "            <nav class=\"mt-4\">\n";
+            $content .= "                <a href=\"school-dashboard.php\" class=\"block px-6 py-3 text-blue-600 bg-blue-50 border-r-4 border-blue-600\">\n";
+            $content .= "                    <i class=\"fas fa-tachometer-alt mr-3\"></i>Dashboard\n";
+            $content .= "                </a>\n";
+            $content .= "                <!-- Add more menu items based on user type -->\n";
+            $content .= "            </nav>\n";
+            $content .= "            <div class=\"absolute bottom-0 w-full p-4 border-t\">\n";
+            $content .= "                <a href=\"/tenant/login.php?logout=1\" class=\"flex items-center text-gray-600 hover:text-red-600\">\n";
+            $content .= "                    <i class=\"fas fa-sign-out-alt mr-3\"></i>\n";
+            $content .= "                    <span>Logout</span>\n";
+            $content .= "                </a>\n";
+            $content .= "            </div>\n";
+            $content .= "        </div>\n";
+            $content .= "        \n";
+            $content .= "        <!-- Main Content -->\n";
+            $content .= "        <div class=\"flex-1\">\n";
+            $content .= "            <!-- Header -->\n";
+            $content .= "            <header class=\"bg-white shadow\">\n";
+            $content .= "                <div class=\"px-6 py-4 flex items-center justify-between\">\n";
+            $content .= "                    <div>\n";
+            $content .= "                        <h1 class=\"text-2xl font-semibold text-gray-800\">Dashboard</h1>\n";
+            $content .= "                        <p class=\"text-gray-600\">Welcome to your school management portal</p>\n";
+            $content .= "                    </div>\n";
+            $content .= "                    <div class=\"text-sm text-gray-500\">\n";
+            $content .= "                        <?php echo date('l, F j, Y'); ?>\n";
+            $content .= "                    </div>\n";
+            $content .= "                </div>\n";
+            $content .= "            </header>\n";
+            $content .= "            \n";
+            $content .= "            <!-- Content -->\n";
+            $content .= "            <main class=\"p-6\">\n";
+            $content .= "                <div class=\"grid grid-cols-1 md:grid-cols-3 gap-6 mb-8\">\n";
+            $content .= "                    <div class=\"bg-white rounded-lg shadow p-6\">\n";
+            $content .= "                        <div class=\"flex items-center\">\n";
+            $content .= "                            <div class=\"w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4\">\n";
+            $content .= "                                <i class=\"fas fa-school text-blue-600\"></i>\n";
+            $content .= "                            </div>\n";
+            $content .= "                            <div>\n";
+            $content .= "                                <h3 class=\"text-lg font-semibold text-gray-800\">School Information</h3>\n";
+            $content .= "                                <p class=\"text-gray-600 text-sm\">View and manage school details</p>\n";
+            $content .= "                            </div>\n";
+            $content .= "                        </div>\n";
+            $content .= "                    </div>\n";
+            $content .= "                    \n";
+            $content .= "                    <div class=\"bg-white rounded-lg shadow p-6\">\n";
+            $content .= "                        <div class=\"flex items-center\">\n";
+            $content .= "                            <div class=\"w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4\">\n";
+            $content .= "                                <i class=\"fas fa-users text-green-600\"></i>\n";
+            $content .= "                            </div>\n";
+            $content .= "                            <div>\n";
+            $content .= "                                <h3 class=\"text-lg font-semibold text-gray-800\">Manage Users</h3>\n";
+            $content .= "                                <p class=\"text-gray-600 text-sm\">Add/edit students, teachers, parents</p>\n";
+            $content .= "                            </div>\n";
+            $content .= "                        </div>\n";
+            $content .= "                    </div>\n";
+            $content .= "                    \n";
+            $content .= "                    <div class=\"bg-white rounded-lg shadow p-6\">\n";
+            $content .= "                        <div class=\"flex items-center\">\n";
+            $content .= "                            <div class=\"w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4\">\n";
+            $content .= "                                <i class=\"fas fa-chart-line text-purple-600\"></i>\n";
+            $content .= "                            </div>\n";
+            $content .= "                            <div>\n";
+            $content .= "                                <h3 class=\"text-lg font-semibold text-gray-800\">Reports</h3>\n";
+            $content .= "                                <p class=\"text-gray-600 text-sm\">Generate and view reports</p>\n";
+            $content .= "                            </div>\n";
+            $content .= "                        </div>\n";
+            $content .= "                    </div>\n";
+            $content .= "                </div>\n";
+            $content .= "                \n";
+            $content .= "                <div class=\"bg-white rounded-lg shadow p-6\">\n";
+            $content .= "                    <h2 class=\"text-lg font-semibold text-gray-800 mb-4\">Quick Actions</h2>\n";
+            $content .= "                    <div class=\"grid grid-cols-1 md:grid-cols-4 gap-4\">\n";
+            $content .= "                        <a href=\"#\" class=\"text-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition\">\n";
+            $content .= "                            <i class=\"fas fa-user-plus text-blue-600 text-2xl mb-2\"></i>\n";
+            $content .= "                            <p class=\"font-medium text-gray-700\">Add Student</p>\n";
+            $content .= "                        </a>\n";
+            $content .= "                        <a href=\"#\" class=\"text-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition\">\n";
+            $content .= "                            <i class=\"fas fa-file-invoice-dollar text-green-600 text-2xl mb-2\"></i>\n";
+            $content .= "                            <p class=\"font-medium text-gray-700\">Collect Fees</p>\n";
+            $content .= "                        </a>\n";
+            $content .= "                        <a href=\"#\" class=\"text-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition\">\n";
+            $content .= "                            <i class=\"fas fa-calendar-check text-purple-600 text-2xl mb-2\"></i>\n";
+            $content .= "                            <p class=\"font-medium text-gray-700\">Mark Attendance</p>\n";
+            $content .= "                        </a>\n";
+            $content .= "                        <a href=\"#\" class=\"text-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition\">\n";
+            $content .= "                            <i class=\"fas fa-bullhorn text-yellow-600 text-2xl mb-2\"></i>\n";
+            $content .= "                            <p class=\"font-medium text-gray-700\">Send Announcement</p>\n";
+            $content .= "                        </a>\n";
+            $content .= "                    </div>\n";
+            $content .= "                </div>\n";
+            $content .= "            </main>\n";
+            $content .= "        </div>\n";
+            $content .= "    </div>\n";
+            $content .= "    \n";
+            $content .= "    <script src=\"../assets/js/school-scripts.js\"></script>\n";
+            $content .= "    <script>\n";
+            $content .= "        // Simple dashboard interactions\n";
+            $content .= "        document.addEventListener('DOMContentLoaded', function() {\n";
+            $content .= "            console.log('Dashboard loaded for <?php echo SCHOOL_NAME; ?>');\n";
+            $content .= "        });\n";
+            $content .= "    </script>\n";
+            $content .= "</body>\n";
+            $content .= "</html>\n";
+
+            file_put_contents($dashboardFile, $content);
+        }
+    }
+    /**
+     * Create school assets
+     * @param array $school
+     * @param string $portalDir
+     */
+    private static function createSchoolAssets($school, $portalDir)
+    {
+        // Create CSS file
+        $cssFile = $portalDir . 'assets/css/school-style.css';
+        $cssContent = "/* School-specific styles for {$school['name']} */\n\n";
+        $cssContent .= ":root {\n";
+        $cssContent .= "    --primary-color: {$school['primary_color']};\n";
+        $cssContent .= "    --secondary-color: {$school['secondary_color']};\n";
+        $cssContent .= "}\n\n";
+        $cssContent .= ".school-header {\n";
+        $cssContent .= "    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));\n";
+        $cssContent .= "}\n\n";
+        $cssContent .= ".btn-primary {\n";
+        $cssContent .= "    background-color: var(--primary-color);\n";
+        $cssContent .= "}\n\n";
+        $cssContent .= ".text-primary {\n";
+        $cssContent .= "    color: var(--primary-color);\n";
+        $cssContent .= "}\n";
+
+        file_put_contents($cssFile, $cssContent);
+
+        // Create JS file
+        $jsFile = $portalDir . 'assets/js/school-scripts.js';
+        $jsContent = "/* School-specific JavaScript for {$school['name']} */\n\n";
+        $jsContent .= "document.addEventListener('DOMContentLoaded', function() {\n";
+        $jsContent .= "    console.log('{$school['name']} Portal Loaded');\n";
+        $jsContent .= "});\n";
+
+        file_put_contents($jsFile, $jsContent);
+    }
+
+
+    /**
+     * Recreate school portal (force update)
+     * @param array $school
+     * @return bool
+     */
+    private static function recreateSchoolPortal($school)
+    {
+        $schoolSlug = $school['slug'];
+        $portalPath = __DIR__ . '/../../tenant/' . $schoolSlug . '/';
+
+        // Remove existing portal
+        if (is_dir($portalPath)) {
+            self::deleteDirectory($portalPath);
+        }
+
+        // Create new portal
+        return self::createOrUpdateSchoolPortal($school);
+    }
+
+    /**
+     * Delete directory recursively
+     * @param string $dir
+     */
+    private static function deleteDirectory($dir)
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $files = array_diff(scandir($dir), array('.', '..'));
+
+        foreach ($files as $file) {
+            $path = $dir . '/' . $file;
+            is_dir($path) ? self::deleteDirectory($path) : unlink($path);
+        }
+
+        rmdir($dir);
+    }
     /**
      * =================================================================
      * TABLE DEFINITION METHODS
@@ -428,7 +1008,7 @@ public static function getSchoolById($id)
     /**
      * 1. CORE EDUCATIONAL TABLES
      */
-    
+
     private static function getAcademicTermsTableSql()
     {
         return "CREATE TABLE IF NOT EXISTS `academic_terms` (
@@ -1020,10 +1600,6 @@ public static function getSchoolById($id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
-    /**
-     * 2. ENHANCED FEATURE TABLES
-     */
-    
     private static function getSubscriptionsTableSql()
     {
         return "CREATE TABLE IF NOT EXISTS `subscriptions` (
@@ -1676,74 +2252,73 @@ public static function getSchoolById($id)
     }
 
     /**
- * Get school statistics for dashboard
- * @param int $schoolId
- * @return array
- */
-public static function getSchoolStatistics($schoolId)
-{
-    try {
-        $school = self::getSchoolById($schoolId);
-        if (!$school || empty($school['database_name'])) {
+     * Get school statistics for dashboard
+     * @param int $schoolId
+     * @return array
+     */
+    public static function getSchoolStatistics($schoolId)
+    {
+        try {
+            $school = self::getSchoolById($schoolId);
+            if (!$school || empty($school['database_name'])) {
+                return ['students' => 0, 'teachers' => 0, 'admins' => 0, 'parents' => 0];
+            }
+
+            $schoolDb = Database::getSchoolConnection($school['database_name']);
+
+            $stats = [
+                'students' => 0,
+                'teachers' => 0,
+                'admins' => 0,
+                'parents' => 0
+            ];
+
+            // Get student count
+            try {
+                $stmt = $schoolDb->prepare("SELECT COUNT(*) as count FROM students WHERE status = 'active'");
+                $stmt->execute();
+                $result = $stmt->fetch();
+                $stats['students'] = (int)$result['count'] ?? 0;
+            } catch (Exception $e) {
+                self::logError("Error counting students", $e);
+            }
+
+            // Get teacher count
+            try {
+                $stmt = $schoolDb->prepare("SELECT COUNT(*) as count FROM teachers WHERE is_active = 1");
+                $stmt->execute();
+                $result = $stmt->fetch();
+                $stats['teachers'] = (int)$result['count'] ?? 0;
+            } catch (Exception $e) {
+                self::logError("Error counting teachers", $e);
+            }
+
+            // Get admin count
+            try {
+                $stmt = $schoolDb->prepare("SELECT COUNT(*) as count FROM users WHERE user_type = 'admin' AND is_active = 1");
+                $stmt->execute();
+                $result = $stmt->fetch();
+                $stats['admins'] = (int)$result['count'] ?? 0;
+            } catch (Exception $e) {
+                self::logError("Error counting admins", $e);
+            }
+
+            // Get parent count
+            try {
+                $stmt = $schoolDb->prepare("SELECT COUNT(*) as count FROM users WHERE user_type = 'parent' AND is_active = 1");
+                $stmt->execute();
+                $result = $stmt->fetch();
+                $stats['parents'] = (int)$result['count'] ?? 0;
+            } catch (Exception $e) {
+                self::logError("Error counting parents", $e);
+            }
+
+            return $stats;
+        } catch (Exception $e) {
+            self::logError("Error getting school statistics", $e);
             return ['students' => 0, 'teachers' => 0, 'admins' => 0, 'parents' => 0];
         }
-
-        $schoolDb = Database::getSchoolConnection($school['database_name']);
-        
-        $stats = [
-            'students' => 0,
-            'teachers' => 0,
-            'admins' => 0,
-            'parents' => 0
-        ];
-
-        // Get student count
-        try {
-            $stmt = $schoolDb->prepare("SELECT COUNT(*) as count FROM students WHERE status = 'active'");
-            $stmt->execute();
-            $result = $stmt->fetch();
-            $stats['students'] = (int)$result['count'] ?? 0;
-        } catch (Exception $e) {
-            self::logError("Error counting students", $e);
-        }
-
-        // Get teacher count
-        try {
-            $stmt = $schoolDb->prepare("SELECT COUNT(*) as count FROM teachers WHERE is_active = 1");
-            $stmt->execute();
-            $result = $stmt->fetch();
-            $stats['teachers'] = (int)$result['count'] ?? 0;
-        } catch (Exception $e) {
-            self::logError("Error counting teachers", $e);
-        }
-
-        // Get admin count
-        try {
-            $stmt = $schoolDb->prepare("SELECT COUNT(*) as count FROM users WHERE user_type = 'admin' AND is_active = 1");
-            $stmt->execute();
-            $result = $stmt->fetch();
-            $stats['admins'] = (int)$result['count'] ?? 0;
-        } catch (Exception $e) {
-            self::logError("Error counting admins", $e);
-        }
-
-        // Get parent count
-        try {
-            $stmt = $schoolDb->prepare("SELECT COUNT(*) as count FROM users WHERE user_type = 'parent' AND is_active = 1");
-            $stmt->execute();
-            $result = $stmt->fetch();
-            $stats['parents'] = (int)$result['count'] ?? 0;
-        } catch (Exception $e) {
-            self::logError("Error counting parents", $e);
-        }
-
-        return $stats;
-        
-    } catch (Exception $e) {
-        self::logError("Error getting school statistics", $e);
-        return ['students' => 0, 'teachers' => 0, 'admins' => 0, 'parents' => 0];
     }
-}
 
     /**
      * Create initial admin user in school database
@@ -1758,16 +2333,16 @@ public static function getSchoolStatistics($schoolId)
 
             // Insert admin user
             $stmt = $db->prepare("
-                INSERT INTO users 
-                (school_id, name, email, phone, password, user_type, is_active) 
-                VALUES (?, ?, ?, ?, ?, 'admin', 1)
-            ");
+            INSERT INTO users 
+            (school_id, name, email, phone, password, user_type, is_active) 
+            VALUES (?, ?, ?, ?, ?, 'admin', 1)
+        ");
 
             $stmt->execute([
                 $schoolData['id'],
-                $schoolData['admin_name'],
-                $schoolData['admin_email'],
-                $schoolData['admin_phone'],
+                $schoolData['admin_name'],  // This should match the key in $adminData
+                $schoolData['admin_email'], // This should match the key in $adminData
+                $schoolData['admin_phone'], // This should match the key in $adminData
                 $hashedPassword
             ]);
 
@@ -1781,7 +2356,7 @@ public static function getSchoolStatistics($schoolId)
 
             if ($role) {
                 $roleId = $role['id'];
-                
+
                 // Assign role to user
                 $userRoleStmt = $db->prepare("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)");
                 $userRoleStmt->execute([$adminUserId, $roleId]);
@@ -1816,7 +2391,7 @@ public static function getSchoolStatistics($schoolId)
                         1073741824, 100, 500, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 1 MONTH), NOW())
             ");
             $stmt->execute([$schoolId]);
-            
+
             self::logInfo("Initialized subscription data for school ID: " . $schoolId);
         } catch (Exception $e) {
             self::logError("Error initializing subscription data", $e);
@@ -1871,7 +2446,7 @@ public static function getSchoolStatistics($schoolId)
             }
 
             $schoolDb = Database::getSchoolConnection($school['database_name']);
-            
+
             if ($storageType === 'total') {
                 $stmt = $schoolDb->prepare("
                     SELECT SUM(used_bytes) as total_used, SUM(limit_bytes) as total_limit 
@@ -1887,26 +2462,26 @@ public static function getSchoolStatistics($schoolId)
                 ");
                 $stmt->execute([$schoolId, $storageType]);
             }
-            
+
             $result = $stmt->fetch();
-            
+
             if (!$result) {
                 return [false, 0, 0, 0];
             }
-            
+
             $usedBytes = (int)$result['total_used'] ?? (int)$result['used_bytes'];
             $limitBytes = (int)$result['total_limit'] ?? (int)$result['limit_bytes'];
             $percentage = $limitBytes > 0 ? ($usedBytes / $limitBytes) * 100 : 0;
-            
+
             $isExceeded = $usedBytes >= $limitBytes;
-            
+
             // Create alert if approaching limit (80% or more)
             if ($percentage >= 80 && $percentage < 100) {
                 self::createStorageAlert($schoolId, 'warning', $percentage, $storageType);
             } elseif ($isExceeded) {
                 self::createStorageAlert($schoolId, 'critical', 100, $storageType);
             }
-            
+
             return [$isExceeded, $usedBytes, $limitBytes, $percentage];
         } catch (Exception $e) {
             self::logError("Error checking storage limit", $e);
@@ -1926,18 +2501,18 @@ public static function getSchoolStatistics($schoolId)
         try {
             // Check current limit before updating
             list($isExceeded, $usedBytes, $limitBytes) = self::checkStorageLimit($schoolId, $storageType);
-            
+
             if ($isExceeded && $additionalBytes > 0) {
                 throw new Exception("Storage limit exceeded for $storageType");
             }
-            
+
             $school = self::getSchoolById($schoolId);
             if (!$school || empty($school['database_name'])) {
                 return false;
             }
-            
+
             $schoolDb = Database::getSchoolConnection($school['database_name']);
-            
+
             $stmt = $schoolDb->prepare("
                 INSERT INTO storage_usage (school_id, storage_type, used_bytes, limit_bytes) 
                 VALUES (?, ?, ?, ?)
@@ -1945,18 +2520,18 @@ public static function getSchoolStatistics($schoolId)
                 used_bytes = used_bytes + VALUES(used_bytes),
                 last_calculated = NOW()
             ");
-            
+
             $limitBytes = self::getStorageLimitForSchool($schoolId, $storageType);
-            
+
             $stmt->execute([
                 $schoolId,
                 $storageType,
                 $additionalBytes,
                 $limitBytes
             ]);
-            
+
             self::logInfo("Updated storage usage for school $schoolId, type $storageType: +$additionalBytes bytes");
-            
+
             return true;
         } catch (Exception $e) {
             self::logError("Error updating storage usage", $e);
@@ -1970,85 +2545,85 @@ public static function getSchoolStatistics($schoolId)
      * @param string $storageType
      * @return int
      */
-   private static function getStorageLimitForSchool($schoolId, $storageType)
-{
-    try {
-        $school = self::getSchoolById($schoolId);
-        if (!$school || empty($school['database_name'])) {
-            return self::$storageLimits['free'];
-        }
-        
-        // Get plan from platform database
-        $platformDb = Database::getPlatformConnection();
-        $stmt = $platformDb->prepare("
+    private static function getStorageLimitForSchool($schoolId, $storageType)
+    {
+        try {
+            $school = self::getSchoolById($schoolId);
+            if (!$school || empty($school['database_name'])) {
+                return self::$storageLimits['free'];
+            }
+
+            // Get plan from platform database
+            $platformDb = Database::getPlatformConnection();
+            $stmt = $platformDb->prepare("
             SELECT p.storage_limit 
             FROM schools s
             JOIN plans p ON s.plan_id = p.id
             WHERE s.id = ?
         ");
-        $stmt->execute([$schoolId]);
-        $result = $stmt->fetch();
-        
-        if (!$result || empty($result['storage_limit'])) {
+            $stmt->execute([$schoolId]);
+            $result = $stmt->fetch();
+
+            if (!$result || empty($result['storage_limit'])) {
+                return self::$storageLimits['free'];
+            }
+
+            $totalLimit = (int)$result['storage_limit'] * 1024 * 1024; // Convert MB to bytes
+
+            // Same allocation logic as before
+            $allocations = [
+                'starter' => ['database' => 0.3, 'files' => 0.4, 'backups' => 0.2, 'attachments' => 0.1],
+                'growth' => ['database' => 0.4, 'files' => 0.3, 'backups' => 0.2, 'attachments' => 0.1],
+                'enterprise' => ['database' => 0.5, 'files' => 0.3, 'backups' => 0.1, 'attachments' => 0.1]
+            ];
+
+            $planSlug = $school['plan_name'] ?? 'starter';
+            $allocation = $allocations[$planSlug] ?? $allocations['starter'];
+
+            if ($storageType === 'total') {
+                return $totalLimit;
+            }
+
+            return (int)($totalLimit * ($allocation[$storageType] ?? 0.1));
+        } catch (Exception $e) {
             return self::$storageLimits['free'];
         }
-        
-        $totalLimit = (int)$result['storage_limit'] * 1024 * 1024; // Convert MB to bytes
-        
-        // Same allocation logic as before
-        $allocations = [
-            'starter' => ['database' => 0.3, 'files' => 0.4, 'backups' => 0.2, 'attachments' => 0.1],
-            'growth' => ['database' => 0.4, 'files' => 0.3, 'backups' => 0.2, 'attachments' => 0.1],
-            'enterprise' => ['database' => 0.5, 'files' => 0.3, 'backups' => 0.1, 'attachments' => 0.1]
-        ];
-        
-        $planSlug = $school['plan_name'] ?? 'starter';
-        $allocation = $allocations[$planSlug] ?? $allocations['starter'];
-        
-        if ($storageType === 'total') {
-            return $totalLimit;
-        }
-        
-        return (int)($totalLimit * ($allocation[$storageType] ?? 0.1));
-    } catch (Exception $e) {
-        return self::$storageLimits['free'];
     }
-}
 
-/**
- * Check if enhanced features are available
- */
-public static function hasEnhancedFeatures($schoolId)
-{
-    try {
-        $school = self::getSchoolById($schoolId);
-        if (!$school || empty($school['database_name'])) {
+    /**
+     * Check if enhanced features are available
+     */
+    public static function hasEnhancedFeatures($schoolId)
+    {
+        try {
+            $school = self::getSchoolById($schoolId);
+            if (!$school || empty($school['database_name'])) {
+                return false;
+            }
+
+            $schoolDb = Database::getSchoolConnection($school['database_name']);
+
+            // Check if storage_usage table exists
+            $tables = $schoolDb->query("SHOW TABLES LIKE 'storage_usage'")->fetchAll();
+
+            return count($tables) > 0;
+        } catch (Exception $e) {
             return false;
         }
-        
-        $schoolDb = Database::getSchoolConnection($school['database_name']);
-        
-        // Check if storage_usage table exists
-        $tables = $schoolDb->query("SHOW TABLES LIKE 'storage_usage'")->fetchAll();
-        
-        return count($tables) > 0;
-    } catch (Exception $e) {
-        return false;
     }
-}
 
-/**
- * Safe storage check with fallback
- */
-public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
-{
-    if (!self::hasEnhancedFeatures($schoolId)) {
-        // Return unlimited for schools without enhanced features
-        return [false, 0, PHP_INT_MAX, 0];
+    /**
+     * Safe storage check with fallback
+     */
+    public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
+    {
+        if (!self::hasEnhancedFeatures($schoolId)) {
+            // Return unlimited for schools without enhanced features
+            return [false, 0, PHP_INT_MAX, 0];
+        }
+
+        return self::checkStorageLimit($schoolId, $storageType);
     }
-    
-    return self::checkStorageLimit($schoolId, $storageType);
-}
 
     /**
      * Create storage alert
@@ -2064,26 +2639,25 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
             if (!$school || empty($school['database_name'])) {
                 return;
             }
-            
+
             $schoolDb = Database::getSchoolConnection($school['database_name']);
-            
+
             $title = "Storage Limit " . ($percentage >= 100 ? "Exceeded" : "Warning");
             $message = "Storage usage for $storageType is at " . round($percentage, 1) . "% of limit";
-            
+
             $stmt = $schoolDb->prepare("
                 INSERT INTO system_alerts 
                 (school_id, alert_type, severity, title, message, data, created_at) 
                 VALUES (?, 'storage_limit', ?, ?, ?, ?, NOW())
             ");
-            
+
             $data = json_encode([
                 'storage_type' => $storageType,
                 'percentage' => $percentage,
                 'threshold' => $percentage >= 100 ? 'exceeded' : 'warning'
             ]);
-            
+
             $stmt->execute([$schoolId, $severity, $title, $message, $data]);
-            
         } catch (Exception $e) {
             self::logError("Error creating storage alert", $e);
         }
@@ -2102,23 +2676,22 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
             if (!$school || empty($school['database_name'])) {
                 return;
             }
-            
+
             $schoolDb = Database::getSchoolConnection($school['database_name']);
-            
+
             $endpoint = $data['endpoint'] ?? null;
             $value = $data['value'] ?? 0;
             $unit = $data['unit'] ?? null;
-            
+
             $stmt = $schoolDb->prepare("
                 INSERT INTO performance_metrics 
                 (school_id, metric_type, endpoint, value, unit, metadata, recorded_at) 
                 VALUES (?, ?, ?, ?, ?, ?, NOW())
             ");
-            
+
             $metadata = json_encode($data);
-            
+
             $stmt->execute([$schoolId, $metricType, $endpoint, $value, $unit, $metadata]);
-            
         } catch (Exception $e) {
             self::logError("Error logging performance metric", $e);
         }
@@ -2137,7 +2710,7 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
     public static function checkRateLimit($schoolId, $endpoint, $ipAddress, $userId = null, $limit = 60, $windowSeconds = 60)
     {
         $key = "{$schoolId}_{$endpoint}_{$ipAddress}" . ($userId ? "_{$userId}" : '');
-        
+
         if (!isset(self::$rateLimits[$key])) {
             self::$rateLimits[$key] = [
                 'count' => 0,
@@ -2145,21 +2718,21 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
                 'window_reset' => time() + $windowSeconds
             ];
         }
-        
+
         $rateLimit = self::$rateLimits[$key];
-        
+
         // Reset if window has passed
         if (time() > $rateLimit['window_reset']) {
             $rateLimit['count'] = 0;
             $rateLimit['first_request'] = time();
             $rateLimit['window_reset'] = time() + $windowSeconds;
         }
-        
+
         // Check if limit exceeded
         if ($rateLimit['count'] >= $limit) {
             // Log security event
             self::logSecurityEvent($schoolId, 'rate_limit_exceeded', $endpoint, $ipAddress, $userId);
-            
+
             return [
                 'allowed' => false,
                 'remaining' => 0,
@@ -2167,14 +2740,14 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
                 'retry_after' => $rateLimit['window_reset'] - time()
             ];
         }
-        
+
         // Increment count
         $rateLimit['count']++;
         self::$rateLimits[$key] = $rateLimit;
-        
+
         // Also log to database for persistence
         self::logRateLimitToDatabase($schoolId, $endpoint, $ipAddress, $userId, $rateLimit['count']);
-        
+
         return [
             'allowed' => true,
             'remaining' => $limit - $rateLimit['count'],
@@ -2197,9 +2770,9 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
             if (!$school || empty($school['database_name'])) {
                 return;
             }
-            
+
             $schoolDb = Database::getSchoolConnection($school['database_name']);
-            
+
             $stmt = $schoolDb->prepare("
                 INSERT INTO rate_limits 
                 (school_id, endpoint, ip_address, user_id, request_count, window_reset, first_request, last_request) 
@@ -2209,9 +2782,8 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
                 last_request = NOW(),
                 window_reset = DATE_ADD(NOW(), INTERVAL 1 MINUTE)
             ");
-            
+
             $stmt->execute([$schoolId, $endpoint, $ipAddress, $userId, $requestCount]);
-            
         } catch (Exception $e) {
             self::logError("Error logging rate limit", $e);
         }
@@ -2232,20 +2804,19 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
             if (!$school || empty($school['database_name'])) {
                 return;
             }
-            
+
             $schoolDb = Database::getSchoolConnection($school['database_name']);
-            
+
             $severity = in_array($eventType, ['rate_limit_exceeded', 'suspicious_activity']) ? 'high' : 'medium';
             $details = "Endpoint: $endpoint, IP: $ipAddress";
-            
+
             $stmt = $schoolDb->prepare("
                 INSERT INTO security_logs 
                 (school_id, event_type, severity, user_id, ip_address, details, created_at) 
                 VALUES (?, ?, ?, ?, ?, ?, NOW())
             ");
-            
+
             $stmt->execute([$schoolId, $eventType, $severity, $userId, $ipAddress, $details]);
-            
         } catch (Exception $e) {
             self::logError("Error logging security event", $e);
         }
@@ -2286,7 +2857,7 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
         if ($exception) {
             $fullMessage .= " - " . $exception->getMessage() . " in " . $exception->getFile() . ":" . $exception->getLine();
         }
-        
+
         error_log("[ERROR] " . $fullMessage);
     }
 
@@ -2305,9 +2876,9 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
     {
         try {
             $basePath = realpath(__DIR__ . '/../../../') . '/assets/uploads/schools/';
-            
+
             self::logInfo("Creating directories at: " . $basePath);
-            
+
             // Create base uploads directory if it doesn't exist
             if (!file_exists($basePath)) {
                 if (!mkdir($basePath, 0755, true)) {
@@ -2315,7 +2886,7 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
                     return false;
                 }
             }
-            
+
             // Create school directory
             $schoolPath = $basePath . $schoolId . '/';
             if (!file_exists($schoolPath)) {
@@ -2324,7 +2895,7 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
                     return false;
                 }
             }
-            
+
             // Create logo directory
             $logoDir = $schoolPath . 'logo/';
             if (!file_exists($logoDir)) {
@@ -2333,7 +2904,7 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
                     return false;
                 }
             }
-            
+
             // Create other directories
             $subDirs = ['students/photos', 'students/documents', 'teachers/photos', 'reports', 'temp'];
             foreach ($subDirs as $dir) {
@@ -2342,9 +2913,8 @@ public static function safeCheckStorageLimit($schoolId, $storageType = 'total')
                     @mkdir($fullPath, 0755, true);
                 }
             }
-            
+
             return true;
-            
         } catch (Exception $e) {
             self::logError("Directory creation error", $e);
             return false;

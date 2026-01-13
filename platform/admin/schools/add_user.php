@@ -561,7 +561,7 @@ function sendParentWelcomeEmail($email, $parentName, $studentName, $password)
             <h3>Your Login Credentials:</h3>
             <p><strong>Login Email:</strong> $email</p>
             <p><strong>Password:</strong> $password</p>
-            <p><strong>Login URL:</strong> " . (APP_URL . "/school/" . $school['slug'] . "/parent/login.php") . "</p>
+            <p><strong>Login URL:</strong> " . (APP_URL . "/tenant/" . $school['slug'] . "/parent/login.php") . "</p>
         </div>
         
         <p>Please login to the parent portal to:</p>

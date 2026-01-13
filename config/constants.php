@@ -3,6 +3,7 @@
  * Application Constants
  */
 
+
 // Application Information
 define('APP_NAME', 'AcademixSuite');
 define('APP_VERSION', '1.0.0');
@@ -117,10 +118,11 @@ if (IS_LOCAL) {
     define('PAYMENT_PUBLIC_KEY', 'test_key');
     define('PAYMENT_SECRET_KEY', 'test_key');
 } else {
-    define('SMS_API_KEY', getenv('SMS_API_KEY'));
-    define('EMAIL_API_KEY', getenv('EMAIL_API_KEY'));
-    define('PAYMENT_PUBLIC_KEY', getenv('PAYMENT_PUBLIC_KEY'));
-    define('PAYMENT_SECRET_KEY', getenv('PAYMENT_SECRET_KEY'));
+    // Try to get from environment, fallback to empty
+    define('SMS_API_KEY', getenv('SMS_API_KEY') ?: '');
+    define('EMAIL_API_KEY', getenv('EMAIL_API_KEY') ?: '');
+    define('PAYMENT_PUBLIC_KEY', getenv('PAYMENT_PUBLIC_KEY') ?: '');
+    define('PAYMENT_SECRET_KEY', getenv('PAYMENT_SECRET_KEY') ?: '');
 }
 
 // Cache Settings
@@ -136,4 +138,3 @@ define('LOG_LEVEL', IS_LOCAL ? 'DEBUG' : 'ERROR');
 // Demo Mode
 define('DEMO_MODE', false);
 define('DEMO_SCHOOL_ID', 1);
-?>

@@ -1,3 +1,5 @@
+Ah, I understand now! You have ONE FOLDER that gets dynamically renamed based on the school slug from the database. This is a different approach. Let me provide you with the correct solution.
+
 academixsuite/
 ├── config/
 │   ├── database.php
@@ -110,7 +112,7 @@ academixsuite/
 │   └── settings.php
 │
 ├── tenant/                     # School-Specific Portals (Multi-tenant)
-│   ├── {school-slug}/          # Dynamic: Created per school
+│   ├── {school-slug}/          # Dynamic: Created per school replaciing it with actual slug from DB
 │   │   │
 │   │   ├── admin/              # School Admin Portal
 │   │   │   ├── dashboard.php
@@ -173,3 +175,7 @@ academixsuite/
 ├── index.php                   # Main entry point
 ├── login.php                   # Global login
 └── composer.json               # Composer dependencies
+
+
+
+Note thats the folder name thekingsinternationalsch doesnt exit , what exits is {school-slug}, but i want the school slug name from database to display instead of {school-slug}, so that any school thats login will see there school slg in the url

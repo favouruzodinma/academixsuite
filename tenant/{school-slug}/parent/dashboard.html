@@ -1,0 +1,2357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Parent Portal | AcademiXSuite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-teal: #06b6d4;
+            --surface-white: #ffffff;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-light); 
+            color: var(--text-dark); 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Glassmorphism effects */
+        .glass-header { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+        
+        .toast {
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease forwards;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            border-left: 4px solid #059669;
+        }
+        
+        .toast-info {
+            background: linear-gradient(135deg, #4f46e5, #7c73e9);
+            color: white;
+            border-left: 4px solid #3730a3;
+        }
+        
+        .toast-warning {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+            border-left: 4px solid #d97706;
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+            border-left: 4px solid #dc2626;
+        }
+        
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+        
+        .toast-exit {
+            animation: fadeOut 0.3s ease forwards;
+        }
+        
+        .toast-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        
+        .toast-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Sidebar styling */
+        .sidebar-link { 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-left: 3px solid transparent; 
+            position: relative;
+        }
+        
+        .sidebar-link:hover { 
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+            color: var(--primary-blue); 
+            border-left-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .active-link { 
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+            color: var(--primary-blue); 
+            border-left-color: var(--primary-blue); 
+            font-weight: 700;
+        }
+        
+        .active-link::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: var(--primary-blue);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Child Cards */
+        .child-card {
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .child-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .child-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--child-color), transparent);
+        }
+        
+        .child-1 { --child-color: #3b82f6; }
+        .child-2 { --child-color: #10b981; }
+        .child-3 { --child-color: #8b5cf6; }
+
+        /* Payment Status */
+        .payment-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-paid {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        
+        .status-overdue {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .status-upcoming {
+            background-color: #e0e7ff;
+            color: #3730a3;
+            border: 1px solid #c7d2fe;
+        }
+
+        /* Tab styling */
+        .tab-button {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-button:hover {
+            color: var(--primary-blue);
+        }
+        
+        .tab-button.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+            background: linear-gradient(to top, rgba(59, 130, 246, 0.05), transparent);
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--metric-color), transparent);
+        }
+        
+        .metric-primary {
+            --metric-color: var(--primary-blue);
+        }
+        
+        .metric-success {
+            --metric-color: var(--accent-green);
+        }
+        
+        .metric-warning {
+            --metric-color: var(--accent-orange);
+        }
+        
+        .metric-danger {
+            --metric-color: var(--accent-red);
+        }
+        
+        .metric-teal {
+            --metric-color: var(--accent-teal);
+        }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Action Buttons */
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .action-btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+            color: white;
+        }
+        
+        .action-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .action-btn-secondary {
+            background: white;
+            color: var(--primary-blue);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .action-btn-secondary:hover {
+            background: #f8fafc;
+            border-color: var(--primary-blue);
+        }
+
+        /* Performance Meter */
+        .performance-meter {
+            height: 8px;
+            border-radius: 4px;
+            background: #f1f5f9;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .performance-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .performance-excellent { background: linear-gradient(90deg, #10b981, #34d399); }
+        .performance-good { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .performance-average { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .performance-poor { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+        /* Grade Badge */
+        .grade-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 16px;
+            color: white;
+        }
+        
+        .grade-a { background: linear-gradient(135deg, #10b981, #34d399); }
+        .grade-b { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        .grade-c { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+        .grade-d { background: linear-gradient(135deg, #ef4444, #f87171); }
+        .grade-f { background: linear-gradient(135deg, #991b1b, #dc2626); }
+
+        /* Attendance Dot */
+        .attendance-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        
+        .dot-present { background-color: #10b981; }
+        .dot-absent { background-color: #ef4444; }
+        .dot-late { background-color: #f59e0b; }
+        .dot-excused { background-color: #8b5cf6; }
+
+        /* Message Card */
+        .message-card {
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .message-card:hover {
+            border-color: var(--primary-blue);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+        }
+        
+        .message-card.unread {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.02));
+            border-left: 4px solid var(--primary-blue);
+        }
+        
+        .message-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 18px;
+            color: white;
+        }
+        
+        .avatar-teacher { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        .avatar-admin { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+        .avatar-school { background: linear-gradient(135deg, #10b981, #34d399); }
+
+        /* Fee Card */
+        .fee-card {
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+        
+        .fee-card:hover {
+            transform: translateX(4px);
+        }
+        
+        .fee-tuition { 
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05)); 
+            border-left-color: #3b82f6;
+        }
+        .fee-transport { 
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05)); 
+            border-left-color: #10b981;
+        }
+        .fee-lunch { 
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05)); 
+            border-left-color: #f59e0b;
+        }
+        .fee-activity { 
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05)); 
+            border-left-color: #8b5cf6;
+        }
+
+        /* Event Card */
+        .event-card {
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .event-card:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+        
+        .event-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .event-academic { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .event-sports { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .event-cultural { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+        .event-meeting { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .glass-header {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: white;
+            }
+            
+            .toast-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+            
+            .chart-container {
+                height: 250px !important;
+            }
+            
+            .child-card {
+                padding: 16px;
+            }
+        }
+
+        /* Loader Animation */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #f1f5f9;
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Progress Circle */
+        .progress-circle {
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+        
+        .progress-circle svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        
+        .progress-circle-bg {
+            fill: none;
+            stroke: #f1f5f9;
+            stroke-width: 6;
+        }
+        
+        .progress-circle-fill {
+            fill: none;
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+        
+        .progress-circle-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: 900;
+            font-size: 18px;
+            color: var(--text-dark);
+        }
+
+        /* Calendar Day */
+        .calendar-day {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .calendar-day:hover {
+            background: #f1f5f9;
+        }
+        
+        .calendar-day.today {
+            background: var(--primary-blue);
+            color: white;
+        }
+        
+        .calendar-day.has-event {
+            background: #fef3c7;
+            color: #92400e;
+            position: relative;
+        }
+        
+        .calendar-day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            width: 4px;
+            height: 4px;
+            background: #f59e0b;
+            border-radius: 50%;
+        }
+        
+        .calendar-day.has-payment {
+            background: #fee2e2;
+            color: #991b1b;
+            position: relative;
+        }
+        
+        .calendar-day.has-payment::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            width: 4px;
+            height: 4px;
+            background: #ef4444;
+            border-radius: 50%;
+        }
+
+        /* Quick Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+        
+        .stat-item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--text-dark);
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Notification Bell */
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        /* Payment Progress */
+        .payment-progress {
+            height: 8px;
+            border-radius: 4px;
+            background: #f1f5f9;
+            overflow: hidden;
+        }
+        
+        .payment-progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[99] lg:hidden hidden" onclick="mobileSidebarToggle()"></div>
+
+    <!-- Make Payment Modal -->
+    <div id="makePaymentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Make Payment</h3>
+                    <button onclick="closeModal('makePaymentModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="paymentForm">
+                    <div class="mb-6">
+                        <h4 class="font-bold text-slate-900 mb-2" id="paymentTitle">Tuition Fee - Q4 2024</h4>
+                        <p class="text-slate-600">Child: <span id="paymentChild">Alex Johnson</span></p>
+                        <p class="text-2xl font-black text-slate-900 mt-2">₦150,000</p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="form-label">Payment Method</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="selectPaymentMethod('card')" class="p-4 border-2 border-slate-200 rounded-xl text-center hover:border-blue-500 transition payment-method">
+                                    <i class="fas fa-credit-card text-2xl text-blue-600 mb-2"></i>
+                                    <p class="font-bold text-slate-900">Credit Card</p>
+                                </button>
+                                <button onclick="selectPaymentMethod('transfer')" class="p-4 border-2 border-slate-200 rounded-xl text-center hover:border-blue-500 transition payment-method">
+                                    <i class="fas fa-university text-2xl text-green-600 mb-2"></i>
+                                    <p class="font-bold text-slate-900">Bank Transfer</p>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="cardDetails" class="hidden">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="form-label">Card Number</label>
+                                    <input type="text" class="form-input" placeholder="1234 5678 9012 3456">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="form-label">Expiry Date</label>
+                                        <input type="text" class="form-input" placeholder="MM/YY">
+                                    </div>
+                                    <div>
+                                        <label class="form-label">CVV</label>
+                                        <input type="text" class="form-input" placeholder="123">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="transferDetails" class="hidden">
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                                <h5 class="font-bold text-slate-900 mb-2">Bank Transfer Details</h5>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-600">Bank Name:</span>
+                                        <span class="font-bold text-slate-900">GTBank</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-600">Account Name:</span>
+                                        <span class="font-bold text-slate-900">Greenwood High School</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-600">Account Number:</span>
+                                        <span class="font-bold text-slate-900">0123456789</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-2 text-sm text-slate-600">
+                            <i class="fas fa-shield-alt text-blue-500"></i>
+                            <p>All transactions are secured with 256-bit encryption</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-8">
+                    <button onclick="closeModal('makePaymentModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="processPayment()" class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                        Pay ₦150,000
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Child Details Modal -->
+    <div id="childDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Child Details</h3>
+                    <button onclick="closeModal('childDetailsModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="childDetailsContent">
+                    <!-- Child details loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Message Modal -->
+    <div id="sendMessageModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Send Message to School</h3>
+                    <button onclick="closeModal('sendMessageModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="sendMessageForm">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="form-label">Recipient</label>
+                            <select class="form-select">
+                                <option value="">Select Recipient</option>
+                                <option value="teacher">Class Teacher</option>
+                                <option value="principal">Principal</option>
+                                <option value="admin">School Admin</option>
+                                <option value="all">All Teachers</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Regarding Child</label>
+                            <select class="form-select">
+                                <option value="alex">Alex Johnson</option>
+                                <option value="sarah">Sarah Johnson</option>
+                                <option value="both">Both Children</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Subject</label>
+                            <input type="text" class="form-input" placeholder="Enter message subject">
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Message</label>
+                            <textarea class="form-input h-48" placeholder="Type your message here..."></textarea>
+                        </div>
+                        
+                        <div class="flex items-center gap-2 text-sm text-slate-600">
+                            <i class="fas fa-paperclip text-blue-500"></i>
+                            <p>You can attach files after sending the message</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-8">
+                    <button onclick="closeModal('sendMessageModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="sendMessage()" class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-blue-200">
+                        Send Message
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-[100] lg:relative lg:translate-x-0 -translate-x-full transition-transform duration-300 flex flex-col shadow-xl lg:shadow-none">
+            
+            <!-- Parent Header -->
+            <div class="h-20 flex items-center px-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-100">
+                            <i class="fas fa-users text-white text-lg"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div>
+                        <span class="text-lg font-black tracking-tight text-slate-900">Johnson Family</span>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">PARENT PORTAL</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Family Quick Info -->
+            <div class="p-6 border-b border-slate-100">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Children:</span>
+                        <span class="text-sm font-black text-emerald-600">2</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Total Fees Due:</span>
+                        <span class="text-sm font-bold text-amber-600">₦285,000</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Unread Messages:</span>
+                        <span class="text-sm font-bold text-blue-600">3</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 space-y-8 custom-scrollbar">
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Dashboard</p>
+                    <nav class="space-y-1">
+                        <a href="#" class="sidebar-link active-link flex items-center gap-3 px-6 py-3 text-sm font-semibold">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <span>Overview</span>
+                        </a>
+                        <a href="parent-children.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <span>My Children</span>
+                        </a>
+                        <a href="parent-schedule.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <span>School Calendar</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Academic</p>
+                    <nav class="space-y-1">
+                        <a href="parent-grades.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <span>Grades & Reports</span>
+                        </a>
+                        <a href="parent-attendance.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <span>Attendance</span>
+                        </a>
+                        <a href="parent-assignments.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <span>Assignments</span>
+                            <span class="ml-auto bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-full">2</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Financial</p>
+                    <nav class="space-y-1">
+                        <a href="parent-fees.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            <span>Fee Statements</span>
+                            <span class="ml-auto bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-full">1</span>
+                        </a>
+                        <a href="parent-payments.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <span>Payment History</span>
+                        </a>
+                        <a href="parent-invoices.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
+                            <span>Invoices</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Communication</p>
+                    <nav class="space-y-1">
+                        <a href="parent-messages.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <span>Messages</span>
+                            <span class="ml-auto bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full">3</span>
+                        </a>
+                        <a href="parent-announcements.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <span>Announcements</span>
+                        </a>
+                        <a href="parent-events.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-day"></i>
+                            </div>
+                            <span>Events</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Account</p>
+                    <nav class="space-y-1">
+                        <a href="parent-profile.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span>Profile</span>
+                        </a>
+                        <a href="parent-settings.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <span>Settings</span>
+                        </a>
+                        <a href="#" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </div>
+                            <span>Logout</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Quick Contact -->
+            <div class="p-6 border-t border-slate-100">
+                <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-phone-alt text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400">SCHOOL OFFICE</p>
+                            <p class="text-sm font-black text-slate-900">(234) 801-234-5678</p>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-500">
+                        <i class="fas fa-clock mr-1"></i> Mon-Fri, 8AM-4PM
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- Header -->
+            <header class="h-20 glass-header px-6 lg:px-8 flex items-center justify-between shrink-0 z-40">
+                <div class="flex items-center gap-3">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition">
+                        <i class="fas fa-bars-staggered"></i>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-lg font-black text-slate-900 tracking-tight">Parent Portal</h1>
+                        <div class="hidden lg:flex items-center gap-2">
+                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            <span class="text-xs font-black text-emerald-600 uppercase tracking-widest">Welcome, Mr. Johnson!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Quick Stats -->
+                    <div class="hidden md:flex items-center gap-6 bg-white border border-slate-200 px-4 py-2 rounded-xl">
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Children</p>
+                            <p class="text-sm font-black text-emerald-600">2</p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fees Due</p>
+                            <p class="text-sm font-black text-amber-600">₦285K</p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Messages</p>
+                            <p class="text-sm font-black text-blue-600">3</p>
+                        </div>
+                    </div>
+
+                    <!-- Notification Bell -->
+                    <div class="notification-bell relative">
+                        <button onclick="viewNotifications()" class="p-2 hover:bg-slate-100 rounded-lg transition">
+                            <i class="fas fa-bell text-slate-600 text-xl"></i>
+                        </button>
+                        <span class="notification-badge">5</span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="openModal('sendMessageModal')" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                            <i class="fas fa-envelope"></i>
+                            <span class="hidden sm:inline">Message</span>
+                        </button>
+                        <button onclick="openModal('makePaymentModal')" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                            <i class="fas fa-credit-card"></i>
+                            <span class="hidden sm:inline">Pay Fees</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tabs Navigation -->
+            <div class="border-b border-slate-200 bg-white">
+                <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                    <div class="flex overflow-x-auto">
+                        <button class="tab-button active" onclick="switchTab('overview')" data-tab="overview">
+                            <i class="fas fa-home mr-2"></i>Overview
+                        </button>
+                        <button class="tab-button" onclick="switchTab('children')" data-tab="children">
+                            <i class="fas fa-user-graduate mr-2"></i>My Children
+                        </button>
+                        <button class="tab-button" onclick="switchTab('fees')" data-tab="fees">
+                            <i class="fas fa-receipt mr-2"></i>Fees
+                        </button>
+                        <button class="tab-button" onclick="switchTab('messages')" data-tab="messages">
+                            <i class="fas fa-comments mr-2"></i>Messages
+                        </button>
+                        <button class="tab-button" onclick="switchTab('calendar')" data-tab="calendar">
+                            <i class="fas fa-calendar-alt mr-2"></i>Calendar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar">
+                <!-- Welcome Section -->
+                <div class="max-w-7xl mx-auto mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h2 class="text-2xl lg:text-3xl font-black text-slate-900 mb-2">Welcome to Parent Portal, <span class="text-blue-600">Mr. Johnson</span>!</h2>
+                            <p class="text-slate-500 font-medium">Monitor your children's progress, pay fees, and communicate with school</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-slate-600">Today's Date</p>
+                                <p class="text-lg font-black text-slate-900" id="currentDate">December 4, 2024</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                                <i class="fas fa-calendar-day text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="flex flex-wrap gap-2 mt-6">
+                        <div class="px-4 py-2 bg-blue-50 border border-blue-200 rounded-xl">
+                            <span class="text-sm font-bold text-blue-700">2 Children Enrolled</span>
+                        </div>
+                        <div class="px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl">
+                            <span class="text-sm font-bold text-emerald-700">Avg GPA: 3.7</span>
+                        </div>
+                        <div class="px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+                            <span class="text-sm font-bold text-amber-700">₦285,000 Fees Due</span>
+                        </div>
+                        <div class="px-4 py-2 bg-purple-50 border border-purple-200 rounded-xl">
+                            <span class="text-sm font-bold text-purple-700">3 Unread Messages</span>
+                        </div>
+                        <div class="px-4 py-2 bg-red-50 border border-red-200 rounded-xl">
+                            <span class="text-sm font-bold text-red-700">2 Overdue Assignments</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Children Overview -->
+                    <div class="glass-card metric-card metric-primary rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.1s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">CHILDREN ENROLLED</p>
+                                <p class="text-2xl font-black text-slate-900">2</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+                                <i class="fas fa-users text-blue-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-emerald-600 font-bold"><i class="fas fa-check-circle mr-1"></i> Both Active</span>
+                            <span class="text-slate-500">Grades 11 & 8</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Fees Due -->
+                    <div class="glass-card metric-card metric-warning rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.2s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">TOTAL FEES DUE</p>
+                                <p class="text-2xl font-black text-slate-900">₦285K</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center">
+                                <i class="fas fa-receipt text-amber-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="payment-progress">
+                            <div class="payment-progress-fill" style="width: 65%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">65% paid this term</p>
+                    </div>
+                    
+                    <!-- Average GPA -->
+                    <div class="glass-card metric-card metric-success rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.3s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">AVERAGE GPA</p>
+                                <p class="text-2xl font-black text-slate-900">3.7</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
+                                <i class="fas fa-award text-emerald-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-emerald-600 font-bold"><i class="fas fa-arrow-up mr-1"></i> 0.3</span>
+                            <span class="text-slate-500">from last term</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Attendance Rate -->
+                    <div class="glass-card metric-card metric-teal rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.4s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">ATTENDANCE RATE</p>
+                                <p class="text-2xl font-black text-slate-900">94%</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-50 to-teal-100 flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-teal-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="performance-meter">
+                            <div class="performance-fill performance-good" style="width: 94%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">Both children combined</p>
+                    </div>
+                </div>
+
+                <!-- My Children Overview -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Children Cards -->
+                    <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">My Children</h3>
+                                <p class="text-slate-500">Academic performance and details</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="viewAllChildren()" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                                    View All Details <i class="fas fa-arrow-right ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Alex Johnson Card -->
+                            <div class="child-card child-1">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white">
+                                            <span class="text-lg font-black">AJ</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-black text-slate-900">Alex Johnson</h4>
+                                            <p class="text-sm text-slate-600">Grade 11 • Section A</p>
+                                        </div>
+                                    </div>
+                                    <div class="grade-badge grade-a">A</div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-bold text-slate-700">Current GPA:</span>
+                                        <span class="text-sm font-bold text-emerald-600">3.8</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-excellent" style="width: 94%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-3 mb-4">
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-600">Attendance:</span>
+                                        <span class="font-bold text-emerald-600">96%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-600">Pending Assignments:</span>
+                                        <span class="font-bold text-amber-600">3</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-600">Fees Due:</span>
+                                        <span class="font-bold text-red-600">₦150,000</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <button onclick="viewChildDetails(1)" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                                        View Profile
+                                    </button>
+                                    <button onclick="messageChildTeacher(1)" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Sarah Johnson Card -->
+                            <div class="child-card child-2">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white">
+                                            <span class="text-lg font-black">SJ</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-black text-slate-900">Sarah Johnson</h4>
+                                            <p class="text-sm text-slate-600">Grade 8 • Section B</p>
+                                        </div>
+                                    </div>
+                                    <div class="grade-badge grade-b">B+</div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-bold text-slate-700">Current GPA:</span>
+                                        <span class="text-sm font-bold text-blue-600">3.6</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-good" style="width: 87%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-3 mb-4">
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-600">Attendance:</span>
+                                        <span class="font-bold text-emerald-600">92%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-600">Pending Assignments:</span>
+                                        <span class="font-bold text-amber-600">2</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-600">Fees Due:</span>
+                                        <span class="font-bold text-red-600">₦135,000</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <button onclick="viewChildDetails(2)" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                                        View Profile
+                                    </button>
+                                    <button onclick="messageChildTeacher(2)" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upcoming Payments -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Upcoming Payments</h3>
+                            <span class="text-xs font-bold text-slate-400">December 2024</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="fee-card fee-tuition">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-bold text-slate-900">Tuition Fee - Q4</span>
+                                    <span class="payment-status status-pending">Pending</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm mb-2">
+                                    <span class="text-slate-600">Alex Johnson</span>
+                                    <span class="font-bold text-slate-900">₦150,000</span>
+                                </div>
+                                <div class="text-xs text-slate-500">
+                                    <i class="fas fa-calendar-alt mr-2"></i>
+                                    Due: Dec 15, 2024
+                                </div>
+                                <button onclick="makePayment(1, 'Alex Johnson')" class="w-full mt-3 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold rounded-xl hover:shadow-lg transition-all">
+                                    Pay Now
+                                </button>
+                            </div>
+                            
+                            <div class="fee-card fee-transport">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-bold text-slate-900">Transport Fee</span>
+                                    <span class="payment-status status-upcoming">Due Soon</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm mb-2">
+                                    <span class="text-slate-600">Sarah Johnson</span>
+                                    <span class="font-bold text-slate-900">₦45,000</span>
+                                </div>
+                                <div class="text-xs text-slate-500">
+                                    <i class="fas fa-calendar-alt mr-2"></i>
+                                    Due: Dec 20, 2024
+                                </div>
+                                <button onclick="makePayment(2, 'Sarah Johnson')" class="w-full mt-3 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                                    Schedule Payment
+                                </button>
+                            </div>
+                            
+                            <div class="fee-card fee-activity">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="font-bold text-slate-900">Activity Fee</span>
+                                    <span class="payment-status status-paid">Paid</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm mb-2">
+                                    <span class="text-slate-600">Both Children</span>
+                                    <span class="font-bold text-slate-900">₦90,000</span>
+                                </div>
+                                <div class="text-xs text-slate-500">
+                                    <i class="fas fa-calendar-check mr-2"></i>
+                                    Paid: Nov 28, 2024
+                                </div>
+                                <button onclick="viewReceipt(3)" class="w-full mt-3 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition">
+                                    View Receipt
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button onclick="viewAllFees()" class="w-full mt-6 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                            View All Fee Statements
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Messages & Quick Stats -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Recent Messages -->
+                    <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Recent Messages</h3>
+                            <button onclick="viewAllMessages()" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                                View All <i class="fas fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <!-- Unread Message -->
+                            <div class="message-card unread">
+                                <div class="flex items-start gap-4">
+                                    <div class="message-avatar avatar-teacher">
+                                        <span>MD</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-start justify-between mb-2">
+                                            <div>
+                                                <h4 class="font-bold text-slate-900">Mr. Davis - Mathematics Teacher</h4>
+                                                <p class="text-sm text-slate-600">Regarding: Alex Johnson</p>
+                                            </div>
+                                            <span class="text-xs text-slate-500">2 hours ago</span>
+                                        </div>
+                                        <p class="text-slate-700 mb-3">Alex has an overdue mathematics assignment. Please ensure it's submitted by tomorrow to avoid grade penalty.</p>
+                                        <div class="flex items-center gap-3">
+                                            <button onclick="replyToMessage(1)" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                                                <i class="fas fa-reply mr-1"></i> Reply
+                                            </button>
+                                            <button onclick="viewMessage(1)" class="text-sm font-bold text-slate-600 hover:text-slate-800">
+                                                View Details
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Unread Message -->
+                            <div class="message-card unread">
+                                <div class="flex items-start gap-4">
+                                    <div class="message-avatar avatar-school">
+                                        <span>GH</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-start justify-between mb-2">
+                                            <div>
+                                                <h4 class="font-bold text-slate-900">School Administration</h4>
+                                                <p class="text-sm text-slate-600">Quarterly Fee Reminder</p>
+                                            </div>
+                                            <span class="text-xs text-slate-500">1 day ago</span>
+                                        </div>
+                                        <p class="text-slate-700 mb-3">Reminder: Q4 tuition fees are due by December 15th. Please make payment through the parent portal.</p>
+                                        <div class="flex items-center gap-3">
+                                            <button onclick="makePayment(1, 'Alex Johnson')" class="text-sm font-bold text-emerald-600 hover:text-emerald-800">
+                                                <i class="fas fa-credit-card mr-1"></i> Pay Now
+                                            </button>
+                                            <button onclick="viewMessage(2)" class="text-sm font-bold text-slate-600 hover:text-slate-800">
+                                                View Details
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Read Message -->
+                            <div class="message-card">
+                                <div class="flex items-start gap-4">
+                                    <div class="message-avatar avatar-admin">
+                                        <span>PS</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-start justify-between mb-2">
+                                            <div>
+                                                <h4 class="font-bold text-slate-900">Principal Smith</h4>
+                                                <p class="text-sm text-slate-600">Parent-Teacher Meeting</p>
+                                            </div>
+                                            <span class="text-xs text-slate-500">3 days ago</span>
+                                        </div>
+                                        <p class="text-slate-700 mb-3">Invitation to the quarterly parent-teacher meeting on December 10th at 3:00 PM in the school auditorium.</p>
+                                        <div class="flex items-center gap-3">
+                                            <button onclick="rsvpMeeting(1)" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                                                <i class="fas fa-calendar-check mr-1"></i> RSVP
+                                            </button>
+                                            <button onclick="viewMessage(3)" class="text-sm font-bold text-slate-600 hover:text-slate-800">
+                                                View Details
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats & Attendance -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-lg font-black text-slate-900 mb-6">Family Overview</h3>
+                        
+                        <div class="stats-grid mb-6">
+                            <div class="stat-item">
+                                <span class="stat-value">3.7</span>
+                                <span class="stat-label">Avg GPA</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">94%</span>
+                                <span class="stat-label">Attendance</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">5</span>
+                                <span class="stat-label">Assignments</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">3</span>
+                                <span class="stat-label">Messages</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Children Attendance -->
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="font-bold text-slate-900">December Attendance</span>
+                                <span class="text-sm font-bold text-emerald-600">94%</span>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-sm font-medium text-slate-700">Alex Johnson</span>
+                                        <span class="text-sm font-bold text-emerald-600">96%</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-excellent" style="width: 96%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-sm font-medium text-slate-700">Sarah Johnson</span>
+                                        <span class="text-sm font-bold text-emerald-600">92%</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-good" style="width: 92%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Upcoming Event -->
+                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl mb-6">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                                    <i class="fas fa-users text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Parent-Teacher Meeting</p>
+                                    <p class="text-xs text-slate-500">Dec 10, 2024 • 3:00 PM</p>
+                                </div>
+                            </div>
+                            <div class="text-sm text-slate-600">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                School Auditorium
+                            </div>
+                        </div>
+                        
+                        <button onclick="viewFamilyReport()" class="w-full py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                            View Family Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upcoming Events & Quick Actions -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Upcoming Events -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Upcoming Events</h3>
+                            <span class="text-xs font-bold text-slate-400">This Month</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="event-card">
+                                <div class="flex items-start gap-3">
+                                    <div class="event-icon event-meeting">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-900">Parent-Teacher Meeting</h4>
+                                        <p class="text-sm text-slate-600 mb-2">Quarterly review meeting with all teachers</p>
+                                        <div class="flex items-center text-xs text-slate-500">
+                                            <i class="fas fa-calendar-alt mr-2"></i>
+                                            Dec 10, 2024 • 3:00 PM
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="event-card">
+                                <div class="flex items-start gap-3">
+                                    <div class="event-icon event-academic">
+                                        <i class="fas fa-graduation-cap"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-900">Mathematics Final Exam</h4>
+                                        <p class="text-sm text-slate-600 mb-2">Grade 11 & 12 final examinations</p>
+                                        <div class="flex items-center text-xs text-slate-500">
+                                            <i class="fas fa-calendar-alt mr-2"></i>
+                                            Dec 15, 2024 • 9:00 AM
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="event-card">
+                                <div class="flex items-start gap-3">
+                                    <div class="event-icon event-cultural">
+                                        <i class="fas fa-music"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-900">Winter Concert</h4>
+                                        <p class="text-sm text-slate-600 mb-2">Annual school winter music concert</p>
+                                        <div class="flex items-center text-xs text-slate-500">
+                                            <i class="fas fa-calendar-alt mr-2"></i>
+                                            Dec 18, 2024 • 6:00 PM
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="event-card">
+                                <div class="flex items-start gap-3">
+                                    <div class="event-icon event-sports">
+                                        <i class="fas fa-futbol"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-900">Sports Day</h4>
+                                        <p class="text-sm text-slate-600 mb-2">Annual inter-house sports competition</p>
+                                        <div class="flex items-center text-xs text-slate-500">
+                                            <i class="fas fa-calendar-alt mr-2"></i>
+                                            Dec 20, 2024 • 8:00 AM
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="viewAllEvents()" class="w-full mt-6 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                            View Full Calendar
+                        </button>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+                        <h3 class="text-lg font-black text-slate-900 mb-6">Quick Actions</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button onclick="makePayment(1, 'Alex Johnson')" class="p-6 bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 rounded-xl text-left hover:bg-red-200 transition group">
+                                <div class="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                    <i class="fas fa-credit-card text-red-600 text-lg"></i>
+                                </div>
+                                <p class="font-bold text-slate-900">Pay Overdue Fees</p>
+                                <p class="text-sm text-slate-600 mt-1">₦150,000 due for Alex</p>
+                            </button>
+                            
+                            <button onclick="openModal('sendMessageModal')" class="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl text-left hover:bg-blue-200 transition group">
+                                <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                    <i class="fas fa-envelope text-blue-600 text-lg"></i>
+                                </div>
+                                <p class="font-bold text-slate-900">Message School</p>
+                                <p class="text-sm text-slate-600 mt-1">Contact teachers or admin</p>
+                            </button>
+                            
+                            <button onclick="viewChildrenGrades()" class="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-200 rounded-xl text-left hover:bg-emerald-200 transition group">
+                                <div class="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                    <i class="fas fa-chart-bar text-emerald-600 text-lg"></i>
+                                </div>
+                                <p class="font-bold text-slate-900">View Grades Report</p>
+                                <p class="text-sm text-slate-600 mt-1">Check academic performance</p>
+                            </button>
+                            
+                            <button onclick="downloadReportCards()" class="p-6 bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl text-left hover:bg-purple-200 transition group">
+                                <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                    <i class="fas fa-download text-purple-600 text-lg"></i>
+                                </div>
+                                <p class="font-bold text-slate-900">Download Reports</p>
+                                <p class="text-sm text-slate-600 mt-1">Term reports and transcripts</p>
+                            </button>
+                            
+                            <button onclick="viewAttendance()" class="p-6 bg-gradient-to-br from-teal-50 to-teal-100 border-2 border-teal-200 rounded-xl text-left hover:bg-teal-200 transition group">
+                                <div class="w-12 h-12 rounded-lg bg-teal-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                    <i class="fas fa-calendar-check text-teal-600 text-lg"></i>
+                                </div>
+                                <p class="font-bold text-slate-900">Check Attendance</p>
+                                <p class="text-sm text-slate-600 mt-1">View children's attendance</p>
+                            </button>
+                            
+                            <button onclick="updateProfile()" class="p-6 bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-200 rounded-xl text-left hover:bg-amber-200 transition group">
+                                <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                    <i class="fas fa-user-edit text-amber-600 text-lg"></i>
+                                </div>
+                                <p class="font-bold text-slate-900">Update Profile</p>
+                                <p class="text-sm text-slate-600 mt-1">Contact info & preferences</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activities & Mini Calendar -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Recent Activities -->
+                    <div class="glass-card rounded-2xl p-6 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Recent Activities</h3>
+                            <span class="text-xs font-bold text-slate-400">Last 7 days</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink: 0">
+                                    <i class="fas fa-credit-card text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Payment Processed</p>
+                                    <p class="text-xs text-slate-500">2 days ago • ₦90,000 activity fee</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-3 p-3 bg-emerald-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink: 0">
+                                    <i class="fas fa-chart-line text-emerald-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Grades Updated</p>
+                                    <p class="text-xs text-slate-500">3 days ago • Sarah's science quiz: 88%</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-3 p-3 bg-amber-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink: 0">
+                                    <i class="fas fa-exclamation-triangle text-amber-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Overdue Assignment Alert</p>
+                                    <p class="text-xs text-slate-500">4 days ago • Alex's mathematics</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-3 p-3 bg-purple-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink: 0">
+                                    <i class="fas fa-calendar-check text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Meeting Scheduled</p>
+                                    <p class="text-xs text-slate-500">5 days ago • Parent-teacher meeting confirmed</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-3 p-3 bg-red-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink: 0">
+                                    <i class="fas fa-user-clock text-red-600"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">Late Arrival Marked</p>
+                                    <p class="text-xs text-slate-500">6 days ago • Sarah arrived late to school</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="viewAllActivities()" class="w-full mt-6 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                            View All Activities
+                        </button>
+                    </div>
+                    
+                    <!-- Mini Calendar -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">December 2024</h3>
+                            <div class="flex items-center gap-2">
+                                <button onclick="prevMonth()" class="p-2 hover:bg-slate-100 rounded-lg">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button onclick="nextMonth()" class="p-2 hover:bg-slate-100 rounded-lg">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-7 gap-2 mb-4">
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Sun</div>
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Mon</div>
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Tue</div>
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Wed</div>
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Thu</div>
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Fri</div>
+                            <div class="text-center text-sm font-bold text-slate-400 py-2">Sat</div>
+                            
+                            <!-- Calendar days will be populated by JavaScript -->
+                            <div id="calendarDays" class="col-span-7 grid grid-cols-7 gap-2">
+                                <!-- Calendar will be generated here -->
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between pt-6 border-t border-slate-100">
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="calendar-day today" style="width: 16px; height: 16px;"></span>
+                                    <span class="text-sm text-slate-600">Today</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="calendar-day has-event" style="width: 16px; height: 16px;"></span>
+                                    <span class="text-sm text-slate-600">Event</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="calendar-day has-payment" style="width: 16px; height: 16px;"></span>
+                                    <span class="text-sm text-slate-600">Payment</span>
+                                </div>
+                            </div>
+                            <button onclick="viewFullCalendar()" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                                View Calendar
+                            </button>
+                        </div>
+                        
+                        <!-- Quick Notes -->
+                        <div class="mt-6 p-4 bg-slate-50 rounded-xl">
+                            <h4 class="font-bold text-slate-900 mb-2">Quick Notes</h4>
+                            <textarea class="w-full h-24 p-3 border border-slate-200 rounded-lg text-sm" placeholder="Add notes about school activities, reminders, or questions..."></textarea>
+                            <button onclick="saveNotes()" class="w-full mt-2 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition">
+                                Save Notes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            // Set icon based on type
+            let icon = 'fa-info-circle';
+            switch(type) {
+                case 'success': icon = 'fa-check-circle'; break;
+                case 'warning': icon = 'fa-exclamation-triangle'; break;
+                case 'error': icon = 'fa-times-circle'; break;
+                default: icon = 'fa-info-circle';
+            }
+            
+            toast.innerHTML = `
+                <i class="fas ${icon} toast-icon"></i>
+                <div class="toast-content">${message}</div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add to container
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Auto remove after duration
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.classList.add('toast-exit');
+                    setTimeout(() => {
+                        if (toast.parentElement) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }, duration);
+            }
+        }
+
+        // Mobile Sidebar Toggle
+        function mobileSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            // Update active tab button
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Show appropriate content
+            showToast(`Switched to ${tabName}`, 'info');
+        }
+
+        // Current Date Display
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Calendar Generation
+        function generateCalendar() {
+            const container = document.getElementById('calendarDays');
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth(); // December is 11
+            
+            // Get first day of month
+            const firstDay = new Date(year, month, 1);
+            // Get last day of month
+            const lastDay = new Date(year, month + 1, 0);
+            // Get starting day (0 = Sunday, 1 = Monday, etc.)
+            const startDay = firstDay.getDay();
+            // Get number of days in month
+            const daysInMonth = lastDay.getDate();
+            
+            let calendarHTML = '';
+            
+            // Add empty cells for days before the first day of the month
+            for (let i = 0; i < startDay; i++) {
+                calendarHTML += `<div class="calendar-day"></div>`;
+            }
+            
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayOfWeek = date.getDay();
+                let dayClass = 'calendar-day';
+                
+                // Check if today
+                if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    dayClass += ' today';
+                }
+                
+                // Add event markers (example data)
+                if (day === 10 || day === 15 || day === 18 || day === 20) {
+                    dayClass += ' has-event';
+                }
+                
+                // Add payment markers (example data)
+                if (day === 15 || day === 20) {
+                    dayClass += ' has-payment';
+                }
+                
+                calendarHTML += `<div class="${dayClass}" onclick="viewDayDetails(${day})">${day}</div>`;
+            }
+            
+            container.innerHTML = calendarHTML;
+        }
+
+        function prevMonth() {
+            showToast('Viewing previous month', 'info');
+            // In real app, update calendar to previous month
+        }
+
+        function nextMonth() {
+            showToast('Viewing next month', 'info');
+            // In real app, update calendar to next month
+        }
+
+        // Payment Functions
+        function makePayment(paymentId, childName) {
+            document.getElementById('paymentTitle').textContent = paymentId === 1 ? 'Tuition Fee - Q4 2024' : 'Transport Fee';
+            document.getElementById('paymentChild').textContent = childName;
+            document.getElementById('paymentAmount').textContent = paymentId === 1 ? '₦150,000' : '₦45,000';
+            
+            // Reset payment method selection
+            document.querySelectorAll('.payment-method').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+            document.getElementById('cardDetails').classList.add('hidden');
+            document.getElementById('transferDetails').classList.add('hidden');
+            
+            openModal('makePaymentModal');
+        }
+
+        function selectPaymentMethod(method) {
+            // Update UI for selected method
+            document.querySelectorAll('.payment-method').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+            event.target.closest('.payment-method').classList.add('border-blue-500', 'bg-blue-50');
+            
+            // Show appropriate details
+            if (method === 'card') {
+                document.getElementById('cardDetails').classList.remove('hidden');
+                document.getElementById('transferDetails').classList.add('hidden');
+            } else {
+                document.getElementById('cardDetails').classList.add('hidden');
+                document.getElementById('transferDetails').classList.remove('hidden');
+            }
+        }
+
+        function processPayment() {
+            showToast('Payment processed successfully!', 'success');
+            closeModal('makePaymentModal');
+        }
+
+        // Child Functions
+        function viewChildDetails(childId) {
+            const children = {
+                1: {
+                    name: 'Alex Johnson',
+                    grade: 'Grade 11',
+                    section: 'Section A',
+                    age: '16 years',
+                    studentId: 'STU2024-001',
+                    gpa: '3.8',
+                    attendance: '96%',
+                    teacher: 'Mr. Davis (Mathematics)',
+                    counselor: 'Ms. Wilson'
+                },
+                2: {
+                    name: 'Sarah Johnson',
+                    grade: 'Grade 8',
+                    section: 'Section B',
+                    age: '13 years',
+                    studentId: 'STU2024-002',
+                    gpa: '3.6',
+                    attendance: '92%',
+                    teacher: 'Mrs. Chen (Homeroom)',
+                    counselor: 'Mr. Thompson'
+                }
+            };
+            
+            const child = children[childId];
+            if (child) {
+                document.getElementById('childDetailsContent').innerHTML = `
+                    <div class="mb-6">
+                        <div class="flex items-start gap-6 mb-6">
+                            <div class="w-20 h-20 rounded-2xl ${childId === 1 ? 'bg-gradient-to-br from-blue-500 to-blue-700' : 'bg-gradient-to-br from-emerald-500 to-emerald-700'} flex items-center justify-center text-white">
+                                <span class="text-2xl font-black">${child.name.split(' ').map(n => n[0]).join('')}</span>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-xl font-black text-slate-900 mb-2">${child.name}</h4>
+                                <div class="flex flex-wrap gap-3">
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-bold">${child.grade}</span>
+                                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm font-bold">${child.section}</span>
+                                    <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-lg text-sm font-bold">${child.age}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="p-4 bg-slate-50 rounded-xl">
+                                <p class="text-sm font-bold text-slate-400 mb-1">Student ID</p>
+                                <p class="text-lg font-black text-slate-900">${child.studentId}</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl">
+                                <p class="text-sm font-bold text-slate-400 mb-1">Current GPA</p>
+                                <p class="text-lg font-black text-slate-900">${child.gpa}</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl">
+                                <p class="text-sm font-bold text-slate-400 mb-1">Attendance Rate</p>
+                                <p class="text-lg font-black text-slate-900">${child.attendance}</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl">
+                                <p class="text-sm font-bold text-slate-400 mb-1">Class Teacher</p>
+                                <p class="text-lg font-black text-slate-900">${child.teacher}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h5 class="font-bold text-slate-900 mb-2">Academic Performance</h5>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-sm font-medium text-slate-700">Mathematics</span>
+                                        <span class="text-sm font-bold text-emerald-600">94% (A)</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-excellent" style="width: 94%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-sm font-medium text-slate-700">Science</span>
+                                        <span class="text-sm font-bold text-blue-600">87% (B+)</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-good" style="width: 87%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-sm font-medium text-slate-700">English</span>
+                                        <span class="text-sm font-bold text-emerald-600">90% (A-)</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-excellent" style="width: 90%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h5 class="font-bold text-slate-900 mb-2">Contact Information</h5>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-400 mb-1">Class Teacher</p>
+                                    <p class="text-slate-900">${child.teacher}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-400 mb-1">School Counselor</p>
+                                    <p class="text-slate-900">${child.counselor}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button onclick="messageChildTeacher(${childId})" class="action-btn action-btn-primary">
+                            <i class="fas fa-envelope"></i> Message Teacher
+                        </button>
+                        <button onclick="viewChildGrades(${childId})" class="action-btn action-btn-secondary">
+                            View Grades
+                        </button>
+                        <button onclick="closeModal('childDetailsModal')" class="action-btn action-btn-secondary">
+                            Close
+                        </button>
+                    </div>
+                `;
+                
+                openModal('childDetailsModal');
+            }
+        }
+
+        function messageChildTeacher(childId) {
+            const childName = childId === 1 ? 'Alex Johnson' : 'Sarah Johnson';
+            showToast(`Opening message form for ${childName}'s teacher`, 'info');
+            openModal('sendMessageModal');
+        }
+
+        function viewReceipt(receiptId) {
+            showToast(`Opening receipt #${receiptId}`, 'info');
+        }
+
+        // Message Functions
+        function sendMessage() {
+            showToast('Message sent successfully!', 'success');
+            closeModal('sendMessageModal');
+        }
+
+        function replyToMessage(messageId) {
+            showToast(`Replying to message #${messageId}`, 'info');
+            openModal('sendMessageModal');
+        }
+
+        function viewMessage(messageId) {
+            showToast(`Viewing message #${messageId}`, 'info');
+        }
+
+        function rsvpMeeting(meetingId) {
+            showToast(`RSVP submitted for meeting #${meetingId}`, 'success');
+        }
+
+        // View Functions
+        function viewNotifications() {
+            showToast('Opening notifications', 'info');
+        }
+
+        function viewAllChildren() {
+            showToast('Opening children details', 'info');
+        }
+
+        function viewAllFees() {
+            showToast('Opening fee statements', 'info');
+        }
+
+        function viewAllMessages() {
+            showToast('Opening all messages', 'info');
+        }
+
+        function viewFamilyReport() {
+            showToast('Opening family report', 'info');
+        }
+
+        function viewAllEvents() {
+            showToast('Opening events calendar', 'info');
+        }
+
+        function viewDayDetails(day) {
+            showToast(`Viewing details for December ${day}, 2024`, 'info');
+        }
+
+        function viewFullCalendar() {
+            showToast('Opening full calendar', 'info');
+        }
+
+        function viewChildrenGrades() {
+            showToast('Opening children grades', 'info');
+        }
+
+        function downloadReportCards() {
+            showToast('Downloading report cards', 'success');
+        }
+
+        function viewAttendance() {
+            showToast('Opening attendance records', 'info');
+        }
+
+        function updateProfile() {
+            showToast('Opening profile settings', 'info');
+        }
+
+        function viewAllActivities() {
+            showToast('Opening all activities', 'info');
+        }
+
+        function viewChildGrades(childId) {
+            showToast(`Opening grades for child #${childId}`, 'info');
+        }
+
+        function saveNotes() {
+            showToast('Notes saved successfully!', 'success');
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update current date
+            updateCurrentDate();
+            
+            // Generate calendar
+            generateCalendar();
+            
+            // Show welcome toast
+            setTimeout(() => {
+                showToast('Welcome to Parent Portal!', 'success', 3000);
+            }, 1000);
+            
+            // Show payment reminder
+            setTimeout(() => {
+                showToast('Reminder: Tuition fees due on December 15th', 'warning', 5000);
+            }, 2000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Only trigger when not in input fields
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+            
+            // Ctrl/Cmd + P: Make payment
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                makePayment(1, 'Alex Johnson');
+            }
+            
+            // Ctrl/Cmd + M: Send message
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+                e.preventDefault();
+                openModal('sendMessageModal');
+            }
+            
+            // Ctrl/Cmd + G: View grades
+            if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+                e.preventDefault();
+                viewChildrenGrades();
+            }
+            
+            // Ctrl/Cmd + C: View calendar
+            if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+                e.preventDefault();
+                viewFullCalendar();
+            }
+        });
+    </script>
+</body>
+</html>

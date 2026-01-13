@@ -1,0 +1,54 @@
+RewriteEngine On
+RewriteBase /academixsuite/tenant/
+
+# 1. Allow direct access to existing files and directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# 2. Support extensionless files in tenant directory
+# If request ends with /, try index files
+RewriteCond %{REQUEST_URI} ^(.*)/$
+RewriteCond %{DOCUMENT_ROOT}/academixsuite/tenant%1/index\.php -f
+RewriteRule ^(.*)/$ $1/index.php [L]
+
+RewriteCond %{REQUEST_URI} ^(.*)/$
+RewriteCond %{DOCUMENT_ROOT}/academixsuite/tenant%1/index\.html -f
+RewriteRule ^(.*)/$ $1/index.html [L]
+
+# If request doesn't have extension, try adding .php, .html
+RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]{2,4}$
+RewriteCond %{DOCUMENT_ROOT}/academixsuite/tenant%{REQUEST_URI}\.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]{2,4}$
+RewriteCond %{DOCUMENT_ROOT}/academixsuite/tenant%{REQUEST_URI}\.html -f
+RewriteRule ^(.*)$ $1.html [L]
+
+# 3. Route school-specific URLs with optional extensions
+# Pattern: /tenant/{school-slug}/{user-type}/page (without .php)
+RewriteCond %{QUERY_STRING} ^(.*)$
+RewriteRule ^([a-zA-Z0-9_-]+)/(admin|teacher|student|parent)/([a-zA-Z0-9_\-/]+)$ router.php?school_slug=$1&user_type=$2&page=$3.php&%1 [L,QSA]
+
+# Pattern: /tenant/{school-slug}/{user-type}/page.php (with .php)
+RewriteCond %{QUERY_STRING} ^(.*)$
+RewriteRule ^([a-zA-Z0-9_-]+)/(admin|teacher|student|parent)/([a-zA-Z0-9_\-/]+\.php)$ router.php?school_slug=$1&user_type=$2&page=$3&%1 [L,QSA]
+
+# 4. Route school-specific directories with files
+RewriteRule ^([a-zA-Z0-9_-]+)/(admin|teacher|student|parent)/([a-zA-Z0-9_\-/]+)/([a-zA-Z0-9_\-/]+)$ router.php?school_slug=$1&user_type=$2&page=$3/$4.php [L,QSA]
+
+RewriteRule ^([a-zA-Z0-9_-]+)/(admin|teacher|student|parent)/([a-zA-Z0-9_\-/]+)/([a-zA-Z0-9_\-/]+\.php)$ router.php?school_slug=$1&user_type=$2&page=$3/$4 [L,QSA]
+
+# 5. Route school homepage to login (extensionless)
+RewriteRule ^([a-zA-Z0-9_-]+)/?$ login.php?school_slug=$1 [L,QSA]
+
+# 6. Route school-specific login (extensionless or with .php)
+RewriteRule ^([a-zA-Z0-9_-]+)/login/?$ login.php?school_slug=$1 [L,QSA]
+RewriteRule ^([a-zA-Z0-9_-]+)/login\.php$ login.php?school_slug=$1 [L,QSA]
+
+# 7. Route school-specific logout
+RewriteRule ^([a-zA-Z0-9_-]+)/logout/?$ logout.php?school_slug=$1 [L,QSA]
+RewriteRule ^([a-zA-Z0-9_-]+)/logout\.php$ logout.php?school_slug=$1 [L,QSA]
+
+# DirectoryIndex for tenant
+DirectoryIndex index.php login.php

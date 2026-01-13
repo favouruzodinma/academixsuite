@@ -404,19 +404,19 @@ class SchoolSession {
         
         switch ($userType) {
             case 'admin':
-                return "/school/$schoolSlug/admin/dashboard.php";
+                return "/tenant/$schoolSlug/admin/dashboard.php";
             case 'teacher':
-                return "/school/$schoolSlug/teacher/dashboard.php";
+                return "/tenant/$schoolSlug/teacher/dashboard.php";
             case 'student':
-                return "/school/$schoolSlug/student/dashboard.php";
+                return "/tenant/$schoolSlug/student/dashboard.php";
             case 'parent':
-                return "/school/$schoolSlug/parent/dashboard.php";
+                return "/tenant/$schoolSlug/parent/dashboard.php";
             case 'accountant':
-                return "/school/$schoolSlug/accountant/dashboard.php";
+                return "/tenant/$schoolSlug/accountant/dashboard.php";
             case 'librarian':
-                return "/school/$schoolSlug/librarian/dashboard.php";
+                return "/tenant/$schoolSlug/librarian/dashboard.php";
             default:
-                return "/school/$schoolSlug/dashboard.php";
+                return "/tenant/$schoolSlug/dashboard.php";
         }
     }
     
