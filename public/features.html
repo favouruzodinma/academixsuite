@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Features | Academixsuite</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    h1,h2,h3 { font-family: 'Space Grotesk', sans-serif; }
+    .glass-nav {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 1rem;
+      margin: 1rem auto;
+      width: 95%;
+      max-width: 1200px;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+<!-- NAVBAR -->
+<!-- NAVBAR -->
+<nav class="glass-nav sticky top-4 z-[1000]">
+  <div class="flex items-center justify-between px-6 py-4">
+
+    <!-- Logo -->
+    <img src="./img/logo.png" alt="Academixsuite" class="h-16 w-auto object-contain"/>
+
+    <!-- Desktop Links -->
+    <div class="hidden lg:flex space-x-10 font-semibold text-slate-600 uppercase text-xs tracking-widest">
+      <a href="index.html" class="hover:text-blue-600">Platform</a>
+      <a href="capabilities.html" class="hover:text-blue-600">Capabilities</a>
+      <a href="blog.html" class="text-blue-600 font-bold">Blog</a>
+      <a href="index.html#pricing" class="hover:text-blue-600">Pricing</a>
+    </div>
+
+    <!-- Desktop CTA -->
+    <div class="hidden lg:flex items-center space-x-4">
+      <a href="#" class="text-sm font-bold">Log In</a>
+      <button class="bg-slate-900 text-white px-6 py-2.5 rounded-full font-bold hover:bg-blue-600 transition">
+        Get Demo
+      </button>
+    </div>
+
+    <!-- Hamburger Button -->
+    <button
+      id="menu-btn"
+      class="lg:hidden text-slate-800 text-2xl focus:outline-none"
+      aria-label="Toggle menu"
+    >
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div
+    id="mobile-menu"
+    class="hidden lg:hidden px-6 pb-6 pt-2 border-t border-slate-200"
+  >
+    <div class="flex flex-col space-y-5 font-semibold text-slate-700 uppercase text-xs tracking-widest">
+      <a href="index.html" class="hover:text-blue-600">Platform</a>
+      <a href="capabilities.html" class="hover:text-blue-600">Capabilities</a>
+      <a href="blog.html" class="text-blue-600 font-bold">Blog</a>
+      <a href="index.html#pricing" class="hover:text-blue-600">Pricing</a>
+
+      <div class="pt-4 border-t border-slate-200 flex flex-col space-y-4">
+        <a href="#" class="text-sm font-bold normal-case">Log In</a>
+        <button class="bg-slate-900 text-white py-3 rounded-full font-bold hover:bg-blue-600 transition">
+          Get Demo
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section class="bg-slate-900   text-white border-slate-100">
+  <div class="max-w-7xl mx-auto px-6 py-20 text-center">
+    <h1 class="text-4xl md:text-5xl font-black mb-6">
+      Powerful Features Built for Modern Education
+    </h1>
+    <p class="text-lg text-slate-600 max-w-3xl mx-auto">
+      Academixsuite provides everything schools and educators need to manage learning, operations, and growth — all in one secure platform.
+    </p>
+  </div>
+</section>
+
+<!-- CORE FEATURES -->
+<section class="max-w-7xl mx-auto px-6 py-20">
+  <h2 class="text-3xl font-black text-center mb-14">
+    Core Platform Features
+  </h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+
+    <!-- Feature Card -->
+    <div class="bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition">
+      <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-6">
+        <i class="fas fa-layer-group"></i>
+      </div>
+      <h3 class="font-extrabold mb-3">Multi-Tenant Architecture</h3>
+      <p class="text-slate-600 text-sm">
+        Run multiple schools on one platform with isolated data, custom branding, and centralized management.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition">
+      <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-6">
+        <i class="fas fa-users"></i>
+      </div>
+      <h3 class="font-extrabold mb-3">Student & Staff Management</h3>
+      <p class="text-slate-600 text-sm">
+        Manage student profiles, teachers, roles, permissions, attendance, and performance with ease.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition">
+      <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-6">
+        <i class="fas fa-graduation-cap"></i>
+      </div>
+      <h3 class="font-extrabold mb-3">Academic Management</h3>
+      <p class="text-slate-600 text-sm">
+        Create classes, subjects, timetables, grading systems, and transcripts in a structured workflow.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ADVANCED FEATURES -->
+<section class="bg-white py-20">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-3xl font-black text-center mb-14">
+      Advanced Capabilities
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+
+      <div class="flex space-x-6">
+        <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+          <i class="fas fa-video"></i>
+        </div>
+        <div>
+          <h3 class="font-extrabold mb-2">Live Classes & Virtual Learning</h3>
+          <p class="text-slate-600 text-sm">
+            Host live classes, record lessons, manage cohorts, and track attendance automatically.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex space-x-6">
+        <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center">
+          <i class="fas fa-laptop-code"></i>
+        </div>
+        <div>
+          <h3 class="font-extrabold mb-2">Computer-Based Testing (CBT)</h3>
+          <p class="text-slate-600 text-sm">
+            Secure exams with auto-grading, instant feedback, analytics, and exam monitoring.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex space-x-6">
+        <div class="w-12 h-12 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center">
+          <i class="fas fa-book-open"></i>
+        </div>
+        <div>
+          <h3 class="font-extrabold mb-2">Course Creation & Monetization</h3>
+          <p class="text-slate-600 text-sm">
+            Build courses, sell content, manage enrollments, certificates, and payments.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex space-x-6">
+        <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center">
+          <i class="fas fa-qrcode"></i>
+        </div>
+        <div>
+          <h3 class="font-extrabold mb-2">QR Codes & Short Links</h3>
+          <p class="text-slate-600 text-sm">
+            Generate QR codes and short links for attendance, resources, exams, and events.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SECURITY & COMPLIANCE -->
+<section class="max-w-7xl mx-auto px-6 py-20">
+  <h2 class="text-3xl font-black text-center mb-14">
+    Security & Reliability
+  </h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+
+    <div class="bg-white rounded-3xl p-8 shadow-sm">
+      <h3 class="font-extrabold mb-3">Role-Based Access Control</h3>
+      <p class="text-slate-600 text-sm">
+        Granular permissions ensure users only access what they are authorized to see.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-3xl p-8 shadow-sm">
+      <h3 class="font-extrabold mb-3">Secure Data Storage</h3>
+      <p class="text-slate-600 text-sm">
+        Encrypted data, regular backups, and enterprise-grade infrastructure.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-3xl p-8 shadow-sm">
+      <h3 class="font-extrabold mb-3">Audit & Reporting</h3>
+      <p class="text-slate-600 text-sm">
+        Full activity logs, reports, and compliance-ready data exports.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="bg-slate-900 text-white">
+  <div class="max-w-7xl mx-auto px-6 py-20 text-center">
+    <h2 class="text-3xl md:text-4xl font-black mb-6">
+      Experience the Future of School Management
+    </h2>
+    <p class="max-w-2xl mx-auto mb-8 text-blue-100">
+      Academixsuite is designed to scale with your institution — from small schools to large academic networks.
+    </p>
+    <a
+      href="contact.html"
+      class="inline-block bg-white text-slate-900 px-8 py-4 rounded-xl font-bold hover:bg-slate-100 transition"
+    >
+      Request a Demo
+    </a>
+  </div>
+</section>
+  <div class="text-center pt-8 border-t border-slate-100">
+      <p class="text-slate-400 font-black text-[10px] uppercase tracking-[0.4em]">
+        © 2026 Academixsuite. Engineering Educational Excellence.
+      </p>
+    </div>
+
+    <script>
+  const menuBtn = document.getElementById("menu-btn");
+  const mobileMenu = document.getElementById("mobile-menu");
+
+  menuBtn.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
+  });
+</script>
+
+</body>
+</html>
