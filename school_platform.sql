@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jan 12, 2026 at 12:57 AM
+-- Generation Time: Jan 13, 2026 at 04:20 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -61,12 +61,7 @@ CREATE TABLE `audit_logs` (
   `tags` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`tags`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `audit_logs`
---
---------------------------------------------------------
-
+-- --------------------------------------------------------
 --
 -- Table structure for table `database_backups`
 --
@@ -120,6 +115,26 @@ CREATE TABLE `enrollment_documents` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `enrollment_fees`
+--
+
+CREATE TABLE `enrollment_fees` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `school_id` int(10) UNSIGNED NOT NULL,
+  `enrollment_request_id` int(10) UNSIGNED NOT NULL,
+  `fee_type` enum('application','registration','acceptance','other') DEFAULT 'application',
+  `description` varchar(255) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `due_date` date DEFAULT NULL,
+  `is_paid` tinyint(1) DEFAULT 0,
+  `paid_at` timestamp NULL DEFAULT NULL,
+  `transaction_id` int(10) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `enrollment_requests`
 --
 
@@ -159,14 +174,18 @@ CREATE TABLE `enrollment_requests` (
 CREATE TABLE `invoices` (
   `id` int(10) UNSIGNED NOT NULL,
   `school_id` int(10) UNSIGNED NOT NULL,
+  `payment_gateway_id` int(10) UNSIGNED DEFAULT NULL,
   `subscription_id` int(10) UNSIGNED DEFAULT NULL,
   `invoice_number` varchar(100) NOT NULL,
+  `payment_reference` varchar(255) DEFAULT NULL,
+  `payment_link` text DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
   `amount` decimal(10,2) NOT NULL,
   `tax` decimal(10,2) DEFAULT 0.00,
   `total_amount` decimal(10,2) DEFAULT NULL,
   `currency` varchar(3) DEFAULT 'NGN',
   `status` enum('draft','sent','paid','overdue','canceled') DEFAULT 'draft',
+  `payment_status` enum('pending','initiated','processing','success','failed','refunded') DEFAULT 'pending',
   `due_date` date DEFAULT NULL,
   `paid_at` timestamp NULL DEFAULT NULL,
   `start_date` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -174,15 +193,31 @@ CREATE TABLE `invoices` (
   `payment_method` varchar(50) DEFAULT NULL,
   `transaction_id` varchar(255) DEFAULT NULL,
   `notes` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `payment_gateway_response` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`payment_gateway_response`)),
+  `webhook_received_at` timestamp NULL DEFAULT NULL,
+  `payment_initiated_at` timestamp NULL DEFAULT NULL,
+  `payment_confirmed_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
 --
--- Dumping data for table `invoices`
+-- Table structure for table `parent_portal_access`
 --
 
-INSERT INTO `invoices` (`id`, `school_id`, `subscription_id`, `invoice_number`, `description`, `amount`, `tax`, `total_amount`, `currency`, `status`, `due_date`, `paid_at`, `start_date`, `end_date`, `payment_method`, `transaction_id`, `notes`, `created_at`) VALUES
-(1, 14, NULL, 'INV-20251231-6033', NULL, 479.88, 0.00, NULL, 'NGN', 'draft', '2026-01-07', NULL, '2025-12-30 23:00:00', '2026-12-30 23:00:00', NULL, NULL, NULL, '2025-12-31 19:46:05');
+CREATE TABLE `parent_portal_access` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `school_id` int(10) UNSIGNED NOT NULL,
+  `parent_id` int(10) UNSIGNED NOT NULL,
+  `student_id` int(10) UNSIGNED NOT NULL,
+  `access_token` varchar(100) NOT NULL,
+  `access_code` varchar(10) DEFAULT NULL,
+  `expires_at` timestamp NULL DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `last_login_at` timestamp NULL DEFAULT NULL,
+  `login_count` int(10) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -200,6 +235,93 @@ CREATE TABLE `payments` (
   `status` varchar(50) DEFAULT NULL,
   `paid_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payment_gateways`
+--
+
+CREATE TABLE `payment_gateways` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `school_id` int(10) UNSIGNED DEFAULT NULL COMMENT 'NULL for platform-wide gateways',
+  `name` varchar(100) NOT NULL,
+  `provider` enum('paystack','flutterwave','stripe','paypal','manual') NOT NULL,
+  `mode` enum('test','live') DEFAULT 'test',
+  `public_key` varchar(500) DEFAULT NULL,
+  `secret_key` varchar(500) DEFAULT NULL,
+  `encryption_key` varchar(500) DEFAULT NULL,
+  `webhook_url` varchar(500) DEFAULT NULL,
+  `webhook_secret` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `is_default` tinyint(1) DEFAULT 0,
+  `transaction_fee_percentage` decimal(5,2) DEFAULT 0.00,
+  `transaction_fee_fixed` decimal(10,2) DEFAULT 0.00,
+  `settlement_bank` varchar(100) DEFAULT NULL,
+  `account_number` varchar(50) DEFAULT NULL,
+  `account_name` varchar(255) DEFAULT NULL,
+  `supported_currencies` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`supported_currencies`)),
+  `config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`config`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payment_tokens`
+--
+
+CREATE TABLE `payment_tokens` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `school_id` int(10) UNSIGNED NOT NULL,
+  `parent_id` int(10) UNSIGNED NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `gateway` varchar(50) NOT NULL,
+  `card_last_four` varchar(4) DEFAULT NULL,
+  `card_brand` varchar(50) DEFAULT NULL,
+  `expiry_month` int(2) DEFAULT NULL,
+  `expiry_year` int(4) DEFAULT NULL,
+  `is_default` tinyint(1) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payment_transactions`
+--
+
+CREATE TABLE `payment_transactions` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `school_id` int(10) UNSIGNED NOT NULL,
+  `invoice_id` int(10) UNSIGNED DEFAULT NULL,
+  `student_id` int(10) UNSIGNED DEFAULT NULL,
+  `parent_id` int(10) UNSIGNED DEFAULT NULL,
+  `payment_gateway_id` int(10) UNSIGNED NOT NULL,
+  `transaction_reference` varchar(255) NOT NULL,
+  `gateway_transaction_id` varchar(255) DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency` varchar(3) DEFAULT 'NGN',
+  `gateway_fee` decimal(10,2) DEFAULT 0.00,
+  `net_amount` decimal(10,2) NOT NULL,
+  `status` enum('initiated','pending','success','failed','cancelled','refunded') DEFAULT 'initiated',
+  `payment_method` varchar(50) DEFAULT NULL,
+  `card_last_four` varchar(4) DEFAULT NULL,
+  `bank_name` varchar(100) DEFAULT NULL,
+  `account_number` varchar(50) DEFAULT NULL,
+  `payer_name` varchar(255) DEFAULT NULL,
+  `payer_email` varchar(255) DEFAULT NULL,
+  `payer_phone` varchar(20) DEFAULT NULL,
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  `gateway_response` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`gateway_response`)),
+  `verified_at` timestamp NULL DEFAULT NULL,
+  `refunded_at` timestamp NULL DEFAULT NULL,
+  `refund_reason` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -226,17 +348,6 @@ CREATE TABLE `plans` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `plans`
---
-
-INSERT INTO `plans` (`id`, `name`, `slug`, `description`, `price_monthly`, `price_yearly`, `student_limit`, `teacher_limit`, `campus_limit`, `storage_limit`, `features`, `is_active`, `is_default`, `sort_order`, `created_at`) VALUES
-(1, 'Starter', 'starter', 'Perfect for small schools', 0.00, 0.00, 20, 3, 1, 1024, '[\r\n  \"Student Management\",\r\n  \"Attendance Tracking\",\r\n  \"Basic Reports\",\r\n  \"Email Support\"\r\n]', 1, 1, 1, '2025-12-23 20:39:13'),
-(2, 'Growth', 'growth', 'For growing schools', 39.99, 399.99, 500, 20, NULL, 5120, '[\r\n  \"All Starter Features\",\r\n  \"Fee Management\",\r\n  \"Online Payments\",\r\n  \"SMS Notifications\",\r\n  \"Advanced Reports\",\r\n  \"Phone Support\"\r\n]', 1, 0, 2, '2025-12-23 20:39:13'),
-(3, 'Enterprise', 'enterprise', 'For large institutions', 199.99, 1999.99, 1500, 100, NULL, 10240, '[\"All Growth Features\", \"Custom Domain\", \"API Access\", \"Priority Support\", \"Custom Development\", \"Dedicated Account Manager\"]', 1, 0, 3, '2025-12-23 20:39:13'),
-(4, 'Tether', 'tether', 'tester', 44.00, 444.00, 5000, 100, 5, 1024, '[\r\n  \"Student Management\",\r\n  \"Attendance Tracking\",\r\n  \"Basic Reports\",\r\n  \"Email Support\"\r\n]', 1, 0, 1, '2025-12-31 08:24:24');
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `platform_audit_logs`
@@ -251,10 +362,7 @@ CREATE TABLE `platform_audit_logs` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `platform_audit_logs`
---
-
+-- --------------------------------------------------------
 --
 -- Table structure for table `platform_broadcasts`
 --
@@ -301,7 +409,7 @@ CREATE TABLE `platform_users` (
 --
 
 INSERT INTO `platform_users` (`id`, `name`, `email`, `email_verified_at`, `password`, `role`, `phone`, `avatar`, `two_factor_secret`, `two_factor_recovery_codes`, `remember_token`, `last_login_at`, `last_login_ip`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'Super Admin', 'admin@schoolsaas.com', NULL, '$2y$10$d2Kj0wgJjhgplYqhdUFXRemEC17IAy/ik61X1J0iJMOoWjW8OkE96', 'super_admin', NULL, NULL, NULL, NULL, NULL, '2026-01-11 23:14:51', '127.0.0.1', 1, '2025-12-23 20:39:13', '2026-01-11 23:14:51');
+(1, 'Super Admin', 'admin@schoolsaas.com', NULL, '$2y$10$d2Kj0wgJjhgplYqhdUFXRemEC17IAy/ik61X1J0iJMOoWjW8OkE96', 'super_admin', NULL, NULL, NULL, NULL, NULL, '2026-01-13 09:14:51', '127.0.0.1', 1, '2025-12-23 20:39:13', '2026-01-13 09:14:51');
 
 -- --------------------------------------------------------
 
@@ -383,9 +491,6 @@ CREATE TABLE `schools` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `schools`
---
---
 -- Table structure for table `school_admins`
 --
 
@@ -400,9 +505,7 @@ CREATE TABLE `school_admins` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `school_admins`
---
+ --------------------------------------------------------
 
 --
 -- Table structure for table `school_contacts`
@@ -516,9 +619,6 @@ CREATE TABLE `subscriptions` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `subscriptions`
---
 
 --
 -- Table structure for table `support_tickets`
@@ -588,6 +688,14 @@ ALTER TABLE `enrollment_documents`
   ADD KEY `idx_enrollment` (`enrollment_request_id`);
 
 --
+-- Indexes for table `enrollment_fees`
+--
+ALTER TABLE `enrollment_fees`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_enrollment_request` (`enrollment_request_id`),
+  ADD KEY `idx_school` (`school_id`);
+
+--
 -- Indexes for table `enrollment_requests`
 --
 ALTER TABLE `enrollment_requests`
@@ -609,7 +717,20 @@ ALTER TABLE `invoices`
   ADD KEY `idx_status` (`status`),
   ADD KEY `idx_due_date` (`due_date`),
   ADD KEY `idx_invoice_number` (`invoice_number`),
-  ADD KEY `idx_invoices_school_date` (`school_id`,`due_date`);
+  ADD KEY `idx_invoices_school_date` (`school_id`,`due_date`),
+  ADD KEY `idx_payment_status` (`payment_status`),
+  ADD KEY `idx_payment_reference` (`payment_reference`),
+  ADD KEY `fk_invoices_payment_gateway` (`payment_gateway_id`);
+
+--
+-- Indexes for table `parent_portal_access`
+--
+ALTER TABLE `parent_portal_access`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `access_token` (`access_token`),
+  ADD KEY `idx_school_parent` (`school_id`,`parent_id`),
+  ADD KEY `idx_student` (`student_id`),
+  ADD KEY `idx_expires` (`expires_at`);
 
 --
 -- Indexes for table `payments`
@@ -618,6 +739,36 @@ ALTER TABLE `payments`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_school_id` (`school_id`),
   ADD KEY `idx_invoice_id` (`invoice_id`);
+
+--
+-- Indexes for table `payment_gateways`
+--
+ALTER TABLE `payment_gateways`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_school_provider` (`school_id`,`provider`),
+  ADD KEY `idx_active_default` (`is_active`,`is_default`);
+
+--
+-- Indexes for table `payment_tokens`
+--
+ALTER TABLE `payment_tokens`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `token` (`token`),
+  ADD KEY `idx_school_parent` (`school_id`,`parent_id`);
+
+--
+-- Indexes for table `payment_transactions`
+--
+ALTER TABLE `payment_transactions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `transaction_reference` (`transaction_reference`),
+  ADD UNIQUE KEY `gateway_transaction_id` (`gateway_transaction_id`),
+  ADD KEY `idx_school_status` (`school_id`,`status`),
+  ADD KEY `idx_invoice` (`invoice_id`),
+  ADD KEY `idx_student` (`student_id`),
+  ADD KEY `idx_parent` (`parent_id`),
+  ADD KEY `idx_created` (`created_at`),
+  ADD KEY `fk_transactions_gateway` (`payment_gateway_id`);
 
 --
 -- Indexes for table `plans`
@@ -766,6 +917,12 @@ ALTER TABLE `enrollment_documents`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `enrollment_fees`
+--
+ALTER TABLE `enrollment_fees`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `enrollment_requests`
 --
 ALTER TABLE `enrollment_requests`
@@ -775,13 +932,37 @@ ALTER TABLE `enrollment_requests`
 -- AUTO_INCREMENT for table `invoices`
 --
 ALTER TABLE `invoices`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `parent_portal_access`
+--
+ALTER TABLE `parent_portal_access`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `payment_gateways`
+--
+ALTER TABLE `payment_gateways`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `payment_tokens`
+--
+ALTER TABLE `payment_tokens`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `payment_transactions`
+--
+ALTER TABLE `payment_transactions`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `plans`
@@ -811,13 +992,13 @@ ALTER TABLE `platform_users`
 -- AUTO_INCREMENT for table `schools`
 --
 ALTER TABLE `schools`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `school_admins`
 --
 ALTER TABLE `school_admins`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `school_contacts`
@@ -853,7 +1034,7 @@ ALTER TABLE `sms_logs`
 -- AUTO_INCREMENT for table `subscriptions`
 --
 ALTER TABLE `subscriptions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `support_tickets`
@@ -872,6 +1053,13 @@ ALTER TABLE `enrollment_documents`
   ADD CONSTRAINT `enrollment_documents_ibfk_1` FOREIGN KEY (`enrollment_request_id`) REFERENCES `enrollment_requests` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `enrollment_fees`
+--
+ALTER TABLE `enrollment_fees`
+  ADD CONSTRAINT `fk_enrollment_fees_request` FOREIGN KEY (`enrollment_request_id`) REFERENCES `enrollment_requests` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_enrollment_fees_school` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `enrollment_requests`
 --
 ALTER TABLE `enrollment_requests`
@@ -881,8 +1069,29 @@ ALTER TABLE `enrollment_requests`
 -- Constraints for table `invoices`
 --
 ALTER TABLE `invoices`
+  ADD CONSTRAINT `fk_invoices_payment_gateway` FOREIGN KEY (`payment_gateway_id`) REFERENCES `payment_gateways` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `invoices_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `invoices_ibfk_2` FOREIGN KEY (`subscription_id`) REFERENCES `subscriptions` (`id`);
+
+--
+-- Constraints for table `parent_portal_access`
+--
+ALTER TABLE `parent_portal_access`
+  ADD CONSTRAINT `fk_parent_portal_school` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `payment_gateways`
+--
+ALTER TABLE `payment_gateways`
+  ADD CONSTRAINT `fk_payment_gateways_school` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `payment_transactions`
+--
+ALTER TABLE `payment_transactions`
+  ADD CONSTRAINT `fk_transactions_gateway` FOREIGN KEY (`payment_gateway_id`) REFERENCES `payment_gateways` (`id`),
+  ADD CONSTRAINT `fk_transactions_invoice` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_transactions_school` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `schools`

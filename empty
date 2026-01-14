@@ -1,0 +1,3342 @@
+<?php
+/**
+ * School Admin Fee Management - VIRTUAL VERSION
+ * This file serves ALL schools via virtual-router.php
+ */
+
+// Enable error reporting
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../../../logs/fee_management.log');
+
+error_log("=== FEE MANAGEMENT START ===");
+error_log("Request URI: " . ($_SERVER['REQUEST_URI'] ?? 'N/A'));
+error_log("Script: " . __FILE__);
+
+// Define constants if not defined
+if (!defined('APP_NAME')) define('APP_NAME', 'AcademixSuite');
+if (!defined('IS_LOCAL')) define('IS_LOCAL', true);
+
+// Start session safely
+try {
+    if (session_status() === PHP_SESSION_NONE) {
+        error_log("Starting session...");
+        session_start([
+            'cookie_lifetime' => 86400,
+            'read_and_close'  => false,
+        ]);
+        error_log("Session started successfully");
+    }
+} catch (Exception $e) {
+    error_log("Session error: " . $e->getMessage());
+}
+
+// Get school slug from GLOBALS (set by router.php)
+$schoolSlug = $GLOBALS['SCHOOL_SLUG'] ?? '';
+$userType = $GLOBALS['USER_TYPE'] ?? 'admin';
+$currentPage = $GLOBALS['CURRENT_PAGE'] ?? 'fees.php';
+$schoolData = $GLOBALS['SCHOOL_DATA'] ?? [];
+$baseUrl = $GLOBALS['BASE_URL'] ?? '';
+
+error_log("School Slug from Router: " . $schoolSlug);
+error_log("User Type: " . $userType);
+error_log("Current Page: " . $currentPage);
+
+if (empty($schoolSlug)) {
+    error_log("ERROR: Empty school slug from router");
+    header('HTTP/1.1 400 Bad Request');
+    echo json_encode(['error' => 'School identifier missing']);
+    exit;
+}
+
+// Get school info from session or GLOBALS
+$school = $schoolData;
+if (empty($school) && isset($_SESSION['school_info'][$schoolSlug])) {
+    $school = $_SESSION['school_info'][$schoolSlug];
+}
+
+if (empty($school)) {
+    error_log("ERROR: School data not found for slug: " . $schoolSlug);
+    header("Location: /academixsuite/tenant/login.php?school_slug=" . urlencode($schoolSlug));
+    exit;
+}
+
+error_log("School: ID=" . $school['id'] . ", Name=" . $school['name'] . ", Status=" . $school['status']);
+
+// Check authentication
+$isAuthenticated = false;
+if (isset($_SESSION['school_auth']) && is_array($_SESSION['school_auth'])) {
+    if ($_SESSION['school_auth']['school_slug'] === $schoolSlug) {
+        $isAuthenticated = true;
+        error_log("User authenticated for school: " . $schoolSlug);
+    }
+}
+
+if (!$isAuthenticated) {
+    error_log("User not authenticated, redirecting to login");
+    header('Location: /academixsuite/tenant/login.php?school_slug=' . urlencode($schoolSlug));
+    exit;
+}
+
+// Get user info from session
+$schoolAuth = $_SESSION['school_auth'];
+$userId = $schoolAuth['user_id'] ?? 0;
+$userType = $schoolAuth['user_type'] ?? '';
+
+error_log("User ID: " . $userId . ", User Type: " . $userType);
+
+// Verify admin access
+if ($userType !== 'admin') {
+    error_log("ERROR: User does not have admin privileges");
+    header('HTTP/1.1 403 Forbidden');
+    echo "Access denied. Admin privileges required.";
+    exit;
+}
+
+// Load configuration
+try {
+    $autoloadPath = __DIR__ . '/../../../includes/autoload.php';
+    error_log("Loading autoload.php from: " . $autoloadPath);
+    
+    if (!file_exists($autoloadPath)) {
+        throw new Exception("Autoload file not found");
+    }
+    
+    require_once $autoloadPath;
+    error_log("Autoload loaded successfully");
+    
+    if (!class_exists('Database')) {
+        throw new Exception("Database class not found");
+    }
+    
+} catch (Exception $e) {
+    error_log("Error loading autoload.php: " . $e->getMessage());
+    http_response_code(500);
+    die("Configuration loading failed.");
+}
+
+// Connect to school database
+$schoolDb = null;
+try {
+    if (!empty($school['database_name'])) {
+        error_log("Connecting to school database: " . $school['database_name']);
+        $schoolDb = Database::getSchoolConnection($school['database_name']);
+        error_log("School database connection successful");
+    } else {
+        error_log("WARNING: School database name is empty");
+    }
+} catch (Exception $e) {
+    error_log("ERROR connecting to school database: " . $e->getMessage());
+    $schoolDb = null;
+}
+
+// Initialize variables
+$currencySymbol = '₦';
+$settings = [];
+$academicYear = null;
+$academicTerm = null;
+$students = [];
+$feeCategories = [];
+$recentPayments = [];
+$feeInvoices = [];
+$feeMetrics = [
+    'total_collected' => 0,
+    'pending_fees' => 0,
+    'overdue_fees' => 0,
+    'collection_rate' => 0,
+    'today_collection' => 0
+];
+$paymentMethods = [];
+$upcomingDueDates = [];
+
+// Load data if database connection exists
+if ($schoolDb) {
+    try {
+        // Get school settings
+        $settingsStmt = $schoolDb->prepare("SELECT * FROM settings WHERE school_id = ?");
+        $settingsStmt->execute([$school['id']]);
+        $settingsRows = $settingsStmt->fetchAll();
+        foreach ($settingsRows as $row) {
+            $settings[$row['key']] = $row['value'];
+        }
+        
+        $currencySymbol = $settings['currency_symbol'] ?? '₦';
+        
+        // Get current academic year
+        $academicYearStmt = $schoolDb->prepare("
+            SELECT * FROM academic_years 
+            WHERE school_id = ? AND status = 'active' 
+            ORDER BY is_default DESC LIMIT 1
+        ");
+        $academicYearStmt->execute([$school['id']]);
+        $academicYear = $academicYearStmt->fetch();
+        
+        // Get current academic term
+        if ($academicYear) {
+            $academicTermStmt = $schoolDb->prepare("
+                SELECT * FROM academic_terms 
+                WHERE school_id = ? AND academic_year_id = ? AND is_default = 1 
+                LIMIT 1
+            ");
+            $academicTermStmt->execute([$school['id'], $academicYear['id']]);
+            $academicTerm = $academicTermStmt->fetch();
+        }
+        
+        // Get fee metrics
+        // Total collected (successful payments)
+        $totalCollectedStmt = $schoolDb->prepare("
+            SELECT COALESCE(SUM(amount), 0) as total
+            FROM payment_transactions 
+            WHERE school_id = ? AND status = 'success'
+        ");
+        $totalCollectedStmt->execute([$school['id']]);
+        $totalCollected = $totalCollectedStmt->fetch();
+        $feeMetrics['total_collected'] = floatval($totalCollected['total'] ?? 0);
+        
+        // Pending fees
+        $pendingStmt = $schoolDb->prepare("
+            SELECT COALESCE(SUM(total_amount - COALESCE(paid_amount, 0)), 0) as pending
+            FROM invoices 
+            WHERE school_id = ? 
+            AND status IN ('pending', 'partial')
+            AND due_date >= CURDATE()
+        ");
+        $pendingStmt->execute([$school['id']]);
+        $pending = $pendingStmt->fetch();
+        $feeMetrics['pending_fees'] = floatval($pending['pending'] ?? 0);
+        
+        // Overdue fees
+        $overdueStmt = $schoolDb->prepare("
+            SELECT COALESCE(SUM(total_amount - COALESCE(paid_amount, 0)), 0) as overdue
+            FROM invoices 
+            WHERE school_id = ? 
+            AND status IN ('pending', 'partial')
+            AND due_date < CURDATE()
+        ");
+        $overdueStmt->execute([$school['id']]);
+        $overdue = $overdueStmt->fetch();
+        $feeMetrics['overdue_fees'] = floatval($overdue['overdue'] ?? 0);
+        
+        // Today's collection
+        $todayStmt = $schoolDb->prepare("
+            SELECT COALESCE(SUM(amount), 0) as today
+            FROM payment_transactions 
+            WHERE school_id = ? 
+            AND status = 'success'
+            AND DATE(created_at) = CURDATE()
+        ");
+        $todayStmt->execute([$school['id']]);
+        $today = $todayStmt->fetch();
+        $feeMetrics['today_collection'] = floatval($today['today'] ?? 0);
+        
+        // Collection rate
+        $totalInvoiceStmt = $schoolDb->prepare("
+            SELECT 
+                COALESCE(SUM(total_amount), 0) as total,
+                COALESCE(SUM(paid_amount), 0) as paid
+            FROM invoices 
+            WHERE school_id = ? AND status NOT IN ('draft', 'canceled')
+        ");
+        $totalInvoiceStmt->execute([$school['id']]);
+        $invoiceData = $totalInvoiceStmt->fetch();
+        $totalInvoices = floatval($invoiceData['total'] ?? 1);
+        $paidInvoices = floatval($invoiceData['paid'] ?? 0);
+        $feeMetrics['collection_rate'] = $totalInvoices > 0 ? round(($paidInvoices / $totalInvoices) * 100, 1) : 0;
+        
+        // Get recent payments (last 10)
+        $recentPaymentsStmt = $schoolDb->prepare("
+            SELECT 
+                pt.*,
+                s.first_name as student_first_name,
+                s.last_name as student_last_name,
+                s.admission_number,
+                i.invoice_number
+            FROM payment_transactions pt
+            LEFT JOIN students s ON pt.student_id = s.id
+            LEFT JOIN invoices i ON pt.invoice_id = i.id
+            WHERE pt.school_id = ?
+            ORDER BY pt.created_at DESC
+            LIMIT 10
+        ");
+        $recentPaymentsStmt->execute([$school['id']]);
+        $recentPayments = $recentPaymentsStmt->fetchAll();
+        
+        // Get fee invoices
+        $invoicesStmt = $schoolDb->prepare("
+            SELECT 
+                i.*,
+                s.first_name as student_first_name,
+                s.last_name as student_last_name,
+                s.admission_number,
+                c.name as class_name
+            FROM invoices i
+            LEFT JOIN students s ON i.student_id = s.id
+            LEFT JOIN classes c ON i.class_id = c.id
+            WHERE i.school_id = ?
+            ORDER BY i.created_at DESC
+            LIMIT 10
+        ");
+        $invoicesStmt->execute([$school['id']]);
+        $feeInvoices = $invoicesStmt->fetchAll();
+        
+        // Get payment methods distribution
+        $methodsStmt = $schoolDb->prepare("
+            SELECT 
+                payment_method,
+                COUNT(*) as count,
+                COALESCE(SUM(amount), 0) as amount
+            FROM payment_transactions 
+            WHERE school_id = ? 
+            AND status = 'success'
+            AND payment_method IS NOT NULL
+            GROUP BY payment_method
+            ORDER BY amount DESC
+            LIMIT 5
+        ");
+        $methodsStmt->execute([$school['id']]);
+        $paymentMethods = $methodsStmt->fetchAll();
+        
+        // Get upcoming due dates
+        $dueDatesStmt = $schoolDb->prepare("
+            SELECT 
+                i.*,
+                s.first_name as student_first_name,
+                s.last_name as student_last_name,
+                s.admission_number,
+                DATEDIFF(i.due_date, CURDATE()) as days_until_due
+            FROM invoices i
+            LEFT JOIN students s ON i.student_id = s.id
+            WHERE i.school_id = ?
+            AND i.status IN ('pending', 'partial')
+            AND i.due_date >= CURDATE()
+            ORDER BY i.due_date ASC
+            LIMIT 10
+        ");
+        $dueDatesStmt->execute([$school['id']]);
+        $upcomingDueDates = $dueDatesStmt->fetchAll();
+        
+        // Get fee categories
+        $categoriesStmt = $schoolDb->prepare("
+            SELECT * FROM fee_categories 
+            WHERE school_id = ? AND is_active = 1
+            ORDER BY name
+        ");
+        $categoriesStmt->execute([$school['id']]);
+        $feeCategories = $categoriesStmt->fetchAll();
+        
+        // Get students for dropdowns
+        $studentsStmt = $schoolDb->prepare("
+            SELECT 
+                s.id,
+                s.first_name,
+                s.last_name,
+                s.admission_number,
+                c.name as class_name
+            FROM students s
+            LEFT JOIN classes c ON s.class_id = c.id
+            WHERE s.school_id = ? AND s.status = 'active'
+            ORDER BY s.first_name, s.last_name
+            LIMIT 100
+        ");
+        $studentsStmt->execute([$school['id']]);
+        $students = $studentsStmt->fetchAll();
+        
+    } catch (Exception $e) {
+        error_log("Error loading fee data: " . $e->getMessage());
+    }
+}
+
+error_log("=================== FEE MANAGEMENT END ===================");
+?>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=5.0"
+    />
+    <title>Fee Management | <?php echo htmlspecialchars($school['name']); ?> - <?php echo defined('APP_NAME') ? APP_NAME : 'AcademixSuite'; ?></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+
+      :root {
+        --school-primary: <?php echo $school['primary_color'] ?? '#4f46e5'; ?>;
+        --school-secondary: <?php echo $school['secondary_color'] ?? '#10b981'; ?>;
+        --school-surface: #ffffff;
+        --school-bg: #f8fafc;
+        --fee-paid: #10b981;
+        --fee-pending: #f59e0b;
+        --fee-overdue: #ef4444;
+        --fee-partial: #3b82f6;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--school-bg);
+        color: #1e293b;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .glass-header {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+      }
+
+      .glass-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.5);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+      }
+
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+      }
+
+      .toast {
+        padding: 16px 20px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        animation: slideIn 0.3s ease forwards;
+        opacity: 0;
+        transform: translateX(100px);
+        transition: opacity 0.3s, transform 0.3s;
+      }
+
+      .toast-success {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+        border-left: 4px solid #059669;
+      }
+
+      .toast-info {
+        background: linear-gradient(135deg, #4f46e5, #7c73e9);
+        color: white;
+        border-left: 4px solid #3730a3;
+      }
+
+      .toast-warning {
+        background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        color: white;
+        border-left: 4px solid #d97706;
+      }
+
+      .toast-error {
+        background: linear-gradient(135deg, #ef4444, #f87171);
+        color: white;
+        border-left: 4px solid #dc2626;
+      }
+
+      @keyframes slideIn {
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes fadeOut {
+        to {
+          opacity: 0;
+          transform: translateX(100px);
+        }
+      }
+
+      .toast-exit {
+        animation: fadeOut 0.3s ease forwards;
+      }
+
+      .sidebar-link {
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        border-left: 3px solid transparent;
+        position: relative;
+      }
+
+      .sidebar-link:hover {
+        background: linear-gradient(
+          90deg,
+          rgba(79, 70, 229, 0.05) 0%,
+          rgba(79, 70, 229, 0.02) 100%
+        );
+        color: var(--school-primary);
+        border-left-color: rgba(79, 70, 229, 0.3);
+      }
+
+      .active-link {
+        background: linear-gradient(
+          90deg,
+          rgba(79, 70, 229, 0.1) 0%,
+          rgba(79, 70, 229, 0.05) 100%
+        );
+        color: var(--school-primary);
+        border-left-color: var(--school-primary);
+        font-weight: 700;
+      }
+
+      .active-link::before {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 60%;
+        background: var(--school-primary);
+        border-radius: 4px 0 0 4px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-fadeInUp {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+
+      .fee-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .status-paid {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+      }
+
+      .status-pending {
+        background-color: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+      }
+
+      .status-overdue {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+
+      .status-partial {
+        background-color: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+      }
+
+      .status-draft {
+        background-color: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+      }
+
+      .fee-amount {
+        font-weight: 800;
+        font-size: 18px;
+        color: #1e293b;
+      }
+
+      .fee-amount.paid {
+        color: #10b981;
+      }
+
+      .fee-amount.pending {
+        color: #f59e0b;
+      }
+
+      .fee-amount.overdue {
+        color: #ef4444;
+      }
+
+      .fee-amount.partial {
+        color: #3b82f6;
+      }
+
+      .tab-button {
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #64748b;
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .tab-button:hover {
+        color: #4f46e5;
+      }
+
+      .tab-button.active {
+        color: #4f46e5;
+        border-bottom-color: #4f46e5;
+        background: linear-gradient(
+          to top,
+          rgba(79, 70, 229, 0.05),
+          transparent
+        );
+      }
+
+      .metric-card {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .metric-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--metric-color), transparent);
+      }
+
+      .metric-primary {
+        --metric-color: #4f46e5;
+      }
+
+      .metric-success {
+        --metric-color: #10b981;
+      }
+
+      .metric-warning {
+        --metric-color: #f59e0b;
+      }
+
+      .metric-danger {
+        --metric-color: #ef4444;
+      }
+
+      .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+      }
+
+      .action-btn {
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .action-btn-primary {
+        background: linear-gradient(135deg, #4f46e5, #7c73e9);
+        color: white;
+      }
+
+      .action-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+      }
+
+      .action-btn-success {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+      }
+
+      .action-btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+      }
+
+      .search-box {
+        position: relative;
+        width: 100%;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 12px 16px 12px 44px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 14px;
+        transition: all 0.2s;
+        background: white;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+      }
+
+      .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .filter-chip:hover {
+        background: #e2e8f0;
+      }
+
+      .filter-chip.active {
+        background: #4f46e5;
+        color: white;
+        border-color: #4f46e5;
+      }
+
+      .pagination-btn {
+        padding: 8px 12px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .pagination-btn:hover {
+        background: #f8fafc;
+        border-color: #4f46e5;
+        color: #4f46e5;
+      }
+
+      .pagination-btn.active {
+        background: #4f46e5;
+        color: white;
+        border-color: #4f46e5;
+      }
+
+      .table-container {
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .data-table th {
+        background: #f8fafc;
+        padding: 16px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      .data-table td {
+        padding: 16px;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+      }
+
+      .data-table tr:hover {
+        background: #f8fafc;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 20px;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 16px;
+        max-width: 800px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 14px;
+        transition: all 0.2s;
+        background: white;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
+
+      .form-select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 14px;
+        background: white;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 12px center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+      }
+
+      .fee-progress {
+        height: 8px;
+        border-radius: 4px;
+        background: #f1f5f9;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .fee-progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      .progress-paid {
+        background: linear-gradient(90deg, #10b981, #34d399);
+      }
+      .progress-pending {
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      }
+      .progress-overdue {
+        background: linear-gradient(90deg, #ef4444, #f87171);
+      }
+      .progress-partial {
+        background: linear-gradient(90deg, #3b82f6, #60a5fa);
+      }
+
+      .payment-method {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .payment-method:hover {
+        border-color: #4f46e5;
+        background: #f8fafc;
+      }
+
+      .payment-method.selected {
+        border-color: #4f46e5;
+        background: linear-gradient(
+          to right,
+          rgba(79, 70, 229, 0.05),
+          transparent
+        );
+      }
+
+      .due-date {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .due-soon {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+      }
+
+      .due-today {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+
+      .due-future {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+      }
+
+      .currency-format {
+        font-feature-settings: "tnum" 1;
+      }
+
+      .installment-plan {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+      }
+
+      .installment-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        border: 2px solid #e2e8f0;
+        text-align: center;
+        transition: all 0.2s ease;
+      }
+
+      .installment-card:hover {
+        border-color: #4f46e5;
+        transform: translateY(-2px);
+      }
+
+      .installment-card.paid {
+        border-color: #10b981;
+        background: #f0fdf4;
+      }
+
+      .installment-card.pending {
+        border-color: #f59e0b;
+        background: #fffbeb;
+      }
+
+      .installment-card.overdue {
+        border-color: #ef4444;
+        background: #fef2f2;
+      }
+
+      @media (max-width: 768px) {
+        .glass-header {
+          backdrop-filter: none;
+          -webkit-backdrop-filter: none;
+          background: white;
+        }
+
+        .chart-container {
+          height: 250px !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="antialiased selection:bg-indigo-100 selection:text-indigo-900">
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div
+      id="sidebarOverlay"
+      class="fixed inset-0 bg-black bg-opacity-50 z-[99] lg:hidden hidden"
+      onclick="mobileSidebarToggle()"
+    ></div>
+
+    <!-- Record Payment Modal -->
+    <div
+      id="recordPaymentModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden"
+    >
+      <div class="modal-content">
+        <div class="p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-black text-slate-900">
+              Record New Payment
+            </h3>
+            <button
+              onclick="closeModal('recordPaymentModal')"
+              class="text-slate-400 hover:text-slate-600"
+            >
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+
+          <form id="paymentForm" method="POST" action="/tenant/<?php echo $schoolSlug; ?>/admin/process-payment">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label class="form-label">Student</label>
+                <select
+                  id="paymentStudent"
+                  name="student_id"
+                  class="form-select"
+                  required
+                  onchange="loadStudentFeeDetails()"
+                >
+                  <option value="">Select Student</option>
+                  <?php foreach ($students as $student): ?>
+                  <option value="<?php echo $student['id']; ?>">
+                    <?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name'] . ' (' . $student['admission_number'] . ')'); ?>
+                  </option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label">Invoice</label>
+                <select id="paymentInvoice" name="invoice_id" class="form-select">
+                  <option value="">Select Invoice (Optional)</option>
+                  <?php foreach ($feeInvoices as $invoice): ?>
+                  <option value="<?php echo $invoice['id']; ?>">
+                    <?php echo htmlspecialchars($invoice['invoice_number'] . ' - ' . $invoice['student_first_name'] . ' ' . $invoice['student_last_name']); ?>
+                  </option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label">Amount</label>
+                <div class="flex items-center gap-2">
+                  <span class="text-2xl font-black text-slate-900"><?php echo $currencySymbol; ?></span>
+                  <input
+                    type="number"
+                    id="paymentAmount"
+                    name="amount"
+                    class="form-input"
+                    placeholder="0.00"
+                    required
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label">Payment Date</label>
+                <input
+                  type="date"
+                  id="paymentDate"
+                  name="payment_date"
+                  class="form-input"
+                  value="<?php echo date('Y-m-d'); ?>"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="form-label">Payment Method</label>
+                <select id="paymentMethod" name="payment_method" class="form-select" required>
+                  <option value="cash">Cash</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="check">Check</option>
+                  <option value="card">Card</option>
+                  <option value="mobile">Mobile Payment</option>
+                  <option value="online">Online Payment</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label">Payment Gateway</label>
+                <select id="paymentGateway" name="gateway" class="form-select">
+                  <option value="">None (Manual Payment)</option>
+                  <option value="paystack">Paystack</option>
+                  <option value="flutterwave">Flutterwave</option>
+                  <option value="stripe">Stripe</option>
+                </select>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="form-label">Transaction Reference</label>
+                <input
+                  type="text"
+                  id="paymentReference"
+                  name="transaction_reference"
+                  class="form-input"
+                  placeholder="Enter transaction reference number"
+                />
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="form-label">Notes</label>
+                <textarea
+                  id="paymentNotes"
+                  name="notes"
+                  class="form-input h-24"
+                  placeholder="Add payment notes or remarks..."
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <button
+                type="button"
+                onclick="closeModal('recordPaymentModal')"
+                class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200"
+              >
+                Record Payment
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generate Invoice Modal -->
+    <div
+      id="generateInvoiceModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden"
+    >
+      <div class="modal-content">
+        <div class="p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-black text-slate-900">
+              Generate Fee Invoice
+            </h3>
+            <button
+              onclick="closeModal('generateInvoiceModal')"
+              class="text-slate-400 hover:text-slate-600"
+            >
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+
+          <form id="invoiceForm" method="POST" action="/tenant/<?php echo $schoolSlug; ?>/admin/process-invoice">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label class="form-label">Invoice Type</label>
+                <select id="invoiceType" name="invoice_type" class="form-select" required>
+                  <option value="single">Single Student Invoice</option>
+                  <option value="bulk">Bulk Invoices</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label">Academic Year</label>
+                <select id="invoiceAcademicYear" name="academic_year_id" class="form-select" required>
+                  <option value="">Select Academic Year</option>
+                  <?php if ($academicYear): ?>
+                  <option value="<?php echo $academicYear['id']; ?>" selected>
+                    <?php echo htmlspecialchars($academicYear['name']); ?>
+                  </option>
+                  <?php endif; ?>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label">Term</label>
+                <select id="invoiceTerm" name="academic_term_id" class="form-select" required>
+                  <option value="">Select Term</option>
+                  <?php if ($academicTerm): ?>
+                  <option value="<?php echo $academicTerm['id']; ?>" selected>
+                    <?php echo htmlspecialchars($academicTerm['name']); ?>
+                  </option>
+                  <?php endif; ?>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label">Due Date</label>
+                <input
+                  type="date"
+                  id="invoiceDueDate"
+                  name="due_date"
+                  class="form-input"
+                  value="<?php echo date('Y-m-d', strtotime('+30 days')); ?>"
+                  required
+                />
+              </div>
+
+              <div id="singleStudentSection">
+                <label class="form-label">Select Student</label>
+                <select id="invoiceStudent" name="student_id" class="form-select">
+                  <option value="">Select Student</option>
+                  <?php foreach ($students as $student): ?>
+                  <option value="<?php echo $student['id']; ?>">
+                    <?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name'] . ' (' . $student['admission_number'] . ')'); ?>
+                  </option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+
+              <div id="bulkSection" class="hidden">
+                <label class="form-label">Select Class</label>
+                <select id="invoiceClass" name="class_id" class="form-select">
+                  <option value="">Select Class</option>
+                  <!-- Classes would be loaded dynamically -->
+                </select>
+              </div>
+            </div>
+
+            <div class="fee-breakdown mb-6">
+              <h4 class="text-lg font-black text-slate-900 mb-4">
+                Fee Breakdown
+              </h4>
+              <div id="feeBreakdown">
+                <?php foreach ($feeCategories as $category): ?>
+                <div class="breakdown-item">
+                  <div class="flex items-center gap-3">
+                    <input type="checkbox" name="fee_categories[]" value="<?php echo $category['id']; ?>" class="rounded border-slate-300">
+                    <span><?php echo htmlspecialchars($category['name']); ?></span>
+                  </div>
+                  <div>
+                    <input type="number" name="amounts[<?php echo $category['id']; ?>]" class="form-input w-32" placeholder="Amount" step="0.01">
+                  </div>
+                </div>
+                <?php endforeach; ?>
+                <div class="breakdown-item">
+                  <span class="text-lg font-black">Total Amount</span>
+                  <span class="text-lg font-black" id="invoiceTotalAmount"><?php echo $currencySymbol; ?>0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-3">
+              <button
+                type="button"
+                onclick="closeModal('generateInvoiceModal')"
+                class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200"
+              >
+                Generate Invoice
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- View Receipt Modal -->
+    <div
+      id="viewReceiptModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden"
+    >
+      <div class="modal-content" style="max-width: 600px">
+        <div class="p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-black text-slate-900">Payment Receipt</h3>
+            <div class="flex items-center gap-3">
+              <button
+                onclick="printReceipt()"
+                class="p-2 text-slate-600 hover:text-slate-800"
+              >
+                <i class="fas fa-print"></i>
+              </button>
+              <button
+                onclick="emailReceipt()"
+                class="p-2 text-slate-600 hover:text-slate-800"
+              >
+                <i class="fas fa-envelope"></i>
+              </button>
+              <button
+                onclick="closeModal('viewReceiptModal')"
+                class="text-slate-400 hover:text-slate-600"
+              >
+                <i class="fas fa-times text-xl"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="receiptContent">
+            <!-- Receipt will be loaded dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Send Reminders Modal -->
+    <div
+      id="sendRemindersModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden"
+    >
+      <div class="modal-content" style="max-width: 600px">
+        <div class="p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-black text-slate-900">
+              Send Fee Reminders
+            </h3>
+            <button
+              onclick="closeModal('sendRemindersModal')"
+              class="text-slate-400 hover:text-slate-600"
+            >
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+
+          <div class="space-y-6">
+            <div>
+              <label class="form-label">Reminder Type</label>
+              <select id="reminderType" class="form-select">
+                <option value="overdue">Overdue Fees</option>
+                <option value="upcoming">Upcoming Due Dates</option>
+                <option value="partial">Partial Payments</option>
+                <option value="all">All Pending Fees</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label">Communication Method</label>
+              <div class="grid grid-cols-2 gap-3">
+                <label
+                  class="payment-method"
+                  onclick="selectReminderMethod('email')"
+                >
+                  <div
+                    class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center"
+                  >
+                    <i class="fas fa-envelope text-blue-600"></i>
+                  </div>
+                  <div class="text-left">
+                    <p class="font-bold">Email</p>
+                    <p class="text-sm text-slate-500">Send email reminders</p>
+                  </div>
+                  <input
+                    type="radio"
+                    name="reminderMethod"
+                    value="email"
+                    class="hidden"
+                    checked
+                  />
+                </label>
+                <label
+                  class="payment-method"
+                  onclick="selectReminderMethod('sms')"
+                >
+                  <div
+                    class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center"
+                  >
+                    <i class="fas fa-sms text-green-600"></i>
+                  </div>
+                  <div class="text-left">
+                    <p class="font-bold">SMS</p>
+                    <p class="text-sm text-slate-500">Send text messages</p>
+                  </div>
+                  <input
+                    type="radio"
+                    name="reminderMethod"
+                    value="sms"
+                    class="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label class="form-label">Custom Message</label>
+              <textarea
+                id="reminderMessage"
+                class="form-input h-32"
+                placeholder="Customize the reminder message..."
+              >
+Dear Parent, This is a reminder that the school fees are due. Please make the payment at your earliest convenience to avoid late fees.</textarea
+              >
+            </div>
+
+            <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+              <div class="flex items-center gap-2 mb-1">
+                <i class="fas fa-exclamation-triangle text-amber-600"></i>
+                <span class="text-sm font-bold text-amber-700"
+                  >Reminder Status</span
+                >
+              </div>
+              <p class="text-xs text-amber-600">
+                This will send reminders to
+                <span id="reminderCount"><?php echo count($upcomingDueDates); ?></span> parents with pending fees.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-3 mt-8 pt-6 border-t border-slate-100">
+            <button
+              onclick="closeModal('sendRemindersModal')"
+              class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition"
+            >
+              Cancel
+            </button>
+            <button
+              onclick="sendReminders()"
+              class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200"
+            >
+              Send Reminders
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk Edit Panel -->
+    <div class="bulk-edit-panel hidden" id="bulkEditPanel">
+      <div class="max-w-7xl mx-auto">
+        <div
+          class="flex flex-col md:flex-row md:items-center justify-between gap-4"
+        >
+          <div>
+            <p class="font-bold text-slate-900" id="bulkEditCount">
+              0 fees selected
+            </p>
+            <p class="text-sm text-slate-500">
+              Apply actions to all selected fee records
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+              <button
+                onclick="applyBulkDiscount()"
+                class="px-3 py-2 bg-emerald-100 text-emerald-700 font-bold rounded-lg hover:bg-emerald-200 transition text-sm"
+              >
+                <i class="fas fa-percentage"></i> Apply Discount
+              </button>
+              <button
+                onclick="extendBulkDueDate()"
+                class="px-3 py-2 bg-blue-100 text-blue-700 font-bold rounded-lg hover:bg-blue-200 transition text-sm"
+              >
+                <i class="fas fa-calendar-plus"></i> Extend Due Date
+              </button>
+              <button
+                onclick="sendBulkReminders()"
+                class="px-3 py-2 bg-amber-100 text-amber-700 font-bold rounded-lg hover:bg-amber-200 transition text-sm"
+              >
+                <i class="fas fa-bell"></i> Send Reminders
+              </button>
+              <button
+                onclick="exportBulkData()"
+                class="px-3 py-2 bg-purple-100 text-purple-700 font-bold rounded-lg hover:bg-purple-200 transition text-sm"
+              >
+                <i class="fas fa-download"></i> Export
+              </button>
+            </div>
+
+            <button
+              onclick="closeBulkEdit()"
+              class="action-btn action-btn-danger"
+            >
+              <i class="fas fa-times"></i> Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+      <aside
+        id="sidebar"
+        class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-[100] lg:relative lg:translate-x-0 -translate-x-full transition-transform duration-300 flex flex-col shadow-xl lg:shadow-none"
+      >
+        <!-- School Header -->
+        <div class="h-20 flex items-center px-6 border-b border-slate-100">
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-100"
+              >
+                <i class="fas fa-school text-white text-lg"></i>
+              </div>
+              <div
+                class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"
+              ></div>
+            </div>
+            <div>
+              <span class="text-xl font-black tracking-tight text-slate-900"
+                ><?php echo htmlspecialchars($school['name']); ?></span
+              >
+              <p
+                class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5"
+              >
+                SCHOOL ADMIN
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- School Quick Info -->
+        <div class="p-6 border-b border-slate-100">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-slate-600"
+                >Fees Collected:</span
+              >
+              <span class="text-sm font-black text-emerald-600 currency-format">
+                <?php echo $currencySymbol . number_format($feeMetrics['total_collected'], 2); ?>
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-slate-600">Pending:</span>
+              <span class="text-sm font-bold text-amber-600 currency-format">
+                <?php echo $currencySymbol . number_format($feeMetrics['pending_fees'], 2); ?>
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-slate-600">Overdue:</span>
+              <span class="text-sm font-bold text-red-600 currency-format">
+                <?php echo $currencySymbol . number_format($feeMetrics['overdue_fees'], 2); ?>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex-1 overflow-y-auto py-6 space-y-8 custom-scrollbar">
+          <div>
+            <p
+              class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3"
+            >
+              Dashboard
+            </p>
+            <nav class="space-y-1">
+              <a
+                href="./dashboard.php"
+                class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600"
+              >
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <i class="fas fa-chart-pie"></i>
+                </div>
+                <span>Overview</span>
+              </a>
+              <a
+                href="./announcements.php"
+                class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600"
+              >
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <i class="fas fa-bullhorn"></i>
+                </div>
+                <span>Announcements</span>
+              </a>
+            </nav>
+          </div>
+
+          <div>
+            <p
+              class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3"
+            >
+              Student Management
+            </p>
+            <nav class="space-y-1">
+              <a
+                href="./students.php"
+                class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600"
+              >
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <i class="fas fa-user-graduate"></i>
+                </div>
+                <span>Students Directory</span>
+              </a>
+              <a
+                href="./attendance.php"
+                class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600"
+              >
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <i class="fas fa-calendar-check"></i>
+                </div>
+                <span>Attendance</span>
+              </a>
+              <a
+                href="./grades.php"
+                class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600"
+              >
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <i class="fas fa-chart-bar"></i>
+                </div>
+                <span>Grades & Reports</span>
+              </a>
+            </nav>
+          </div>
+
+          <div>
+            <p
+              class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3"
+            >
+              Staff Management
+            </p>
+            <nav class="space-y-1">
+              <a
+                href="./teachers.php"
+                class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600"
+              >
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <span>Teachers</span>
+              </a>
+              <a
+                href="./schedule.php"
+                class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600"
+              >
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <i class="fas fa-calendar-alt"></i>
+                </div>
+                <span>Timetable</span>
+              </a>
+            </nav>
+          </div>
+
+          <div>
+            <p
+              class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3"
+            >
+              Finance & Revenue
+            </p>
+            <nav class="space-y-1">
+              <a
+                href="./fees.php"
+                class="sidebar-link active-link flex items-center gap-3 px-6 py-3 text-sm font-semibold"
+              >
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <i class="fas fa-receipt"></i>
+                </div>
+                <span>Fee Management</span>
+              </a>
+              <a
+                href="./finance.php"
+                class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600"
+              >
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <span>Revenue Analytics</span>
+              </a>
+            </nav>
+          </div>
+
+          <div>
+            <p
+              class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3"
+            >
+              School Operations
+            </p>
+            <nav class="space-y-1">
+              <a
+                href="./settings.php"
+                class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600"
+              >
+                <div class="w-5 h-5 flex items-center justify-center">
+                  <i class="fas fa-cog"></i>
+                </div>
+                <span>School Settings</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+
+        <!-- User Profile -->
+        <div class="p-6 border-t border-slate-100">
+          <div
+            class="flex items-center gap-3 p-2 group cursor-pointer hover:bg-slate-50 rounded-xl transition"
+          >
+            <div class="relative">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold"
+              >
+                <?php 
+                $initials = 'A';
+                if (isset($_SESSION['school_auth']['user_name'])) {
+                    $nameParts = explode(' ', $_SESSION['school_auth']['user_name']);
+                    $initials = '';
+                    foreach ($nameParts as $part) {
+                        $initials .= strtoupper(substr($part, 0, 1));
+                        if (strlen($initials) >= 2) break;
+                    }
+                }
+                echo $initials ?: 'A';
+                ?>
+              </div>
+              <div
+                class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"
+              ></div>
+            </div>
+            <div class="overflow-hidden flex-1">
+              <p class="text-[13px] font-black text-slate-900 truncate">
+                <?php echo htmlspecialchars($_SESSION['school_auth']['user_name'] ?? 'Admin'); ?>
+              </p>
+              <p
+                class="text-[10px] font-black text-indigo-600 uppercase tracking-wider italic"
+              >
+                Administrator
+              </p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <!-- Header -->
+        <header
+          class="h-20 glass-header px-6 lg:px-8 flex items-center justify-between shrink-0 z-40"
+        >
+          <div class="flex items-center gap-3">
+            <button
+              onclick="mobileSidebarToggle()"
+              class="lg:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition"
+            >
+              <i class="fas fa-bars-staggered"></i>
+            </button>
+            <div class="flex items-center gap-3">
+              <h1 class="text-lg font-black text-slate-900 tracking-tight">
+                Fee Management
+              </h1>
+              <?php if ($academicYear): ?>
+              <div class="hidden lg:flex items-center gap-2">
+                <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <span
+                  class="text-xs font-black text-emerald-600 uppercase tracking-widest"
+                  ><?php echo htmlspecialchars($academicYear['name'] ?? 'Academic Year'); ?></span
+                >
+              </div>
+              <?php endif; ?>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <!-- Quick Stats -->
+            <div
+              class="hidden md:flex items-center gap-6 bg-white border border-slate-200 px-4 py-2 rounded-xl"
+            >
+              <div class="text-right">
+                <p
+                  class="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+                >
+                  Today's Collection
+                </p>
+                <p class="text-sm font-black text-emerald-600 currency-format">
+                  <?php echo $currencySymbol . number_format($feeMetrics['today_collection'], 2); ?>
+                </p>
+              </div>
+              <div class="h-8 w-px bg-slate-200"></div>
+              <div class="text-right">
+                <p
+                  class="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+                >
+                  Overdue
+                </p>
+                <p class="text-sm font-black text-red-600">
+                  <?php echo number_format(count($upcomingDueDates)); ?>
+                </p>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2">
+              <button
+                onclick="openModal('sendRemindersModal')"
+                class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2"
+              >
+                <i class="fas fa-bell"></i>
+                <span class="hidden sm:inline">Reminders</span>
+              </button>
+              <button
+                onclick="openModal('generateInvoiceModal')"
+                class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2"
+              >
+                <i class="fas fa-file-invoice"></i>
+                <span class="hidden sm:inline">Invoices</span>
+              </button>
+              <button
+                onclick="openModal('recordPaymentModal')"
+                class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200"
+              >
+                <i class="fas fa-plus-circle"></i>
+                <span class="hidden sm:inline">Record Payment</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <!-- Tabs Navigation -->
+        <div class="border-b border-slate-200 bg-white">
+          <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex overflow-x-auto">
+              <button
+                class="tab-button active"
+                onclick="switchTab('overview')"
+                data-tab="overview"
+              >
+                <i class="fas fa-chart-pie mr-2"></i>Overview
+              </button>
+              <button
+                class="tab-button"
+                onclick="switchTab('payments')"
+                data-tab="payments"
+              >
+                <i class="fas fa-money-check mr-2"></i>Payments
+              </button>
+              <button
+                class="tab-button"
+                onclick="switchTab('invoices')"
+                data-tab="invoices"
+              >
+                <i class="fas fa-file-invoice mr-2"></i>Invoices
+              </button>
+              <button
+                class="tab-button"
+                onclick="switchTab('reports')"
+                data-tab="reports"
+              >
+                <i class="fas fa-chart-bar mr-2"></i>Reports
+              </button>
+              <button
+                class="tab-button"
+                onclick="switchTab('settings')"
+                data-tab="settings"
+              >
+                <i class="fas fa-cog mr-2"></i>Settings
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar">
+          <!-- Page Header & Filters -->
+          <div class="max-w-7xl mx-auto mb-8">
+            <div
+              class="flex flex-col md:flex-row md:items-center justify-between gap-6"
+            >
+              <div>
+                <h2 class="text-2xl lg:text-3xl font-black text-slate-900 mb-2">
+                  Fee Management System
+                </h2>
+                <p class="text-slate-500 font-medium">
+                  Manage fee collection, invoices, and financial reports for <?php echo htmlspecialchars($school['name']); ?>
+                </p>
+              </div>
+              <div class="flex gap-3">
+                <div class="search-box">
+                  <input
+                    type="text"
+                    placeholder="Search student, invoice, or payment..."
+                    class="search-input"
+                    id="searchInput"
+                    onkeyup="filterFees()"
+                  />
+                  <i class="fas fa-search search-icon"></i>
+                </div>
+                <button
+                  onclick="toggleFilters()"
+                  class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2"
+                >
+                  <i class="fas fa-filter"></i>
+                  <span class="hidden sm:inline">Filters</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div
+              class="glass-card rounded-xl p-6 mt-6 hidden"
+              id="advancedFilters"
+            >
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-black text-slate-900">
+                  Advanced Filters
+                </h3>
+                <button
+                  onclick="toggleFilters()"
+                  class="text-slate-400 hover:text-slate-600"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div>
+                  <label class="form-label">Fee Status</label>
+                  <select
+                    id="filterStatus"
+                    class="form-select"
+                    onchange="applyFilters()"
+                  >
+                    <option value="">All Status</option>
+                    <option value="paid">Paid</option>
+                    <option value="pending">Pending</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="partial">Partial</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="form-label">Academic Year</label>
+                  <select
+                    id="filterAcademicYear"
+                    class="form-select"
+                    onchange="applyFilters()"
+                  >
+                    <option value="">All Years</option>
+                    <?php if ($academicYear): ?>
+                    <option value="<?php echo $academicYear['id']; ?>" selected>
+                      <?php echo htmlspecialchars($academicYear['name']); ?>
+                    </option>
+                    <?php endif; ?>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="form-label">Term</label>
+                  <select
+                    id="filterTerm"
+                    class="form-select"
+                    onchange="applyFilters()"
+                  >
+                    <option value="">All Terms</option>
+                    <?php if ($academicTerm): ?>
+                    <option value="<?php echo $academicTerm['id']; ?>" selected>
+                      <?php echo htmlspecialchars($academicTerm['name']); ?>
+                    </option>
+                    <?php endif; ?>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="form-label">Date Range</label>
+                  <input
+                    type="date"
+                    id="filterDate"
+                    class="form-input"
+                    onchange="applyFilters()"
+                    value="<?php echo date('Y-m-d'); ?>"
+                  />
+                </div>
+              </div>
+
+              <div
+                class="flex justify-between items-center mt-6 pt-6 border-t border-slate-100"
+              >
+                <button
+                  onclick="resetFilters()"
+                  class="px-4 py-2 text-slate-600 hover:text-slate-800 transition"
+                >
+                  Reset All Filters
+                </button>
+                <button
+                  onclick="exportFilteredData()"
+                  class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200"
+                >
+                  Export Filtered Data
+                </button>
+              </div>
+            </div>
+
+            <!-- Filter Chips -->
+            <div class="flex flex-wrap gap-2 mt-6">
+              <span
+                class="filter-chip active"
+                onclick="toggleFilter('all')"
+                data-filter="all"
+              >
+                <i class="fas fa-receipt"></i> All Fees
+              </span>
+              <span
+                class="filter-chip"
+                onclick="toggleFilter('paid')"
+                data-filter="paid"
+              >
+                <i class="fas fa-check-circle"></i> Paid
+              </span>
+              <span
+                               class="filter-chip"
+                onclick="toggleFilter('pending')"
+                data-filter="pending"
+              >
+                <i class="fas fa-clock"></i> Pending
+              </span>
+              <span
+                class="filter-chip"
+                onclick="toggleFilter('overdue')"
+                data-filter="overdue"
+              >
+                <i class="fas fa-exclamation-circle"></i> Overdue
+              </span>
+              <span
+                class="filter-chip"
+                onclick="toggleFilter('partial')"
+                data-filter="partial"
+              >
+                <i class="fas fa-percentage"></i> Partial
+              </span>
+            </div>
+          </div>
+
+          <!-- Tab Content: Overview -->
+          <div class="max-w-7xl mx-auto" id="overviewTab">
+            <!-- Quick Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div class="metric-card glass-card rounded-xl p-6 metric-primary">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <p class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">
+                      Total Collected
+                    </p>
+                    <p class="text-2xl font-black text-slate-900 currency-format">
+                      <?php echo $currencySymbol . number_format($feeMetrics['total_collected'], 2); ?>
+                    </p>
+                  </div>
+                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                    <i class="fas fa-wallet text-2xl text-indigo-600"></i>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-black text-emerald-600">
+                    <i class="fas fa-arrow-up"></i> 12.5% this term
+                  </span>
+                </div>
+              </div>
+
+              <div class="metric-card glass-card rounded-xl p-6 metric-success">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <p class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">
+                      Collection Rate
+                    </p>
+                    <p class="text-2xl font-black text-slate-900">
+                      <?php echo $feeMetrics['collection_rate']; ?>%
+                    </p>
+                  </div>
+                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                    <i class="fas fa-percentage text-2xl text-emerald-600"></i>
+                  </div>
+                </div>
+                <div class="fee-progress">
+                  <div 
+                    class="fee-progress-fill progress-paid" 
+                    style="width: <?php echo min($feeMetrics['collection_rate'], 100); ?>%"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="metric-card glass-card rounded-xl p-6 metric-warning">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <p class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">
+                      Pending Fees
+                    </p>
+                    <p class="text-2xl font-black text-slate-900 currency-format">
+                      <?php echo $currencySymbol . number_format($feeMetrics['pending_fees'], 2); ?>
+                    </p>
+                  </div>
+                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-100 to-yellow-100 flex items-center justify-center">
+                    <i class="fas fa-clock text-2xl text-amber-600"></i>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-black text-amber-600">
+                    <?php echo count(array_filter($feeInvoices, function($inv) { 
+                      return in_array($inv['status'], ['pending', 'partial']) && 
+                             strtotime($inv['due_date']) >= time(); 
+                    })); ?> invoices
+                  </span>
+                </div>
+              </div>
+
+              <div class="metric-card glass-card rounded-xl p-6 metric-danger">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <p class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">
+                      Overdue Fees
+                    </p>
+                    <p class="text-2xl font-black text-slate-900 currency-format">
+                      <?php echo $currencySymbol . number_format($feeMetrics['overdue_fees'], 2); ?>
+                    </p>
+                  </div>
+                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-red-100 to-pink-100 flex items-center justify-center">
+                    <i class="fas fa-exclamation-circle text-2xl text-red-600"></i>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-black text-red-600">
+                    <?php echo count(array_filter($feeInvoices, function($inv) { 
+                      return in_array($inv['status'], ['pending', 'partial']) && 
+                             strtotime($inv['due_date']) < time(); 
+                    })); ?> overdue
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts & Recent Activity -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+              <!-- Collection Chart -->
+              <div class="lg:col-span-2">
+                <div class="glass-card rounded-xl p-6 h-full">
+                  <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-black text-slate-900">
+                      Collection Trend
+                    </h3>
+                    <select class="form-select w-auto">
+                      <option>Last 7 days</option>
+                      <option selected>Last 30 days</option>
+                      <option>This Term</option>
+                      <option>This Academic Year</option>
+                    </select>
+                  </div>
+                  <div class="chart-container">
+                    <canvas id="collectionChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Methods -->
+              <div>
+                <div class="glass-card rounded-xl p-6 h-full">
+                  <h3 class="text-lg font-black text-slate-900 mb-6">
+                    Payment Methods
+                  </h3>
+                  <div class="space-y-4">
+                    <?php foreach ($paymentMethods as $method): ?>
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                          <?php 
+                          $icon = 'fa-wallet';
+                          $color = 'text-slate-600';
+                          switch(strtolower($method['payment_method'])) {
+                            case 'cash': $icon = 'fa-money-bill'; $color = 'text-emerald-600'; break;
+                            case 'bank_transfer': $icon = 'fa-university'; $color = 'text-blue-600'; break;
+                            case 'card': $icon = 'fa-credit-card'; $color = 'text-purple-600'; break;
+                            case 'mobile': $icon = 'fa-mobile-alt'; $color = 'text-indigo-600'; break;
+                            case 'online': $icon = 'fa-globe'; $color = 'text-cyan-600'; break;
+                          }
+                          ?>
+                          <i class="fas <?php echo $icon; ?> <?php echo $color; ?>"></i>
+                        </div>
+                        <span class="font-medium">
+                          <?php 
+                          $methodName = ucfirst(str_replace('_', ' ', $method['payment_method']));
+                          echo htmlspecialchars($methodName);
+                          ?>
+                        </span>
+                      </div>
+                      <div class="text-right">
+                        <p class="font-black text-slate-900 currency-format">
+                          <?php echo $currencySymbol . number_format($method['amount'], 2); ?>
+                        </p>
+                        <p class="text-xs text-slate-500">
+                          <?php echo $method['count']; ?> payments
+                        </p>
+                      </div>
+                    </div>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($paymentMethods)): ?>
+                    <div class="text-center py-8">
+                      <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-chart-pie text-2xl text-slate-400"></i>
+                      </div>
+                      <p class="text-slate-500">No payment data available</p>
+                    </div>
+                    <?php endif; ?>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Payments & Upcoming Due Dates -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <!-- Recent Payments -->
+              <div>
+                <div class="glass-card rounded-xl p-6">
+                  <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-black text-slate-900">
+                      Recent Payments
+                    </h3>
+                    <button
+                      onclick="switchTab('payments')"
+                      class="text-sm font-bold text-indigo-600 hover:text-indigo-800"
+                    >
+                      View All
+                    </button>
+                  </div>
+                  
+                  <div class="space-y-4">
+                    <?php foreach ($recentPayments as $payment): ?>
+                    <div class="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-indigo-200 transition">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                          <i class="fas fa-check text-emerald-600"></i>
+                        </div>
+                        <div>
+                          <p class="font-bold text-slate-900">
+                            <?php echo htmlspecialchars($payment['student_first_name'] . ' ' . $payment['student_last_name']); ?>
+                          </p>
+                          <p class="text-xs text-slate-500">
+                            <?php echo htmlspecialchars($payment['admission_number'] ?? 'N/A'); ?>
+                            • <?php echo date('M d, Y', strtotime($payment['created_at'])); ?>
+                          </p>
+                        </div>
+                      </div>
+                      <div class="text-right">
+                        <p class="font-black text-emerald-600 currency-format">
+                          <?php echo $currencySymbol . number_format($payment['amount'], 2); ?>
+                        </p>
+                        <p class="text-xs text-slate-500">
+                          <?php echo ucfirst($payment['payment_method'] ?? 'N/A'); ?>
+                        </p>
+                      </div>
+                    </div>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($recentPayments)): ?>
+                    <div class="text-center py-8">
+                      <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-money-bill-wave text-2xl text-slate-400"></i>
+                      </div>
+                      <p class="text-slate-500">No recent payments</p>
+                    </div>
+                    <?php endif; ?>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Upcoming Due Dates -->
+              <div>
+                <div class="glass-card rounded-xl p-6">
+                  <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-black text-slate-900">
+                      Upcoming Due Dates
+                    </h3>
+                    <button
+                      onclick="openModal('sendRemindersModal')"
+                      class="px-3 py-1.5 bg-amber-100 text-amber-700 font-bold rounded-lg hover:bg-amber-200 transition text-sm"
+                    >
+                      <i class="fas fa-bell mr-1"></i> Remind All
+                    </button>
+                  </div>
+                  
+                  <div class="space-y-4">
+                    <?php foreach ($upcomingDueDates as $invoice): ?>
+                    <?php 
+                    $daysUntilDue = $invoice['days_until_due'] ?? 0;
+                    $dueClass = 'due-future';
+                    $dueText = 'Due in ' . $daysUntilDue . ' days';
+                    
+                    if ($daysUntilDue == 0) {
+                      $dueClass = 'due-today';
+                      $dueText = 'Due today';
+                    } elseif ($daysUntilDue < 0) {
+                      $dueClass = 'due-today';
+                      $dueText = 'Overdue by ' . abs($daysUntilDue) . ' days';
+                    } elseif ($daysUntilDue <= 3) {
+                      $dueClass = 'due-soon';
+                      $dueText = 'Due in ' . $daysUntilDue . ' days';
+                    }
+                    ?>
+                    <div class="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-amber-200 transition">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-100 to-yellow-100 flex items-center justify-center">
+                          <i class="fas fa-calendar-day text-amber-600"></i>
+                        </div>
+                        <div>
+                          <p class="font-bold text-slate-900">
+                            <?php echo htmlspecialchars($invoice['student_first_name'] . ' ' . $invoice['student_last_name']); ?>
+                          </p>
+                          <p class="text-xs text-slate-500">
+                            Invoice #<?php echo htmlspecialchars($invoice['invoice_number'] ?? 'N/A'); ?>
+                          </p>
+                        </div>
+                      </div>
+                      <div class="text-right">
+                        <p class="font-black text-slate-900 currency-format">
+                          <?php 
+                          $balance = floatval($invoice['total_amount']) - floatval($invoice['paid_amount'] ?? 0);
+                          echo $currencySymbol . number_format($balance, 2);
+                          ?>
+                        </p>
+                        <span class="due-date <?php echo $dueClass; ?>">
+                          <i class="fas fa-clock"></i>
+                          <?php echo $dueText; ?>
+                        </span>
+                      </div>
+                    </div>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($upcomingDueDates)): ?>
+                    <div class="text-center py-8">
+                      <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-calendar-check text-2xl text-slate-400"></i>
+                      </div>
+                      <p class="text-slate-500">No upcoming due dates</p>
+                    </div>
+                    <?php endif; ?>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Payments -->
+          <div class="max-w-7xl mx-auto hidden" id="paymentsTab">
+            <div class="glass-card rounded-xl p-6 mb-8">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-black text-slate-900">
+                  Payment Transactions
+                </h3>
+                <div class="flex items-center gap-3">
+                  <button
+                    onclick="exportPayments()"
+                    class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2"
+                  >
+                    <i class="fas fa-download"></i> Export
+                  </button>
+                  <button
+                    onclick="openModal('recordPaymentModal')"
+                    class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200"
+                  >
+                    <i class="fas fa-plus-circle"></i> New Payment
+                  </button>
+                </div>
+              </div>
+
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th class="w-12">
+                        <input type="checkbox" id="selectAllPayments" onchange="toggleAllPayments()">
+                      </th>
+                      <th>Transaction ID</th>
+                      <th>Student</th>
+                      <th>Invoice</th>
+                      <th>Amount</th>
+                      <th>Method</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="paymentsTableBody">
+                    <?php foreach ($recentPayments as $payment): ?>
+                    <?php 
+                    $statusClass = 'status-paid';
+                    $statusText = 'Paid';
+                    if ($payment['status'] === 'failed') {
+                      $statusClass = 'status-overdue';
+                      $statusText = 'Failed';
+                    } elseif ($payment['status'] === 'pending') {
+                      $statusClass = 'status-pending';
+                      $statusText = 'Pending';
+                    }
+                    ?>
+                    <tr>
+                      <td>
+                        <input type="checkbox" class="payment-checkbox" value="<?php echo $payment['id']; ?>">
+                      </td>
+                      <td>
+                        <span class="font-mono text-sm"><?php echo htmlspecialchars($payment['transaction_reference'] ?? 'N/A'); ?></span>
+                      </td>
+                      <td>
+                        <div>
+                          <p class="font-bold"><?php echo htmlspecialchars($payment['student_first_name'] . ' ' . $payment['student_last_name']); ?></p>
+                          <p class="text-xs text-slate-500"><?php echo htmlspecialchars($payment['admission_number'] ?? ''); ?></p>
+                        </div>
+                      </td>
+                      <td>
+                        <?php if ($payment['invoice_number']): ?>
+                        <span class="font-mono text-sm"><?php echo htmlspecialchars($payment['invoice_number']); ?></span>
+                        <?php else: ?>
+                        <span class="text-slate-400">Direct Payment</span>
+                        <?php endif; ?>
+                      </td>
+                      <td>
+                        <span class="font-black text-emerald-600 currency-format">
+                          <?php echo $currencySymbol . number_format($payment['amount'], 2); ?>
+                        </span>
+                      </td>
+                      <td>
+                        <?php echo ucfirst($payment['payment_method'] ?? 'N/A'); ?>
+                      </td>
+                      <td>
+                        <?php echo date('M d, Y', strtotime($payment['created_at'])); ?>
+                      </td>
+                      <td>
+                        <span class="fee-status <?php echo $statusClass; ?>">
+                          <?php echo $statusText; ?>
+                        </span>
+                      </td>
+                      <td>
+                        <div class="flex items-center gap-2">
+                          <button
+                            onclick="viewReceipt(<?php echo $payment['id']; ?>)"
+                            class="p-2 text-slate-600 hover:text-slate-800"
+                            title="View Receipt"
+                          >
+                            <i class="fas fa-eye"></i>
+                          </button>
+                          <button
+                            onclick="editPayment(<?php echo $payment['id']; ?>)"
+                            class="p-2 text-slate-600 hover:text-slate-800"
+                            title="Edit"
+                          >
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button
+                            onclick="deletePayment(<?php echo $payment['id']; ?>)"
+                            class="p-2 text-red-600 hover:text-red-800"
+                            title="Delete"
+                          >
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($recentPayments)): ?>
+                    <tr>
+                      <td colspan="9" class="text-center py-8">
+                        <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                          <i class="fas fa-money-bill-wave text-2xl text-slate-400"></i>
+                        </div>
+                        <p class="text-slate-500">No payment records found</p>
+                        <button
+                          onclick="openModal('recordPaymentModal')"
+                          class="mt-4 px-6 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                        >
+                          Record First Payment
+                        </button>
+                      </td>
+                    </tr>
+                    <?php endif; ?>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              <div class="flex items-center justify-between mt-6 pt-6 border-t border-slate-100">
+                <p class="text-sm text-slate-500">
+                  Showing <span id="paymentsStart">1</span>-<span id="paymentsEnd">10</span> of <span id="paymentsTotal"><?php echo count($recentPayments); ?></span> payments
+                </p>
+                <div class="flex items-center gap-2">
+                  <button class="pagination-btn" onclick="previousPaymentsPage()">
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
+                  <button class="pagination-btn active">1</button>
+                  <button class="pagination-btn">2</button>
+                  <button class="pagination-btn">3</button>
+                  <button class="pagination-btn" onclick="nextPaymentsPage()">
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Invoices -->
+          <div class="max-w-7xl mx-auto hidden" id="invoicesTab">
+            <div class="glass-card rounded-xl p-6 mb-8">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-black text-slate-900">
+                  Fee Invoices
+                </h3>
+                <div class="flex items-center gap-3">
+                  <button
+                    onclick="printInvoices()"
+                    class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2"
+                  >
+                    <i class="fas fa-print"></i> Print
+                  </button>
+                  <button
+                    onclick="openModal('generateInvoiceModal')"
+                    class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200"
+                  >
+                    <i class="fas fa-plus-circle"></i> New Invoice
+                  </button>
+                </div>
+              </div>
+
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th class="w-12">
+                        <input type="checkbox" id="selectAllInvoices" onchange="toggleAllInvoices()">
+                      </th>
+                      <th>Invoice #</th>
+                      <th>Student</th>
+                      <th>Class</th>
+                      <th>Total Amount</th>
+                      <th>Paid</th>
+                      <th>Balance</th>
+                      <th>Due Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="invoicesTableBody">
+                    <?php foreach ($feeInvoices as $invoice): ?>
+                    <?php 
+                    $total = floatval($invoice['total_amount']);
+                    $paid = floatval($invoice['paid_amount'] ?? 0);
+                    $balance = $total - $paid;
+                    
+                    $statusClass = 'status-' . $invoice['status'];
+                    $statusText = ucfirst($invoice['status']);
+                    
+                    if ($balance <= 0) {
+                      $statusClass = 'status-paid';
+                      $statusText = 'Paid';
+                    } elseif ($balance > 0 && $paid > 0) {
+                      $statusClass = 'status-partial';
+                      $statusText = 'Partial';
+                    } elseif (strtotime($invoice['due_date']) < time() && $balance > 0) {
+                      $statusClass = 'status-overdue';
+                      $statusText = 'Overdue';
+                    } elseif ($balance > 0) {
+                      $statusClass = 'status-pending';
+                      $statusText = 'Pending';
+                    }
+                    ?>
+                    <tr>
+                      <td>
+                        <input type="checkbox" class="invoice-checkbox" value="<?php echo $invoice['id']; ?>">
+                      </td>
+                      <td>
+                        <span class="font-mono text-sm font-bold"><?php echo htmlspecialchars($invoice['invoice_number'] ?? 'N/A'); ?></span>
+                      </td>
+                      <td>
+                        <div>
+                          <p class="font-bold"><?php echo htmlspecialchars($invoice['student_first_name'] . ' ' . $invoice['student_last_name']); ?></p>
+                          <p class="text-xs text-slate-500"><?php echo htmlspecialchars($invoice['admission_number'] ?? ''); ?></p>
+                        </div>
+                      </td>
+                      <td>
+                        <?php echo htmlspecialchars($invoice['class_name'] ?? 'N/A'); ?>
+                      </td>
+                      <td>
+                        <span class="font-black text-slate-900 currency-format">
+                          <?php echo $currencySymbol . number_format($total, 2); ?>
+                        </span>
+                      </td>
+                      <td>
+                        <span class="font-bold text-emerald-600 currency-format">
+                          <?php echo $currencySymbol . number_format($paid, 2); ?>
+                        </span>
+                      </td>
+                      <td>
+                        <span class="font-black <?php echo $balance > 0 ? 'text-amber-600' : 'text-emerald-600'; ?> currency-format">
+                          <?php echo $currencySymbol . number_format($balance, 2); ?>
+                        </span>
+                      </td>
+                      <td>
+                        <?php 
+                        $dueDate = date('M d, Y', strtotime($invoice['due_date']));
+                        $today = date('Y-m-d');
+                        $dueClass = '';
+                        if ($invoice['due_date'] < $today && $balance > 0) {
+                          $dueClass = 'text-red-600';
+                        } elseif ($invoice['due_date'] == $today) {
+                          $dueClass = 'text-amber-600';
+                        }
+                        ?>
+                        <span class="<?php echo $dueClass; ?>"><?php echo $dueDate; ?></span>
+                      </td>
+                      <td>
+                        <span class="fee-status <?php echo $statusClass; ?>">
+                          <?php echo $statusText; ?>
+                        </span>
+                      </td>
+                      <td>
+                        <div class="flex items-center gap-2">
+                          <button
+                            onclick="viewInvoice(<?php echo $invoice['id']; ?>)"
+                            class="p-2 text-slate-600 hover:text-slate-800"
+                            title="View"
+                          >
+                            <i class="fas fa-eye"></i>
+                          </button>
+                          <button
+                            onclick="editInvoice(<?php echo $invoice['id']; ?>)"
+                            class="p-2 text-slate-600 hover:text-slate-800"
+                            title="Edit"
+                          >
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button
+                            onclick="recordPaymentForInvoice(<?php echo $invoice['id']; ?>)"
+                            class="p-2 text-emerald-600 hover:text-emerald-800"
+                            title="Record Payment"
+                          >
+                            <i class="fas fa-money-bill-wave"></i>
+                          </button>
+                          <button
+                            onclick="deleteInvoice(<?php echo $invoice['id']; ?>)"
+                            class="p-2 text-red-600 hover:text-red-800"
+                            title="Delete"
+                          >
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($feeInvoices)): ?>
+                    <tr>
+                      <td colspan="10" class="text-center py-8">
+                        <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                          <i class="fas fa-file-invoice text-2xl text-slate-400"></i>
+                        </div>
+                        <p class="text-slate-500">No invoices found</p>
+                        <button
+                          onclick="openModal('generateInvoiceModal')"
+                          class="mt-4 px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                        >
+                          Create First Invoice
+                        </button>
+                      </td>
+                    </tr>
+                    <?php endif; ?>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              <div class="flex items-center justify-between mt-6 pt-6 border-t border-slate-100">
+                <p class="text-sm text-slate-500">
+                  Showing <span id="invoicesStart">1</span>-<span id="invoicesEnd">10</span> of <span id="invoicesTotal"><?php echo count($feeInvoices); ?></span> invoices
+                </p>
+                <div class="flex items-center gap-2">
+                  <button class="pagination-btn" onclick="previousInvoicesPage()">
+                    <i class="fas fa-chevron-left"></i>
+                  </button>
+                  <button class="pagination-btn active">1</button>
+                  <button class="pagination-btn">2</button>
+                  <button class="pagination-btn">3</button>
+                  <button class="pagination-btn" onclick="nextInvoicesPage()">
+                    <i class="fas fa-chevron-right"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Reports -->
+          <div class="max-w-7xl mx-auto hidden" id="reportsTab">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <!-- Fee Collection Report -->
+              <div class="glass-card rounded-xl p-6">
+                <h3 class="text-lg font-black text-slate-900 mb-6">
+                  Fee Collection Report
+                </h3>
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium">Total Invoiced Amount</span>
+                    <span class="font-black text-slate-900 currency-format">
+                      <?php 
+                      $totalInvoiced = array_sum(array_map(function($inv) {
+                        return floatval($inv['total_amount']);
+                      }, $feeInvoices));
+                      echo $currencySymbol . number_format($totalInvoiced, 2);
+                      ?>
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium">Total Collected</span>
+                    <span class="font-black text-emerald-600 currency-format">
+                      <?php echo $currencySymbol . number_format($feeMetrics['total_collected'], 2); ?>
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium">Outstanding Balance</span>
+                    <span class="font-black text-amber-600 currency-format">
+                      <?php echo $currencySymbol . number_format($feeMetrics['pending_fees'] + $feeMetrics['overdue_fees'], 2); ?>
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium">Collection Efficiency</span>
+                    <span class="font-black <?php echo $feeMetrics['collection_rate'] >= 80 ? 'text-emerald-600' : ($feeMetrics['collection_rate'] >= 60 ? 'text-amber-600' : 'text-red-600'); ?>">
+                      <?php echo $feeMetrics['collection_rate']; ?>%
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="mt-8">
+                  <button
+                    onclick="generateCollectionReport()"
+                    class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200"
+                  >
+                    <i class="fas fa-download mr-2"></i> Download Full Report
+                  </button>
+                </div>
+              </div>
+
+              <!-- Payment Methods Report -->
+              <div class="glass-card rounded-xl p-6">
+                <h3 class="text-lg font-black text-slate-900 mb-6">
+                  Payment Methods Distribution
+                </h3>
+                <div class="chart-container">
+                  <canvas id="paymentMethodsChart"></canvas>
+                </div>
+              </div>
+
+              <!-- Overdue Analysis -->
+              <div class="glass-card rounded-xl p-6">
+                <h3 class="text-lg font-black text-slate-900 mb-6">
+                  Overdue Analysis
+                </h3>
+                <div class="space-y-4">
+                  <?php 
+                  $overdueByDays = [
+                    '0-7' => 0,
+                    '8-30' => 0,
+                    '31-90' => 0,
+                    '90+' => 0
+                  ];
+                  
+                  foreach ($feeInvoices as $invoice) {
+                    if (in_array($invoice['status'], ['pending', 'partial']) && strtotime($invoice['due_date']) < time()) {
+                      $daysOverdue = floor((time() - strtotime($invoice['due_date'])) / (60 * 60 * 24));
+                      $balance = floatval($invoice['total_amount']) - floatval($invoice['paid_amount'] ?? 0);
+                      
+                      if ($daysOverdue <= 7) {
+                        $overdueByDays['0-7'] += $balance;
+                      } elseif ($daysOverdue <= 30) {
+                        $overdueByDays['8-30'] += $balance;
+                      } elseif ($daysOverdue <= 90) {
+                        $overdueByDays['31-90'] += $balance;
+                      } else {
+                        $overdueByDays['90+'] += $balance;
+                      }
+                    }
+                  }
+                  ?>
+                  
+                  <?php foreach ($overdueByDays as $range => $amount): ?>
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium"><?php echo $range; ?> days</span>
+                    <span class="font-black text-red-600 currency-format">
+                      <?php echo $currencySymbol . number_format($amount, 2); ?>
+                    </span>
+                  </div>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+
+              <!-- Class-wise Collection -->
+              <div class="glass-card rounded-xl p-6 lg:col-span-2">
+                <h3 class="text-lg font-black text-slate-900 mb-6">
+                  Class-wise Fee Collection
+                </h3>
+                <div class="chart-container">
+                  <canvas id="classCollectionChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Settings -->
+          <div class="max-w-7xl mx-auto hidden" id="settingsTab">
+            <div class="glass-card rounded-xl p-6">
+              <h3 class="text-lg font-black text-slate-900 mb-6">
+                Fee Management Settings
+              </h3>
+              
+              <div class="space-y-8">
+                <!-- Fee Categories -->
+                <div>
+                  <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-md font-black text-slate-900">
+                      Fee Categories
+                    </h4>
+                    <button
+                      onclick="addFeeCategory()"
+                      class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                    >
+                      <i class="fas fa-plus mr-2"></i> Add Category
+                    </button>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <?php foreach ($feeCategories as $category): ?>
+                    <div class="bg-white border border-slate-200 rounded-xl p-4">
+                      <div class="flex items-center justify-between mb-3">
+                        <span class="font-bold"><?php echo htmlspecialchars($category['name']); ?></span>
+                        <span class="text-sm font-black text-emerald-600">
+                          <?php echo $currencySymbol . number_format($category['amount'] ?? 0, 2); ?>
+                        </span>
+                      </div>
+                      <p class="text-sm text-slate-500 mb-3">
+                        <?php echo htmlspecialchars($category['description'] ?? 'No description'); ?>
+                      </p>
+                      <div class="flex items-center gap-2">
+                        <button
+                          onclick="editFeeCategory(<?php echo $category['id']; ?>)"
+                          class="flex-1 py-2 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onclick="deleteFeeCategory(<?php echo $category['id']; ?>)"
+                          class="flex-1 py-2 bg-red-100 text-red-700 font-bold rounded-lg hover:bg-red-200 transition"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($feeCategories)): ?>
+                    <div class="md:col-span-2 lg:col-span-3 text-center py-8">
+                      <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-tags text-2xl text-slate-400"></i>
+                      </div>
+                      <p class="text-slate-500">No fee categories defined</p>
+                    </div>
+                    <?php endif; ?>
+                  </div>
+                </div>
+
+                <!-- Payment Gateway Settings -->
+                <div>
+                  <h4 class="text-md font-black text-slate-900 mb-4">
+                    Payment Gateway Integration
+                  </h4>
+                  
+                  <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                          <i class="fab fa-paypal text-purple-600"></i>
+                        </div>
+                        <div>
+                          <p class="font-bold">Paystack</p>
+                          <p class="text-sm text-slate-500">Online payment processing</p>
+                        </div>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                      </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                          <i class="fas fa-university text-blue-600"></i>
+                        </div>
+                        <div>
+                          <p class="font-bold">Flutterwave</p>
+                          <p class="text-sm text-slate-500">Bank transfers and cards</p>
+                        </div>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Reminder Settings -->
+                <div>
+                  <h4 class="text-md font-black text-slate-900 mb-4">
+                    Automatic Reminders
+                  </h4>
+                  
+                  <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="font-bold">Send reminders before due date</p>
+                        <p class="text-sm text-slate-500">Send email/SMS reminders X days before due date</p>
+                      </div>
+                      <input
+                        type="number"
+                        class="form-input w-20"
+                        value="3"
+                        min="0"
+                        max="30"
+                      >
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="font-bold">Send overdue reminders</p>
+                        <p class="text-sm text-slate-500">Send reminders for overdue fees every X days</p>
+                      </div>
+                      <input
+                        type="number"
+                        class="form-input w-20"
+                        value="7"
+                        min="1"
+                        max="30"
+                      >
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="font-bold">Late fee penalty</p>
+                        <p class="text-sm text-slate-500">Apply late fee after X days overdue</p>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <input
+                          type="number"
+                          class="form-input w-20"
+                          value="14"
+                          min="1"
+                          max="90"
+                        >
+                        <span class="text-sm font-bold">days</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100">
+                  <button
+                    onclick="saveFeeSettings()"
+                    class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200"
+                  >
+                    Save All Settings
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Toast Notification System
+      function showToast(message, type = 'info', duration = 5000) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        const icons = {
+          success: 'fa-check-circle',
+          info: 'fa-info-circle',
+          warning: 'fa-exclamation-triangle',
+          error: 'fa-times-circle'
+        };
+        
+        toast.innerHTML = `
+          <i class="fas ${icons[type]}"></i>
+          <span>${message}</span>
+        `;
+        
+        container.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => {
+          toast.style.opacity = '1';
+          toast.style.transform = 'translateX(0)';
+        }, 10);
+        
+        // Auto remove
+        setTimeout(() => {
+          toast.classList.add('toast-exit');
+          setTimeout(() => {
+            if (toast.parentNode) {
+              toast.parentNode.removeChild(toast);
+            }
+          }, 300);
+        }, duration);
+      }
+
+      // Modal Functions
+      function openModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      }
+
+      // Sidebar Toggle for Mobile
+      function mobileSidebarToggle() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        
+        if (sidebar.classList.contains('-translate-x-full')) {
+          sidebar.classList.remove('-translate-x-full');
+          overlay.classList.remove('hidden');
+        } else {
+          sidebar.classList.add('-translate-x-full');
+          overlay.classList.add('hidden');
+        }
+      }
+
+      // Tab Switching
+      function switchTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll('[id$="Tab"]').forEach(tab => {
+          tab.classList.add('hidden');
+        });
+        
+        // Show selected tab
+        document.getElementById(tabName + 'Tab').classList.remove('hidden');
+        
+        // Update active tab button
+        document.querySelectorAll('.tab-button').forEach(btn => {
+          btn.classList.remove('active');
+          if (btn.getAttribute('data-tab') === tabName) {
+            btn.classList.add('active');
+          }
+        });
+        
+        // Refresh charts if needed
+        if (tabName === 'overview') {
+          setTimeout(initializeCharts, 100);
+        }
+      }
+
+      // Filter Functions
+      function toggleFilters() {
+        const filters = document.getElementById('advancedFilters');
+        filters.classList.toggle('hidden');
+      }
+
+      function toggleFilter(filterType) {
+        const chip = document.querySelector(`[data-filter="${filterType}"]`);
+        chip.classList.toggle('active');
+        applyFilters();
+      }
+
+      function applyFilters() {
+        // Implement filter logic here
+        showToast('Filters applied successfully', 'success');
+      }
+
+      function resetFilters() {
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+          chip.classList.remove('active');
+        });
+        document.querySelector('[data-filter="all"]').classList.add('active');
+        
+        document.getElementById('filterStatus').value = '';
+        document.getElementById('filterAcademicYear').value = '';
+        document.getElementById('filterTerm').value = '';
+        document.getElementById('filterDate').value = '';
+        
+        showToast('Filters reset', 'info');
+      }
+
+      // Bulk Edit Functions
+      function toggleAllPayments() {
+        const selectAll = document.getElementById('selectAllPayments');
+        const checkboxes = document.querySelectorAll('.payment-checkbox');
+        checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        updateBulkEditPanel();
+      }
+
+      function toggleAllInvoices() {
+        const selectAll = document.getElementById('selectAllInvoices');
+        const checkboxes = document.querySelectorAll('.invoice-checkbox');
+        checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        updateBulkEditPanel();
+      }
+
+      function updateBulkEditPanel() {
+        const paymentChecks = document.querySelectorAll('.payment-checkbox:checked');
+        const invoiceChecks = document.querySelectorAll('.invoice-checkbox:checked');
+        const total = paymentChecks.length + invoiceChecks.length;
+        
+        const panel = document.getElementById('bulkEditPanel');
+        const count = document.getElementById('bulkEditCount');
+        
+        if (total > 0) {
+          panel.classList.remove('hidden');
+          count.textContent = `${total} fees selected`;
+        } else {
+          panel.classList.add('hidden');
+        }
+      }
+
+      function closeBulkEdit() {
+        document.getElementById('bulkEditPanel').classList.add('hidden');
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      }
+
+      // Payment Functions
+      function loadStudentFeeDetails() {
+        const studentId = document.getElementById('paymentStudent').value;
+        if (studentId) {
+          // Load student's fee details via AJAX
+          showToast('Loading student fee details...', 'info');
+        }
+      }
+
+      function viewReceipt(paymentId) {
+        // Load receipt via AJAX
+        fetch(`/tenant/<?php echo $schoolSlug; ?>/admin/receipt/${paymentId}`)
+          .then(response => response.text())
+          .then(html => {
+            document.getElementById('receiptContent').innerHTML = html;
+            openModal('viewReceiptModal');
+          })
+          .catch(error => {
+            console.error('Error loading receipt:', error);
+            showToast('Failed to load receipt', 'error');
+          });
+      }
+
+      function printReceipt() {
+        const receiptContent = document.getElementById('receiptContent');
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Payment Receipt</title>
+              <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                .receipt-header { text-align: center; margin-bottom: 30px; }
+                .receipt-details { margin: 20px 0; }
+                .receipt-footer { margin-top: 30px; text-align: center; }
+              </style>
+            </head>
+            <body>
+              ${receiptContent.innerHTML}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+      }
+
+      // Invoice Functions
+      function recordPaymentForInvoice(invoiceId) {
+        openModal('recordPaymentModal');
+        // Pre-select the invoice
+        setTimeout(() => {
+          document.getElementById('paymentInvoice').value = invoiceId;
+        }, 100);
+      }
+
+      function viewInvoice(invoiceId) {
+        // Load invoice details via AJAX
+        showToast(`Loading invoice #${invoiceId}`, 'info');
+      }
+
+      // Initialize Charts
+      function initializeCharts() {
+        // Collection Chart
+        const collectionCtx = document.getElementById('collectionChart').getContext('2d');
+        new Chart(collectionCtx, {
+          type: 'line',
+          data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+            datasets: [{
+              label: 'Fee Collection',
+              data: [45000, 52000, 48000, 61000, 55000, 68000, 72000],
+              borderColor: '#4f46e5',
+              backgroundColor: 'rgba(79, 70, 229, 0.1)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: 'rgba(0, 0, 0, 0.05)'
+                },
+                ticks: {
+                  callback: function(value) {
+                    return '<?php echo $currencySymbol; ?>' + value.toLocaleString();
+                  }
+                }
+              },
+              x: {
+                grid: {
+                  color: 'rgba(0, 0, 0, 0.05)'
+                }
+              }
+            }
+          }
+        });
+
+        // Payment Methods Chart
+        const methodsCtx = document.getElementById('paymentMethodsChart').getContext('2d');
+        new Chart(methodsCtx, {
+          type: 'doughnut',
+          data: {
+            labels: <?php echo json_encode(array_map(function($m) { 
+              return ucfirst(str_replace('_', ' ', $m['payment_method'])); 
+            }, $paymentMethods)); ?>,
+            datasets: [{
+              data: <?php echo json_encode(array_map(function($m) { 
+                return $m['amount']; 
+              }, $paymentMethods)); ?>,
+              backgroundColor: [
+                '#4f46e5',
+                '#10b981',
+                '#f59e0b',
+                '#ef4444',
+                '#8b5cf6'
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            }
+          }
+        });
+      }
+
+      // Initialize when page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        // Initialize charts
+        initializeCharts();
+        
+        // Initialize flatpickr for date inputs
+        flatpickr("#paymentDate", {
+          dateFormat: "Y-m-d",
+          defaultDate: "today"
+        });
+        
+        flatpickr("#invoiceDueDate", {
+          dateFormat: "Y-m-d",
+          defaultDate: new Date().fp_incr(30)
+        });
+        
+        // Form submissions
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+          e.preventDefault();
+          // Process payment via AJAX
+          showToast('Payment recorded successfully!', 'success');
+          closeModal('recordPaymentModal');
+          // Refresh page after 2 seconds
+          setTimeout(() => location.reload(), 2000);
+        });
+        
+        document.getElementById('invoiceForm').addEventListener('submit', function(e) {
+          e.preventDefault();
+          // Process invoice via AJAX
+          showToast('Invoice generated successfully!', 'success');
+          closeModal('generateInvoiceModal');
+          // Refresh page after 2 seconds
+          setTimeout(() => location.reload(), 2000);
+        });
+        
+        // Invoice type toggle
+        document.getElementById('invoiceType').addEventListener('change', function() {
+          const type = this.value;
+          document.getElementById('singleStudentSection').classList.toggle('hidden', type !== 'single');
+          document.getElementById('bulkSection').classList.toggle('hidden', type !== 'bulk');
+        });
+      });
+
+      // Demo functions for buttons
+      function sendReminders() {
+        showToast('Reminders sent successfully!', 'success');
+        closeModal('sendRemindersModal');
+      }
+
+      function generateCollectionReport() {
+        showToast('Report generated and downloaded', 'success');
+      }
+
+      function exportFilteredData() {
+        showToast('Data exported successfully', 'success');
+      }
+
+      function addFeeCategory() {
+        showToast('Add fee category functionality', 'info');
+      }
+
+      function saveFeeSettings() {
+        showToast('Settings saved successfully', 'success');
+      }
+    </script>
+  </body>
+</html>

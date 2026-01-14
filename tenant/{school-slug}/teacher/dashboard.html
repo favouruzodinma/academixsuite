@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Teacher Portal | AcademiXSuite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --primary-indigo: #4f46e5;
+            --primary-teal: #0d9488;
+            --accent-purple: #8b5cf6;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --surface-white: #ffffff;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-light); 
+            color: var(--text-dark); 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Glassmorphism effects */
+        .glass-header { 
+            background: rgba(255, 255, 255, 0.98); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+        
+        .toast {
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease forwards;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #0d9488, #14b8a6);
+            color: white;
+            border-left: 4px solid #0f766e;
+        }
+        
+        .toast-info {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: white;
+            border-left: 4px solid #3730a3;
+        }
+        
+        .toast-warning {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+            border-left: 4px solid #d97706;
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #f43f5e, #fb7185);
+            color: white;
+            border-left: 4px solid #be123c;
+        }
+        
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+        
+        .toast-exit {
+            animation: fadeOut 0.3s ease forwards;
+        }
+        
+        .toast-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        
+        .toast-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Sidebar styling */
+        .sidebar-link { 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-left: 3px solid transparent; 
+            position: relative;
+        }
+        
+        .sidebar-link:hover { 
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.05) 0%, rgba(79, 70, 229, 0.02) 100%);
+            color: var(--primary-indigo); 
+            border-left-color: rgba(79, 70, 229, 0.3);
+        }
+        
+        .active-link { 
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.1) 0%, rgba(79, 70, 229, 0.05) 100%);
+            color: var(--primary-indigo); 
+            border-left-color: var(--primary-indigo); 
+            font-weight: 700;
+        }
+        
+        .active-link::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: var(--primary-indigo);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Class Cards */
+        .class-card {
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .class-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .class-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--class-color), transparent);
+        }
+        
+        .class-1 { --class-color: #4f46e5; }
+        .class-2 { --class-color: #0d9488; }
+        .class-3 { --class-color: #8b5cf6; }
+
+        /* Attendance Status */
+        .attendance-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-present {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .status-absent {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .status-late {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        /* Tab styling */
+        .tab-button {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-button:hover {
+            color: var(--primary-indigo);
+        }
+        
+        .tab-button.active {
+            color: var(--primary-indigo);
+            border-bottom-color: var(--primary-indigo);
+            background: linear-gradient(to top, rgba(79, 70, 229, 0.05), transparent);
+        }
+
+        /* Metric Cards */
+        .metric-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--metric-color), transparent);
+        }
+        
+        .metric-primary {
+            --metric-color: var(--primary-indigo);
+        }
+        
+        .metric-success {
+            --metric-color: var(--primary-teal);
+        }
+        
+        .metric-warning {
+            --metric-color: var(--accent-amber);
+        }
+        
+        .metric-danger {
+            --metric-color: var(--accent-rose);
+        }
+        
+        .metric-purple {
+            --metric-color: var(--accent-purple);
+        }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Action Buttons */
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .action-btn-primary {
+            background: linear-gradient(135deg, var(--primary-indigo), var(--accent-purple));
+            color: white;
+        }
+        
+        .action-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+        }
+        
+        .action-btn-secondary {
+            background: white;
+            color: var(--primary-indigo);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .action-btn-secondary:hover {
+            background: #f8fafc;
+            border-color: var(--primary-indigo);
+        }
+
+        /* Performance Meter */
+        .performance-meter {
+            height: 8px;
+            border-radius: 4px;
+            background: #f1f5f9;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .performance-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .performance-excellent { background: linear-gradient(90deg, #0d9488, #14b8a6); }
+        .performance-good { background: linear-gradient(90deg, #4f46e5, #6366f1); }
+        .performance-average { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .performance-poor { background: linear-gradient(90deg, #f43f5e, #fb7185); }
+
+        /* Grade Badge */
+        .grade-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 16px;
+            color: white;
+        }
+        
+        .grade-a { background: linear-gradient(135deg, #0d9488, #14b8a6); }
+        .grade-b { background: linear-gradient(135deg, #4f46e5, #6366f1); }
+        .grade-c { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+        .grade-d { background: linear-gradient(135deg, #f43f5e, #fb7185); }
+        .grade-f { background: linear-gradient(135deg, #991b1b, #dc2626); }
+
+        /* Student Card */
+        .student-card {
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .student-card:hover {
+            border-color: var(--primary-indigo);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Message Card */
+        .message-card {
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .message-card:hover {
+            border-color: var(--primary-indigo);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.1);
+        }
+        
+        .message-card.unread {
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.05), rgba(79, 70, 229, 0.02));
+            border-left: 4px solid var(--primary-indigo);
+        }
+        
+        .message-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 18px;
+            color: white;
+        }
+        
+        .avatar-parent { background: linear-gradient(135deg, #4f46e5, #6366f1); }
+        .avatar-admin { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+        .avatar-student { background: linear-gradient(135deg, #0d9488, #14b8a6); }
+
+        /* Assignment Card */
+        .assignment-card {
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+        
+        .assignment-card:hover {
+            transform: translateX(4px);
+        }
+        
+        .assignment-math { 
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.1), rgba(79, 70, 229, 0.05)); 
+            border-left-color: #4f46e5;
+        }
+        .assignment-science { 
+            background: linear-gradient(90deg, rgba(13, 148, 136, 0.1), rgba(13, 148, 136, 0.05)); 
+            border-left-color: #0d9488;
+        }
+        .assignment-english { 
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05)); 
+            border-left-color: #f59e0b;
+        }
+        .assignment-history { 
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05)); 
+            border-left-color: #8b5cf6;
+        }
+
+        /* Event Card */
+        .event-card {
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .event-card:hover {
+            border-color: var(--primary-indigo);
+            transform: translateY(-2px);
+        }
+        
+        .event-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .event-meeting { background: rgba(79, 70, 229, 0.1); color: #4f46e5; }
+        .event-training { background: rgba(13, 148, 136, 0.1); color: #0d9488; }
+        .event-exam { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .event-deadline { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
+
+        /* Notification Bell */
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #f43f5e, #fb7185);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .glass-header {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: white;
+            }
+            
+            .toast-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+            
+            .chart-container {
+                height: 250px !important;
+            }
+            
+            .class-card {
+                padding: 16px;
+            }
+        }
+
+        /* Loader Animation */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #f1f5f9;
+            border-top-color: var(--primary-indigo);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[99] lg:hidden hidden" onclick="mobileSidebarToggle()"></div>
+
+    <!-- Mark Attendance Modal -->
+    <div id="markAttendanceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="bg-white rounded-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Mark Attendance</h3>
+                    <button onclick="closeModal('markAttendanceModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h4 class="font-bold text-slate-900">Mathematics - Grade 11A</h4>
+                            <p class="text-sm text-slate-600">Period 2 • Room 201 • Today, 9:00 AM</p>
+                        </div>
+                        <span class="text-sm font-bold text-slate-400">22 Students</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                            <span class="text-sm text-slate-600">Present: <span class="font-bold text-emerald-600" id="presentCount">18</span></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-rose-500"></div>
+                            <span class="text-sm text-slate-600">Absent: <span class="font-bold text-rose-600" id="absentCount">2</span></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                            <span class="text-sm text-slate-600">Late: <span class="font-bold text-amber-600" id="lateCount">2</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Attendance Table -->
+                <div class="overflow-y-auto max-h-96">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-slate-200">
+                                <th class="text-left py-3 px-4 text-sm font-bold text-slate-600">Student</th>
+                                <th class="text-left py-3 px-4 text-sm font-bold text-slate-600">Status</th>
+                                <th class="text-left py-3 px-4 text-sm font-bold text-slate-600">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTable">
+                            <!-- Attendance rows will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="flex gap-3 mt-8">
+                    <button onclick="closeModal('markAttendanceModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="submitAttendance()" class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200">
+                        Save Attendance
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Grade Modal -->
+    <div id="recordGradeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="bg-white rounded-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Record Grade</h3>
+                    <button onclick="closeModal('recordGradeModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="form-label">Assessment Type</label>
+                        <select id="assessmentType" class="form-select">
+                            <option value="ca1">Continuous Assessment 1 (CA1)</option>
+                            <option value="ca2">Continuous Assessment 2 (CA2)</option>
+                            <option value="exam">Term Examination</option>
+                            <option value="project">Project/Assignment</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Subject & Class</label>
+                        <select id="gradeClass" class="form-select">
+                            <option value="math11">Mathematics - Grade 11A</option>
+                            <option value="math12">Mathematics - Grade 12B</option>
+                            <option value="physics11">Physics - Grade 11A</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Maximum Score</label>
+                            <input type="number" id="maxScore" class="form-input" value="20" min="1" max="100">
+                        </div>
+                        <div>
+                            <label class="form-label">Assessment Date</label>
+                            <input type="date" id="assessmentDate" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Upload Score Sheet (Optional)</label>
+                        <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-indigo-400 transition">
+                            <i class="fas fa-file-upload text-3xl text-slate-400 mb-3"></i>
+                            <p class="text-slate-600 mb-2">Drag & drop Excel or CSV file here</p>
+                            <p class="text-sm text-slate-500">or</p>
+                            <button onclick="uploadScoreSheet()" class="mt-3 px-4 py-2 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200">
+                                Browse Files
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-8">
+                    <button onclick="closeModal('recordGradeModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="proceedToGradeEntry()" class="flex-1 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-teal-200">
+                        Proceed to Grade Entry
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Announcement Modal -->
+    <div id="sendAnnouncementModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="bg-white rounded-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900">Send Announcement</h3>
+                    <button onclick="closeModal('sendAnnouncementModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="form-label">Recipients</label>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="form-checkbox text-indigo-600" checked>
+                                <span class="ml-2 text-sm">All Students</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="form-checkbox text-indigo-600">
+                                <span class="ml-2 text-sm">Grade 11A</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="form-checkbox text-indigo-600">
+                                <span class="ml-2 text-sm">Grade 12B</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="form-checkbox text-indigo-600">
+                                <span class="ml-2 text-sm">Parents</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Subject</label>
+                        <input type="text" id="announcementSubject" class="form-input" placeholder="Enter announcement subject">
+                    </div>
+                    
+                    <div>
+                        <label class="form-label">Message</label>
+                        <textarea id="announcementMessage" class="form-input h-48" placeholder="Type your announcement here..."></textarea>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <button onclick="attachFile()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <button onclick="scheduleAnnouncement()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                                <i class="fas fa-clock"></i>
+                            </button>
+                        </div>
+                        <div class="text-sm text-slate-500">
+                            <span id="charCount">0</span>/500 characters
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-8">
+                    <button onclick="closeModal('sendAnnouncementModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        Cancel
+                    </button>
+                    <button onclick="sendAnnouncement()" class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200">
+                        Send Announcement
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-[100] lg:relative lg:translate-x-0 -translate-x-full transition-transform duration-300 flex flex-col shadow-xl lg:shadow-none">
+            
+            <!-- Teacher Header -->
+            <div class="h-20 flex items-center px-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-100">
+                            <i class="fas fa-chalkboard-teacher text-white text-lg"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-teal-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div>
+                        <span class="text-lg font-black tracking-tight text-slate-900">Mr. Davis</span>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">TEACHER PORTAL</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teacher Quick Info -->
+            <div class="p-6 border-b border-slate-100">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Classes:</span>
+                        <span class="text-sm font-black text-indigo-600">3</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Students:</span>
+                        <span class="text-sm font-bold text-teal-600">68</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Pending Tasks:</span>
+                        <span class="text-sm font-bold text-amber-600">4</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 space-y-8 custom-scrollbar">
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Dashboard</p>
+                    <nav class="space-y-1">
+                        <a href="#" class="sidebar-link active-link flex items-center gap-3 px-6 py-3 text-sm font-semibold">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <span>Overview</span>
+                        </a>
+                        <a href="teacher-classes.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-users-class"></i>
+                            </div>
+                            <span>My Classes</span>
+                            <span class="ml-auto bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-full">3</span>
+                        </a>
+                        <a href="teacher-schedule.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <span>Schedule</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Academic</p>
+                    <nav class="space-y-1">
+                        <a href="teacher-attendance.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <span>Attendance</span>
+                        </a>
+                        <a href="teacher-grades.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <span>Grades & Assessment</span>
+                        </a>
+                        <a href="teacher-assignments.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <span>Assignments</span>
+                            <span class="ml-auto bg-rose-100 text-rose-700 text-xs font-bold px-2 py-1 rounded-full">2</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Communication</p>
+                    <nav class="space-y-1">
+                        <a href="teacher-messages.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <span>Messages</span>
+                            <span class="ml-auto bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-full">3</span>
+                        </a>
+                        <a href="teacher-announcements.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <span>Announcements</span>
+                        </a>
+                        <a href="teacher-parents.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-user-friends"></i>
+                            </div>
+                            <span>Parent Contacts</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Resources</p>
+                    <nav class="space-y-1">
+                        <a href="teacher-resources.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <span>Lesson Materials</span>
+                        </a>
+                        <a href="teacher-reports.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <span>Reports & Analytics</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Bottom Section -->
+            <div class="p-6 border-t border-slate-100 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
+                            <i class="fas fa-cog text-slate-600"></i>
+                        </div>
+                        <a href="teacher-settings.html" class="text-sm font-medium text-slate-600 hover:text-indigo-600">Settings</a>
+                    </div>
+                </div>
+                <button onclick="showToast('Logout successful', 'success')" class="w-full py-3 bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 text-slate-700 font-bold rounded-xl hover:shadow-md transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            
+            <!-- Header -->
+            <header class="glass-header h-20 px-6 flex items-center justify-between border-b border-slate-200/50">
+                <div class="flex items-center gap-4">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl font-black text-slate-900">Teacher Dashboard</h1>
+                        <p class="text-sm text-slate-600">Welcome back, Mr. Davis. Here's your teaching overview.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <!-- Quick Actions -->
+                    <div class="hidden md:flex items-center gap-2">
+                        <button onclick="openModal('markAttendanceModal')" class="action-btn action-btn-primary">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Mark Attendance</span>
+                        </button>
+                        <button onclick="openModal('recordGradeModal')" class="action-btn action-btn-secondary">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Record Grade</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <div class="notification-bell relative">
+                        <button onclick="toggleNotifications()" class="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <div class="notification-badge">3</div>
+                        
+                        <!-- Notification Dropdown -->
+                        <div id="notificationDropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 hidden z-50">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-slate-900">Notifications</h3>
+                                <button class="text-xs text-indigo-600 font-bold">Mark all as read</button>
+                            </div>
+                            <div class="space-y-3 max-h-64 overflow-y-auto">
+                                <div class="message-card unread">
+                                    <div class="flex gap-3">
+                                        <div class="message-avatar avatar-admin">A</div>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-900">Admin: Staff Meeting</p>
+                                            <p class="text-xs text-slate-600">Tomorrow at 3:00 PM in Conference Room</p>
+                                            <p class="text-xs text-slate-400 mt-1">2 hours ago</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="message-card">
+                                    <div class="flex gap-3">
+                                        <div class="message-avatar avatar-parent">P</div>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-900">Mrs. Johnson (Parent)</p>
+                                            <p class="text-xs text-slate-600">Requested meeting about Sarah's progress</p>
+                                            <p class="text-xs text-slate-400 mt-1">5 hours ago</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="message-card unread">
+                                    <div class="flex gap-3">
+                                        <div class="message-avatar avatar-student">S</div>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-900">Assignment Submitted</p>
+                                            <p class="text-xs text-slate-600">Michael Turner submitted Math Assignment 3</p>
+                                            <p class="text-xs text-slate-400 mt-1">Yesterday</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="teacher-notifications.html" class="block text-center text-sm text-indigo-600 font-bold mt-4 pt-4 border-t border-slate-100 hover:text-indigo-800">
+                                View all notifications
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- User Profile -->
+                    <div class="relative">
+                        <button onclick="toggleProfileMenu()" class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold">
+                                JD
+                            </div>
+                            <div class="hidden md:block text-left">
+                                <p class="text-sm font-bold text-slate-900">John Davis</p>
+                                <p class="text-xs text-slate-600">Mathematics Teacher</p>
+                            </div>
+                            <i class="fas fa-chevron-down text-slate-400 text-xs hidden md:block"></i>
+                        </button>
+                        
+                        <!-- Profile Dropdown -->
+                        <div id="profileDropdown" class="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 hidden z-50">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                                    JD
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900">John Davis</p>
+                                    <p class="text-xs text-slate-600">jdavis@academix.edu</p>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <a href="teacher-profile.html" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">
+                                    <i class="fas fa-user w-5"></i>
+                                    <span>My Profile</span>
+                                </a>
+                                <a href="teacher-settings.html" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">
+                                    <i class="fas fa-cog w-5"></i>
+                                    <span>Account Settings</span>
+                                </a>
+                                <a href="teacher-help.html" class="flex items-center gap-3 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">
+                                    <i class="fas fa-question-circle w-5"></i>
+                                    <span>Help & Support</span>
+                                </a>
+                            </div>
+                            <div class="border-t border-slate-200 mt-4 pt-4">
+                                <button onclick="showToast('Logout successful', 'success')" class="w-full flex items-center justify-center gap-2 text-sm font-bold text-rose-600 hover:text-rose-800 py-2">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="glass-card metric-card metric-primary rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.1s">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-bold text-slate-600 mb-1">Total Students</p>
+                                <p class="text-3xl font-black text-slate-900">68</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center">
+                                <i class="fas fa-users text-indigo-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-3"><span class="font-bold text-emerald-600">+3</span> this term</p>
+                    </div>
+                    
+                    <div class="glass-card metric-card metric-success rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.2s">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-bold text-slate-600 mb-1">Average Grade</p>
+                                <p class="text-3xl font-black text-slate-900">B+</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center">
+                                <i class="fas fa-chart-line text-teal-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-3"><span class="font-bold text-emerald-600">+5.2%</span> vs last term</p>
+                    </div>
+                    
+                    <div class="glass-card metric-card metric-warning rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.3s">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-bold text-slate-600 mb-1">Attendance Rate</p>
+                                <p class="text-3xl font-black text-slate-900">94.5%</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-amber-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-3"><span class="font-bold text-emerald-600">+2.1%</span> improvement</p>
+                    </div>
+                    
+                    <div class="glass-card metric-card metric-purple rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.4s">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-bold text-slate-600 mb-1">Pending Tasks</p>
+                                <p class="text-3xl font-black text-slate-900">4</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                                <i class="fas fa-tasks text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <button onclick="showToast('Task list loaded', 'info')" class="text-xs text-indigo-600 font-bold mt-3 hover:text-indigo-800">
+                            View all tasks →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left Column -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- My Classes -->
+                        <div class="glass-card rounded-2xl p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <div>
+                                    <h2 class="text-xl font-black text-slate-900">My Classes</h2>
+                                    <p class="text-sm text-slate-600">Manage your assigned classes and students</p>
+                                </div>
+                                <button onclick="openModal('sendAnnouncementModal')" class="action-btn action-btn-primary">
+                                    <i class="fas fa-bullhorn"></i>
+                                    <span>Announce</span>
+                                </button>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="class-card class-1 glass-card rounded-xl">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div>
+                                            <h3 class="font-black text-lg text-slate-900">Mathematics</h3>
+                                            <p class="text-sm text-slate-600">Grade 11A • 24 students</p>
+                                        </div>
+                                        <div class="grade-badge grade-a">A</div>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-slate-600">Avg. Score:</span>
+                                            <span class="text-sm font-bold text-emerald-600">85%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-slate-600">Attendance:</span>
+                                            <span class="text-sm font-bold text-indigo-600">96%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-slate-600">Next Class:</span>
+                                            <span class="text-sm font-bold text-amber-600">Tomorrow 9:00</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2 mt-6">
+                                        <button onclick="showToast('Class details loaded', 'info')" class="flex-1 py-2 bg-slate-100 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-200">
+                                            View
+                                        </button>
+                                        <button onclick="openModal('markAttendanceModal')" class="flex-1 py-2 bg-indigo-100 text-indigo-700 text-sm font-bold rounded-lg hover:bg-indigo-200">
+                                            Attendance
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="class-card class-2 glass-card rounded-xl">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div>
+                                            <h3 class="font-black text-lg text-slate-900">Mathematics</h3>
+                                            <p class="text-sm text-slate-600">Grade 12B • 22 students</p>
+                                        </div>
+                                        <div class="grade-badge grade-b">B</div>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-slate-600">Avg. Score:</span>
+                                            <span class="text-sm font-bold text-emerald-600">78%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-slate-600">Attendance:</span>
+                                            <span class="text-sm font-bold text-indigo-600">92%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-slate-600">Next Class:</span>
+                                            <span class="text-sm font-bold text-amber-600">Mon 11:00</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2 mt-6">
+                                        <button onclick="showToast('Class details loaded', 'info')" class="flex-1 py-2 bg-slate-100 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-200">
+                                            View
+                                        </button>
+                                        <button onclick="openModal('markAttendanceModal')" class="flex-1 py-2 bg-indigo-100 text-indigo-700 text-sm font-bold rounded-lg hover:bg-indigo-200">
+                                            Attendance
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="class-card class-3 glass-card rounded-xl">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div>
+                                            <h3 class="font-black text-lg text-slate-900">Physics</h3>
+                                            <p class="text-sm text-slate-600">Grade 11A • 22 students</p>
+                                        </div>
+                                        <div class="grade-badge grade-c">C+</div>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-slate-600">Avg. Score:</span>
+                                            <span class="text-sm font-bold text-emerald-600">72%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-slate-600">Attendance:</span>
+                                            <span class="text-sm font-bold text-indigo-600">95%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-slate-600">Next Class:</span>
+                                            <span class="text-sm font-bold text-amber-600">Today 14:00</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2 mt-6">
+                                        <button onclick="showToast('Class details loaded', 'info')" class="flex-1 py-2 bg-slate-100 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-200">
+                                            View
+                                        </button>
+                                        <button onclick="openModal('markAttendanceModal')" class="flex-1 py-2 bg-indigo-100 text-indigo-700 text-sm font-bold rounded-lg hover:bg-indigo-200">
+                                            Attendance
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Grade Performance Chart -->
+                        <div class="glass-card rounded-2xl p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <div>
+                                    <h2 class="text-xl font-black text-slate-900">Grade Performance</h2>
+                                    <p class="text-sm text-slate-600">Term 3 2024 overview across all classes</p>
+                                </div>
+                                <select class="bg-slate-100 border-0 text-slate-700 text-sm font-bold rounded-lg px-4 py-2">
+                                    <option>Term 3 2024</option>
+                                    <option>Term 2 2024</option>
+                                    <option>Term 1 2024</option>
+                                </select>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="space-y-6">
+                        <!-- Upcoming Deadlines -->
+                        <div class="glass-card rounded-2xl p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-xl font-black text-slate-900">Upcoming Deadlines</h2>
+                                <span class="text-xs font-bold text-rose-600 bg-rose-100 px-3 py-1 rounded-full">2 Urgent</span>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="assignment-card assignment-math">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h4 class="font-bold text-slate-900">Grade Math CA1</h4>
+                                            <p class="text-sm text-slate-600">Grade 11A • 24 papers</p>
+                                        </div>
+                                        <span class="text-xs font-bold text-rose-600">Today</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <div class="performance-meter w-3/4">
+                                            <div class="performance-fill performance-average" style="width: 40%"></div>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-700">40%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="assignment-card assignment-science">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h4 class="font-bold text-slate-900">Prepare Exam Papers</h4>
+                                            <p class="text-sm text-slate-600">Physics Final Exam</p>
+                                        </div>
+                                        <span class="text-xs font-bold text-amber-600">2 days</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <div class="performance-meter w-3/4">
+                                            <div class="performance-fill performance-good" style="width: 60%"></div>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-700">60%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="assignment-card assignment-history">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h4 class="font-bold text-slate-900">Submit Term Reports</h4>
+                                            <p class="text-sm text-slate-600">All classes</p>
+                                        </div>
+                                        <span class="text-xs font-bold text-emerald-600">1 week</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <div class="performance-meter w-3/4">
+                                            <div class="performance-fill performance-poor" style="width: 20%"></div>
+                                        </div>
+                                        <span class="text-xs font-bold text-slate-700">20%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button onclick="showToast('All tasks loaded', 'info')" class="w-full mt-6 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                                View All Tasks
+                            </button>
+                        </div>
+
+                        <!-- Recent Messages -->
+                        <div class="glass-card rounded-2xl p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-xl font-black text-slate-900">Recent Messages</h2>
+                                <span class="text-xs font-bold text-indigo-600 bg-indigo-100 px-3 py-1 rounded-full">3 Unread</span>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="message-card unread">
+                                    <div class="flex gap-3">
+                                        <div class="message-avatar avatar-parent">P</div>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-900">Mrs. Johnson</p>
+                                            <p class="text-xs text-slate-600">Regarding Sarah's math performance...</p>
+                                            <p class="text-xs text-slate-400 mt-1">2 hours ago</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="message-card">
+                                    <div class="flex gap-3">
+                                        <div class="message-avatar avatar-admin">A</div>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-900">Admin Team</p>
+                                            <p class="text-xs text-slate-600">Staff meeting reminder</p>
+                                            <p class="text-xs text-slate-400 mt-1">5 hours ago</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="message-card unread">
+                                    <div class="flex gap-3">
+                                        <div class="message-avatar avatar-student">S</div>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-900">Michael Turner</p>
+                                            <p class="text-xs text-slate-600">Question about assignment 3...</p>
+                                            <p class="text-xs text-slate-400 mt-1">Yesterday</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <a href="teacher-messages.html" class="block text-center text-indigo-600 font-bold mt-6 pt-4 border-t border-slate-100 hover:text-indigo-800">
+                                View All Messages
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Initialize date picker for assessment date
+        flatpickr("#assessmentDate", {
+            dateFormat: "Y-m-d",
+            defaultDate: "today",
+        });
+
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                info: 'fas fa-info-circle',
+                warning: 'fas fa-exclamation-triangle',
+                error: 'fas fa-times-circle'
+            };
+            
+            toast.innerHTML = `
+                <i class="toast-icon ${icons[type]}"></i>
+                <div class="toast-content">${message}</div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Auto remove
+            setTimeout(() => {
+                toast.classList.add('toast-exit');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Mobile Sidebar Toggle
+        function mobileSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Dropdown Toggles
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.toggle('hidden');
+            
+            // Close other dropdowns
+            document.getElementById('profileDropdown').classList.add('hidden');
+        }
+
+        function toggleProfileMenu() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('hidden');
+            
+            // Close other dropdowns
+            document.getElementById('notificationDropdown').classList.add('hidden');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const notifDropdown = document.getElementById('notificationDropdown');
+            const notifBell = document.querySelector('.notification-bell');
+            const profileDropdown = document.getElementById('profileDropdown');
+            const profileButton = document.querySelector('.relative > button');
+            
+            if (!notifBell.contains(event.target) && !notifDropdown.contains(event.target)) {
+                notifDropdown.classList.add('hidden');
+            }
+            
+            if (!profileButton.contains(event.target) && !profileDropdown.contains(event.target)) {
+                profileDropdown.classList.add('hidden');
+            }
+        });
+
+        // Initialize attendance table
+        function loadAttendanceTable() {
+            const students = [
+                { name: 'Sarah Johnson', id: 'S001', status: 'present' },
+                { name: 'Michael Turner', id: 'S002', status: 'present' },
+                { name: 'Emily Chen', id: 'S003', status: 'late' },
+                { name: 'James Wilson', id: 'S004', status: 'present' },
+                { name: 'Olivia Davis', id: 'S005', status: 'absent' },
+                { name: 'Ethan Martinez', id: 'S006', status: 'present' },
+                { name: 'Ava Thompson', id: 'S007', status: 'present' },
+                { name: 'Noah Robinson', id: 'S008', status: 'present' },
+                { name: 'Isabella Clark', id: 'S009', status: 'late' },
+                { name: 'Liam Lewis', id: 'S010', status: 'present' },
+                { name: 'Sophia Walker', id: 'S011', status: 'present' },
+                { name: 'Mason Hall', id: 'S012', status: 'present' },
+                { name: 'Charlotte Young', id: 'S013', status: 'absent' },
+                { name: 'Benjamin King', id: 'S014', status: 'present' },
+                { name: 'Amelia Wright', id: 'S015', status: 'present' },
+                { name: 'William Scott', id: 'S016', status: 'present' },
+                { name: 'Mia Green', id: 'S017', status: 'present' },
+                { name: 'Jameson Adams', id: 'S018', status: 'present' },
+                { name: 'Harper Nelson', id: 'S019', status: 'present' },
+                { name: 'Alexander Carter', id: 'S020', status: 'present' },
+                { name: 'Evelyn Mitchell', id: 'S021', status: 'present' },
+                { name: 'Daniel Perez', id: 'S022', status: 'present' }
+            ];
+
+            const table = document.getElementById('attendanceTable');
+            table.innerHTML = '';
+            
+            let presentCount = 0, absentCount = 0, lateCount = 0;
+            
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-slate-100 hover:bg-slate-50';
+                row.innerHTML = `
+                    <td class="py-4 px-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-sm font-bold text-slate-600">
+                                ${student.name.charAt(0)}
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-slate-900">${student.name}</p>
+                                <p class="text-xs text-slate-500">${student.id}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4 px-4">
+                        <select class="attendance-select border border-slate-300 rounded-lg px-3 py-2 text-sm" data-student="${student.id}" onchange="updateAttendanceCount()">
+                            <option value="present" ${student.status === 'present' ? 'selected' : ''}>Present</option>
+                            <option value="absent" ${student.status === 'absent' ? 'selected' : ''}>Absent</option>
+                            <option value="late" ${student.status === 'late' ? 'selected' : ''}>Late</option>
+                        </select>
+                    </td>
+                    <td class="py-4 px-4">
+                        <input type="text" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Add note (optional)">
+                    </td>
+                `;
+                table.appendChild(row);
+                
+                if (student.status === 'present') presentCount++;
+                if (student.status === 'absent') absentCount++;
+                if (student.status === 'late') lateCount++;
+            });
+            
+            document.getElementById('presentCount').textContent = presentCount;
+            document.getElementById('absentCount').textContent = absentCount;
+            document.getElementById('lateCount').textContent = lateCount;
+        }
+
+        function updateAttendanceCount() {
+            const selects = document.querySelectorAll('.attendance-select');
+            let presentCount = 0, absentCount = 0, lateCount = 0;
+            
+            selects.forEach(select => {
+                if (select.value === 'present') presentCount++;
+                if (select.value === 'absent') absentCount++;
+                if (select.value === 'late') lateCount++;
+            });
+            
+            document.getElementById('presentCount').textContent = presentCount;
+            document.getElementById('absentCount').textContent = absentCount;
+            document.getElementById('lateCount').textContent = lateCount;
+        }
+
+        function submitAttendance() {
+            showToast('Attendance saved successfully for 22 students', 'success');
+            closeModal('markAttendanceModal');
+        }
+
+        function proceedToGradeEntry() {
+            showToast('Grade entry screen loaded', 'info');
+            closeModal('recordGradeModal');
+        }
+
+        function uploadScoreSheet() {
+            showToast('File upload dialog opened', 'info');
+        }
+
+        function attachFile() {
+            showToast('Attachment dialog opened', 'info');
+        }
+
+        function scheduleAnnouncement() {
+            showToast('Schedule options loaded', 'info');
+        }
+
+        function sendAnnouncement() {
+            const subject = document.getElementById('announcementSubject').value;
+            if (!subject) {
+                showToast('Please enter a subject', 'error');
+                return;
+            }
+            showToast('Announcement sent to 68 recipients', 'success');
+            closeModal('sendAnnouncementModal');
+        }
+
+        // Character counter for announcement
+        document.getElementById('announcementMessage').addEventListener('input', function() {
+            document.getElementById('charCount').textContent = this.value.length;
+        });
+
+        // Initialize performance chart
+        function initializeCharts() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Grade 11A Math', 'Grade 12B Math', 'Grade 11A Physics', 'Grade 10C Math', 'Grade 9B Science'],
+                    datasets: [{
+                        label: 'Average Score (%)',
+                        data: [85, 78, 72, 81, 69],
+                        backgroundColor: [
+                            'rgba(79, 70, 229, 0.8)',
+                            'rgba(79, 70, 229, 0.6)',
+                            'rgba(79, 70, 229, 0.4)',
+                            'rgba(79, 70, 229, 0.7)',
+                            'rgba(79, 70, 229, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgba(79, 70, 229, 1)',
+                            'rgba(79, 70, 229, 1)',
+                            'rgba(79, 70, 229, 1)',
+                            'rgba(79, 70, 229, 1)',
+                            'rgba(79, 70, 229, 1)'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1e293b',
+                            bodyColor: '#1e293b',
+                            borderColor: '#e2e8f0',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Score: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(226, 232, 240, 0.5)'
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                font: {
+                                    family: "'Inter', sans-serif"
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#64748b',
+                                font: {
+                                    family: "'Inter', sans-serif",
+                                    size: 11
+                                },
+                                maxRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Form input styling
+        document.querySelectorAll('.form-input, .form-select, .form-textarea').forEach(element => {
+            element.classList.add('w-full', 'border', 'border-slate-300', 'rounded-xl', 'px-4', 'py-3', 'text-slate-700', 'focus:outline-none', 'focus:ring-2', 'focus:ring-indigo-500', 'focus:border-transparent', 'transition');
+        });
+
+        document.querySelectorAll('.form-label').forEach(element => {
+            element.classList.add('block', 'text-sm', 'font-bold', 'text-slate-700', 'mb-2');
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAttendanceTable();
+            initializeCharts();
+            
+            // Show welcome toast
+            setTimeout(() => {
+                showToast('Welcome back, Mr. Davis! You have 4 pending tasks.', 'info', 3000);
+            }, 1000);
+        });
+
+        // Close modals with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal('markAttendanceModal');
+                closeModal('recordGradeModal');
+                closeModal('sendAnnouncementModal');
+                document.getElementById('notificationDropdown').classList.add('hidden');
+                document.getElementById('profileDropdown').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

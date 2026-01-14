@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>My Children | Parent Portal | AcademiXSuite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-teal: #06b6d4;
+            --surface-white: #ffffff;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-light); 
+            color: var(--text-dark); 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Glassmorphism effects */
+        .glass-header { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Sidebar styling */
+        .sidebar-link { 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-left: 3px solid transparent; 
+            position: relative;
+        }
+        
+        .sidebar-link:hover { 
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+            color: var(--primary-blue); 
+            border-left-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .active-link { 
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+            color: var(--primary-blue); 
+            border-left-color: var(--primary-blue); 
+            font-weight: 700;
+        }
+        
+        .active-link::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: var(--primary-blue);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Child Cards */
+        .child-card {
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .child-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .child-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--child-color), transparent);
+        }
+        
+        .child-1 { --child-color: #3b82f6; }
+        .child-2 { --child-color: #10b981; }
+        .child-3 { --child-color: #8b5cf6; }
+
+        /* Performance Meter */
+        .performance-meter {
+            height: 8px;
+            border-radius: 4px;
+            background: #f1f5f9;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .performance-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .performance-excellent { background: linear-gradient(90deg, #10b981, #34d399); }
+        .performance-good { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .performance-average { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .performance-poor { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+        /* Grade Badge */
+        .grade-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 16px;
+            color: white;
+        }
+        
+        .grade-a { background: linear-gradient(135deg, #10b981, #34d399); }
+        .grade-b { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        .grade-c { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+        .grade-d { background: linear-gradient(135deg, #ef4444, #f87171); }
+        .grade-f { background: linear-gradient(135deg, #991b1b, #dc2626); }
+
+        /* Subject Cards */
+        .subject-card {
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .subject-card:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+        
+        /* Schedule Timeline */
+        .timeline-item {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 17px;
+            width: 2px;
+            height: calc(100% + 3px);
+            background: #e2e8f0;
+        }
+        
+        .timeline-item:last-child::after {
+            display: none;
+        }
+
+        /* Attendance Dot */
+        .attendance-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        
+        .dot-present { background-color: #10b981; }
+        .dot-absent { background-color: #ef4444; }
+        .dot-late { background-color: #f59e0b; }
+        .dot-excused { background-color: #8b5cf6; }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .action-btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+            color: white;
+        }
+        
+        .action-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .action-btn-secondary {
+            background: white;
+            color: var(--primary-blue);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .action-btn-secondary:hover {
+            background: #f8fafc;
+            border-color: var(--primary-blue);
+        }
+
+        /* Tab styling */
+        .tab-button {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-button:hover {
+            color: var(--primary-blue);
+        }
+        
+        .tab-button.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+            background: linear-gradient(to top, rgba(59, 130, 246, 0.05), transparent);
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .glass-header {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: white;
+            }
+            
+            .chart-container {
+                height: 250px !important;
+            }
+            
+            .child-card {
+                padding: 16px;
+            }
+        }
+
+        /* Loader Animation */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #f1f5f9;
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+        
+        .toast {
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease forwards;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            border-left: 4px solid #059669;
+        }
+        
+        .toast-info {
+            background: linear-gradient(135deg, #4f46e5, #7c73e9);
+            color: white;
+            border-left: 4px solid #3730a3;
+        }
+        
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[99] lg:hidden hidden" onclick="mobileSidebarToggle()"></div>
+
+    <!-- Child Details Modal -->
+    <div id="childDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="bg-white rounded-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900" id="childModalTitle">Child Details</h3>
+                    <button onclick="closeModal('childDetailsModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="childDetailsContent">
+                    <!-- Child details loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-[100] lg:relative lg:translate-x-0 -translate-x-full transition-transform duration-300 flex flex-col shadow-xl lg:shadow-none">
+            
+            <!-- Parent Header -->
+            <div class="h-20 flex items-center px-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-100">
+                            <i class="fas fa-users text-white text-lg"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div>
+                        <span class="text-lg font-black tracking-tight text-slate-900">Johnson Family</span>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">PARENT PORTAL</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Family Quick Info -->
+            <div class="p-6 border-b border-slate-100">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Children:</span>
+                        <span class="text-sm font-black text-emerald-600">2</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Total Fees Due:</span>
+                        <span class="text-sm font-bold text-amber-600">₦285,000</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Unread Messages:</span>
+                        <span class="text-sm font-bold text-blue-600">3</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 space-y-8 custom-scrollbar">
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Dashboard</p>
+                    <nav class="space-y-1">
+                        <a href="parent-dashboard.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <span>Overview</span>
+                        </a>
+                        <a href="#" class="sidebar-link active-link flex items-center gap-3 px-6 py-3 text-sm font-semibold">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <span>My Children</span>
+                        </a>
+                        <a href="parent-schedule.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <span>School Calendar</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Academic</p>
+                    <nav class="space-y-1">
+                        <a href="parent-grades.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <span>Grades & Reports</span>
+                        </a>
+                        <a href="parent-attendance.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <span>Attendance</span>
+                        </a>
+                        <a href="parent-assignments.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <span>Assignments</span>
+                            <span class="ml-auto bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-full">2</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Financial</p>
+                    <nav class="space-y-1">
+                        <a href="parent-fees.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            <span>Fee Statements</span>
+                            <span class="ml-auto bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-full">1</span>
+                        </a>
+                        <a href="parent-payments.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <span>Payment History</span>
+                        </a>
+                        <a href="parent-invoices.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
+                            <span>Invoices</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Account</p>
+                    <nav class="space-y-1">
+                        <a href="parent-profile.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span>Profile</span>
+                        </a>
+                        <a href="parent-settings.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <span>Settings</span>
+                        </a>
+                        <a href="login.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </div>
+                            <span>Logout</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Quick Contact -->
+            <div class="p-6 border-t border-slate-100">
+                <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-phone-alt text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400">SCHOOL OFFICE</p>
+                            <p class="text-sm font-black text-slate-900">(234) 801-234-5678</p>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-500">
+                        <i class="fas fa-clock mr-1"></i> Mon-Fri, 8AM-4PM
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- Header -->
+            <header class="h-20 glass-header px-6 lg:px-8 flex items-center justify-between shrink-0 z-40">
+                <div class="flex items-center gap-3">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition">
+                        <i class="fas fa-bars-staggered"></i>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-lg font-black text-slate-900 tracking-tight">My Children</h1>
+                        <div class="hidden lg:flex items-center gap-2">
+                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            <span class="text-xs font-black text-emerald-600 uppercase tracking-widest">Johnson Family</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Quick Stats -->
+                    <div class="hidden md:flex items-center gap-6 bg-white border border-slate-200 px-4 py-2 rounded-xl">
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Children</p>
+                            <p class="text-sm font-black text-emerald-600">2</p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avg GPA</p>
+                            <p class="text-sm font-black text-emerald-600">3.7</p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Attendance</p>
+                            <p class="text-sm font-black text-blue-600">94%</p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="showToast('Message feature coming soon', 'info')" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                            <i class="fas fa-print"></i>
+                            <span class="hidden sm:inline">Print Reports</span>
+                        </button>
+                        <button onclick="showToast('Downloading all children reports', 'success')" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                            <i class="fas fa-download"></i>
+                            <span class="hidden sm:inline">Download All</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Children Tabs -->
+            <div class="border-b border-slate-200 bg-white">
+                <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                    <div class="flex overflow-x-auto">
+                        <button class="tab-button active" onclick="switchChildTab('all')" data-tab="all">
+                            <i class="fas fa-users mr-2"></i>All Children
+                        </button>
+                        <button class="tab-button" onclick="switchChildTab('alex')" data-tab="alex">
+                            <i class="fas fa-user mr-2"></i>Alex Johnson
+                        </button>
+                        <button class="tab-button" onclick="switchChildTab('sarah')" data-tab="sarah">
+                            <i class="fas fa-user mr-2"></i>Sarah Johnson
+                        </button>
+                        <button class="tab-button" onclick="switchChildTab('compare')" data-tab="compare">
+                            <i class="fas fa-balance-scale mr-2"></i>Compare
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar">
+                <!-- Welcome Section -->
+                <div class="max-w-7xl mx-auto mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h2 class="text-2xl lg:text-3xl font-black text-slate-900 mb-2">My Children Overview</h2>
+                            <p class="text-slate-500 font-medium">Monitor academic progress, attendance, and activities for all your children</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-slate-600">Total Children</p>
+                                <p class="text-lg font-black text-slate-900">2 Children</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                                <i class="fas fa-user-graduate text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Children Cards -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Alex Johnson Card -->
+                    <div class="child-card child-1 animate-fadeInUp" style="animation-delay: 0.1s">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white">
+                                    <span class="text-lg font-black">AJ</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-black text-slate-900">Alex Johnson</h4>
+                                    <p class="text-sm text-slate-600">Grade 11 • Section A • Student ID: STU2024-001</p>
+                                </div>
+                            </div>
+                            <div class="grade-badge grade-a">A</div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="p-3 bg-blue-50 rounded-xl">
+                                <p class="text-xs font-bold text-slate-400 mb-1">Current GPA</p>
+                                <p class="text-lg font-black text-slate-900">3.8</p>
+                            </div>
+                            <div class="p-3 bg-emerald-50 rounded-xl">
+                                <p class="text-xs font-bold text-slate-400 mb-1">Attendance</p>
+                                <p class="text-lg font-black text-slate-900">96%</p>
+                            </div>
+                            <div class="p-3 bg-amber-50 rounded-xl">
+                                <p class="text-xs font-bold text-slate-400 mb-1">Pending Work</p>
+                                <p class="text-lg font-black text-slate-900">3</p>
+                            </div>
+                            <div class="p-3 bg-red-50 rounded-xl">
+                                <p class="text-xs font-bold text-slate-400 mb-1">Fees Due</p>
+                                <p class="text-lg font-black text-slate-900">₦150K</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-bold text-slate-700">Overall Performance</span>
+                                <span class="text-sm font-bold text-emerald-600">94%</span>
+                            </div>
+                            <div class="performance-meter">
+                                <div class="performance-fill performance-excellent" style="width: 94%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <button onclick="viewChildDetails(1)" class="action-btn action-btn-primary">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                            <div class="flex items-center gap-2">
+                                <button onclick="showToast('Opening Alex\'s grades', 'info')" class="action-btn action-btn-secondary">
+                                    <i class="fas fa-chart-line"></i>
+                                </button>
+                                <button onclick="showToast('Messaging Alex\'s teacher', 'info')" class="action-btn action-btn-secondary">
+                                    <i class="fas fa-envelope"></i>
+                                </button>
+                                <button onclick="showToast('Opening Alex\'s schedule', 'info')" class="action-btn action-btn-secondary">
+                                    <i class="fas fa-calendar"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sarah Johnson Card -->
+                    <div class="child-card child-2 animate-fadeInUp" style="animation-delay: 0.2s">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white">
+                                    <span class="text-lg font-black">SJ</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-black text-slate-900">Sarah Johnson</h4>
+                                    <p class="text-sm text-slate-600">Grade 8 • Section B • Student ID: STU2024-002</p>
+                                </div>
+                            </div>
+                            <div class="grade-badge grade-b">B+</div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="p-3 bg-blue-50 rounded-xl">
+                                <p class="text-xs font-bold text-slate-400 mb-1">Current GPA</p>
+                                <p class="text-lg font-black text-slate-900">3.6</p>
+                            </div>
+                            <div class="p-3 bg-emerald-50 rounded-xl">
+                                <p class="text-xs font-bold text-slate-400 mb-1">Attendance</p>
+                                <p class="text-lg font-black text-slate-900">92%</p>
+                            </div>
+                            <div class="p-3 bg-amber-50 rounded-xl">
+                                <p class="text-xs font-bold text-slate-400 mb-1">Pending Work</p>
+                                <p class="text-lg font-black text-slate-900">2</p>
+                            </div>
+                            <div class="p-3 bg-red-50 rounded-xl">
+                                <p class="text-xs font-bold text-slate-400 mb-1">Fees Due</p>
+                                <p class="text-lg font-black text-slate-900">₦135K</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-bold text-slate-700">Overall Performance</span>
+                                <span class="text-sm font-bold text-blue-600">87%</span>
+                            </div>
+                            <div class="performance-meter">
+                                <div class="performance-fill performance-good" style="width: 87%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <button onclick="viewChildDetails(2)" class="action-btn action-btn-primary">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                            <div class="flex items-center gap-2">
+                                <button onclick="showToast('Opening Sarah\'s grades', 'info')" class="action-btn action-btn-secondary">
+                                    <i class="fas fa-chart-line"></i>
+                                </button>
+                                <button onclick="showToast('Messaging Sarah\'s teacher', 'info')" class="action-btn action-btn-secondary">
+                                    <i class="fas fa-envelope"></i>
+                                </button>
+                                <button onclick="showToast('Opening Sarah\'s schedule', 'info')" class="action-btn action-btn-secondary">
+                                    <i class="fas fa-calendar"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Academic Performance -->
+                <div class="max-w-7xl mx-auto glass-card rounded-2xl p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-black text-slate-900">Academic Performance</h3>
+                        <div class="flex items-center gap-2">
+                            <button onclick="showToast('Viewing term 1', 'info')" class="px-3 py-1 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-lg">
+                                Term 1
+                            </button>
+                            <button onclick="showToast('Viewing term 2', 'info')" class="px-3 py-1 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg">
+                                Term 2
+                            </button>
+                            <button onclick="showToast('Viewing term 3', 'info')" class="px-3 py-1 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg">
+                                Term 3
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                        <!-- Mathematics -->
+                        <div class="subject-card">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-slate-900">Mathematics</span>
+                                <span class="text-sm font-bold text-emerald-600">94%</span>
+                            </div>
+                            <div class="performance-meter mb-3">
+                                <div class="performance-fill performance-excellent" style="width: 94%"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-slate-600">Alex: A</span>
+                                <span class="text-slate-600">Sarah: B+</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Science -->
+                        <div class="subject-card">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-slate-900">Science</span>
+                                <span class="text-sm font-bold text-blue-600">87%</span>
+                            </div>
+                            <div class="performance-meter mb-3">
+                                <div class="performance-fill performance-good" style="width: 87%"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-slate-600">Alex: B+</span>
+                                <span class="text-slate-600">Sarah: A-</span>
+                            </div>
+                        </div>
+                        
+                        <!-- English -->
+                        <div class="subject-card">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-slate-900">English</span>
+                                <span class="text-sm font-bold text-emerald-600">90%</span>
+                            </div>
+                            <div class="performance-meter mb-3">
+                                <div class="performance-fill performance-excellent" style="width: 90%"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-slate-600">Alex: A-</span>
+                                <span class="text-slate-600">Sarah: A</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Social Studies -->
+                        <div class="subject-card">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-slate-900">Social Studies</span>
+                                <span class="text-sm font-bold text-blue-600">85%</span>
+                            </div>
+                            <div class="performance-meter mb-3">
+                                <div class="performance-fill performance-good" style="width: 85%"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-slate-600">Alex: B+</span>
+                                <span class="text-slate-600">Sarah: B+</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Foreign Language -->
+                        <div class="subject-card">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-slate-900">French</span>
+                                <span class="text-sm font-bold text-amber-600">78%</span>
+                            </div>
+                            <div class="performance-meter mb-3">
+                                <div class="performance-fill performance-average" style="width: 78%"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-slate-600">Alex: B-</span>
+                                <span class="text-slate-600">Sarah: C+</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Performance Chart -->
+                    <div class="h-64">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Children Details Grid -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Alex's Schedule -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Alex's Schedule</h3>
+                            <span class="text-xs font-bold text-slate-400">Today, Dec 4</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="timeline-item">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-900">Mathematics</span>
+                                    <span class="text-sm font-bold text-blue-600">8:00 - 9:30 AM</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Room 201 • Mr. Davis</p>
+                                <p class="text-xs text-slate-500 mt-1">Topic: Calculus - Derivatives</p>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-900">Science</span>
+                                    <span class="text-sm font-bold text-blue-600">9:45 - 11:15 AM</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Lab 3 • Mrs. Parker</p>
+                                <p class="text-xs text-slate-500 mt-1">Physics Lab: Motion Experiments</p>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-900">English Literature</span>
+                                    <span class="text-sm font-bold text-blue-600">11:30 AM - 1:00 PM</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Room 105 • Ms. Johnson</p>
+                                <p class="text-xs text-slate-500 mt-1">Shakespeare: Macbeth Analysis</p>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-900">Lunch Break</span>
+                                    <span class="text-sm font-bold text-blue-600">1:00 - 2:00 PM</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Cafeteria</p>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-900">History</span>
+                                    <span class="text-sm font-bold text-blue-600">2:00 - 3:30 PM</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Room 208 • Mr. Wilson</p>
+                                <p class="text-xs text-slate-500 mt-1">World War II: Causes and Effects</p>
+                            </div>
+                        </div>
+                        
+                        <button onclick="showToast('Opening full schedule', 'info')" class="w-full mt-6 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                            View Full Weekly Schedule
+                        </button>
+                    </div>
+                    
+                    <!-- Sarah's Schedule -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Sarah's Schedule</h3>
+                            <span class="text-xs font-bold text-slate-400">Today, Dec 4</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="timeline-item">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-900">Mathematics</span>
+                                    <span class="text-sm font-bold text-emerald-600">8:00 - 9:30 AM</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Room 101 • Mrs. Chen</p>
+                                <p class="text-xs text-slate-500 mt-1">Algebra: Quadratic Equations</p>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-900">Science</span>
+                                    <span class="text-sm font-bold text-emerald-600">9:45 - 11:15 AM</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Lab 1 • Mr. Thompson</p>
+                                <p class="text-xs text-slate-500 mt-1">Biology: Cell Structure</p>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-900">English</span>
+                                    <span class="text-sm font-bold text-emerald-600">11:30 AM - 1:00 PM</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Room 103 • Ms. Roberts</p>
+                                <p class="text-xs text-slate-500 mt-1">Creative Writing Workshop</p>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-900">Lunch Break</span>
+                                    <span class="text-sm font-bold text-emerald-600">1:00 - 2:00 PM</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Cafeteria</p>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-900">Art & Music</span>
+                                    <span class="text-sm font-bold text-emerald-600">2:00 - 3:30 PM</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Art Room • Mrs. Davis</p>
+                                <p class="text-xs text-slate-500 mt-1">Watercolor Painting Techniques</p>
+                            </div>
+                        </div>
+                        
+                        <button onclick="showToast('Opening full schedule', 'info')" class="w-full mt-6 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                            View Full Weekly Schedule
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Attendance Overview -->
+                <div class="max-w-7xl mx-auto glass-card rounded-2xl p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-black text-slate-900">Attendance Overview</h3>
+                        <span class="text-xs font-bold text-slate-400">December 2024</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Alex's Attendance -->
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                                        <span class="text-sm font-black text-blue-600">AJ</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900">Alex Johnson</p>
+                                        <p class="text-sm text-slate-600">Attendance: 96%</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-bold text-emerald-600">Excellent</p>
+                                    <p class="text-xs text-slate-500">22 of 23 days</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-slate-700">December Attendance</span>
+                                    <span class="text-sm font-bold text-emerald-600">96%</span>
+                                </div>
+                                <div class="performance-meter">
+                                    <div class="performance-fill performance-excellent" style="width: 96%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                <span class="attendance-dot dot-present" title="Dec 2: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 3: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 4: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 5: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 6: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 9: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 10: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 11: Present"></span>
+                                <span class="attendance-dot dot-late" title="Dec 12: Late"></span>
+                                <span class="attendance-dot dot-present" title="Dec 13: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 16: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 17: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 18: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 19: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 20: Present"></span>
+                                <span class="attendance-dot dot-excused" title="Dec 23: Excused"></span>
+                                <span class="attendance-dot dot-present" title="Dec 24: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 25: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 26: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 27: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 30: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 31: Present"></span>
+                            </div>
+                            
+                            <div class="text-sm text-slate-600">
+                                <p><i class="fas fa-info-circle mr-2"></i>1 late arrival on Dec 12</p>
+                                <p><i class="fas fa-info-circle mr-2"></i>1 excused absence on Dec 23</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Sarah's Attendance -->
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                        <span class="text-sm font-black text-emerald-600">SJ</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-900">Sarah Johnson</p>
+                                        <p class="text-sm text-slate-600">Attendance: 92%</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-bold text-blue-600">Good</p>
+                                    <p class="text-xs text-slate-500">21 of 23 days</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-slate-700">December Attendance</span>
+                                    <span class="text-sm font-bold text-blue-600">92%</span>
+                                </div>
+                                <div class="performance-meter">
+                                    <div class="performance-fill performance-good" style="width: 92%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                <span class="attendance-dot dot-present" title="Dec 2: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 3: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 4: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 5: Present"></span>
+                                <span class="attendance-dot dot-absent" title="Dec 6: Absent"></span>
+                                <span class="attendance-dot dot-present" title="Dec 9: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 10: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 11: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 12: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 13: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 16: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 17: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 18: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 19: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 20: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 23: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 24: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 25: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 26: Present"></span>
+                                <span class="attendance-dot dot-late" title="Dec 27: Late"></span>
+                                <span class="attendance-dot dot-present" title="Dec 30: Present"></span>
+                                <span class="attendance-dot dot-present" title="Dec 31: Present"></span>
+                            </div>
+                            
+                            <div class="text-sm text-slate-600">
+                                <p><i class="fas fa-info-circle mr-2"></i>1 absence on Dec 6 (sick)</p>
+                                <p><i class="fas fa-info-circle mr-2"></i>1 late arrival on Dec 27</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="showToast('Opening detailed attendance report', 'info')" class="w-full mt-6 py-3 border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                        View Detailed Attendance Reports
+                    </button>
+                </div>
+
+                <!-- Teacher Contacts -->
+                <div class="max-w-7xl mx-auto glass-card rounded-2xl p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-black text-slate-900">Teacher Contacts</h3>
+                        <button onclick="showToast('Opening contact directory', 'info')" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                            View All Contacts <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Alex's Teachers -->
+                        <div>
+                            <h4 class="font-bold text-slate-900 mb-4">Alex Johnson's Teachers</h4>
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                                        <i class="fas fa-chalkboard-teacher text-blue-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-bold text-slate-900">Mr. Davis</p>
+                                        <p class="text-sm text-slate-600">Mathematics Teacher</p>
+                                    </div>
+                                    <button onclick="showToast('Messaging Mr. Davis', 'info')" class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
+                                    <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                        <i class="fas fa-flask text-emerald-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-bold text-slate-900">Mrs. Parker</p>
+                                        <p class="text-sm text-slate-600">Science Teacher</p>
+                                    </div>
+                                    <button onclick="showToast('Messaging Mrs. Parker', 'info')" class="p-2 text-emerald-600 hover:bg-emerald-100 rounded-lg">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-xl">
+                                    <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                                        <i class="fas fa-book text-purple-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-bold text-slate-900">Ms. Johnson</p>
+                                        <p class="text-sm text-slate-600">English Literature</p>
+                                    </div>
+                                    <button onclick="showToast('Messaging Ms. Johnson', 'info')" class="p-2 text-purple-600 hover:bg-purple-100 rounded-lg">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sarah's Teachers -->
+                        <div>
+                            <h4 class="font-bold text-slate-900 mb-4">Sarah Johnson's Teachers</h4>
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                                        <i class="fas fa-chalkboard-teacher text-blue-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-bold text-slate-900">Mrs. Chen</p>
+                                        <p class="text-sm text-slate-600">Mathematics Teacher</p>
+                                    </div>
+                                    <button onclick="showToast('Messaging Mrs. Chen', 'info')" class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
+                                    <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                        <i class="fas fa-flask text-emerald-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-bold text-slate-900">Mr. Thompson</p>
+                                        <p class="text-sm text-slate-600">Science Teacher</p>
+                                    </div>
+                                    <button onclick="showToast('Messaging Mr. Thompson', 'info')" class="p-2 text-emerald-600 hover:bg-emerald-100 rounded-lg">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-xl">
+                                    <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                                        <i class="fas fa-paint-brush text-amber-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-bold text-slate-900">Mrs. Davis</p>
+                                        <p class="text-sm text-slate-600">Art & Music Teacher</p>
+                                    </div>
+                                    <button onclick="showToast('Messaging Mrs. Davis', 'info')" class="p-2 text-amber-600 hover:bg-amber-100 rounded-lg">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="max-w-7xl mx-auto glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-black text-slate-900 mb-6">Quick Actions</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <button onclick="showToast('Downloading academic reports', 'info')" class="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl text-left hover:bg-blue-200 transition group">
+                            <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                <i class="fas fa-download text-blue-600 text-lg"></i>
+                            </div>
+                            <p class="font-bold text-slate-900">Download Reports</p>
+                            <p class="text-sm text-slate-600 mt-1">Academic transcripts & progress</p>
+                        </button>
+                        
+                        <button onclick="showToast('Scheduling parent-teacher meeting', 'info')" class="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-200 rounded-xl text-left hover:bg-emerald-200 transition group">
+                            <div class="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                <i class="fas fa-calendar-check text-emerald-600 text-lg"></i>
+                            </div>
+                            <p class="font-bold text-slate-900">Schedule Meeting</p>
+                            <p class="text-sm text-slate-600 mt-1">With teachers or counselors</p>
+                        </button>
+                        
+                        <button onclick="showToast('Viewing extracurricular activities', 'info')" class="p-6 bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl text-left hover:bg-purple-200 transition group">
+                            <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                <i class="fas fa-futbol text-purple-600 text-lg"></i>
+                            </div>
+                            <p class="font-bold text-slate-900">Extracurriculars</p>
+                            <p class="text-sm text-slate-600 mt-1">Sports, clubs & activities</p>
+                        </button>
+                        
+                        <button onclick="showToast('Updating contact information', 'info')" class="p-6 bg-gradient-to-br from-teal-50 to-teal-100 border-2 border-teal-200 rounded-xl text-left hover:bg-teal-200 transition group">
+                            <div class="w-12 h-12 rounded-lg bg-teal-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                                <i class="fas fa-user-edit text-teal-600 text-lg"></i>
+                            </div>
+                            <p class="font-bold text-slate-900">Update Information</p>
+                            <p class="text-sm text-slate-600 mt-1">Contact & medical details</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            // Set icon based on type
+            let icon = 'fa-info-circle';
+            switch(type) {
+                case 'success': icon = 'fa-check-circle'; break;
+                case 'warning': icon = 'fa-exclamation-triangle'; break;
+                case 'error': icon = 'fa-times-circle'; break;
+                default: icon = 'fa-info-circle';
+            }
+            
+            toast.innerHTML = `
+                <i class="fas ${icon} toast-icon"></i>
+                <div class="toast-content">${message}</div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add to container
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Auto remove after duration
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100px)';
+                    setTimeout(() => {
+                        if (toast.parentElement) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }, duration);
+            }
+        }
+
+        // Mobile Sidebar Toggle
+        function mobileSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Tab Switching
+        function switchChildTab(tabName) {
+            // Update active tab button
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Show appropriate content
+            showToast(`Viewing ${tabName === 'all' ? 'all children' : tabName + ' details'}`, 'info');
+        }
+
+        // View Child Details
+        function viewChildDetails(childId) {
+            const children = {
+                1: {
+                    name: 'Alex Johnson',
+                    grade: 'Grade 11',
+                    section: 'Section A',
+                    age: '16 years',
+                    studentId: 'STU2024-001',
+                    gpa: '3.8',
+                    attendance: '96%',
+                    teacher: 'Mr. Davis (Mathematics)',
+                    counselor: 'Ms. Wilson',
+                    homeroom: 'Room 201',
+                    enrollmentDate: 'August 15, 2024',
+                    busRoute: 'Route 3 - Bus #12',
+                    medicalInfo: 'No allergies, Asthma inhaler in nurse office',
+                    emergencyContact: 'Mrs. Johnson (Mother): (234) 801-987-6543'
+                },
+                2: {
+                    name: 'Sarah Johnson',
+                    grade: 'Grade 8',
+                    section: 'Section B',
+                    age: '13 years',
+                    studentId: 'STU2024-002',
+                    gpa: '3.6',
+                    attendance: '92%',
+                    teacher: 'Mrs. Chen (Homeroom)',
+                    counselor: 'Mr. Thompson',
+                    homeroom: 'Room 101',
+                    enrollmentDate: 'August 15, 2024',
+                    busRoute: 'Route 2 - Bus #8',
+                    medicalInfo: 'Peanut allergy, EpiPen in backpack',
+                    emergencyContact: 'Mr. Johnson (Father): (234) 801-123-4567'
+                }
+            };
+            
+            const child = children[childId];
+            if (child) {
+                document.getElementById('childModalTitle').textContent = `${child.name}'s Details`;
+                
+                document.getElementById('childDetailsContent').innerHTML = `
+                    <div class="mb-6">
+                        <div class="flex items-start gap-6 mb-6">
+                            <div class="w-20 h-20 rounded-2xl ${childId === 1 ? 'bg-gradient-to-br from-blue-500 to-blue-700' : 'bg-gradient-to-br from-emerald-500 to-emerald-700'} flex items-center justify-center text-white">
+                                <span class="text-2xl font-black">${child.name.split(' ').map(n => n[0]).join('')}</span>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-xl font-black text-slate-900 mb-2">${child.name}</h4>
+                                <div class="flex flex-wrap gap-3">
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-bold">${child.grade}</span>
+                                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-sm font-bold">${child.section}</span>
+                                    <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-lg text-sm font-bold">${child.age}</span>
+                                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-bold">Student ID: ${child.studentId}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="p-4 bg-slate-50 rounded-xl">
+                                <p class="text-sm font-bold text-slate-400 mb-1">Current GPA</p>
+                                <p class="text-lg font-black text-slate-900">${child.gpa}</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl">
+                                <p class="text-sm font-bold text-slate-400 mb-1">Attendance Rate</p>
+                                <p class="text-lg font-black text-slate-900">${child.attendance}</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl">
+                                <p class="text-sm font-bold text-slate-400 mb-1">Class Teacher</p>
+                                <p class="text-lg font-black text-slate-900">${child.teacher}</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl">
+                                <p class="text-sm font-bold text-slate-400 mb-1">School Counselor</p>
+                                <p class="text-lg font-black text-slate-900">${child.counselor}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <h5 class="font-bold text-slate-900 mb-2">School Information</h5>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-600">Homeroom:</span>
+                                        <span class="font-bold text-slate-900">${child.homeroom}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-600">Enrollment Date:</span>
+                                        <span class="font-bold text-slate-900">${child.enrollmentDate}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-600">Bus Route:</span>
+                                        <span class="font-bold text-slate-900">${child.busRoute}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h5 class="font-bold text-slate-900 mb-2">Health & Safety</h5>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-600">Medical Information:</span>
+                                        <span class="font-bold text-slate-900">${child.medicalInfo}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-600">Emergency Contact:</span>
+                                        <span class="font-bold text-slate-900">${child.emergencyContact}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h5 class="font-bold text-slate-900 mb-2">Academic Performance</h5>
+                            <div class="space-y-3">
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-sm font-medium text-slate-700">Mathematics</span>
+                                        <span class="text-sm font-bold ${childId === 1 ? 'text-emerald-600' : 'text-blue-600'}">${childId === 1 ? '94% (A)' : '88% (B+)'}</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill ${childId === 1 ? 'performance-excellent' : 'performance-good'}" style="width: ${childId === 1 ? '94%' : '88%'}"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-sm font-medium text-slate-700">Science</span>
+                                        <span class="text-sm font-bold ${childId === 1 ? 'text-blue-600' : 'text-emerald-600'}">${childId === 1 ? '87% (B+)' : '92% (A-)'}</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill ${childId === 1 ? 'performance-good' : 'performance-excellent'}" style="width: ${childId === 1 ? '87%' : '92%'}"></div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-sm font-medium text-slate-700">English</span>
+                                        <span class="text-sm font-bold ${childId === 1 ? 'text-emerald-600' : 'text-emerald-600'}">${childId === 1 ? '90% (A-)' : '94% (A)'}</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-excellent" style="width: ${childId === 1 ? '90%' : '94%'}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button onclick="showToast('Messaging teacher for ${child.name}', 'info')" class="action-btn action-btn-primary">
+                            <i class="fas fa-envelope"></i> Message Teacher
+                        </button>
+                        <button onclick="showToast('Viewing grades for ${child.name}', 'info')" class="action-btn action-btn-secondary">
+                            <i class="fas fa-chart-line"></i> View Grades
+                        </button>
+                        <button onclick="closeModal('childDetailsModal')" class="action-btn action-btn-secondary">
+                            Close
+                        </button>
+                    </div>
+                `;
+                
+                openModal('childDetailsModal');
+            }
+        }
+
+        // Initialize Performance Chart
+        function initializePerformanceChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            const performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Term 1', 'Term 2', 'Term 3', 'Term 4'],
+                    datasets: [
+                        {
+                            label: 'Alex Johnson',
+                            data: [3.6, 3.7, 3.8, 3.8],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Sarah Johnson',
+                            data: [3.4, 3.5, 3.6, 3.6],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 3.0,
+                            max: 4.0,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toFixed(1);
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'GPA'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize performance chart
+            initializePerformanceChart();
+            
+            // Show welcome toast
+            setTimeout(() => {
+                showToast('My Children page loaded successfully!', 'success', 3000);
+            }, 1000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Only trigger when not in input fields
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+            
+            // Ctrl/Cmd + 1: View Alex's details
+            if ((e.ctrlKey || e.metaKey) && e.key === '1') {
+                e.preventDefault();
+                viewChildDetails(1);
+            }
+            
+            // Ctrl/Cmd + 2: View Sarah's details
+            if ((e.ctrlKey || e.metaKey) && e.key === '2') {
+                e.preventDefault();
+                viewChildDetails(2);
+            }
+            
+            // Ctrl/Cmd + D: Download reports
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                showToast('Downloading all children reports', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

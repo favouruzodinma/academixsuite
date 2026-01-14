@@ -1528,7 +1528,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                             </div>
                             <span>Teachers</span>
                         </a>
-                        <a href="timetable.php" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                        <a href="schedule.php" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
                             <div class="w-5 h-5 flex items-center justify-center">
                                 <i class="fas fa-calendar-alt"></i>
                             </div>

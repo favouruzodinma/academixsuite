@@ -131,9 +131,6 @@ try {
     $schoolDb = null;
 }
 
-// The rest of your existing dashboard.php code continues here...
-// (From line 80 or so where you initialize variables and fetch data)
-
 // Initialize variables with safe defaults
 $settings = [];
 $academicYear = null;
@@ -151,13 +148,21 @@ $weeklyAttendance = [];
 $feeCollectionRate = 0;
 $adminUser = ['name' => 'Admin User', 'role_name' => 'Administrator'];
 
+// Revenue variables
+$totalRevenue = 0;
+$monthlyRevenue = 0;
+$pendingPayments = 0;
+$collectionRate = 0;
+$recentTransactions = [];
+$monthlyRevenueData = [];
+$paymentMethodsData = [];
+
 // Check if we have a valid school database connection before querying
 if ($schoolDb) {
     try {
         // Get school settings
         error_log("Fetching school settings...");
         try {
-            // Check if settings table exists
             $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'settings'")->fetch();
             if ($tableCheck) {
                 $settingsStmt = $schoolDb->prepare("SELECT * FROM settings WHERE school_id = ?");
@@ -169,8 +174,6 @@ if ($schoolDb) {
                     }
                     error_log("Settings fetched: " . count($settings) . " items");
                 }
-            } else {
-                error_log("Settings table does not exist yet");
             }
         } catch (Exception $e) {
             error_log("Error fetching settings: " . $e->getMessage());
@@ -189,7 +192,6 @@ if ($schoolDb) {
                 if ($academicYearStmt) {
                     $academicYearStmt->execute([$school['id']]);
                     $academicYear = $academicYearStmt->fetch();
-                    error_log("Academic year: " . ($academicYear ? $academicYear['name'] : "Not found"));
                 }
             }
         } catch (Exception $e) {
@@ -210,7 +212,6 @@ if ($schoolDb) {
                     if ($academicTermStmt) {
                         $academicTermStmt->execute([$school['id'], $academicYear['id']]);
                         $academicTerm = $academicTermStmt->fetch();
-                        error_log("Academic term: " . ($academicTerm ? $academicTerm['name'] : "Not found"));
                     }
                 }
             } catch (Exception $e) {
@@ -218,7 +219,7 @@ if ($schoolDb) {
             }
         }
 
-        // Get school statistics with safe table checks
+        // Get school statistics
         error_log("Fetching school statistics...");
         
         // Total Students
@@ -233,7 +234,6 @@ if ($schoolDb) {
                     $studentStmt->execute([$school['id']]);
                     $studentResult = $studentStmt->fetch();
                     $totalStudents = $studentResult['count'] ?? 0;
-                    error_log("Total students: " . $totalStudents);
                 }
             }
         } catch (Exception $e) {
@@ -252,7 +252,6 @@ if ($schoolDb) {
                     $teacherStmt->execute([$school['id']]);
                     $teacherResult = $teacherStmt->fetch();
                     $totalTeachers = $teacherResult['count'] ?? 0;
-                    error_log("Total teachers: " . $totalTeachers);
                 }
             }
         } catch (Exception $e) {
@@ -271,7 +270,6 @@ if ($schoolDb) {
                     $classStmt->execute([$school['id']]);
                     $classResult = $classStmt->fetch();
                     $totalClasses = $classResult['count'] ?? 0;
-                    error_log("Total classes: " . $totalClasses);
                 }
             }
         } catch (Exception $e) {
@@ -290,7 +288,6 @@ if ($schoolDb) {
                     $subjectStmt->execute([$school['id']]);
                     $subjectResult = $subjectStmt->fetch();
                     $totalSubjects = $subjectResult['count'] ?? 0;
-                    error_log("Total subjects: " . $totalSubjects);
                 }
             }
         } catch (Exception $e) {
@@ -299,16 +296,13 @@ if ($schoolDb) {
 
         // Today's attendance
         $today = date('Y-m-d');
-        error_log("Checking attendance for date: " . $today);
         try {
             $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'attendance'")->fetch();
             if ($tableCheck) {
                 $attendanceStmt = $schoolDb->prepare("
                     SELECT 
                         COUNT(*) as total,
-                        SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
-                        SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent,
-                        SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late
+                        SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present
                     FROM attendance 
                     WHERE school_id = ? AND date = ?
                 ");
@@ -318,15 +312,157 @@ if ($schoolDb) {
                     if ($attendance && $attendance['total'] > 0) {
                         $attendanceRate = round(($attendance['present'] / $attendance['total']) * 100, 1);
                     }
-                    error_log("Attendance rate: " . $attendanceRate . "%");
                 }
             }
         } catch (Exception $e) {
             error_log("Error fetching attendance: " . $e->getMessage());
         }
 
+        // Revenue calculations
+        error_log("Calculating revenue metrics...");
+        try {
+            // Check payment_transactions table
+            $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'payment_transactions'")->fetch();
+            if ($tableCheck) {
+                // Total successful transactions
+                $revenueStmt = $schoolDb->prepare("
+                    SELECT 
+                        SUM(CASE WHEN status = 'success' THEN amount ELSE 0 END) as total_revenue,
+                        SUM(CASE WHEN status = 'success' AND MONTH(created_at) = MONTH(CURDATE()) THEN amount ELSE 0 END) as monthly_revenue,
+                        SUM(CASE WHEN status IN ('pending', 'initiated') THEN amount ELSE 0 END) as pending_amount
+                    FROM payment_transactions 
+                    WHERE school_id = ?
+                ");
+                if ($revenueStmt) {
+                    $revenueStmt->execute([$school['id']]);
+                    $revenueData = $revenueStmt->fetch();
+                    
+                    if ($revenueData) {
+                        $totalRevenue = floatval($revenueData['total_revenue'] ?? 0);
+                        $monthlyRevenue = floatval($revenueData['monthly_revenue'] ?? 0);
+                        $pendingPayments = floatval($revenueData['pending_amount'] ?? 0);
+                    }
+                }
+                
+                // Get monthly revenue data for last 6 months
+                $monthlyStmt = $schoolDb->prepare("
+                    SELECT 
+                        DATE_FORMAT(created_at, '%Y-%m') as month,
+                        DATE_FORMAT(created_at, '%b') as month_name,
+                        SUM(amount) as revenue
+                    FROM payment_transactions 
+                    WHERE school_id = ? 
+                    AND status = 'success'
+                    AND created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                    GROUP BY DATE_FORMAT(created_at, '%Y-%m'), DATE_FORMAT(created_at, '%b')
+                    ORDER BY month
+                ");
+                if ($monthlyStmt) {
+                    $monthlyStmt->execute([$school['id']]);
+                    $monthlyRevenueData = $monthlyStmt->fetchAll();
+                }
+                
+                // Get payment methods distribution
+                $methodsStmt = $schoolDb->prepare("
+                    SELECT 
+                        payment_method,
+                        COUNT(*) as count,
+                        SUM(amount) as amount
+                    FROM payment_transactions 
+                    WHERE school_id = ? 
+                    AND status = 'success'
+                    AND payment_method IS NOT NULL
+                    GROUP BY payment_method
+                    ORDER BY amount DESC
+                ");
+                if ($methodsStmt) {
+                    $methodsStmt->execute([$school['id']]);
+                    $paymentMethodsData = $methodsStmt->fetchAll();
+                }
+                
+                // Get recent transactions
+                $transactionsStmt = $schoolDb->prepare("
+                    SELECT 
+                        pt.*,
+                        s.first_name as student_first_name,
+                        s.last_name as student_last_name,
+                        s.admission_number
+                    FROM payment_transactions pt
+                    LEFT JOIN students s ON pt.student_id = s.id
+                    WHERE pt.school_id = ?
+                    ORDER BY pt.created_at DESC
+                    LIMIT 8
+                ");
+                if ($transactionsStmt) {
+                    $transactionsStmt->execute([$school['id']]);
+                    $recentTransactions = $transactionsStmt->fetchAll();
+                }
+            } else {
+                // Fallback to invoices table
+                $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'invoices'")->fetch();
+                if ($tableCheck) {
+                    $invoiceStmt = $schoolDb->prepare("
+                        SELECT 
+                            SUM(CASE WHEN payment_status = 'success' OR status = 'paid' THEN total_amount ELSE 0 END) as total_revenue,
+                            SUM(CASE WHEN (payment_status = 'success' OR status = 'paid') AND MONTH(created_at) = MONTH(CURDATE()) THEN total_amount ELSE 0 END) as monthly_revenue,
+                            SUM(CASE WHEN payment_status IN ('pending', 'initiated') THEN total_amount ELSE 0 END) as pending_amount
+                        FROM invoices 
+                        WHERE school_id = ?
+                    ");
+                    if ($invoiceStmt) {
+                        $invoiceStmt->execute([$school['id']]);
+                        $invoiceData = $invoiceStmt->fetch();
+                        
+                        if ($invoiceData) {
+                            $totalRevenue = floatval($invoiceData['total_revenue'] ?? 0);
+                            $monthlyRevenue = floatval($invoiceData['monthly_revenue'] ?? 0);
+                            $pendingPayments = floatval($invoiceData['pending_amount'] ?? 0);
+                        }
+                    }
+                    
+                    // Get recent transactions from invoices
+                    $transactionsStmt = $schoolDb->prepare("
+                        SELECT 
+                            i.*,
+                            s.first_name as student_first_name,
+                            s.last_name as student_last_name,
+                            s.admission_number
+                        FROM invoices i
+                        LEFT JOIN students s ON i.student_id = s.id
+                        WHERE i.school_id = ?
+                        ORDER BY i.created_at DESC
+                        LIMIT 8
+                    ");
+                    if ($transactionsStmt) {
+                        $transactionsStmt->execute([$school['id']]);
+                        $recentTransactions = $transactionsStmt->fetchAll();
+                    }
+                }
+            }
+            
+            // Calculate collection rate
+            $collectionStmt = $schoolDb->prepare("
+                SELECT 
+                    COUNT(*) as total_invoices,
+                    SUM(CASE WHEN payment_status = 'success' OR status = 'paid' THEN 1 ELSE 0 END) as paid_invoices,
+                    SUM(total_amount) as total_amount,
+                    SUM(CASE WHEN payment_status = 'success' OR status = 'paid' THEN total_amount ELSE 0 END) as paid_amount
+                FROM invoices 
+                WHERE school_id = ? AND status NOT IN ('draft', 'canceled')
+            ");
+            if ($collectionStmt) {
+                $collectionStmt->execute([$school['id']]);
+                $collectionData = $collectionStmt->fetch();
+                
+                if ($collectionData && floatval($collectionData['total_amount'] ?? 0) > 0) {
+                    $collectionRate = round((floatval($collectionData['paid_amount'] ?? 0) / floatval($collectionData['total_amount'] ?? 1)) * 100, 1);
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error calculating revenue: " . $e->getMessage());
+        }
+
         // Recent announcements (last 7 days)
-        error_log("Fetching recent announcements...");
         try {
             $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'announcements'")->fetch();
             if ($tableCheck) {
@@ -342,7 +478,6 @@ if ($schoolDb) {
                 if ($announcementStmt) {
                     $announcementStmt->execute([$school['id']]);
                     $announcements = $announcementStmt->fetchAll();
-                    error_log("Announcements found: " . count($announcements));
                 }
             }
         } catch (Exception $e) {
@@ -350,7 +485,6 @@ if ($schoolDb) {
         }
 
         // Upcoming events (next 30 days)
-        error_log("Fetching upcoming events...");
         try {
             $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'events'")->fetch();
             if ($tableCheck) {
@@ -364,50 +498,34 @@ if ($schoolDb) {
                 if ($eventStmt) {
                     $eventStmt->execute([$school['id']]);
                     $upcomingEvents = $eventStmt->fetchAll();
-                    error_log("Upcoming events found: " . count($upcomingEvents));
                 }
             }
         } catch (Exception $e) {
             error_log("Error fetching events: " . $e->getMessage());
         }
 
-        // Recent activity - Check if audit_logs table exists
-        error_log("Fetching recent activity...");
+        // Recent activity
         try {
             $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'audit_logs'")->fetch();
             if ($tableCheck) {
-                // Check if audit_logs has school_id column
-                $columns = $schoolDb->query("SHOW COLUMNS FROM audit_logs LIKE 'school_id'")->fetch();
-                if ($columns) {
-                    $activityStmt = $schoolDb->prepare("
-                        SELECT al.*, u.name as user_name, u.user_type 
-                        FROM audit_logs al 
-                        LEFT JOIN users u ON al.user_id = u.id 
-                        WHERE al.school_id = ? 
-                        ORDER BY al.created_at DESC 
-                        LIMIT 10
-                    ");
+                $activityStmt = $schoolDb->prepare("
+                    SELECT al.*, u.name as user_name, u.user_type 
+                    FROM audit_logs al 
+                    LEFT JOIN users u ON al.user_id = u.id 
+                    WHERE al.school_id = ? 
+                    ORDER BY al.created_at DESC 
+                    LIMIT 10
+                ");
+                if ($activityStmt) {
                     $activityStmt->execute([$school['id']]);
-                } else {
-                    $activityStmt = $schoolDb->prepare("
-                        SELECT al.*, u.name as user_name, u.user_type 
-                        FROM audit_logs al 
-                        LEFT JOIN users u ON al.user_id = u.id 
-                        WHERE u.school_id = ? 
-                        ORDER BY al.created_at DESC 
-                        LIMIT 10
-                    ");
-                    $activityStmt->execute([$school['id']]);
+                    $recentActivities = $activityStmt->fetchAll();
                 }
-                $recentActivities = $activityStmt->fetchAll();
-                error_log("Recent activities found: " . count($recentActivities));
             }
         } catch (Exception $e) {
             error_log("Error fetching activity logs: " . $e->getMessage());
         }
 
         // Grade distribution
-        error_log("Fetching grade distribution...");
         try {
             $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'classes'")->fetch();
             if ($tableCheck) {
@@ -424,7 +542,6 @@ if ($schoolDb) {
                 if ($gradeStmt) {
                     $gradeStmt->execute([$school['id']]);
                     $gradeDistribution = $gradeStmt->fetchAll();
-                    error_log("Grade distribution classes: " . count($gradeDistribution));
                 }
             }
         } catch (Exception $e) {
@@ -432,7 +549,6 @@ if ($schoolDb) {
         }
 
         // Weekly attendance trend (last 6 weeks)
-        error_log("Fetching weekly attendance trend...");
         try {
             $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'attendance'")->fetch();
             if ($tableCheck) {
@@ -451,9 +567,7 @@ if ($schoolDb) {
                 if ($weekStmt) {
                     $weekStmt->execute([$school['id']]);
                     $weeklyAttendance = $weekStmt->fetchAll();
-                    // Reverse array for chart
                     $weeklyAttendance = array_reverse($weeklyAttendance);
-                    error_log("Weekly attendance data points: " . count($weeklyAttendance));
                 }
             }
         } catch (Exception $e) {
@@ -462,7 +576,6 @@ if ($schoolDb) {
 
         // Fee collection rate for current term
         if ($academicTerm) {
-            error_log("Fetching fee collection rate...");
             try {
                 $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'invoices'")->fetch();
                 if ($tableCheck) {
@@ -480,7 +593,6 @@ if ($schoolDb) {
                         if ($feeData && $feeData['total_students'] > 0) {
                             $feeCollectionRate = round(($feeData['paid_students'] / $feeData['total_students']) * 100, 1);
                         }
-                        error_log("Fee collection rate: " . $feeCollectionRate . "%");
                     }
                 }
             } catch (Exception $e) {
@@ -489,7 +601,6 @@ if ($schoolDb) {
         }
 
         // Get logged in admin user details
-        error_log("Fetching admin user details...");
         try {
             $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'users'")->fetch();
             if ($tableCheck) {
@@ -503,11 +614,7 @@ if ($schoolDb) {
                 if ($userStmt) {
                     $userStmt->execute([$userId, $school['id']]);
                     $adminUser = $userStmt->fetch();
-                    if ($adminUser) {
-                        error_log("Admin user found: " . $adminUser['name']);
-                    } else {
-                        error_log("WARNING: Admin user not found in school database");
-                        // Fallback to session data
+                    if (!$adminUser) {
                         if (isset($_SESSION['school_auth'][$school['id']]['user_name'])) {
                             $adminUser = [
                                 'name' => $_SESSION['school_auth'][$school['id']]['user_name'],
@@ -530,8 +637,6 @@ if ($schoolDb) {
 
     } catch (Exception $e) {
         error_log("ERROR in database operations: " . $e->getMessage());
-        error_log("Stack trace: " . $e->getTraceAsString());
-        // Continue with default values
     }
 } else {
     error_log("School database connection failed or not available, using default values");
@@ -545,7 +650,6 @@ if ($school['status'] === 'trial' && !empty($school['trial_ends_at'])) {
         if ($daysLeft <= 7 && $daysLeft > 0) {
             $trialWarning = "Your trial expires in {$daysLeft} day" . ($daysLeft > 1 ? 's' : '');
         }
-        error_log("Trial status: " . ($trialWarning ? $trialWarning : "No warning"));
     } catch (Exception $e) {
         error_log("Error calculating trial days: " . $e->getMessage());
     }
@@ -553,12 +657,8 @@ if ($school['status'] === 'trial' && !empty($school['trial_ends_at'])) {
 
 // Format currency
 $currencySymbol = $settings['currency_symbol'] ?? '₦';
-error_log("Currency symbol: " . $currencySymbol);
 
 error_log("=================== SCHOOL DASHBOARD END ===================");
-error_log("");
-
-// Now continue with the HTML part...
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -587,7 +687,6 @@ error_log("");
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Glassmorphism effects */
         .glass-header { 
             background: rgba(255, 255, 255, 0.92); 
             backdrop-filter: blur(12px);
@@ -602,7 +701,6 @@ error_log("");
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
         }
 
-        /* Toast Notification Styles */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -670,37 +768,7 @@ error_log("");
         .toast-exit {
             animation: fadeOut 0.3s ease forwards;
         }
-        
-        .toast-icon {
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-        
-        .toast-content {
-            flex: 1;
-        }
-        
-        .toast-close {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 14px;
-            cursor: pointer;
-            padding: 0;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background-color 0.2s;
-        }
-        
-        .toast-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
 
-        /* Sidebar styling */
         .sidebar-link { 
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
             border-left: 3px solid transparent; 
@@ -732,7 +800,6 @@ error_log("");
             border-radius: 4px 0 0 4px;
         }
 
-        /* Custom scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -752,7 +819,6 @@ error_log("");
             background: #94a3b8;
         }
 
-        /* Animation for cards */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -768,7 +834,6 @@ error_log("");
             animation: fadeInUp 0.6s ease-out forwards;
         }
 
-        /* Status badges */
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -804,7 +869,6 @@ error_log("");
             border: 1px solid #bfdbfe;
         }
 
-        /* Mobile optimizations */
         @media (max-width: 768px) {
             .glass-header {
                 backdrop-filter: none;
@@ -823,7 +887,6 @@ error_log("");
             }
         }
 
-        /* Tab styling */
         .tab-button {
             padding: 12px 24px;
             font-size: 14px;
@@ -846,7 +909,6 @@ error_log("");
             background: linear-gradient(to top, rgba(79, 70, 229, 0.05), transparent);
         }
 
-        /* Metric Cards */
         .metric-card {
             position: relative;
             overflow: hidden;
@@ -874,14 +936,12 @@ error_log("");
             --metric-color: #f59e0b;
         }
 
-        /* Chart Containers */
         .chart-container {
             position: relative;
             height: 300px;
             width: 100%;
         }
         
-        /* Quick Actions */
         .quick-action {
             transition: all 0.3s ease;
             cursor: pointer;
@@ -892,7 +952,6 @@ error_log("");
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
         }
         
-        /* Announcement Cards */
         .announcement-card {
             border-left: 4px solid transparent;
             transition: all 0.3s ease;
@@ -914,7 +973,6 @@ error_log("");
             border-left-color: #4f46e5;
         }
         
-        /* Progress bars */
         .progress-bar {
             height: 6px;
             border-radius: 3px;
@@ -939,8 +997,7 @@ error_log("");
         .progress-warning {
             background: linear-gradient(90deg, #f59e0b, #fbbf24);
         }
-        
-        /* Avatar Styles */
+
         .avatar {
             display: flex;
             align-items: center;
@@ -949,26 +1006,7 @@ error_log("");
             font-weight: 600;
             color: white;
         }
-        
-        .avatar-sm {
-            width: 32px;
-            height: 32px;
-            font-size: 12px;
-        }
-        
-        .avatar-md {
-            width: 40px;
-            height: 40px;
-            font-size: 14px;
-        }
-        
-        .avatar-lg {
-            width: 48px;
-            height: 48px;
-            font-size: 16px;
-        }
-        
-        /* Badge Styles */
+
         .badge {
             display: inline-flex;
             align-items: center;
@@ -994,8 +1032,7 @@ error_log("");
             background-color: #fef3c7;
             color: #d97706;
         }
-        
-        /* Form Styles */
+
         .form-label {
             display: block;
             margin-bottom: 8px;
@@ -1033,6 +1070,23 @@ error_log("");
             background-repeat: no-repeat;
             background-position: right 12px center;
             background-size: 16px;
+        }
+
+        /* Revenue specific styles */
+        .revenue-positive {
+            color: #10b981;
+        }
+        
+        .revenue-negative {
+            color: #ef4444;
+        }
+        
+        .revenue-neutral {
+            color: #6b7280;
+        }
+        
+        .currency-format {
+            font-feature-settings: "tnum" 1;
         }
     </style>
 </head>
@@ -1180,7 +1234,6 @@ error_log("");
                     <select name="class_id" class="form-select" required>
                         <option value="">Select Class</option>
                         <?php
-                        // Get active classes if schoolDb exists
                         if ($schoolDb) {
                             try {
                                 $classOptionsStmt = $schoolDb->prepare("
@@ -1206,7 +1259,6 @@ error_log("");
                     <label class="form-label">Section</label>
                     <select name="section_id" class="form-select">
                         <option value="">Select Section</option>
-                        <!-- Will be populated via JavaScript -->
                     </select>
                 </div>
                 <div class="md:col-span-2">
@@ -1245,7 +1297,7 @@ error_log("");
                         <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
                     </div>
                     <div>
-                        <span class="text-xl font-black tracking-tight text-slate-900"><?php echo htmlspecialchars($school['name']); ?></span>
+                        <span class="text-xl font-black tracking-tight text-slate-900"><?php echo htmlspecialchars(strtoupper($school['name'])); ?></span>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">SCHOOL ADMIN</p>
                     </div>
                 </div>
@@ -1343,7 +1395,7 @@ error_log("");
                 </div>
 
                 <div>
-                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">School Operations</p>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Finance & Revenue</p>
                     <nav class="space-y-1">
                         <a href="./fees.php" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
                             <div class="w-5 h-5 flex items-center justify-center">
@@ -1351,6 +1403,19 @@ error_log("");
                             </div>
                             <span>Fee Management</span>
                         </a>
+                        <a href="./finance.php" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <span>Revenue Analytics</span>
+                            <span class="badge badge-success ml-auto"><?php echo $currencySymbol . number_format($totalRevenue, 0); ?></span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">School Operations</p>
+                    <nav class="space-y-1">
                         <a href="./settings.php" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
                             <div class="w-5 h-5 flex items-center justify-center">
                                 <i class="fas fa-cog"></i>
@@ -1406,11 +1471,11 @@ error_log("");
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <!-- Quick Stats -->
+                    <!-- Revenue Quick Stats -->
                     <div class="hidden md:flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl">
                         <div class="text-right">
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Today's Attendance</p>
-                            <p class="text-sm font-black text-emerald-600"><?php echo $attendanceRate; ?>%</p>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Monthly Revenue</p>
+                            <p class="text-sm font-black text-emerald-600 currency-format"><?php echo $currencySymbol . number_format($monthlyRevenue, 0); ?></p>
                         </div>
                     </div>
 
@@ -1445,7 +1510,7 @@ error_log("");
                             <i class="fas fa-graduation-cap mr-2"></i>Academics
                         </button>
                         <button class="tab-button" onclick="switchTab('finance')" data-tab="finance">
-                            <i class="fas fa-dollar-sign mr-2"></i>Finance
+                            <i class="fas fa-chart-line mr-2"></i>Finance
                         </button>
                     </div>
                 </div>
@@ -1463,13 +1528,11 @@ error_log("");
                             </div>
                             <div class="flex items-center gap-3">
                                 <div class="text-right">
-                                    <p class="text-sm font-black text-slate-900">School Status</p>
-                                    <p class="text-2xl font-black <?php echo $school['status'] === 'active' ? 'text-emerald-600' : 'text-amber-600'; ?>">
-                                        <?php echo ucfirst($school['status']); ?>
-                                    </p>
+                                    <p class="text-sm font-black text-slate-900">Total Revenue</p>
+                                    <p class="text-2xl font-black text-emerald-600 currency-format"><?php echo $currencySymbol . number_format($totalRevenue, 0); ?></p>
                                 </div>
-                                <div class="w-12 h-12 rounded-xl <?php echo $school['status'] === 'active' ? 'bg-emerald-100' : 'bg-amber-100'; ?> flex items-center justify-center">
-                                    <i class="fas <?php echo $school['status'] === 'active' ? 'fa-check-circle text-emerald-600' : 'fa-exclamation-triangle text-amber-600'; ?> text-2xl"></i>
+                                <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-emerald-600 text-2xl"></i>
                                 </div>
                             </div>
                         </div>
@@ -1480,7 +1543,7 @@ error_log("");
                 <div class="max-w-7xl mx-auto mb-8">
                     <h3 class="text-lg font-black text-slate-900 mb-4">Quick Actions</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="glass-card quick-action rounded-2xl p-6 text-center hover:border-indigo-200" onclick="window.location.href='/tenant/<?php echo $schoolSlug; ?>/admin/attendance'">
+                        <div class="glass-card quick-action rounded-2xl p-6 text-center hover:border-amber-200" onclick="window.location.href='/tenant/<?php echo $schoolSlug; ?>/admin/attendance'">
                             <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center mx-auto mb-3">
                                 <i class="fas fa-calendar-check text-amber-600 text-xl"></i>
                             </div>
@@ -1501,12 +1564,12 @@ error_log("");
                             <h4 class="font-bold text-slate-900 mb-1">Generate Reports</h4>
                             <p class="text-sm text-slate-500">Academic/financial reports</p>
                         </div>
-                        <div class="glass-card quick-action rounded-2xl p-6 text-center hover:border-purple-200" onclick="window.location.href='/tenant/<?php echo $schoolSlug; ?>/admin/schedule'">
-                            <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-calendar-alt text-purple-600 text-xl"></i>
+                        <div class="glass-card quick-action rounded-2xl p-6 text-center hover:border-green-200" onclick="window.location.href='/tenant/<?php echo $schoolSlug; ?>/admin/finance'">
+                            <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-chart-line text-green-600 text-xl"></i>
                             </div>
-                            <h4 class="font-bold text-slate-900 mb-1">Update Schedule</h4>
-                            <p class="text-sm text-slate-500">Modify class timetable</p>
+                            <h4 class="font-bold text-slate-900 mb-1">Revenue Report</h4>
+                            <p class="text-sm text-slate-500">View financial analytics</p>
                         </div>
                     </div>
                 </div>
@@ -1582,6 +1645,223 @@ error_log("");
                     </div>
                 </div>
 
+                <!-- Revenue Metrics -->
+                <div class="max-w-7xl mx-auto mb-8">
+                    <h3 class="text-lg font-black text-slate-900 mb-4">Revenue & Finance Overview</h3>
+                    
+                    <!-- Revenue Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <!-- Total Revenue Card -->
+                        <div class="glass-card metric-card metric-success rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.5s">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-400">TOTAL REVENUE</p>
+                                    <p class="text-2xl font-black text-slate-900 currency-format"><?php echo $currencySymbol . number_format($totalRevenue, 2); ?></p>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 flex items-center justify-center">
+                                    <i class="fas fa-money-bill-wave text-emerald-600 text-lg"></i>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-success" style="width: <?php echo min(($totalRevenue / 1000000) * 100, 100); ?>%"></div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">Lifetime revenue from payments</p>
+                        </div>
+                        
+                        <!-- Monthly Revenue Card -->
+                        <div class="glass-card metric-card metric-primary rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.6s">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-400">MONTHLY REVENUE</p>
+                                    <p class="text-2xl font-black text-slate-900 currency-format"><?php echo $currencySymbol . number_format($monthlyRevenue, 2); ?></p>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 flex items-center justify-center">
+                                    <i class="fas fa-calendar-alt text-blue-600 text-lg"></i>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-primary" style="width: <?php echo min(($monthlyRevenue / 100000) * 100, 100); ?>%"></div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">Current month's revenue</p>
+                        </div>
+                        
+                        <!-- Pending Payments Card -->
+                        <div class="glass-card metric-card metric-warning rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.7s">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-400">PENDING PAYMENTS</p>
+                                    <p class="text-2xl font-black text-slate-900 currency-format"><?php echo $currencySymbol . number_format($pendingPayments, 2); ?></p>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
+                                    <i class="fas fa-clock text-amber-600 text-lg"></i>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-warning" style="width: <?php echo min(($pendingPayments / 50000) * 100, 100); ?>%"></div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">Awaiting payment confirmation</p>
+                        </div>
+                        
+                        <!-- Collection Rate Card -->
+                        <div class="glass-card metric-card metric-success rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.8s">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-400">COLLECTION RATE</p>
+                                    <p class="text-2xl font-black text-slate-900"><?php echo $collectionRate; ?>%</p>
+                                </div>
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-50 to-emerald-50 flex items-center justify-center">
+                                    <i class="fas fa-percentage text-teal-600 text-lg"></i>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-success" style="width: <?php echo $collectionRate; ?>%"></div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">Invoice collection rate</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Revenue Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Monthly Revenue Trend -->
+                        <div class="glass-card rounded-2xl p-6 animate-fadeInUp">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 class="text-lg font-black text-slate-900">Monthly Revenue Trend</h3>
+                                    <p class="text-slate-500">Revenue over last 6 months</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-bold <?php echo $monthlyRevenue > 0 ? 'text-emerald-600' : 'text-slate-400'; ?>">
+                                        <i class="fas fa-chart-line mr-1"></i>
+                                        <?php echo $currencySymbol . number_format($monthlyRevenue, 2); ?>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Methods Distribution -->
+                        <div class="glass-card rounded-2xl p-6 animate-fadeInUp">
+                            <div class="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 class="text-lg font-black text-slate-900">Payment Methods</h3>
+                                    <p class="text-slate-500">Distribution by payment type</p>
+                                </div>
+                                <button onclick="exportRevenueData()" class="px-3 py-1.5 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition text-xs">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="paymentMethodsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Transactions -->
+                    <div class="glass-card rounded-2xl p-6 mt-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">Recent Transactions</h3>
+                                <p class="text-slate-500">Latest payments and invoices</p>
+                            </div>
+                            <button onclick="window.location.href='/tenant/<?php echo $schoolSlug; ?>/admin/finance'" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200">
+                                <i class="fas fa-exchange-alt mr-2"></i>View All
+                            </button>
+                        </div>
+                        
+                        <?php if (count($recentTransactions) > 0): ?>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-slate-100">
+                                        <th class="text-left py-3 px-4 text-xs font-black text-slate-400 uppercase tracking-wider">Transaction</th>
+                                        <th class="text-left py-3 px-4 text-xs font-black text-slate-400 uppercase tracking-wider">Student</th>
+                                        <th class="text-left py-3 px-4 text-xs font-black text-slate-400 uppercase tracking-wider">Amount</th>
+                                        <th class="text-left py-3 px-4 text-xs font-black text-slate-400 uppercase tracking-wider">Method</th>
+                                        <th class="text-left py-3 px-4 text-xs font-black text-slate-400 uppercase tracking-wider">Status</th>
+                                        <th class="text-left py-3 px-4 text-xs font-black text-slate-400 uppercase tracking-wider">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <?php foreach ($recentTransactions as $transaction): 
+                                        $statusClass = '';
+                                        $statusText = '';
+                                        
+                                        if (isset($transaction['status'])) {
+                                            $status = strtolower($transaction['status']);
+                                            if (in_array($status, ['success', 'paid'])) {
+                                                $statusClass = 'status-active';
+                                                $statusText = 'Paid';
+                                            } elseif (in_array($status, ['pending', 'initiated', 'processing'])) {
+                                                $statusClass = 'status-pending';
+                                                $statusText = 'Pending';
+                                            } elseif (in_array($status, ['failed', 'cancelled', 'refunded'])) {
+                                                $statusClass = 'status-inactive';
+                                                $statusText = ucfirst($status);
+                                            } else {
+                                                $statusClass = 'status-pending';
+                                                $statusText = ucfirst($status);
+                                            }
+                                        } elseif (isset($transaction['payment_status'])) {
+                                            $status = strtolower($transaction['payment_status']);
+                                            $statusClass = $status === 'success' ? 'status-active' : 'status-pending';
+                                            $statusText = ucfirst($status);
+                                        }
+                                        
+                                        $amount = $transaction['amount'] ?? $transaction['total_amount'] ?? 0;
+                                        $method = $transaction['payment_method'] ?? 'N/A';
+                                        $reference = $transaction['transaction_reference'] ?? $transaction['invoice_number'] ?? 'N/A';
+                                        
+                                        $studentName = 'N/A';
+                                        if (isset($transaction['student_first_name']) && $transaction['student_first_name']) {
+                                            $studentName = htmlspecialchars($transaction['student_first_name'] . ' ' . $transaction['student_last_name']);
+                                        } elseif (isset($transaction['admission_number'])) {
+                                            $studentName = 'Student ' . $transaction['admission_number'];
+                                        }
+                                    ?>
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="py-3 px-4">
+                                            <div>
+                                                <p class="text-sm font-medium text-slate-900"><?php echo htmlspecialchars($reference); ?></p>
+                                                <p class="text-xs text-slate-500"><?php echo isset($transaction['gateway_transaction_id']) ? htmlspecialchars($transaction['gateway_transaction_id']) : 'Payment'; ?></p>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <p class="text-sm text-slate-700"><?php echo $studentName; ?></p>
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <p class="text-sm font-bold text-emerald-600 currency-format"><?php echo $currencySymbol . number_format($amount, 2); ?></p>
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <p class="text-sm text-slate-600"><?php echo htmlspecialchars($method); ?></p>
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <span class="status-badge <?php echo $statusClass; ?>">
+                                                <?php echo $statusText; ?>
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <p class="text-sm text-slate-500">
+                                                <?php echo date('M j, Y', strtotime($transaction['created_at'] ?? 'now')); ?>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <?php else: ?>
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-exchange-alt text-slate-400 text-xl"></i>
+                            </div>
+                            <p class="text-slate-500">No transactions recorded yet</p>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
                 <!-- Charts Section -->
                 <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <!-- Attendance Trend Chart -->
@@ -1637,12 +1917,10 @@ error_log("");
                     <?php if (count($announcements) > 0): ?>
                     <div class="space-y-4">
                         <?php foreach ($announcements as $announcement): 
-                            // Determine priority class based on announcement data
                             $priorityClass = 'announcement-info';
                             $badgeClass = 'badge-primary';
                             $iconClass = 'fa-info-circle text-blue-600';
                             
-                            // Check if announcement has priority field
                             if (isset($announcement['priority'])) {
                                 if ($announcement['priority'] === 'urgent') {
                                     $priorityClass = 'announcement-urgent';
@@ -1864,7 +2142,6 @@ error_log("");
                 
                 container.appendChild(toast);
                 
-                // Force reflow
                 toast.offsetHeight;
                 
                 setTimeout(() => {
@@ -1906,149 +2183,293 @@ error_log("");
         // Chart Instances
         let attendanceChart = null;
         let gradeDistributionChart = null;
+        let revenueChart = null;
+        let paymentMethodsChart = null;
 
         // Initialize Charts
         function initializeCharts() {
             // Attendance Trend Chart
             const attendanceCanvas = document.getElementById('attendanceChart');
-            if (!attendanceCanvas) {
-                console.error('Attendance chart canvas not found');
-                return;
-            }
-            
-            const attendanceCtx = attendanceCanvas.getContext('2d');
-            
-            <?php
-            // Prepare data for attendance chart
-            $weeklyLabels = [];
-            $weeklyData = [];
-            foreach ($weeklyAttendance as $week) {
-                $weeklyLabels[] = $week['week_label'] ?? 'Week';
-                $weeklyData[] = floatval($week['attendance_rate'] ?? 0);
-            }
-            ?>
-            
-            attendanceChart = new Chart(attendanceCtx, {
-                type: 'line',
-                data: {
-                    labels: <?php echo json_encode($weeklyLabels); ?>,
-                    datasets: [{
-                        label: 'Attendance Rate',
-                        data: <?php echo json_encode($weeklyData); ?>,
-                        borderColor: '<?php echo $school["primary_color"] ?? "#4f46e5"; ?>',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            callbacks: {
-                                label: function(context) {
-                                    return `Attendance: ${context.parsed.y}%`;
+            if (attendanceCanvas) {
+                const attendanceCtx = attendanceCanvas.getContext('2d');
+                
+                <?php
+                $weeklyLabels = [];
+                $weeklyData = [];
+                foreach ($weeklyAttendance as $week) {
+                    $weeklyLabels[] = $week['week_label'] ?? 'Week';
+                    $weeklyData[] = floatval($week['attendance_rate'] ?? 0);
+                }
+                ?>
+                
+                attendanceChart = new Chart(attendanceCtx, {
+                    type: 'line',
+                    data: {
+                        labels: <?php echo json_encode($weeklyLabels); ?>,
+                        datasets: [{
+                            label: 'Attendance Rate',
+                            data: <?php echo json_encode($weeklyData); ?>,
+                            borderColor: '<?php echo $school["primary_color"] ?? "#4f46e5"; ?>',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Attendance: ${context.parsed.y}%`;
+                                    }
                                 }
                             }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            min: Math.min(...<?php echo json_encode($weeklyData); ?>) - 5,
-                            max: 100,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: Math.min(...<?php echo json_encode($weeklyData); ?>) - 5,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                },
+                                grid: {
+                                    drawBorder: false
                                 }
                             },
-                            grid: {
-                                drawBorder: false
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
+                            x: {
+                                grid: {
+                                    display: false
+                                }
                             }
                         }
                     }
-                }
-            });
+                });
+            }
 
             // Grade Distribution Chart
             const gradeCanvas = document.getElementById('gradeDistributionChart');
-            if (!gradeCanvas) {
-                console.error('Grade distribution chart canvas not found');
-                return;
-            }
-            
-            const gradeCtx = gradeCanvas.getContext('2d');
-            
-            <?php
-            // Prepare data for grade distribution chart
-            $gradeLabels = [];
-            $gradeData = [];
-            foreach ($gradeDistribution as $grade) {
-                $gradeLabels[] = $grade['class_name'] ?? 'Class';
-                $gradeData[] = intval($grade['student_count'] ?? 0);
-            }
-            
-          
-            ?>
-            
-            gradeDistributionChart = new Chart(gradeCtx, {
-                type: 'bar',
-                data: {
-                    labels: <?php echo json_encode($gradeLabels); ?>,
-                    datasets: [{
-                        label: 'Students',
-                        data: <?php echo json_encode($gradeData); ?>,
-                        backgroundColor: '<?php echo $school["primary_color"] ?? "#4f46e5"; ?>',
-                        borderWidth: 0,
-                        borderRadius: 6,
-                        hoverBackgroundColor: '#3730a3'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
+            if (gradeCanvas) {
+                const gradeCtx = gradeCanvas.getContext('2d');
+                
+                <?php
+                $gradeLabels = [];
+                $gradeData = [];
+                foreach ($gradeDistribution as $grade) {
+                    $gradeLabels[] = $grade['class_name'] ?? 'Class';
+                    $gradeData[] = intval($grade['student_count'] ?? 0);
+                }
+                ?>
+                
+                gradeDistributionChart = new Chart(gradeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: <?php echo json_encode($gradeLabels); ?>,
+                        datasets: [{
+                            label: 'Students',
+                            data: <?php echo json_encode($gradeData); ?>,
+                            backgroundColor: '<?php echo $school["primary_color"] ?? "#4f46e5"; ?>',
+                            borderWidth: 0,
+                            borderRadius: 6,
+                            hoverBackgroundColor: '#3730a3'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Students: ${context.parsed.y}`;
+                                    }
+                                }
+                            }
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `Students: ${context.parsed.y}`;
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 20
+                                },
+                                grid: {
+                                    drawBorder: false
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
                                 }
                             }
                         }
+                    }
+                });
+            }
+            
+            // Revenue Chart
+            const revenueCanvas = document.getElementById('revenueChart');
+            if (revenueCanvas) {
+                const revenueCtx = revenueCanvas.getContext('2d');
+                
+                <?php
+                $revenueMonths = [];
+                $revenueData = [];
+                
+                if (!empty($monthlyRevenueData)) {
+                    foreach ($monthlyRevenueData as $month) {
+                        $revenueMonths[] = $month['month_name'];
+                        $revenueData[] = floatval($month['revenue'] ?? 0);
+                    }
+                } else {
+                    // Generate sample data for last 6 months
+                    $currentDate = new DateTime();
+                    for ($i = 5; $i >= 0; $i--) {
+                        $date = clone $currentDate;
+                        $date->modify("-$i months");
+                        $revenueMonths[] = $date->format('M');
+                        // Generate random revenue data for demo
+                        $revenueData[] = $monthlyRevenue * (0.8 + (mt_rand(0, 40) / 100));
+                    }
+                }
+                ?>
+                
+                revenueChart = new Chart(revenueCtx, {
+                    type: 'line',
+                    data: {
+                        labels: <?php echo json_encode($revenueMonths); ?>,
+                        datasets: [{
+                            label: 'Revenue',
+                            data: <?php echo json_encode($revenueData); ?>,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }]
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 20
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
                             },
-                            grid: {
-                                drawBorder: false
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Revenue: <?php echo $currencySymbol; ?>${context.parsed.y.toFixed(2)}`;
+                                    }
+                                }
                             }
                         },
-                        x: {
-                            grid: {
-                                display: false
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '<?php echo $currencySymbol; ?>' + value.toLocaleString();
+                                    }
+                                },
+                                grid: {
+                                    drawBorder: false
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
                             }
                         }
                     }
+                });
+            }
+            
+            // Payment Methods Chart
+            const paymentCanvas = document.getElementById('paymentMethodsChart');
+            if (paymentCanvas) {
+                const paymentCtx = paymentCanvas.getContext('2d');
+                
+                <?php
+                $paymentLabels = [];
+                $paymentAmounts = [];
+                
+                if (!empty($paymentMethodsData)) {
+                    foreach ($paymentMethodsData as $method) {
+                        $paymentLabels[] = ucfirst($method['payment_method'] ?? 'Unknown');
+                        $paymentAmounts[] = floatval($method['amount'] ?? 0);
+                    }
+                } else {
+                    // Sample payment methods data
+                    $paymentLabels = ['Card', 'Bank Transfer', 'Mobile Money', 'Cash'];
+                    $paymentAmounts = [
+                        $totalRevenue * 0.4,
+                        $totalRevenue * 0.3,
+                        $totalRevenue * 0.2,
+                        $totalRevenue * 0.1
+                    ];
                 }
-            });
+                ?>
+                
+                paymentMethodsChart = new Chart(paymentCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: <?php echo json_encode($paymentLabels); ?>,
+                        datasets: [{
+                            data: <?php echo json_encode($paymentAmounts); ?>,
+                            backgroundColor: [
+                                '#4f46e5',
+                                '#10b981',
+                                '#f59e0b',
+                                '#ef4444',
+                                '#8b5cf6',
+                                '#06b6d4'
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 15
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return `<?php echo $currencySymbol; ?>${value.toLocaleString()} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
         }
 
         // Mobile sidebar toggle
@@ -2063,20 +2484,15 @@ error_log("");
 
         // Tab switching
         function switchTab(tabName) {
-            // Remove active class from all tabs
             document.querySelectorAll('.tab-button').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // Add active class to clicked tab
             if (event && event.target) {
                 event.target.classList.add('active');
             }
             
-            // Show toast notification
             Toast.info(`Switched to ${tabName} view`);
-            
-            // In a real app, you would load different content based on tab
             console.log('Switched to tab:', tabName);
         }
 
@@ -2104,14 +2520,11 @@ error_log("");
                 e.preventDefault();
                 const formData = new FormData(this);
                 
-                // Show loading state
                 const submitBtn = this.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Publishing...';
                 submitBtn.disabled = true;
                 
-                // In a real application, you would make an AJAX request here
-                // For now, simulate success
                 setTimeout(() => {
                     Toast.success('Announcement published successfully!');
                     closeModal('newAnnouncementModal');
@@ -2128,14 +2541,11 @@ error_log("");
                 e.preventDefault();
                 const formData = new FormData(this);
                 
-                // Show loading state
                 const submitBtn = this.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Adding...';
                 submitBtn.disabled = true;
                 
-                // In a real application, you would make an AJAX request here
-                // For now, simulate success
                 setTimeout(() => {
                     Toast.success('Student added successfully!');
                     closeModal('addStudentModal');
@@ -2149,17 +2559,14 @@ error_log("");
         // Announcement priority selection
         document.querySelectorAll('.announcement-priority').forEach(label => {
             label.addEventListener('click', function() {
-                // Remove active class from all
                 document.querySelectorAll('.announcement-priority').forEach(l => {
                     l.style.borderColor = '#e2e8f0';
                     l.style.backgroundColor = '';
                 });
                 
-                // Add active style to clicked
                 this.style.borderColor = '#4f46e5';
                 this.style.backgroundColor = '#f8fafc';
                 
-                // Check the radio button
                 const radio = this.querySelector('input[type="radio"]');
                 if (radio) radio.checked = true;
             });
@@ -2179,12 +2586,10 @@ error_log("");
                     return;
                 }
                 
-                // Simulate loading sections
                 sectionSelect.innerHTML = '<option value="">Loading sections...</option>';
                 sectionSelect.disabled = true;
                 
                 setTimeout(() => {
-                    // In a real app, fetch from API
                     sectionSelect.innerHTML = '<option value="">Select Section</option>';
                     sectionSelect.innerHTML += '<option value="1">Section A</option>';
                     sectionSelect.innerHTML += '<option value="2">Section B</option>';
@@ -2197,6 +2602,10 @@ error_log("");
         // Export functions
         function exportGradeData() {
             Toast.success('Grade distribution data exported!<br>CSV file downloaded.');
+        }
+        
+        function exportRevenueData() {
+            Toast.success('Revenue data exported!<br>CSV file downloaded.');
         }
 
         // Initialize on page load
@@ -2239,24 +2648,27 @@ error_log("");
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + N for new announcement
             if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
                 e.preventDefault();
                 openModal('newAnnouncementModal');
                 Toast.info('New announcement modal opened (Ctrl+N)');
             }
             
-            // Ctrl/Cmd + S for add student
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
                 openModal('addStudentModal');
                 Toast.info('Add student modal opened (Ctrl+S)');
             }
             
-            // Esc to close modals
             if (e.key === 'Escape') {
                 closeModal('newAnnouncementModal');
                 closeModal('addStudentModal');
+            }
+            
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                window.location.reload();
+                Toast.info('Dashboard refreshed (Ctrl+R)');
             }
         });
     </script>

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>School Calendar | Parent Portal | AcademiXSuite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-teal: #06b6d4;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc; 
+            color: #1e293b; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .glass-header { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        .sidebar-link { 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-left: 3px solid transparent; 
+        }
+        
+        .sidebar-link:hover { 
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+            color: var(--primary-blue); 
+            border-left-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .active-link { 
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+            color: var(--primary-blue); 
+            border-left-color: var(--primary-blue); 
+            font-weight: 700;
+        }
+
+        /* Calendar Styles */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: #e2e8f0;
+        }
+        
+        .calendar-day {
+            background: white;
+            min-height: 100px;
+            padding: 8px;
+            position: relative;
+        }
+        
+        .calendar-day-header {
+            background: #f1f5f9;
+            padding: 12px;
+            text-align: center;
+            font-weight: 700;
+            color: #475569;
+        }
+        
+        .calendar-day.today {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+        }
+        
+        .calendar-day.weekend {
+            background: #f8fafc;
+        }
+        
+        .event-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+        
+        .event-academic { background-color: #3b82f6; }
+        .event-sports { background-color: #10b981; }
+        .event-cultural { background-color: #8b5cf6; }
+        .event-meeting { background-color: #f59e0b; }
+        .event-holiday { background-color: #ef4444; }
+        
+        .fc-event {
+            border-radius: 6px;
+            padding: 4px 8px;
+            margin: 2px 0;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .fc-event:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[99] lg:hidden hidden" onclick="mobileSidebarToggle()"></div>
+
+    <!-- Event Details Modal -->
+    <div id="eventDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="bg-white rounded-2xl w-full max-w-2xl mx-4">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-black text-slate-900" id="eventModalTitle">Event Details</h3>
+                    <button onclick="closeModal('eventDetailsModal')" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div id="eventDetailsContent">
+                    <!-- Event details loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-[100] lg:relative lg:translate-x-0 -translate-x-full transition-transform duration-300 flex flex-col shadow-xl lg:shadow-none">
+            
+            <!-- Parent Header -->
+            <div class="h-20 flex items-center px-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-100">
+                            <i class="fas fa-users text-white text-lg"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div>
+                        <span class="text-lg font-black tracking-tight text-slate-900">Johnson Family</span>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">PARENT PORTAL</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 space-y-8">
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Dashboard</p>
+                    <nav class="space-y-1">
+                        <a href="parent-dashboard.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <i class="fas fa-home w-5"></i>
+                            <span>Overview</span>
+                        </a>
+                        <a href="parent-children.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <i class="fas fa-user-graduate w-5"></i>
+                            <span>My Children</span>
+                        </a>
+                        <a href="#" class="sidebar-link active-link flex items-center gap-3 px-6 py-3 text-sm font-semibold">
+                            <i class="fas fa-calendar-alt w-5"></i>
+                            <span>School Calendar</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Academic</p>
+                    <nav class="space-y-1">
+                        <a href="parent-grades.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <i class="fas fa-chart-line w-5"></i>
+                            <span>Grades & Reports</span>
+                        </a>
+                        <a href="parent-attendance.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <i class="fas fa-calendar-check w-5"></i>
+                            <span>Attendance</span>
+                        </a>
+                        <a href="parent-assignments.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <i class="fas fa-tasks w-5"></i>
+                            <span>Assignments</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Financial</p>
+                    <nav class="space-y-1">
+                        <a href="parent-fees.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <i class="fas fa-receipt w-5"></i>
+                            <span>Fee Statements</span>
+                        </a>
+                        <a href="parent-payments.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <i class="fas fa-credit-card w-5"></i>
+                            <span>Payment History</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Communication</p>
+                    <nav class="space-y-1">
+                        <a href="parent-messages.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <i class="fas fa-comments w-5"></i>
+                            <span>Messages</span>
+                        </a>
+                        <a href="parent-events.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <i class="fas fa-calendar-day w-5"></i>
+                            <span>Events</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Account</p>
+                    <nav class="space-y-1">
+                        <a href="parent-profile.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <i class="fas fa-user w-5"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a href="parent-settings.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <i class="fas fa-cog w-5"></i>
+                            <span>Settings</span>
+                        </a>
+                        <a href="login.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <i class="fas fa-sign-out-alt w-5"></i>
+                            <span>Logout</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- Header -->
+            <header class="h-20 glass-header px-6 lg:px-8 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg">
+                        <i class="fas fa-bars-staggered"></i>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-lg font-black text-slate-900">School Calendar</h1>
+                        <div class="hidden lg:flex items-center gap-2">
+                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            <span class="text-xs font-black text-emerald-600 uppercase tracking-widest">December 2024</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Calendar Navigation -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="previousMonth()" class="p-2 hover:bg-slate-100 rounded-lg">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button onclick="currentMonth()" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl">
+                            Today
+                        </button>
+                        <button onclick="nextMonth()" class="p-2 hover:bg-slate-100 rounded-lg">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <!-- View Toggle -->
+                    <div class="hidden md:flex items-center gap-2 bg-white border border-slate-200 px-2 py-1 rounded-xl">
+                        <button onclick="setView('month')" class="px-3 py-1 text-sm font-bold text-blue-600 bg-blue-50 rounded-lg">
+                            Month
+                        </button>
+                        <button onclick="setView('week')" class="px-3 py-1 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg">
+                            Week
+                        </button>
+                        <button onclick="setView('day')" class="px-3 py-1 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg">
+                            Day
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <div class="flex-1 overflow-y-auto p-6 lg:p-8">
+                <div class="max-w-7xl mx-auto">
+                    <!-- Calendar Header -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                        <div>
+                            <h2 class="text-2xl lg:text-3xl font-black text-slate-900 mb-2">School Calendar</h2>
+                            <p class="text-slate-500 font-medium">View important dates, events, and schedules for your children</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div id="currentMonthYear" class="text-right">
+                                <p class="text-sm font-bold text-slate-600">Current Month</p>
+                                <p class="text-lg font-black text-slate-900">December 2024</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                                <i class="fas fa-calendar text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="glass-card rounded-2xl p-6 mb-6">
+                        <div class="flex flex-wrap items-center gap-4">
+                            <span class="text-sm font-bold text-slate-900">Legend:</span>
+                            <div class="flex items-center gap-2">
+                                <span class="event-dot event-academic"></span>
+                                <span class="text-sm text-slate-600">Academic</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="event-dot event-sports"></span>
+                                <span class="text-sm text-slate-600">Sports</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="event-dot event-cultural"></span>
+                                <span class="text-sm text-slate-600">Cultural</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="event-dot event-meeting"></span>
+                                <span class="text-sm text-slate-600">Meetings</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="event-dot event-holiday"></span>
+                                <span class="text-sm text-slate-600">Holidays</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar -->
+                    <div class="glass-card rounded-2xl p-6 mb-6">
+                        <div class="calendar-grid">
+                            <!-- Day Headers -->
+                            <div class="calendar-day-header">Sun</div>
+                            <div class="calendar-day-header">Mon</div>
+                            <div class="calendar-day-header">Tue</div>
+                            <div class="calendar-day-header">Wed</div>
+                            <div class="calendar-day-header">Thu</div>
+                            <div class="calendar-day-header">Fri</div>
+                            <div class="calendar-day-header">Sat</div>
+
+                            <!-- Calendar Days -->
+                            <div id="calendarDays" class="col-span-7">
+                                <!-- Calendar will be generated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Events -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Upcoming Events List -->
+                        <div class="glass-card rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-black text-slate-900">Upcoming Events</h3>
+                                <button onclick="exportCalendar()" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-download mr-1"></i> Export
+                                </button>
+                            </div>
+                            
+                            <div class="space-y-4" id="upcomingEvents">
+                                <!-- Events will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Add to Personal Calendar -->
+                        <div class="glass-card rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-black text-slate-900">Add to Personal Calendar</h3>
+                                <button onclick="syncCalendar()" class="text-sm font-bold text-emerald-600 hover:text-emerald-800">
+                                    <i class="fas fa-sync-alt mr-1"></i> Sync
+                                </button>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="p-4 bg-blue-50 rounded-xl">
+                                    <h4 class="font-bold text-slate-900 mb-2">Sync with Google Calendar</h4>
+                                    <p class="text-sm text-slate-600 mb-3">Automatically sync school events with your Google Calendar</p>
+                                    <button onclick="syncGoogleCalendar()" class="w-full py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-50">
+                                        Connect Google Calendar
+                                    </button>
+                                </div>
+                                
+                                <div class="p-4 bg-emerald-50 rounded-xl">
+                                    <h4 class="font-bold text-slate-900 mb-2">Download Calendar</h4>
+                                    <p class="text-sm text-slate-600 mb-3">Download school calendar as .ics file for your personal calendar</p>
+                                    <button onclick="downloadCalendar()" class="w-full py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-50">
+                                        Download .ics File
+                                    </button>
+                                </div>
+                                
+                                <div class="p-4 bg-purple-50 rounded-xl">
+                                    <h4 class="font-bold text-slate-900 mb-2">Event Notifications</h4>
+                                    <p class="text-sm text-slate-600 mb-3">Get notifications for upcoming events</p>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-slate-700">Email Reminders</span>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" class="sr-only peer" checked>
+                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">${message}</div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 10);
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.remove();
+                }, duration);
+            }
+        }
+
+        // Calendar Data
+        const events = [
+            { id: 1, date: '2024-12-10', title: 'Parent-Teacher Meeting', type: 'meeting', description: 'Quarterly review meeting with all teachers', time: '3:00 PM', location: 'School Auditorium', children: ['Alex', 'Sarah'] },
+            { id: 2, date: '2024-12-15', title: 'Mathematics Final Exam', type: 'academic', description: 'Grade 11 & 12 final examinations', time: '9:00 AM - 12:00 PM', location: 'Exam Hall', children: ['Alex'] },
+            { id: 3, date: '2024-12-18', title: 'Winter Concert', type: 'cultural', description: 'Annual school winter music concert', time: '6:00 PM', location: 'School Auditorium', children: ['Alex', 'Sarah'] },
+            { id: 4, date: '2024-12-20', title: 'Sports Day', type: 'sports', description: 'Annual inter-house sports competition', time: '8:00 AM - 4:00 PM', location: 'School Field', children: ['Alex', 'Sarah'] },
+            { id: 5, date: '2024-12-25', title: 'Christmas Holiday', type: 'holiday', description: 'School closed for Christmas', time: 'All day', location: '-', children: [] },
+            { id: 6, date: '2024-12-31', title: 'New Year\'s Eve', type: 'holiday', description: 'School closed for New Year', time: 'All day', location: '-', children: [] },
+            { id: 7, date: '2024-12-12', title: 'Science Fair', type: 'academic', description: 'Annual school science fair exhibition', time: '10:00 AM - 3:00 PM', location: 'Science Block', children: ['Sarah'] }
+        ];
+
+        // Calendar Generation
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+
+        function generateCalendar(month = currentMonth, year = currentYear) {
+            const container = document.getElementById('calendarDays');
+            if (!container) return;
+            
+            // Clear previous calendar
+            container.innerHTML = '';
+            
+            // Update month/year display
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('currentMonthYear').innerHTML = `
+                <p class="text-sm font-bold text-slate-600">Current Month</p>
+                <p class="text-lg font-black text-slate-900">${monthNames[month]} ${year}</p>
+            `;
+            
+            // Get first day of month
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDay = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+            const today = new Date();
+            
+            // Add empty days for previous month
+            for (let i = 0; i < startDay; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                container.appendChild(dayDiv);
+            }
+            
+            // Add days of current month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                
+                // Check if today
+                const date = new Date(year, month, day);
+                if (date.getDate() === today.getDate() && 
+                    date.getMonth() === today.getMonth() && 
+                    date.getFullYear() === today.getFullYear()) {
+                    dayDiv.classList.add('today');
+                }
+                
+                // Check if weekend
+                const dayOfWeek = date.getDay();
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    dayDiv.classList.add('weekend');
+                }
+                
+                // Add day number
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'font-bold text-slate-900 mb-1';
+                dayNumber.textContent = day;
+                dayDiv.appendChild(dayNumber);
+                
+                // Add events for this day
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayEvents = events.filter(event => event.date === dateStr);
+                
+                dayEvents.forEach(event => {
+                    const eventDiv = document.createElement('div');
+                    eventDiv.className = `fc-event bg-${getEventColor(event.type)}-100 text-${getEventColor(event.type)}-800 border border-${getEventColor(event.type)}-200`;
+                    eventDiv.innerHTML = `
+                        <span class="event-dot event-${event.type}"></span>
+                        ${event.title}
+                    `;
+                    eventDiv.onclick = () => showEventDetails(event.id);
+                    dayDiv.appendChild(eventDiv);
+                });
+                
+                container.appendChild(dayDiv);
+            }
+            
+            // Update upcoming events list
+            updateUpcomingEvents();
+        }
+
+        function getEventColor(type) {
+            switch(type) {
+                case 'academic': return 'blue';
+                case 'sports': return 'emerald';
+                case 'cultural': return 'purple';
+                case 'meeting': return 'amber';
+                case 'holiday': return 'red';
+                default: return 'blue';
+            }
+        }
+
+        function updateUpcomingEvents() {
+            const container = document.getElementById('upcomingEvents');
+            if (!container) return;
+            
+            // Sort events by date
+            const sortedEvents = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Get upcoming events (next 7 days)
+            const today = new Date();
+            const nextWeek = new Date();
+            nextWeek.setDate(today.getDate() + 7);
+            
+            const upcoming = sortedEvents.filter(event => {
+                const eventDate = new Date(event.date);
+                return eventDate >= today && eventDate <= nextWeek;
+            });
+            
+            container.innerHTML = upcoming.map(event => `
+                <div class="p-4 border border-slate-200 rounded-xl hover:border-${getEventColor(event.type)}-300 transition">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="event-dot event-${event.type}"></span>
+                            <h4 class="font-bold text-slate-900">${event.title}</h4>
+                        </div>
+                        <span class="text-sm font-bold text-slate-600">${formatDate(event.date)}</span>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-2">${event.description}</p>
+                    <div class="flex items-center justify-between text-xs text-slate-500">
+                        <span><i class="fas fa-clock mr-1"></i>${event.time}</span>
+                        <span><i class="fas fa-map-marker-alt mr-1"></i>${event.location}</span>
+                        <span><i class="fas fa-user-graduate mr-1"></i>${event.children.join(', ') || 'All'}</span>
+                    </div>
+                    <button onclick="showEventDetails(${event.id})" class="w-full mt-3 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-lg">
+                        View Details
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function showEventDetails(eventId) {
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+            
+            document.getElementById('eventModalTitle').textContent = event.title;
+            document.getElementById('eventDetailsContent').innerHTML = `
+                <div class="space-y-6">
+                    <div class="p-4 bg-${getEventColor(event.type)}-50 rounded-xl">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 rounded-lg bg-${getEventColor(event.type)}-100 flex items-center justify-center">
+                                <i class="fas fa-calendar text-${getEventColor(event.type)}-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900">${event.title}</h4>
+                                <p class="text-sm text-slate-600">${event.description}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-slate-50 rounded-xl">
+                            <p class="text-sm font-bold text-slate-400 mb-1">Date</p>
+                            <p class="text-lg font-black text-slate-900">${formatDate(event.date)}</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl">
+                            <p class="text-sm font-bold text-slate-400 mb-1">Time</p>
+                            <p class="text-lg font-black text-slate-900">${event.time}</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl">
+                            <p class="text-sm font-bold text-slate-400 mb-1">Location</p>
+                            <p class="text-lg font-black text-slate-900">${event.location}</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-xl">
+                            <p class="text-sm font-bold text-slate-400 mb-1">Children</p>
+                            <p class="text-lg font-black text-slate-900">${event.children.join(', ') || 'All Children'}</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h5 class="font-bold text-slate-900 mb-2">Additional Information</h5>
+                        <p class="text-slate-600">
+                            Please arrive 15 minutes before the event starts. ${event.children.length > 0 ? `This event involves ${event.children.join(' and ')}.` : ''}
+                            ${event.type === 'meeting' ? 'Bring any questions or concerns you may have about your children\'s progress.' : ''}
+                            ${event.type === 'exam' ? 'Ensure your child brings all necessary materials.' : ''}
+                        </p>
+                    </div>
+                    
+                    <div class="flex gap-3 pt-6 border-t border-slate-200">
+                        <button onclick="addToPersonalCalendar(${event.id})" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700">
+                            <i class="fas fa-calendar-plus mr-2"></i> Add to Calendar
+                        </button>
+                        <button onclick="setReminder(${event.id})" class="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700">
+                            <i class="fas fa-bell mr-2"></i> Set Reminder
+                        </button>
+                        <button onclick="closeModal('eventDetailsModal')" class="px-6 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            openModal('eventDetailsModal');
+        }
+
+        function addToPersonalCalendar(eventId) {
+            showToast('Event added to your personal calendar', 'success');
+        }
+
+        function setReminder(eventId) {
+            showToast('Reminder set for this event', 'success');
+        }
+
+        // Calendar Navigation
+        function previousMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            generateCalendar(currentMonth, currentYear);
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            generateCalendar(currentMonth, currentYear);
+        }
+
+        function currentMonth() {
+            currentDate = new Date();
+            currentMonth = currentDate.getMonth();
+            currentYear = currentDate.getFullYear();
+            generateCalendar(currentMonth, currentYear);
+        }
+
+        // View Controls
+        function setView(view) {
+            showToast(`Switched to ${view} view`, 'info');
+            // In a real app, this would switch between different calendar views
+        }
+
+        // Export Functions
+        function exportCalendar() {
+            showToast('Calendar exported successfully', 'success');
+        }
+
+        function syncCalendar() {
+            showToast('Calendar synced with personal calendar', 'success');
+        }
+
+        function syncGoogleCalendar() {
+            showToast('Connecting to Google Calendar...', 'info');
+            setTimeout(() => {
+                showToast('Successfully connected to Google Calendar', 'success');
+            }, 1500);
+        }
+
+        function downloadCalendar() {
+            showToast('Calendar file downloaded', 'success');
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Mobile Sidebar Toggle
+        function mobileSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Initialize Calendar
+        document.addEventListener('DOMContentLoaded', function() {
+            generateCalendar();
+            showToast('School calendar loaded', 'success', 2000);
+        });
+    </script>
+</body>
+</html>

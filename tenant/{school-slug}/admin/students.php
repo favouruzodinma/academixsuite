@@ -1,9 +1,267 @@
+<?php
+/**
+ * Timetable Management - VIRTUAL VERSION
+ * This file serves ALL schools via virtual-router.php
+ * ALL DATA FETCHED LIVE FROM DATABASE
+ */
+
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../../../logs/timetable_management.log');
+
+// Start output buffering
+ob_start();
+
+error_log("=== TIMETABLE MANAGEMENT START ===");
+error_log("Request URI: " . ($_SERVER['REQUEST_URI'] ?? 'N/A'));
+
+// Define constants if not defined
+if (!defined('APP_NAME')) define('APP_NAME', 'AcademixSuite');
+if (!defined('IS_LOCAL')) define('IS_LOCAL', true);
+
+// Start session safely
+try {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start([
+            'cookie_lifetime' => 86400,
+            'read_and_close'  => false,
+        ]);
+        error_log("Session started successfully");
+    }
+} catch (Exception $e) {
+    error_log("Session error: " . $e->getMessage());
+}
+
+// Get school slug from GLOBALS (set by router.php)
+$schoolSlug = $GLOBALS['SCHOOL_SLUG'] ?? '';
+$userType = $GLOBALS['USER_TYPE'] ?? 'admin';
+$currentPage = $GLOBALS['CURRENT_PAGE'] ?? 'timetable.php';
+$schoolData = $GLOBALS['SCHOOL_DATA'] ?? [];
+$baseUrl = $GLOBALS['BASE_URL'] ?? '';
+
+error_log("School Slug from Router: " . $schoolSlug);
+
+if (empty($schoolSlug)) {
+    error_log("ERROR: Empty school slug from router");
+    header('HTTP/1.1 400 Bad Request');
+    echo json_encode(['error' => 'School identifier missing']);
+    exit;
+}
+
+// Get school info from session or GLOBALS
+$school = $schoolData;
+if (empty($school) && isset($_SESSION['school_info'][$schoolSlug])) {
+    $school = $_SESSION['school_info'][$schoolSlug];
+}
+
+if (empty($school)) {
+    error_log("ERROR: School data not found for slug: " . $schoolSlug);
+    header("Location: /academixsuite/tenant/login.php?school_slug=" . urlencode($schoolSlug));
+    exit;
+}
+
+// Check authentication
+$isAuthenticated = false;
+if (isset($_SESSION['school_auth']) && is_array($_SESSION['school_auth'])) {
+    if ($_SESSION['school_auth']['school_slug'] === $schoolSlug) {
+        $isAuthenticated = true;
+    }
+}
+
+if (!$isAuthenticated) {
+    error_log("User not authenticated, redirecting to login");
+    header('Location: /academixsuite/tenant/login.php?school_slug=' . urlencode($schoolSlug));
+    exit;
+}
+
+// Get user info from session
+$schoolAuth = $_SESSION['school_auth'];
+$userId = $schoolAuth['user_id'] ?? 0;
+$userType = $schoolAuth['user_type'] ?? '';
+
+// Verify admin access
+if ($userType !== 'admin') {
+    error_log("ERROR: User does not have admin privileges");
+    header('HTTP/1.1 403 Forbidden');
+    echo "Access denied. Admin privileges required.";
+    exit;
+}
+
+function deletePeriod($db) {
+    try {
+        $periodId = $_POST['period_id'];
+        
+        $stmt = $db->prepare("DELETE FROM timetables WHERE id = ?");
+        $stmt->execute([$periodId]);
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Period deleted successfully'
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Error deleting period: " . $e->getMessage());
+        echo json_encode(['error' => $e->getMessage()]);
+    }
+}
+
+// Load configuration
+try {
+    $autoloadPath = __DIR__ . '/../../../includes/autoload.php';
+    
+    if (!file_exists($autoloadPath)) {
+        throw new Exception("Autoload file not found at: " . $autoloadPath);
+    }
+    
+    require_once $autoloadPath;
+    
+    if (!class_exists('Database')) {
+        throw new Exception("Database class not found");
+    }
+    
+} catch (Exception $e) {
+    error_log("Error loading autoload.php: " . $e->getMessage());
+    http_response_code(500);
+    die("Configuration loading failed: " . $e->getMessage());
+}
+
+// Connect to school database
+$schoolDb = null;
+// Get initial data for the page
+try {
+    // Get total active students
+    $totalStmt = $schoolDb->prepare("
+        SELECT COUNT(*) as total 
+        FROM students 
+        WHERE school_id = ? AND status = 'active'
+    ");
+    $totalStmt->execute([$school['id']]);
+    $totalStudents = $totalStmt->fetch(PDO::FETCH_ASSOC)['total'];
+    
+    // Get today's attendance
+    $today = date('Y-m-d');
+    $attendanceStmt = $schoolDb->prepare("
+        SELECT 
+            COUNT(DISTINCT student_id) as total,
+            SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present,
+            SUM(CASE WHEN status = 'absent' THEN 1 ELSE 0 END) as absent
+        FROM attendance 
+        WHERE school_id = ? AND date = ?
+    ");
+    $attendanceStmt->execute([$school['id'], $today]);
+    $attendanceToday = $attendanceStmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Get new admissions this month
+    $monthStart = date('Y-m-01');
+    $newStmt = $schoolDb->prepare("
+        SELECT COUNT(*) as new 
+        FROM students 
+        WHERE school_id = ? AND enrollment_date >= ?
+    ");
+    $newStmt->execute([$school['id'], $monthStart]);
+    $newAdmissions = $newStmt->fetch(PDO::FETCH_ASSOC)['new'];
+    
+    // Get average GPA
+    $gpaStmt = $schoolDb->prepare("
+        SELECT AVG(grade_point) as avg_gpa 
+        FROM grades 
+        WHERE school_id = ?
+    ");
+    $gpaStmt->execute([$school['id']]);
+    $avgGpa = $gpaStmt->fetch(PDO::FETCH_ASSOC)['avg_gpa'];
+    
+    // Get classes for filters
+    $classesStmt = $schoolDb->prepare("
+        SELECT DISTINCT grade_level, section 
+        FROM classes 
+        WHERE school_id = ? 
+        ORDER BY grade_level, section
+    ");
+    $classesStmt->execute([$school['id']]);
+    $classes = $classesStmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get recent students
+    $recentStmt = $schoolDb->prepare("
+        SELECT 
+            s.*,
+            c.grade_level,
+            c.section
+        FROM students s
+        LEFT JOIN classes c ON s.class_id = c.id
+        WHERE s.school_id = ? 
+        ORDER BY s.created_at DESC 
+        LIMIT 5
+    ");
+    $recentStmt->execute([$school['id']]);
+    $recentStudents = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Process recent students for display
+    foreach ($recentStudents as &$student) {
+        $student['initials'] = substr($student['first_name'], 0, 1) . substr($student['last_name'], 0, 1);
+        $student['avatar_color'] = getAvatarColor($student['grade_level'] ?? '');
+    }
+    
+    // Get statistics
+    $stats = [
+        'total_students' => $totalStudents,
+        'attendance_today' => $attendanceToday,
+        'new_admissions' => $newAdmissions,
+        'avg_gpa' => round($avgGpa, 2) ?? 0,
+        'absent_today' => $attendanceToday['absent'] ?? 0
+    ];
+    
+} catch (Exception $e) {
+    error_log("Error loading initial data: " . $e->getMessage());
+    $totalStudents = 0;
+    $attendanceToday = ['total' => 0, 'present' => 0, 'absent' => 0];
+    $newAdmissions = 0;
+    $avgGpa = 0;
+    $classes = [];
+    $recentStudents = [];
+    $stats = [
+        'total_students' => 0,
+        'attendance_today' => ['total' => 0, 'present' => 0, 'absent' => 0],
+        'new_admissions' => 0,
+        'avg_gpa' => 0,
+        'absent_today' => 0
+    ];
+}
+
+// Get current date info
+$currentDate = date('F j, Y');
+$currentMonth = date('F');
+$currentYear = date('Y');
+
+// Prepare data for JavaScript
+$jsData = [
+    'school' => [
+        'id' => $school['id'],
+        'name' => $school['name'],
+        'slug' => $school['slug'],
+        'primary_color' => $school['primary_color'] ?? '#4f46e5',
+        'secondary_color' => $school['secondary_color'] ?? '#10b981'
+    ],
+    'stats' => $stats,
+    'classes' => $classes,
+    'recent_students' => $recentStudents,
+    'current_date' => $currentDate,
+    'current_month' => $currentMonth,
+    'current_year' => $currentYear,
+    'api_url' => $baseUrl . '/' . $schoolSlug . '/admin/school-students.php'
+];
+
+// End PHP output buffering and get the buffered content
+$php_content = ob_get_clean();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Students Directory | AcademixSuite School Admin</title>
+    <title><?php echo htmlspecialchars($school['name']); ?> - Students Directory | AcademixSuite School Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,8 +269,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         
         :root {
-            --school-primary: #4f46e5;
-            --school-secondary: #10b981;
+            --school-primary: <?php echo $school['primary_color'] ?? '#4f46e5'; ?>;
+            --school-secondary: <?php echo $school['secondary_color'] ?? '#10b981'; ?>;
             --school-surface: #ffffff;
             --school-bg: #f8fafc;
         }
@@ -769,19 +1027,19 @@
                     </button>
                 </div>
                 
-                <form id="addStudentForm" class="space-y-6">
+                <form id="addStudentForm" class="space-y-6" onsubmit="return saveNewStudent(event)">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="form-label">First Name *</label>
-                            <input type="text" name="firstName" class="form-input" placeholder="John" required>
+                            <input type="text" name="first_name" class="form-input" placeholder="John" required>
                         </div>
                         <div>
                             <label class="form-label">Last Name *</label>
-                            <input type="text" name="lastName" class="form-input" placeholder="Doe" required>
+                            <input type="text" name="last_name" class="form-input" placeholder="Doe" required>
                         </div>
                         <div>
                             <label class="form-label">Date of Birth *</label>
-                            <input type="date" name="dateOfBirth" class="form-input" required>
+                            <input type="date" name="date_of_birth" class="form-input" required>
                         </div>
                         <div>
                             <label class="form-label">Gender *</label>
@@ -793,40 +1051,21 @@
                             </select>
                         </div>
                         <div>
-                            <label class="form-label">Grade Level *</label>
-                            <select name="gradeLevel" class="form-select" required>
-                                <option value="">Select Grade</option>
-                                <option value="k">Kindergarten</option>
-                                <option value="1">Grade 1</option>
-                                <option value="2">Grade 2</option>
-                                <option value="3">Grade 3</option>
-                                <option value="4">Grade 4</option>
-                                <option value="5">Grade 5</option>
-                                <option value="6">Grade 6</option>
-                                <option value="7">Grade 7</option>
-                                <option value="8">Grade 8</option>
-                                <option value="9">Grade 9</option>
-                                <option value="10">Grade 10</option>
-                                <option value="11">Grade 11</option>
-                                <option value="12">Grade 12</option>
+                            <label class="form-label">Student ID *</label>
+                            <input type="text" name="student_id" class="form-input" placeholder="STU-2024-001" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Class *</label>
+                            <select name="class_id" class="form-select" required>
+                                <option value="">Select Class</option>
+                                <?php foreach ($classes as $class): ?>
+                                <option value="<?php echo htmlspecialchars($class['id'] ?? ''); ?>">
+                                    Grade <?php echo htmlspecialchars($class['grade_level'] ?? ''); ?> - Section <?php echo htmlspecialchars($class['section'] ?? ''); ?>
+                                </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div>
-                            <label class="form-label">Section *</label>
-                            <select name="section" class="form-select" required>
-                                <option value="">Select Section</option>
-                                <option value="A">Section A</option>
-                                <option value="B">Section B</option>
-                                <option value="C">Section C</option>
-                                <option value="D">Section D</option>
-                                <option value="E">Section E</option>
-                            </select>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="form-label">Student ID *</label>
-                            <input type="text" name="studentId" class="form-input" placeholder="STU-2024-001" required>
-                        </div>
-                        <div class="md:col-span-2">
                             <label class="form-label">Email Address</label>
                             <input type="email" name="email" class="form-input" placeholder="student@school.edu">
                         </div>
@@ -834,9 +1073,22 @@
                             <label class="form-label">Phone Number</label>
                             <input type="tel" name="phone" class="form-input" placeholder="+1 (555) 123-4567">
                         </div>
+                        <div class="md:col-span-2">
+                            <label class="form-label">Address</label>
+                            <input type="text" name="address" class="form-input" placeholder="123 Main St, Anytown, USA">
+                        </div>
                         <div>
                             <label class="form-label">Enrollment Date *</label>
-                            <input type="date" name="enrollmentDate" class="form-input" required>
+                            <input type="date" name="enrollment_date" class="form-input" required value="<?php echo date('Y-m-d'); ?>">
+                        </div>
+                        <div>
+                            <label class="form-label">Status *</label>
+                            <select name="status" class="form-select" required>
+                                <option value="active" selected>Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="pending">Pending</option>
+                                <option value="graduated">Graduated</option>
+                            </select>
                         </div>
                     </div>
                     
@@ -845,11 +1097,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="form-label">Parent Name *</label>
-                                <input type="text" name="parentName" class="form-input" placeholder="Jane Doe" required>
+                                <input type="text" name="parent_name" class="form-input" placeholder="Jane Doe" required>
                             </div>
                             <div>
                                 <label class="form-label">Parent Relationship *</label>
-                                <select name="parentRelationship" class="form-select" required>
+                                <select name="parent_relationship" class="form-select" required>
                                     <option value="">Select Relationship</option>
                                     <option value="mother">Mother</option>
                                     <option value="father">Father</option>
@@ -859,11 +1111,11 @@
                             </div>
                             <div>
                                 <label class="form-label">Parent Email *</label>
-                                <input type="email" name="parentEmail" class="form-input" placeholder="parent@email.com" required>
+                                <input type="email" name="parent_email" class="form-input" placeholder="parent@email.com" required>
                             </div>
                             <div>
                                 <label class="form-label">Parent Phone *</label>
-                                <input type="tel" name="parentPhone" class="form-input" placeholder="+1 (555) 123-4567" required>
+                                <input type="tel" name="parent_phone" class="form-input" placeholder="+1 (555) 123-4567" required>
                             </div>
                         </div>
                     </div>
@@ -873,11 +1125,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="form-label">Emergency Contact Name</label>
-                                <input type="text" name="emergencyContact" class="form-input" placeholder="Emergency Contact">
+                                <input type="text" name="emergency_contact" class="form-input" placeholder="Emergency Contact">
                             </div>
                             <div>
                                 <label class="form-label">Emergency Contact Phone</label>
-                                <input type="tel" name="emergencyPhone" class="form-input" placeholder="+1 (555) 987-6543">
+                                <input type="tel" name="emergency_phone" class="form-input" placeholder="+1 (555) 987-6543">
                             </div>
                         </div>
                     </div>
@@ -887,7 +1139,7 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="form-label">Medical Conditions</label>
-                                <textarea name="medicalConditions" class="form-input h-24" placeholder="List any medical conditions or allergies"></textarea>
+                                <textarea name="medical_conditions" class="form-input h-24" placeholder="List any medical conditions or allergies"></textarea>
                             </div>
                             <div>
                                 <label class="form-label">Medications</label>
@@ -895,20 +1147,20 @@
                             </div>
                             <div>
                                 <label class="form-label">Special Requirements</label>
-                                <textarea name="specialRequirements" class="form-input h-24" placeholder="Any special educational or physical requirements"></textarea>
+                                <textarea name="special_requirements" class="form-input h-24" placeholder="Any special educational or physical requirements"></textarea>
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="flex gap-3 mt-8 pt-6 border-t border-slate-100">
+                        <button type="button" onclick="closeModal('addStudentModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                            Add Student
+                        </button>
+                    </div>
                 </form>
-                
-                <div class="flex gap-3 mt-8 pt-6 border-t border-slate-100">
-                    <button onclick="closeModal('addStudentModal')" class="flex-1 py-3 border border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
-                        Cancel
-                    </button>
-                    <button onclick="saveNewStudent()" class="flex-1 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
-                        Add Student
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -1022,11 +1274,11 @@
                                 <div class="space-y-4">
                                     <div>
                                         <p class="text-sm text-slate-500">Overall GPA</p>
-                                        <p class="text-2xl font-black text-slate-900">3.75</p>
+                                        <p class="text-2xl font-black text-slate-900" id="studentGPA">3.75</p>
                                     </div>
                                     <div>
                                         <p class="text-sm text-slate-500">Attendance Rate</p>
-                                        <p class="text-2xl font-black text-emerald-600">94.2%</p>
+                                        <p class="text-2xl font-black text-emerald-600" id="studentAttendance">94.2%</p>
                                     </div>
                                     <div>
                                         <p class="text-sm text-slate-500">Current Grade</p>
@@ -1108,30 +1360,30 @@
                             
                             <div>
                                 <h5 class="font-bold text-slate-900 mb-4">Recent Attendance</h5>
-                                <div class="space-y-3">
-                                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                        <div>
-                                            <p class="font-medium text-slate-900">Today</p>
-                                            <p class="text-sm text-slate-500">December 4, 2024</p>
-                                        </div>
-                                        <span class="status-badge status-active">Present</span>
-                                    </div>
-                                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                        <div>
-                                            <p class="font-medium text-slate-900">Yesterday</p>
-                                            <p class="text-sm text-slate-500">December 3, 2024</p>
-                                        </div>
-                                        <span class="status-badge status-active">Present</span>
-                                    </div>
-                                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                                        <div>
-                                            <p class="font-medium text-slate-900">November 28</p>
-                                            <p class="text-sm text-slate-500">Last Week</p>
-                                        </div>
-                                        <span class="status-badge status-inactive">Absent</span>
-                                    </div>
+                                <div class="space-y-3" id="recentAttendance">
+                                    <!-- Recent attendance will be loaded here -->
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Documents Tab -->
+                <div id="studentDocumentsTab" class="student-tab-content hidden">
+                    <div class="glass-card rounded-xl p-6">
+                        <h4 class="text-lg font-black text-slate-900 mb-6">Student Documents</h4>
+                        <div class="space-y-4" id="studentDocuments">
+                            <!-- Documents will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notes Tab -->
+                <div id="studentNotesTab" class="student-tab-content hidden">
+                    <div class="glass-card rounded-xl p-6">
+                        <h4 class="text-lg font-black text-slate-900 mb-6">Student Notes</h4>
+                        <div class="space-y-4" id="studentNotes">
+                            <!-- Notes will be loaded here -->
                         </div>
                     </div>
                 </div>
@@ -1139,7 +1391,7 @@
             
             <div class="p-8 border-t border-slate-100">
                 <div class="flex gap-3">
-                    <button onclick="editStudent()" class="action-btn action-btn-primary">
+                    <button onclick="editCurrentStudent()" class="action-btn action-btn-primary">
                         <i class="fas fa-edit"></i> Edit Student
                     </button>
                     <button onclick="printStudentRecord()" class="action-btn action-btn-secondary">
@@ -1229,7 +1481,7 @@
                         <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
                     </div>
                     <div>
-                        <span class="text-xl font-black tracking-tight text-slate-900">Greenwood High</span>
+                        <span class="text-xl font-black tracking-tight text-slate-900"><?php echo htmlspecialchars($school['name']); ?></span>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">SCHOOL ADMIN</p>
                     </div>
                 </div>
@@ -1240,15 +1492,15 @@
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="text-sm font-medium text-slate-600">Total Students:</span>
-                        <span class="text-sm font-black text-indigo-600">1,248</span>
+                        <span class="text-sm font-black text-indigo-600"><?php echo number_format($stats['total_students']); ?></span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-slate-600">Active Today:</span>
-                        <span class="text-sm font-bold text-emerald-600">1,176</span>
+                        <span class="text-sm font-medium text-slate-600">Present Today:</span>
+                        <span class="text-sm font-bold text-emerald-600"><?php echo number_format($stats['attendance_today']['present'] ?? 0); ?></span>
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-sm font-medium text-slate-600">New This Month:</span>
-                        <span class="text-sm font-bold text-slate-900">24</span>
+                        <span class="text-sm font-bold text-slate-900"><?php echo number_format($stats['new_admissions']); ?></span>
                     </div>
                 </div>
             </div>
@@ -1258,13 +1510,13 @@
                 <div>
                     <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Dashboard</p>
                     <nav class="space-y-1">
-                        <a href="school-dashboard.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                        <a href="<?php echo $baseUrl . '/' . $schoolSlug . '/admin/dashboard.php'; ?>" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
                             <div class="w-5 h-5 flex items-center justify-center">
                                 <i class="fas fa-chart-pie"></i>
                             </div>
                             <span>Overview</span>
                         </a>
-                        <a href="school-announcements.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                        <a href="<?php echo $baseUrl . '/' . $schoolSlug . '/admin/announcements.php'; ?>" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
                             <div class="w-5 h-5 flex items-center justify-center">
                                 <i class="fas fa-bullhorn"></i>
                             </div>
@@ -1276,20 +1528,20 @@
                 <div>
                     <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Student Management</p>
                     <nav class="space-y-1">
-                        <a href="school-students.html" class="sidebar-link active-link flex items-center gap-3 px-6 py-3 text-sm font-semibold">
+                        <a href="<?php echo $baseUrl . '/' . $schoolSlug . '/admin/students.php'; ?>" class="sidebar-link active-link flex items-center gap-3 px-6 py-3 text-sm font-semibold">
                             <div class="w-5 h-5 flex items-center justify-center">
                                 <i class="fas fa-user-graduate"></i>
                             </div>
                             <span>Students Directory</span>
-                            <span class="text-xs font-bold text-slate-400 ml-auto">1,248</span>
+                            <span class="text-xs font-bold text-slate-400 ml-auto"><?php echo number_format($stats['total_students']); ?></span>
                         </a>
-                        <a href="school-attendance.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                        <a href="<?php echo $baseUrl . '/' . $schoolSlug . '/admin/attendance.php'; ?>" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
                             <div class="w-5 h-5 flex items-center justify-center">
                                 <i class="fas fa-calendar-check"></i>
                             </div>
                             <span>Attendance</span>
                         </a>
-                        <a href="school-grades.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                        <a href="<?php echo $baseUrl . '/' . $schoolSlug . '/admin/grades.php'; ?>" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
                             <div class="w-5 h-5 flex items-center justify-center">
                                 <i class="fas fa-chart-bar"></i>
                             </div>
@@ -1301,13 +1553,13 @@
                 <div>
                     <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Staff Management</p>
                     <nav class="space-y-1">
-                        <a href="school-teachers.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                        <a href="<?php echo $baseUrl . '/' . $schoolSlug . '/admin/teachers.php'; ?>" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
                             <div class="w-5 h-5 flex items-center justify-center">
                                 <i class="fas fa-chalkboard-teacher"></i>
                             </div>
                             <span>Teachers</span>
                         </a>
-                        <a href="school-schedule.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                        <a href="<?php echo $baseUrl . '/' . $schoolSlug . '/admin/schedule.php'; ?>" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
                             <div class="w-5 h-5 flex items-center justify-center">
                                 <i class="fas fa-calendar-alt"></i>
                             </div>
@@ -1319,13 +1571,13 @@
                 <div>
                     <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">School Operations</p>
                     <nav class="space-y-1">
-                        <a href="school-fees.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                        <a href="<?php echo $baseUrl . '/' . $schoolSlug . '/admin/fees.php'; ?>" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
                             <div class="w-5 h-5 flex items-center justify-center">
                                 <i class="fas fa-receipt"></i>
                             </div>
                             <span>Fee Management</span>
                         </a>
-                        <a href="school-settings.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                        <a href="<?php echo $baseUrl . '/' . $schoolSlug . '/admin/settings.php'; ?>" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
                             <div class="w-5 h-5 flex items-center justify-center">
                                 <i class="fas fa-cog"></i>
                             </div>
@@ -1337,13 +1589,17 @@
 
             <!-- User Profile -->
             <div class="p-6 border-t border-slate-100">
-                <div class="flex items-center gap-3 p-2 group cursor-pointer hover:bg-slate-50 rounded-xl transition">
+                <div class="flex items-center gap-3 p-2 group cursor-pointer hover:bg-slate-50 rounded-xl transition" onclick="window.location.href='<?php echo $baseUrl . '/' . $schoolSlug . '/admin/profile.php'; ?>'">
                     <div class="relative">
-                        <img src="https://ui-avatars.com/api/?name=Principal+Smith&background=4f46e5&color=fff&bold=true&size=128" class="w-10 h-10 rounded-xl shadow-sm">
+                        <?php
+                        $adminName = $schoolAuth['name'] ?? 'Admin User';
+                        $avatarUrl = "https://ui-avatars.com/api/?name=" . urlencode($adminName) . "&background=4f46e5&color=fff&bold=true&size=128";
+                        ?>
+                        <img src="<?php echo $avatarUrl; ?>" class="w-10 h-10 rounded-xl shadow-sm">
                         <div class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
                     </div>
                     <div class="overflow-hidden flex-1">
-                        <p class="text-[13px] font-black text-slate-900 truncate">Principal Smith</p>
+                        <p class="text-[13px] font-black text-slate-900 truncate"><?php echo htmlspecialchars($adminName); ?></p>
                         <p class="text-[10px] font-black text-indigo-600 uppercase tracking-wider italic">School_Admin</p>
                     </div>
                 </div>
@@ -1362,7 +1618,7 @@
                         <h1 class="text-lg font-black text-slate-900 tracking-tight">Students Directory</h1>
                         <div class="hidden lg:flex items-center gap-2">
                             <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                            <span class="text-xs font-black text-emerald-600 uppercase tracking-widest">1,248 Total Students</span>
+                            <span class="text-xs font-black text-emerald-600 uppercase tracking-widest"><?php echo number_format($stats['total_students']); ?> Total Students</span>
                         </div>
                     </div>
                 </div>
@@ -1372,7 +1628,7 @@
                     <div class="hidden md:flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl">
                         <div class="text-right">
                             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Today's Absent</p>
-                            <p class="text-sm font-black text-red-600">24</p>
+                            <p class="text-sm font-black text-red-600"><?php echo number_format($stats['absent_today']); ?></p>
                         </div>
                     </div>
 
@@ -1382,7 +1638,7 @@
                             <i class="fas fa-file-import"></i>
                             <span class="hidden sm:inline">Import</span>
                         </button>
-                        <button onclick="generateReports()" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
+                        <button onclick="exportStudents()" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2">
                             <i class="fas fa-file-export"></i>
                             <span class="hidden sm:inline">Export</span>
                         </button>
@@ -1452,19 +1708,14 @@
                                 <label class="form-label">Grade Level</label>
                                 <select class="form-select" id="filterGrade" onchange="applyFilters()">
                                     <option value="">All Grades</option>
-                                    <option value="k">Kindergarten</option>
-                                    <option value="1">Grade 1</option>
-                                    <option value="2">Grade 2</option>
-                                    <option value="3">Grade 3</option>
-                                    <option value="4">Grade 4</option>
-                                    <option value="5">Grade 5</option>
-                                    <option value="6">Grade 6</option>
-                                    <option value="7">Grade 7</option>
-                                    <option value="8">Grade 8</option>
-                                    <option value="9">Grade 9</option>
-                                    <option value="10">Grade 10</option>
-                                    <option value="11">Grade 11</option>
-                                    <option value="12">Grade 12</option>
+                                    <?php
+                                    $gradeLevels = ['k' => 'Kindergarten'];
+                                    for ($i = 1; $i <= 12; $i++) {
+                                        $gradeLevels[$i] = "Grade $i";
+                                    }
+                                    foreach ($gradeLevels as $value => $label): ?>
+                                    <option value="<?php echo $value; ?>"><?php echo $label; ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                             
@@ -1472,11 +1723,11 @@
                                 <label class="form-label">Section</label>
                                 <select class="form-select" id="filterSection" onchange="applyFilters()">
                                     <option value="">All Sections</option>
-                                    <option value="A">Section A</option>
-                                    <option value="B">Section B</option>
-                                    <option value="C">Section C</option>
-                                    <option value="D">Section D</option>
-                                    <option value="E">Section E</option>
+                                    <?php
+                                    $sections = ['A', 'B', 'C', 'D', 'E'];
+                                    foreach ($sections as $section): ?>
+                                    <option value="<?php echo $section; ?>">Section <?php echo $section; ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                             
@@ -1506,7 +1757,7 @@
                             <button onclick="clearFilters()" class="px-4 py-2 text-slate-600 hover:text-slate-800 transition">
                                 Clear All Filters
                             </button>
-                            <button onclick="toggleAdvancedFilters()" class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200">
+                            <button onclick="applyFilters()" class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-indigo-200">
                                 Apply Filters
                             </button>
                         </div>
@@ -1515,22 +1766,13 @@
                     <!-- Filter Chips -->
                     <div class="flex flex-wrap gap-2 mt-6">
                         <span class="filter-chip active" onclick="toggleFilter('all')" data-filter="all">
-                            <i class="fas fa-users"></i> All Students (1,248)
-                        </span>
-                        <span class="filter-chip" onclick="toggleFilter('grade10')" data-filter="grade10">
-                            <i class="fas fa-graduation-cap"></i> Grade 10 (186)
-                        </span>
-                        <span class="filter-chip" onclick="toggleFilter('grade11')" data-filter="grade11">
-                            <i class="fas fa-graduation-cap"></i> Grade 11 (192)
-                        </span>
-                        <span class="filter-chip" onclick="toggleFilter('grade12')" data-filter="grade12">
-                            <i class="fas fa-graduation-cap"></i> Grade 12 (178)
+                            <i class="fas fa-users"></i> All Students (<?php echo number_format($stats['total_students']); ?>)
                         </span>
                         <span class="filter-chip" onclick="toggleFilter('absent')" data-filter="absent">
-                            <i class="fas fa-user-slash"></i> Absent Today (24)
+                            <i class="fas fa-user-slash"></i> Absent Today (<?php echo number_format($stats['absent_today']); ?>)
                         </span>
-                        <span class="filter-chip" onclick="toggleFilter('fees')" data-filter="fees">
-                            <i class="fas fa-exclamation-circle"></i> Fee Due (45)
+                        <span class="filter-chip" onclick="toggleFilter('new')" data-filter="new">
+                            <i class="fas fa-star"></i> New This Month (<?php echo number_format($stats['new_admissions']); ?>)
                         </span>
                     </div>
                 </div>
@@ -1542,7 +1784,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <p class="text-sm font-bold text-slate-400">TOTAL STUDENTS</p>
-                                <p class="text-2xl font-black text-slate-900">1,248</p>
+                                <p class="text-2xl font-black text-slate-900"><?php echo number_format($stats['total_students']); ?></p>
                             </div>
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
                                 <i class="fas fa-user-graduate text-indigo-600 text-lg"></i>
@@ -1559,7 +1801,14 @@
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <p class="text-sm font-bold text-slate-400">ATTENDANCE RATE</p>
-                                <p class="text-2xl font-black text-slate-900">94.2%</p>
+                                <p class="text-2xl font-black text-slate-900">
+                                    <?php
+                                    $attendanceRate = 0;
+                                    if ($stats['attendance_today']['total'] > 0) {
+                                        $attendanceRate = round(($stats['attendance_today']['present'] / $stats['attendance_today']['total']) * 100, 1);
+                                    }
+                                    echo $attendanceRate; ?>%
+                                </p>
                             </div>
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
                                 <i class="fas fa-calendar-check text-emerald-600 text-lg"></i>
@@ -1576,7 +1825,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <p class="text-sm font-bold text-slate-400">AVERAGE GPA</p>
-                                <p class="text-2xl font-black text-slate-900">3.42</p>
+                                <p class="text-2xl font-black text-slate-900"><?php echo number_format($stats['avg_gpa'], 2); ?></p>
                             </div>
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center">
                                 <i class="fas fa-chart-line text-amber-600 text-lg"></i>
@@ -1593,7 +1842,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <div>
                                 <p class="text-sm font-bold text-slate-400">NEW ADMISSIONS</p>
-                                <p class="text-2xl font-black text-slate-900">24</p>
+                                <p class="text-2xl font-black text-slate-900"><?php echo number_format($stats['new_admissions']); ?></p>
                             </div>
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
                                 <i class="fas fa-user-plus text-red-600 text-lg"></i>
@@ -1633,7 +1882,7 @@
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <h3 class="text-lg font-black text-slate-900" id="studentsTitle">All Students</h3>
                             <div class="flex items-center gap-3">
-                                <span class="text-sm text-slate-500" id="studentsCount">Showing 1-20 of 1,248 students</span>
+                                <span class="text-sm text-slate-500" id="studentsCount">Loading students...</span>
                                 <div class="flex items-center gap-2">
                                     <button onclick="previousPage()" class="pagination-btn">
                                         <i class="fas fa-chevron-left"></i>
@@ -1669,7 +1918,13 @@
                                 </tr>
                             </thead>
                             <tbody id="studentsTableBody">
-                                <!-- Students will be loaded here -->
+                                <!-- Students will be loaded via AJAX -->
+                                <tr>
+                                    <td colspan="9" class="text-center py-8">
+                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                                        <p class="text-slate-500 mt-2">Loading students...</p>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -1762,111 +2017,50 @@
                             </button>
                         </div>
                         
-                        <div class="space-y-4">
+                        <div class="space-y-4" id="recentAdmissionsList">
+                            <?php foreach ($recentStudents as $student): ?>
                             <div class="flex items-center gap-3">
-                                <div class="avatar avatar-md bg-gradient-to-br from-indigo-500 to-purple-500">
-                                    JD
+                                <div class="avatar avatar-md bg-gradient-to-br <?php echo $student['avatar_color']; ?>">
+                                    <?php echo $student['initials']; ?>
                                 </div>
                                 <div class="flex-1">
-                                    <p class="font-medium text-slate-900">John Doe</p>
+                                    <p class="font-medium text-slate-900"><?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name']); ?></p>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-xs text-slate-500">Grade 10 • Section A</span>
+                                        <span class="text-xs text-slate-500">Grade <?php echo htmlspecialchars($student['grade_level'] ?? 'N/A'); ?> • Section <?php echo htmlspecialchars($student['section'] ?? 'N/A'); ?></span>
                                         <span class="badge badge-primary">New</span>
                                     </div>
                                 </div>
-                                <span class="text-xs text-slate-500">2 days ago</span>
+                                <span class="text-xs text-slate-500">
+                                    <?php
+                                    $enrollmentDate = new DateTime($student['enrollment_date'] ?? $student['created_at']);
+                                    $now = new DateTime();
+                                    $interval = $now->diff($enrollmentDate);
+                                    
+                                    if ($interval->days == 0) {
+                                        echo 'Today';
+                                    } elseif ($interval->days == 1) {
+                                        echo 'Yesterday';
+                                    } elseif ($interval->days < 7) {
+                                        echo $interval->days . ' days ago';
+                                    } elseif ($interval->days < 30) {
+                                        echo floor($interval->days / 7) . ' weeks ago';
+                                    } else {
+                                        echo floor($interval->days / 30) . ' months ago';
+                                    }
+                                    ?>
+                                </span>
                             </div>
-                            
-                            <div class="flex items-center gap-3">
-                                <div class="avatar avatar-md bg-gradient-to-br from-emerald-500 to-teal-500">
-                                    SJ
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-medium text-slate-900">Sarah Johnson</p>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-slate-500">Grade 11 • Section B</span>
-                                        <span class="badge badge-primary">New</span>
-                                    </div>
-                                </div>
-                                <span class="text-xs text-slate-500">3 days ago</span>
-                            </div>
-                            
-                            <div class="flex items-center gap-3">
-                                <div class="avatar avatar-md bg-gradient-to-br from-amber-500 to-orange-500">
-                                    MB
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-medium text-slate-900">Michael Brown</p>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-slate-500">Grade 9 • Section C</span>
-                                        <span class="badge badge-primary">New</span>
-                                    </div>
-                                </div>
-                                <span class="text-xs text-slate-500">5 days ago</span>
-                            </div>
-                            
-                            <div class="flex items-center gap-3">
-                                <div class="avatar avatar-md bg-gradient-to-br from-blue-500 to-cyan-500">
-                                    EW
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-medium text-slate-900">Emma Wilson</p>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-slate-500">Grade 12 • Section A</span>
-                                        <span class="badge badge-primary">Transfer</span>
-                                    </div>
-                                </div>
-                                <span class="text-xs text-slate-500">1 week ago</span>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                     
                     <!-- Upcoming Events -->
                     <div class="glass-card rounded-2xl p-6">
                         <h3 class="text-lg font-black text-slate-900 mb-6">Upcoming Student Events</h3>
-                        <div class="space-y-4">
-                            <div class="flex items-center gap-4 p-3 bg-blue-50 border border-blue-100 rounded-xl">
-                                <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-blue-100 flex flex-col items-center justify-center">
-                                    <span class="text-sm font-black text-blue-600">DEC</span>
-                                    <span class="text-lg font-black text-blue-600">15</span>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-bold text-slate-900 mb-1">Science Fair</h4>
-                                    <p class="text-xs text-slate-500">Grades 6-12 • Science Dept</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center gap-4 p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
-                                <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-emerald-100 flex flex-col items-center justify-center">
-                                    <span class="text-sm font-black text-emerald-600">DEC</span>
-                                    <span class="text-lg font-black text-emerald-600">18</span>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-bold text-slate-900 mb-1">Sports Day</h4>
-                                    <p class="text-xs text-slate-500">All grades • Sports Field</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center gap-4 p-3 bg-purple-50 border border-purple-100 rounded-xl">
-                                <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-purple-100 flex flex-col items-center justify-center">
-                                    <span class="text-sm font-black text-purple-600">JAN</span>
-                                    <span class="text-lg font-black text-purple-600">10</span>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-bold text-slate-900 mb-1">Parent-Teacher Meetings</h4>
-                                    <p class="text-xs text-slate-500">All parents • Main Hall</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center gap-4 p-3 bg-amber-50 border border-amber-100 rounded-xl">
-                                <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-amber-100 flex flex-col items-center justify-center">
-                                    <span class="text-sm font-black text-amber-600">JAN</span>
-                                    <span class="text-lg font-black text-amber-600">15</span>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-bold text-slate-900 mb-1">Mid-term Exams Begin</h4>
-                                    <p class="text-xs text-slate-500">All grades • Exam Halls</p>
-                                </div>
+                        <div class="space-y-4" id="upcomingEvents">
+                            <!-- Events will be loaded via AJAX -->
+                            <div class="text-center py-4">
+                                <p class="text-slate-500">Loading events...</p>
                             </div>
                         </div>
                     </div>
@@ -1876,6 +2070,18 @@
     </div>
 
     <script>
+        // Global variables
+        const jsData = <?php echo json_encode($jsData); ?>;
+        let currentTab = 'all';
+        let selectedStudents = new Set();
+        let currentPage = 1;
+        let itemsPerPage = 20;
+        let totalStudents = 0;
+        let gradeChart = null;
+        let academicChart = null;
+        let attendanceChart = null;
+        let currentViewStudentId = null;
+
         // Toast Notification System
         class Toast {
             static show(message, type = 'info', duration = 5000) {
@@ -1936,164 +2142,68 @@
             }
         }
 
-        // Sample Students Data
-        const studentsData = [
-            {
-                id: 1,
-                firstName: "John",
-                lastName: "Doe",
-                studentId: "STU-2024-001",
-                grade: "10",
-                section: "A",
-                dateOfBirth: "2008-01-15",
-                gender: "male",
-                email: "john.doe@school.edu",
-                phone: "+1 (555) 123-4567",
-                address: "123 Main St, Anytown, USA",
-                enrollmentDate: "2024-09-01",
-                status: "active",
-                gpa: 3.75,
-                attendance: 94.2,
-                parentName: "Jane Doe",
-                parentRelationship: "mother",
-                parentEmail: "jane.doe@email.com",
-                parentPhone: "+1 (555) 987-6543",
-                emergencyContact: "John Smith",
-                emergencyPhone: "+1 (555) 456-7890",
-                medicalConditions: "None",
-                allergies: "Peanut allergy",
-                avatarColor: "from-indigo-500 to-purple-500"
-            },
-            {
-                id: 2,
-                firstName: "Sarah",
-                lastName: "Johnson",
-                studentId: "STU-2024-002",
-                grade: "11",
-                section: "B",
-                dateOfBirth: "2007-03-22",
-                gender: "female",
-                email: "sarah.j@school.edu",
-                phone: "+1 (555) 234-5678",
-                address: "456 Oak Ave, Anytown, USA",
-                enrollmentDate: "2023-09-01",
-                status: "active",
-                gpa: 3.92,
-                attendance: 96.5,
-                parentName: "Robert Johnson",
-                parentRelationship: "father",
-                parentEmail: "robert.j@email.com",
-                parentPhone: "+1 (555) 876-5432",
-                emergencyContact: "Mary Johnson",
-                emergencyPhone: "+1 (555) 765-4321",
-                medicalConditions: "Asthma",
-                allergies: "None",
-                avatarColor: "from-emerald-500 to-teal-500"
-            },
-            {
-                id: 3,
-                firstName: "Michael",
-                lastName: "Brown",
-                studentId: "STU-2024-003",
-                grade: "9",
-                section: "C",
-                dateOfBirth: "2009-07-10",
-                gender: "male",
-                email: "michael.b@school.edu",
-                phone: "+1 (555) 345-6789",
-                address: "789 Pine Rd, Anytown, USA",
-                enrollmentDate: "2024-09-01",
-                status: "active",
-                gpa: 3.25,
-                attendance: 88.7,
-                parentName: "Lisa Brown",
-                parentRelationship: "mother",
-                parentEmail: "lisa.b@email.com",
-                parentPhone: "+1 (555) 765-4321",
-                emergencyContact: "David Brown",
-                emergencyPhone: "+1 (555) 654-3210",
-                medicalConditions: "None",
-                allergies: "Dairy",
-                avatarColor: "from-amber-500 to-orange-500"
-            },
-            {
-                id: 4,
-                firstName: "Emma",
-                lastName: "Wilson",
-                studentId: "STU-2024-004",
-                grade: "12",
-                section: "A",
-                dateOfBirth: "2006-11-30",
-                gender: "female",
-                email: "emma.w@school.edu",
-                phone: "+1 (555) 456-7890",
-                address: "321 Elm St, Anytown, USA",
-                enrollmentDate: "2020-09-01",
-                status: "active",
-                gpa: 4.0,
-                attendance: 98.9,
-                parentName: "James Wilson",
-                parentRelationship: "father",
-                parentEmail: "james.w@email.com",
-                parentPhone: "+1 (555) 543-2109",
-                emergencyContact: "Sarah Wilson",
-                emergencyPhone: "+1 (555) 432-1098",
-                medicalConditions: "None",
-                allergies: "None",
-                avatarColor: "from-blue-500 to-cyan-500"
-            },
-            {
-                id: 5,
-                firstName: "Alex",
-                lastName: "Garcia",
-                studentId: "STU-2024-005",
-                grade: "10",
-                section: "B",
-                dateOfBirth: "2008-05-18",
-                gender: "male",
-                email: "alex.g@school.edu",
-                phone: "+1 (555) 567-8901",
-                address: "654 Maple Dr, Anytown, USA",
-                enrollmentDate: "2024-09-01",
-                status: "active",
-                gpa: 3.45,
-                attendance: 92.3,
-                parentName: "Maria Garcia",
-                parentRelationship: "mother",
-                parentEmail: "maria.g@email.com",
-                parentPhone: "+1 (555) 432-1098",
-                emergencyContact: "Carlos Garcia",
-                emergencyPhone: "+1 (555) 321-0987",
-                medicalConditions: "ADHD",
-                allergies: "None",
-                avatarColor: "from-red-500 to-pink-500"
-            }
-        ];
-
-        // State Management
-        let currentTab = 'all';
-        let selectedStudents = new Set();
-        let currentPage = 1;
-        let itemsPerPage = 20;
-        let gradeChart = null;
-        let academicChart = null;
-        let attendanceChart = null;
-
         // Initialize page
         function initializePage() {
-            loadStudentsTable();
+            loadStudents();
             initializeCharts();
+            loadUpcomingEvents();
             setupEventListeners();
         }
 
-        // Load students table
-        function loadStudentsTable() {
+        // Load students via AJAX
+        function loadStudents() {
+            const formData = new FormData();
+            formData.append('action', 'get_students');
+            formData.append('page', currentPage);
+            formData.append('limit', itemsPerPage);
+            formData.append('status', currentTab === 'all' ? '' : currentTab);
+            
+            // Add search filter
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput.value) {
+                formData.append('search', searchInput.value);
+            }
+            
+            // Add advanced filters
+            const gradeFilter = document.getElementById('filterGrade');
+            const sectionFilter = document.getElementById('filterSection');
+            const genderFilter = document.getElementById('filterGender');
+            const statusFilter = document.getElementById('filterStatus');
+            
+            const filters = {};
+            if (gradeFilter && gradeFilter.value) filters.grade = gradeFilter.value;
+            if (sectionFilter && sectionFilter.value) filters.section = sectionFilter.value;
+            if (genderFilter && genderFilter.value) filters.gender = genderFilter.value;
+            if (statusFilter && statusFilter.value) filters.status = statusFilter.value;
+            
+            formData.append('filters', JSON.stringify(filters));
+            
+            fetch(jsData.api_url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    Toast.error(data.error);
+                    return;
+                }
+                
+                totalStudents = data.total;
+                renderStudentsTable(data.students);
+                updatePaginationInfo();
+            })
+            .catch(error => {
+                console.error('Error loading students:', error);
+                Toast.error('Failed to load students. Please try again.');
+            });
+        }
+
+        // Render students table
+        function renderStudentsTable(students) {
             const tableBody = document.getElementById('studentsTableBody');
-            const filteredData = filterStudentsData();
             
-            tableBody.innerHTML = '';
-            
-            if (filteredData.length === 0) {
+            if (students.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
                         <td colspan="9" class="text-center py-12">
@@ -2111,19 +2221,12 @@
                 return;
             }
             
-            // Calculate pagination
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const paginatedData = filteredData.slice(startIndex, endIndex);
+            tableBody.innerHTML = '';
             
-            // Render students
-            paginatedData.forEach(student => {
+            students.forEach(student => {
                 const row = createStudentRow(student);
                 tableBody.appendChild(row);
             });
-            
-            // Update pagination info
-            updatePaginationInfo(filteredData.length);
         }
 
         // Create student row
@@ -2135,20 +2238,35 @@
                               student.status === 'inactive' ? 'status-inactive' :
                               student.status === 'pending' ? 'status-pending' : 'status-graduated';
             
-            const attendanceClass = student.attendance >= 95 ? 'text-emerald-600' :
-                                  student.attendance >= 90 ? 'text-amber-600' : 'text-red-600';
+            const attendanceRate = student.attendance_rate || 0;
+            const attendanceClass = attendanceRate >= 95 ? 'text-emerald-600' :
+                                  attendanceRate >= 90 ? 'text-amber-600' : 'text-red-600';
             
-            const gradeClass = student.gpa >= 3.5 ? 'grade-a' :
-                             student.gpa >= 3.0 ? 'grade-b' :
-                             student.gpa >= 2.5 ? 'grade-c' :
-                             student.gpa >= 2.0 ? 'grade-d' : 'grade-f';
+            const gpa = student.gpa || 0;
+            const gradeClass = gpa >= 3.5 ? 'grade-a' :
+                             gpa >= 3.0 ? 'grade-b' :
+                             gpa >= 2.5 ? 'grade-c' :
+                             gpa >= 2.0 ? 'grade-d' : 'grade-f';
             
-            const gradeLetter = student.gpa >= 3.5 ? 'A' :
-                              student.gpa >= 3.0 ? 'B' :
-                              student.gpa >= 2.5 ? 'C' :
-                              student.gpa >= 2.0 ? 'D' : 'F';
+            const gradeLetter = gpa >= 3.5 ? 'A' :
+                              gpa >= 3.0 ? 'B' :
+                              gpa >= 2.5 ? 'C' :
+                              gpa >= 2.0 ? 'D' : 'F';
             
-            const initials = `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`;
+            const initials = `${student.first_name?.charAt(0) || ''}${student.last_name?.charAt(0) || ''}`;
+            const avatarColor = student.avatar_color || 'from-slate-500 to-gray-500';
+            
+            // Calculate age if date_of_birth exists
+            let age = '';
+            if (student.date_of_birth) {
+                const birthDate = new Date(student.date_of_birth);
+                const today = new Date();
+                age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+            }
             
             row.innerHTML = `
                 <td>
@@ -2156,45 +2274,45 @@
                 </td>
                 <td>
                     <div class="flex items-center gap-3">
-                        <div class="avatar avatar-md bg-gradient-to-br ${student.avatarColor}">
+                        <div class="avatar avatar-md bg-gradient-to-br ${avatarColor}">
                             ${initials}
                         </div>
                         <div>
-                            <p class="font-bold text-slate-900">${student.firstName} ${student.lastName}</p>
-                            <p class="text-xs text-slate-500">${student.studentId}</p>
+                            <p class="font-bold text-slate-900">${student.first_name} ${student.last_name}</p>
+                            <p class="text-xs text-slate-500">${student.student_id || 'No ID'}</p>
                         </div>
                     </div>
                 </td>
                 <td>
                     <div class="flex items-center gap-2">
-                        <span class="font-bold text-slate-900">Grade ${student.grade}</span>
-                        <span class="text-sm text-slate-500">• Section ${student.section}</span>
+                        <span class="font-bold text-slate-900">${student.grade_level ? 'Grade ' + student.grade_level : 'No Grade'}</span>
+                        <span class="text-sm text-slate-500">${student.section ? '• Section ' + student.section : ''}</span>
                     </div>
-                    <p class="text-xs text-slate-500 mt-1">Age: ${calculateAge(student.dateOfBirth)}</p>
+                    <p class="text-xs text-slate-500 mt-1">${age ? 'Age: ' + age : ''}</p>
                 </td>
                 <td>
-                    <p class="font-medium text-slate-900">${student.parentName}</p>
-                    <p class="text-xs text-slate-500">${student.parentRelationship}</p>
+                    <p class="font-medium text-slate-900">${student.parent_name || 'No parent info'}</p>
+                    <p class="text-xs text-slate-500">${student.parent_email || ''}</p>
                 </td>
                 <td>
-                    <p class="text-sm text-slate-900">${student.parentPhone}</p>
-                    <p class="text-xs text-slate-500">${student.parentEmail}</p>
+                    <p class="text-sm text-slate-900">${student.phone || 'No phone'}</p>
+                    <p class="text-xs text-slate-500">${student.email || ''}</p>
                 </td>
                 <td>
-                    <span class="${statusClass}">${student.status.charAt(0).toUpperCase() + student.status.slice(1)}</span>
+                    <span class="${statusClass}">${student.status ? student.status.charAt(0).toUpperCase() + student.status.slice(1) : 'Unknown'}</span>
                 </td>
                 <td>
                     <div class="flex items-center gap-2">
-                        <span class="font-bold ${attendanceClass}">${student.attendance}%</span>
+                        <span class="font-bold ${attendanceClass}">${attendanceRate}%</span>
                         <div class="progress-bar w-20">
-                            <div class="progress-fill progress-success" style="width: ${student.attendance}%"></div>
+                            <div class="progress-fill progress-success" style="width: ${attendanceRate}%"></div>
                         </div>
                     </div>
                 </td>
                 <td>
                     <div class="flex items-center gap-2">
                         <span class="grade-badge ${gradeClass}">${gradeLetter}</span>
-                        <span class="font-bold text-slate-900">${student.gpa.toFixed(2)}</span>
+                        <span class="font-bold text-slate-900">${gpa.toFixed(2)}</span>
                     </div>
                 </td>
                 <td>
@@ -2215,80 +2333,310 @@
             return row;
         }
 
-        // Calculate age from date of birth
-        function calculateAge(dateOfBirth) {
-            const today = new Date();
-            const birthDate = new Date(dateOfBirth);
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
+        // View student details
+        function viewStudent(id) {
+            currentViewStudentId = id;
             
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
+            const formData = new FormData();
+            formData.append('action', 'get_student');
+            formData.append('student_id', id);
             
-            return age;
+            fetch(jsData.api_url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    Toast.error(data.error);
+                    return;
+                }
+                
+                populateStudentModal(data);
+                openModal('viewStudentModal');
+            })
+            .catch(error => {
+                console.error('Error loading student:', error);
+                Toast.error('Failed to load student details.');
+            });
         }
 
-        // Filter students data
-        function filterStudentsData() {
-            let filtered = [...studentsData];
+        // Populate student modal
+        function populateStudentModal(data) {
+            const student = data.student;
             
-            // Apply tab filter
-            if (currentTab !== 'all') {
-                filtered = filtered.filter(student => {
-                    if (currentTab === 'active') return student.status === 'active';
-                    if (currentTab === 'new') return student.enrollmentDate.includes('2024-09');
-                    if (currentTab === 'graduating') return student.grade === '12';
-                    if (currentTab === 'inactive') return student.status === 'inactive';
-                    return true;
+            // Set basic info
+            document.getElementById('studentName').textContent = `${student.first_name} ${student.last_name}`;
+            document.getElementById('studentAvatar').textContent = 
+                `${student.first_name?.charAt(0) || ''}${student.last_name?.charAt(0) || ''}`;
+            document.getElementById('studentInfo').textContent = 
+                `Grade ${student.grade_level || 'N/A'} • Section ${student.section || 'N/A'} • ID: ${student.student_id || 'No ID'}`;
+            
+            // Calculate age
+            let age = '';
+            if (student.date_of_birth) {
+                const birthDate = new Date(student.date_of_birth);
+                const today = new Date();
+                age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+            }
+            
+            // Format dates
+            const formatDate = (dateString) => {
+                if (!dateString) return 'Not available';
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { 
+                    month: 'long', 
+                    day: 'numeric', 
+                    year: 'numeric' 
                 });
+            };
+            
+            // Set personal information
+            document.getElementById('studentDOB').textContent = formatDate(student.date_of_birth);
+            document.getElementById('studentGender').textContent = student.gender ? student.gender.charAt(0).toUpperCase() + student.gender.slice(1) : 'Not available';
+            document.getElementById('studentAge').textContent = age ? `${age} years` : 'Not available';
+            document.getElementById('studentEnrollment').textContent = formatDate(student.enrollment_date);
+            
+            // Set contact information
+            document.getElementById('studentEmail').textContent = student.email || 'Not available';
+            document.getElementById('studentPhone').textContent = student.phone || 'Not available';
+            document.getElementById('studentAddress').textContent = student.address || 'Not available';
+            
+            // Set parent information
+            document.getElementById('studentParent').textContent = student.parent_name || 'Not available';
+            document.getElementById('studentParentRel').textContent = 'Parent'; // Relationship not in sample data
+            document.getElementById('studentParentEmail').textContent = student.parent_email || 'Not available';
+            document.getElementById('studentParentPhone').textContent = student.parent_phone || 'Not available';
+            
+            // Set GPA and attendance
+            document.getElementById('studentGPA').textContent = student.gpa ? student.gpa.toFixed(2) : 'N/A';
+            document.getElementById('studentAttendance').textContent = student.attendance_rate ? `${student.attendance_rate}%` : 'N/A';
+            
+            // Set emergency contact from emergency_contacts array
+            if (data.emergency_contacts && data.emergency_contacts.length > 0) {
+                const contact = data.emergency_contacts[0];
+                document.getElementById('studentEmergencyContact').textContent = contact.name || 'Not available';
+                document.getElementById('studentEmergencyPhone').textContent = contact.phone || 'Not available';
+            } else {
+                document.getElementById('studentEmergencyContact').textContent = 'Not available';
+                document.getElementById('studentEmergencyPhone').textContent = 'Not available';
             }
             
-            // Apply search filter
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            if (searchTerm) {
-                filtered = filtered.filter(student => 
-                    student.firstName.toLowerCase().includes(searchTerm) || 
-                    student.lastName.toLowerCase().includes(searchTerm) ||
-                    student.studentId.toLowerCase().includes(searchTerm) ||
-                    student.grade.toLowerCase().includes(searchTerm) ||
-                    student.parentName.toLowerCase().includes(searchTerm)
-                );
+            // Set medical info from medical_info array
+            if (data.medical_info && data.medical_info.length > 0) {
+                const medical = data.medical_info[0];
+                document.getElementById('studentMedical').textContent = medical.conditions || 'No known medical conditions';
+                document.getElementById('studentAllergies').textContent = medical.allergies || 'No known allergies';
+            } else {
+                document.getElementById('studentMedical').textContent = 'No known medical conditions';
+                document.getElementById('studentAllergies').textContent = 'No known allergies';
             }
             
-            // Apply advanced filters
-            const gradeFilter = document.getElementById('filterGrade')?.value;
-            const sectionFilter = document.getElementById('filterSection')?.value;
-            const genderFilter = document.getElementById('filterGender')?.value;
-            const statusFilter = document.getElementById('filterStatus')?.value;
+            // Load academic records if available
+            if (data.academic_records && data.academic_records.length > 0) {
+                populateAcademicTab(data.academic_records);
+            }
             
-            if (gradeFilter) filtered = filtered.filter(s => s.grade === gradeFilter);
-            if (sectionFilter) filtered = filtered.filter(s => s.section === sectionFilter);
-            if (genderFilter) filtered = filtered.filter(s => s.gender === genderFilter);
-            if (statusFilter) filtered = filtered.filter(s => s.status === statusFilter);
+            // Load attendance records if available
+            if (data.attendance_records && data.attendance_records.length > 0) {
+                populateAttendanceTab(data.attendance_records);
+            }
+        }
+
+        // Populate academic tab
+        function populateAcademicTab(records) {
+            const subjectsBody = document.getElementById('academicSubjects');
+            subjectsBody.innerHTML = '';
             
-            return filtered;
+            records.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.subject_name || 'N/A'}</td>
+                    <td>Teacher Name</td>
+                    <td>${record.grade_point ? record.grade_point.toFixed(1) : 'N/A'}</td>
+                    <td>${record.mid_term || 'N/A'}</td>
+                    <td>${record.final || 'N/A'}</td>
+                    <td>95%</td>
+                    <td><span class="status-badge status-active">Passing</span></td>
+                `;
+                subjectsBody.appendChild(row);
+            });
+        }
+
+        // Populate attendance tab
+        function populateAttendanceTab(records) {
+            const recentAttendance = document.getElementById('recentAttendance');
+            recentAttendance.innerHTML = '';
+            
+            records.slice(0, 5).forEach(record => {
+                const statusClass = record.status === 'present' ? 'status-active' :
+                                  record.status === 'absent' ? 'status-inactive' :
+                                  'status-pending';
+                
+                const date = new Date(record.date);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+                
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 bg-slate-50 rounded-lg';
+                div.innerHTML = `
+                    <div>
+                        <p class="font-medium text-slate-900">${dayName}</p>
+                        <p class="text-sm text-slate-500">${formattedDate}</p>
+                    </div>
+                    <span class="${statusClass}">${record.status.charAt(0).toUpperCase() + record.status.slice(1)}</span>
+                `;
+                recentAttendance.appendChild(div);
+            });
+        }
+
+        // Edit student
+        function editStudent(id) {
+            // For now, just show a message
+            Toast.info('Edit feature will be implemented in next phase');
+        }
+
+        // Edit current student in view modal
+        function editCurrentStudent() {
+            if (currentViewStudentId) {
+                editStudent(currentViewStudentId);
+            }
+        }
+
+        // Delete student
+        function deleteStudent(id) {
+            if (!confirm('Are you sure you want to delete this student? This action cannot be undone.')) {
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', 'delete_student');
+            formData.append('student_id', id);
+            
+            fetch(jsData.api_url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    Toast.error(data.error);
+                    return;
+                }
+                
+                Toast.success('Student deleted successfully');
+                loadStudents();
+                if (currentViewStudentId === id) {
+                    closeModal('viewStudentModal');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting student:', error);
+                Toast.error('Failed to delete student.');
+            });
+        }
+
+        // Save new student
+        function saveNewStudent(event) {
+            event.preventDefault();
+            
+            const form = document.getElementById('addStudentForm');
+            const formData = new FormData(form);
+            
+            // Validate required fields
+            const requiredFields = ['first_name', 'last_name', 'date_of_birth', 'gender', 'student_id', 'class_id', 'enrollment_date', 'status'];
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!formData.get(field)) {
+                    isValid = false;
+                    const input = form.querySelector(`[name="${field}"]`);
+                    input.classList.add('border-red-500');
+                }
+            });
+            
+            if (!isValid) {
+                Toast.error('Please fill in all required fields');
+                return;
+            }
+            
+            // Prepare student data
+            const studentData = {
+                first_name: formData.get('first_name'),
+                last_name: formData.get('last_name'),
+                date_of_birth: formData.get('date_of_birth'),
+                gender: formData.get('gender'),
+                student_id: formData.get('student_id'),
+                class_id: formData.get('class_id'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                address: formData.get('address'),
+                enrollment_date: formData.get('enrollment_date'),
+                status: formData.get('status')
+            };
+            
+            // Send to server
+            const postData = new FormData();
+            postData.append('action', 'save_student');
+            postData.append('student_data', JSON.stringify(studentData));
+            
+            fetch(jsData.api_url, {
+                method: 'POST',
+                body: postData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    Toast.error(data.error);
+                    return;
+                }
+                
+                Toast.success('Student added successfully!');
+                closeModal('addStudentModal');
+                form.reset();
+                loadStudents();
+            })
+            .catch(error => {
+                console.error('Error saving student:', error);
+                Toast.error('Failed to save student.');
+            });
         }
 
         // Filter students on search
         function filterStudents() {
             currentPage = 1;
-            loadStudentsTable();
+            loadStudents();
         }
 
         // Apply filters
         function applyFilters() {
             currentPage = 1;
-            loadStudentsTable();
+            loadStudents();
+            toggleAdvancedFilters();
         }
 
         // Clear filters
         function clearFilters() {
             document.getElementById('searchInput').value = '';
-            document.getElementById('filterGrade').value = '';
-            document.getElementById('filterSection').value = '';
-            document.getElementById('filterGender').value = '';
-            document.getElementById('filterStatus').value = '';
+            
+            const gradeFilter = document.getElementById('filterGrade');
+            const sectionFilter = document.getElementById('filterSection');
+            const genderFilter = document.getElementById('filterGender');
+            const statusFilter = document.getElementById('filterStatus');
+            
+            if (gradeFilter) gradeFilter.value = '';
+            if (sectionFilter) sectionFilter.value = '';
+            if (genderFilter) genderFilter.value = '';
+            if (statusFilter) statusFilter.value = '';
             
             // Reset chip filters
             document.querySelectorAll('.filter-chip').forEach(chip => {
@@ -2297,7 +2645,7 @@
             document.querySelector('.filter-chip[data-filter="all"]').classList.add('active');
             
             currentPage = 1;
-            loadStudentsTable();
+            loadStudents();
             
             Toast.info('All filters cleared');
         }
@@ -2312,9 +2660,7 @@
             
             // Apply filter
             currentPage = 1;
-            loadStudentsTable();
-            
-            Toast.info(`Filtered by ${filterType.replace('-', ' ')}`);
+            loadStudents();
         }
 
         // Toggle advanced filters
@@ -2327,24 +2673,28 @@
         function initializeCharts() {
             // Grade Distribution Chart
             const gradeCtx = document.getElementById('gradeDistributionChart').getContext('2d');
+            
+            // Get grade distribution data (this would normally come from the server)
+            const gradeData = {
+                labels: ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+                datasets: [{
+                    label: 'Students',
+                    data: [85, 92, 88, 96, 102, 98, 105, 112, 108, 115, 186, 192, 178],
+                    backgroundColor: [
+                        '#4f46e5', '#6366f1', '#818cf8', '#a5b4fc',
+                        '#10b981', '#34d399', '#6ee7b7',
+                        '#f59e0b', '#fbbf24', '#fcd34d',
+                        '#ef4444', '#f87171', '#fca5a5'
+                    ],
+                    borderWidth: 0,
+                    borderRadius: 6,
+                    hoverBackgroundColor: '#3730a3'
+                }]
+            };
+            
             gradeChart = new Chart(gradeCtx, {
                 type: 'bar',
-                data: {
-                    labels: ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
-                    datasets: [{
-                        label: 'Students',
-                        data: [85, 92, 88, 96, 102, 98, 105, 112, 108, 115, 186, 192, 178],
-                        backgroundColor: [
-                            '#4f46e5', '#6366f1', '#818cf8', '#a5b4fc',
-                            '#10b981', '#34d399', '#6ee7b7',
-                            '#f59e0b', '#fbbf24', '#fcd34d',
-                            '#ef4444', '#f87171', '#fca5a5'
-                        ],
-                        borderWidth: 0,
-                        borderRadius: 6,
-                        hoverBackgroundColor: '#3730a3'
-                    }]
-                },
+                data: gradeData,
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -2382,7 +2732,42 @@
 
         // Update grade chart
         function updateGradeChart() {
+            // This would normally fetch new data from the server
             Toast.info('Updating grade distribution chart...');
+        }
+
+        // Load upcoming events
+        function loadUpcomingEvents() {
+            // This would normally fetch events from the server
+            const events = [
+                { title: 'Science Fair', date: '2024-12-15', color: 'blue', location: 'Science Dept' },
+                { title: 'Sports Day', date: '2024-12-18', color: 'emerald', location: 'Sports Field' },
+                { title: 'Parent-Teacher Meetings', date: '2025-01-10', color: 'purple', location: 'Main Hall' },
+                { title: 'Mid-term Exams Begin', date: '2025-01-15', color: 'amber', location: 'Exam Halls' }
+            ];
+            
+            const eventsContainer = document.getElementById('upcomingEvents');
+            eventsContainer.innerHTML = '';
+            
+            events.forEach(event => {
+                const date = new Date(event.date);
+                const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+                const day = date.getDate();
+                
+                const eventDiv = document.createElement('div');
+                eventDiv.className = `flex items-center gap-4 p-3 bg-${event.color}-50 border border-${event.color}-100 rounded-xl`;
+                eventDiv.innerHTML = `
+                    <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-${event.color}-100 flex flex-col items-center justify-center">
+                        <span class="text-sm font-black text-${event.color}-600">${month}</span>
+                        <span class="text-lg font-black text-${event.color}-600">${day}</span>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-slate-900 mb-1">${event.title}</h4>
+                        <p class="text-xs text-slate-500">All grades • ${event.location}</p>
+                    </div>
+                `;
+                eventsContainer.appendChild(eventDiv);
+            });
         }
 
         // Mobile sidebar toggle
@@ -2415,63 +2800,10 @@
             
             // Reload students
             currentPage = 1;
-            loadStudentsTable();
-            
-            Toast.info(`Showing ${tabName} students`);
+            loadStudents();
         }
 
-        // View student
-        function viewStudent(id) {
-            const student = studentsData.find(s => s.id === id);
-            if (!student) return;
-            
-            // Populate view modal
-            document.getElementById('studentName').textContent = `${student.firstName} ${student.lastName}`;
-            document.getElementById('studentAvatar').textContent = `${student.firstName.charAt(0)}${student.lastName.charAt(0)}`;
-            document.getElementById('studentInfo').textContent = `Grade ${student.grade} • Section ${student.section} • ID: ${student.studentId}`;
-            
-            // Calculate age
-            const age = calculateAge(student.dateOfBirth);
-            
-            // Set personal information
-            document.getElementById('studentDOB').textContent = formatDate(student.dateOfBirth);
-            document.getElementById('studentGender').textContent = student.gender.charAt(0).toUpperCase() + student.gender.slice(1);
-            document.getElementById('studentAge').textContent = `${age} years`;
-            document.getElementById('studentEnrollment').textContent = formatDate(student.enrollmentDate);
-            
-            // Set contact information
-            document.getElementById('studentEmail').textContent = student.email;
-            document.getElementById('studentPhone').textContent = student.phone;
-            document.getElementById('studentAddress').textContent = student.address;
-            
-            // Set parent information
-            document.getElementById('studentParent').textContent = student.parentName;
-            document.getElementById('studentParentRel').textContent = student.parentRelationship;
-            document.getElementById('studentParentEmail').textContent = student.parentEmail;
-            document.getElementById('studentParentPhone').textContent = student.parentPhone;
-            
-            // Set emergency contact
-            document.getElementById('studentEmergencyContact').textContent = student.emergencyContact;
-            document.getElementById('studentEmergencyPhone').textContent = student.emergencyPhone;
-            
-            // Set medical information
-            document.getElementById('studentMedical').textContent = student.medicalConditions || 'No known medical conditions';
-            document.getElementById('studentAllergies').textContent = student.allergies || 'No known allergies';
-            
-            openModal('viewStudentModal');
-        }
-
-        // Format date
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { 
-                month: 'long', 
-                day: 'numeric', 
-                year: 'numeric' 
-            });
-        }
-
-        // Switch student tab
+        // Switch student tab in view modal
         function switchStudentTab(tabName) {
             // Hide all tab contents
             document.querySelectorAll('.student-tab-content').forEach(content => {
@@ -2486,42 +2818,13 @@
             // Show selected tab
             document.getElementById(`student${tabName.charAt(0).toUpperCase() + tabName.slice(1)}Tab`).classList.remove('hidden');
             event.target.classList.add('active');
-        }
-
-        // Edit student
-        function editStudent(id) {
-            const student = studentsData.find(s => s.id === id);
-            if (!student) return;
             
-            Toast.info(`Editing ${student.firstName} ${student.lastName}...`);
-            closeModal('viewStudentModal');
-            setTimeout(() => {
-                openModal('addStudentModal');
-            }, 300);
-        }
-
-        // Delete student
-        function deleteStudent(id) {
-            const student = studentsData.find(s => s.id === id);
-            if (!student) return;
-            
-            if (confirm(`Are you sure you want to delete ${student.firstName} ${student.lastName}? This action cannot be undone.`)) {
-                Toast.success(`Student ${student.firstName} ${student.lastName} deleted successfully`);
-                loadStudentsTable();
+            // Load tab-specific data if needed
+            if (tabName === 'academics' && currentViewStudentId) {
+                // Load academic data
+            } else if (tabName === 'attendance' && currentViewStudentId) {
+                // Load attendance data
             }
-        }
-
-        // Save new student
-        function saveNewStudent() {
-            const form = document.getElementById('addStudentForm');
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-            
-            Toast.success('New student added successfully!');
-            closeModal('addStudentModal');
-            loadStudentsTable();
         }
 
         // Modal functions
@@ -2535,6 +2838,10 @@
             const modal = document.getElementById(modalId);
             modal.classList.add('hidden');
             document.body.style.overflow = '';
+            
+            if (modalId === 'viewStudentModal') {
+                currentViewStudentId = null;
+            }
         }
 
         // Toggle student selection
@@ -2551,13 +2858,14 @@
         function selectAllStudents() {
             const selectAll = document.getElementById('selectAll');
             const checkboxes = document.querySelectorAll('.student-checkbox');
-            const filteredData = filterStudentsData();
             
             if (selectAll.checked) {
-                filteredData.forEach(student => {
-                    selectedStudents.add(student.id);
+                // Get all student IDs from current page
+                checkboxes.forEach(cb => {
+                    const id = parseInt(cb.getAttribute('data-id'));
+                    selectedStudents.add(id);
+                    cb.checked = true;
                 });
-                checkboxes.forEach(cb => cb.checked = true);
             } else {
                 selectedStudents.clear();
                 checkboxes.forEach(cb => cb.checked = false);
@@ -2579,12 +2887,6 @@
                 button.disabled = true;
                 countSpan.textContent = '0 students selected';
             }
-            
-            // Update select all checkbox
-            const filteredData = filterStudentsData();
-            const selectAll = document.getElementById('selectAll');
-            selectAll.checked = selectedStudents.size > 0 && selectedStudents.size === filteredData.length;
-            selectAll.indeterminate = selectedStudents.size > 0 && selectedStudents.size < filteredData.length;
         }
 
         // Bulk actions
@@ -2595,11 +2897,47 @@
             }
             
             Toast.info(`Performing bulk actions on ${selectedStudents.size} students...`);
+            // Here you would implement bulk actions like email, status change, etc.
+        }
+
+        // Update pagination info
+        function updatePaginationInfo() {
+            const startIndex = (currentPage - 1) * itemsPerPage + 1;
+            const endIndex = Math.min(startIndex + itemsPerPage - 1, totalStudents);
+            const countElement = document.getElementById('studentsCount');
+            
+            if (countElement) {
+                countElement.textContent = `Showing ${startIndex}-${endIndex} of ${totalStudents} students`;
+            }
+        }
+
+        // Pagination
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                loadStudents();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(totalStudents / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadStudents();
+            }
+        }
+
+        function changePageSize(size) {
+            itemsPerPage = parseInt(size);
+            currentPage = 1;
+            loadStudents();
         }
 
         // Quick actions
         function takeAttendance() {
             Toast.info('Opening attendance module...');
+            // Redirect to attendance page
+            window.location.href = jsData.api_url.replace('students.php', 'attendance.php');
         }
 
         function generateReportCards() {
@@ -2614,12 +2952,34 @@
             Toast.info('Opening class list manager...');
         }
 
-        // Generate reports
-        function generateReports() {
-            Toast.success('Student report generated successfully!<br>Your download will begin shortly.');
+        // Export students
+        function exportStudents() {
+            Toast.info('Preparing export...');
+            
+            const formData = new FormData();
+            formData.append('action', 'export_students');
+            
+            fetch(jsData.api_url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    Toast.error(data.error);
+                    return;
+                }
+                
+                Toast.success('Export completed successfully!');
+                // Here you would trigger the file download
+            })
+            .catch(error => {
+                console.error('Error exporting:', error);
+                Toast.error('Failed to export students.');
+            });
         }
 
-        // Bulk import
+        // Bulk import functions
         function downloadTemplate() {
             Toast.success('Template downloaded successfully!');
         }
@@ -2629,24 +2989,48 @@
         }
 
         function processImport() {
-            Toast.success('Import processed successfully!<br>24 students imported.');
-            closeModal('bulkImportModal');
-            loadStudentsTable();
+            Toast.info('Processing import...');
+            
+            const formData = new FormData();
+            formData.append('action', 'bulk_import');
+            
+            fetch(jsData.api_url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    Toast.error(data.error);
+                    return;
+                }
+                
+                Toast.success('Import processed successfully!');
+                closeModal('bulkImportModal');
+                loadStudents();
+            })
+            .catch(error => {
+                console.error('Error importing:', error);
+                Toast.error('Failed to import students.');
+            });
         }
 
         // Print student list
         function printStudentList() {
             Toast.info('Opening print preview...');
+            window.print();
         }
 
         // View all admissions
         function viewAllAdmissions() {
-            Toast.info('Loading all admissions...');
+            // Switch to new admissions tab
+            switchTab('new');
         }
 
         // Print student record
         function printStudentRecord() {
             Toast.info('Opening print preview for student record...');
+            // Print the view student modal content
         }
 
         // Send parent message
@@ -2659,41 +3043,13 @@
             Toast.info('Opening student transfer form...');
         }
 
-        // Pagination
-        function previousPage() {
-            if (currentPage > 1) {
-                currentPage--;
-                loadStudentsTable();
-            }
-        }
-
-        function nextPage() {
-            const filteredData = filterStudentsData();
-            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                loadStudentsTable();
-            }
-        }
-
-        function changePageSize(size) {
-            itemsPerPage = parseInt(size);
-            currentPage = 1;
-            loadStudentsTable();
-        }
-
-        // Update pagination info
-        function updatePaginationInfo(totalItems) {
-            const startIndex = (currentPage - 1) * itemsPerPage + 1;
-            const endIndex = Math.min(startIndex + itemsPerPage - 1, totalItems);
-            document.getElementById('studentsCount').textContent = 
-                `Showing ${startIndex}-${endIndex} of ${totalItems} students`;
-        }
-
         // Setup event listeners
         function setupEventListeners() {
             // Select all checkbox
-            document.getElementById('selectAll').addEventListener('change', selectAllStudents);
+            const selectAll = document.getElementById('selectAll');
+            if (selectAll) {
+                selectAll.addEventListener('change', selectAllStudents);
+            }
             
             // Keyboard shortcuts
             document.addEventListener('keydown', function(e) {
@@ -2716,6 +3072,14 @@
                     closeModal('bulkImportModal');
                 }
             });
+            
+            // Form input validation
+            const formInputs = document.querySelectorAll('#addStudentForm input, #addStudentForm select');
+            formInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.classList.remove('border-red-500');
+                });
+            });
         }
 
         // Initialize on page load
@@ -2728,12 +3092,11 @@
             }, 1000);
             
             // Check for new admissions
-            setTimeout(() => {
-                const newAdmissions = studentsData.filter(s => s.enrollmentDate.includes('2024-09')).length;
-                if (newAdmissions > 0) {
-                    Toast.info(`You have ${newAdmissions} new student admissions this month`);
-                }
-            }, 2000);
+            if (jsData.stats.new_admissions > 0) {
+                setTimeout(() => {
+                    Toast.info(`You have ${jsData.stats.new_admissions} new student admissions this month`);
+                }, 2000);
+            }
         });
     </script>
 </body>

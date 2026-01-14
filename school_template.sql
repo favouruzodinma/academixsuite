@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jan 12, 2026 at 03:49 PM
+-- Generation Time: Jan 13, 2026 at 04:25 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `school_23`
+-- Database: `school_24`
 --
 
 -- --------------------------------------------------------
@@ -727,13 +727,13 @@ CREATE TABLE `roles` (
 --
 
 INSERT INTO `roles` (`id`, `school_id`, `name`, `slug`, `description`, `permissions`, `is_system`, `created_at`) VALUES
-(1, 23, 'Super Administrator', 'super_admin', 'Has full access to all features', '[\"*\"]', 1, '2026-01-12 02:44:06'),
-(2, 23, 'School Administrator', 'school_admin', 'Manages school operations', '[\"dashboard.view\", \"students.*\", \"teachers.*\", \"classes.*\", \"attendance.*\", \"exams.*\", \"fees.*\", \"reports.*\", \"settings.*\"]', 1, '2026-01-12 02:44:06'),
-(3, 23, 'Teacher', 'teacher', 'Can manage classes and students', '[\"dashboard.view\", \"attendance.mark\", \"grades.enter\", \"homework.*\", \"students.view\"]', 1, '2026-01-12 02:44:06'),
-(4, 23, 'Student', 'student', 'Can view their own information', '[\"dashboard.view\", \"timetable.view\", \"grades.view\", \"homework.view\"]', 1, '2026-01-12 02:44:06'),
-(5, 23, 'Parent', 'parent', 'Can view child information', '[\"dashboard.view\", \"children.view\", \"attendance.view\", \"fees.view\"]', 1, '2026-01-12 02:44:06'),
-(6, 23, 'Accountant', 'accountant', 'Manages financial operations', '[\"dashboard.view\", \"fees.*\", \"payments.*\", \"invoices.*\", \"reports.financial\"]', 1, '2026-01-12 02:44:06'),
-(7, 23, 'Librarian', 'librarian', 'Manages library operations', '[\"dashboard.view\", \"library.*\"]', 1, '2026-01-12 02:44:06');
+(1, 24, 'Super Administrator', 'super_admin', 'Has full access to all features', '[\"*\"]', 1, '2026-01-12 08:15:55'),
+(2, 24, 'School Administrator', 'school_admin', 'Manages school operations', '[\"dashboard.view\", \"students.*\", \"teachers.*\", \"classes.*\", \"attendance.*\", \"exams.*\", \"fees.*\", \"reports.*\", \"settings.*\"]', 1, '2026-01-12 08:15:55'),
+(3, 24, 'Teacher', 'teacher', 'Can manage classes and students', '[\"dashboard.view\", \"attendance.mark\", \"grades.enter\", \"homework.*\", \"students.view\"]', 1, '2026-01-12 08:15:55'),
+(4, 24, 'Student', 'student', 'Can view their own information', '[\"dashboard.view\", \"timetable.view\", \"grades.view\", \"homework.view\"]', 1, '2026-01-12 08:15:55'),
+(5, 24, 'Parent', 'parent', 'Can view child information', '[\"dashboard.view\", \"children.view\", \"attendance.view\", \"fees.view\"]', 1, '2026-01-12 08:15:55'),
+(6, 24, 'Accountant', 'accountant', 'Manages financial operations', '[\"dashboard.view\", \"fees.*\", \"payments.*\", \"invoices.*\", \"reports.financial\"]', 1, '2026-01-12 08:15:55'),
+(7, 24, 'Librarian', 'librarian', 'Manages library operations', '[\"dashboard.view\", \"library.*\"]', 1, '2026-01-12 08:15:55');
 
 -- --------------------------------------------------------
 
@@ -798,17 +798,17 @@ CREATE TABLE `settings` (
 --
 
 INSERT INTO `settings` (`id`, `school_id`, `key`, `value`, `type`, `category`, `created_at`, `updated_at`) VALUES
-(1, 23, 'school_name', 'New School', 'string', 'general', '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(2, 23, 'school_email', '', 'string', 'general', '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(3, 23, 'school_phone', '', 'string', 'general', '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(4, 23, 'school_address', '', 'string', 'general', '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(5, 23, 'currency', 'NGN', 'string', 'financial', '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(6, 23, 'currency_symbol', '₦', 'string', 'financial', '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(7, 23, 'attendance_method', 'daily', 'string', 'academic', '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(8, 23, 'grading_system', 'percentage', 'string', 'academic', '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(9, 23, 'result_publish', 'immediate', 'string', 'academic', '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(10, 23, 'fee_due_days', '30', 'number', 'financial', '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(11, 23, 'late_fee_percentage', '5', 'number', 'financial', '2026-01-12 02:44:06', '2026-01-12 02:44:06');
+(1, 24, 'school_name', 'New School', 'string', 'general', '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(2, 24, 'school_email', '', 'string', 'general', '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(3, 24, 'school_phone', '', 'string', 'general', '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(4, 24, 'school_address', '', 'string', 'general', '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(5, 24, 'currency', 'NGN', 'string', 'financial', '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(6, 24, 'currency_symbol', '₦', 'string', 'financial', '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(7, 24, 'attendance_method', 'daily', 'string', 'academic', '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(8, 24, 'grading_system', 'percentage', 'string', 'academic', '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(9, 24, 'result_publish', 'immediate', 'string', 'academic', '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(10, 24, 'fee_due_days', '30', 'number', 'financial', '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(11, 24, 'late_fee_percentage', '5', 'number', 'financial', '2026-01-12 08:15:55', '2026-01-12 08:15:55');
 
 -- --------------------------------------------------------
 
@@ -856,10 +856,10 @@ CREATE TABLE `storage_usage` (
 --
 
 INSERT INTO `storage_usage` (`id`, `school_id`, `storage_type`, `used_bytes`, `limit_bytes`, `file_count`, `last_calculated`, `created_at`) VALUES
-(1, 23, 'database', 0, 1073741824, 0, '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(2, 23, 'files', 0, 1073741824, 0, '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(3, 23, 'backups', 0, 536870912, 0, '2026-01-12 02:44:06', '2026-01-12 02:44:06'),
-(4, 23, 'attachments', 0, 536870912, 0, '2026-01-12 02:44:06', '2026-01-12 02:44:06');
+(1, 24, 'database', 0, 1073741824, 0, '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(2, 24, 'files', 0, 1073741824, 0, '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(3, 24, 'backups', 0, 536870912, 0, '2026-01-12 08:15:55', '2026-01-12 08:15:55'),
+(4, 24, 'attachments', 0, 536870912, 0, '2026-01-12 08:15:55', '2026-01-12 08:15:55');
 
 -- --------------------------------------------------------
 
@@ -946,12 +946,6 @@ CREATE TABLE `subscriptions` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `subscriptions`
---
-
-INSERT INTO `subscriptions` (`id`, `school_id`, `plan_id`, `plan_name`, `status`, `billing_cycle`, `amount`, `currency`, `storage_limit`, `user_limit`, `student_limit`, `features`, `current_period_start`, `current_period_end`, `cancel_at_period_end`, `cancelled_at`, `trial_ends_at`, `created_at`, `updated_at`) VALUES
-(1, 23, 'free_tier', 'Free Plan', 'active', 'monthly', 0.00, 'NGN', 1073741824, 100, 500, NULL, '2026-01-12', '2026-02-12', 0, NULL, NULL, '2026-01-12 02:44:06', '2026-01-12 02:44:06');
 
 -- --------------------------------------------------------
 
@@ -1062,7 +1056,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `school_id`, `name`, `email`, `phone`, `username`, `password`, `user_type`, `profile_photo`, `gender`, `date_of_birth`, `blood_group`, `religion`, `address`, `email_verified_at`, `phone_verified_at`, `is_active`, `last_login_at`, `last_login_ip`, `remember_token`, `reset_token`, `reset_token_expires`, `created_at`, `updated_at`) VALUES
-(1, 23, 'james lincon', 'brookstone@gmail.com', '08119999755', NULL, '$2y$10$d2Kj0wgJjhgplYqhdUFXRemEC17IAy/ik61X1J0iJMOoWjW8OkE96', 'admin', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, '2026-01-12 02:55:40', '127.0.0.1', NULL, NULL, NULL, '2026-01-12 02:44:06', '2026-01-12 02:55:40');
+(1, 24, 'helen brown', 'accountnobsam@gmail.com', '09088888888', NULL, '$2y$10$qZ/ub7JfUaVfitVrE/8Hm./yqxDVNAK5t5cXDZyrgJAhFD.EfS4mW', 'admin', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, '2026-01-12 08:15:55', '2026-01-12 08:15:55');
 
 -- --------------------------------------------------------
 
@@ -1082,7 +1076,7 @@ CREATE TABLE `user_roles` (
 --
 
 INSERT INTO `user_roles` (`id`, `user_id`, `role_id`, `created_at`) VALUES
-(1, 1, 2, '2026-01-12 02:44:06');
+(1, 1, 2, '2026-01-12 08:15:55');
 
 --
 -- Indexes for dumped tables

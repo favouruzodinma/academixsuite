@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Academic Reports | Parent Portal | AcademiXSuite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Merriweather:wght@400;700;900&display=swap');
+        
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-teal: #06b6d4;
+            --surface-white: #ffffff;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-light); 
+            color: var(--text-dark); 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Glassmorphism effects */
+        .glass-header { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Sidebar styling */
+        .sidebar-link { 
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-left: 3px solid transparent; 
+            position: relative;
+        }
+        
+        .sidebar-link:hover { 
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+            color: var(--primary-blue); 
+            border-left-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .active-link { 
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+            color: var(--primary-blue); 
+            border-left-color: var(--primary-blue); 
+            font-weight: 700;
+        }
+        
+        .active-link::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: var(--primary-blue);
+            border-radius: 4px 0 0 4px;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Animation for cards */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Child Cards */
+        .child-card {
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .child-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .child-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--child-color), transparent);
+        }
+        
+        .child-1 { --child-color: #3b82f6; }
+        .child-2 { --child-color: #10b981; }
+
+        /* Performance Meter */
+        .performance-meter {
+            height: 8px;
+            border-radius: 4px;
+            background: #f1f5f9;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .performance-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .performance-excellent { background: linear-gradient(90deg, #10b981, #34d399); }
+        .performance-good { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .performance-average { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+
+        /* Toast Notification Styles */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+        
+        .toast {
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease forwards;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            border-left: 4px solid #059669;
+        }
+        
+        .toast-info {
+            background: linear-gradient(135deg, #4f46e5, #7c73e9);
+            color: white;
+            border-left: 4px solid #3730a3;
+        }
+        
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ===== PROFESSIONAL NIGERIAN REPORT CARD STYLES ===== */
+        .report-card-container {
+            background: white;
+            border: 1px solid #d1d5db;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .school-header {
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
+            color: white;
+            padding: 24px 0;
+            border-bottom: 4px solid #b45309;
+        }
+        
+        .school-header h1 {
+            font-family: 'Merriweather', serif;
+            font-weight: 900;
+        }
+        
+        .school-motto {
+            font-style: italic;
+            letter-spacing: 0.5px;
+        }
+        
+        .official-stamp {
+            border: 2px dashed #991b1b;
+            padding: 12px;
+            display: inline-block;
+            font-family: 'Merriweather', serif;
+            font-weight: 700;
+            color: #991b1b;
+        }
+        
+        .subject-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        
+        .subject-table th {
+            background: #f3f4f6;
+            padding: 10px;
+            text-align: center;
+            font-weight: 700;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            font-size: 12px;
+        }
+        
+        .subject-table td {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            text-align: center;
+            font-size: 13px;
+        }
+        
+        .subject-table .subject-name {
+            text-align: left;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .total-row {
+            background: #f3f4f6 !important;
+            font-weight: 700 !important;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #9ca3af;
+            width: 200px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        
+        .grade-box {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            color: white;
+            margin: 0 auto;
+        }
+        
+        .grade-a { background: #065f46; }
+        .grade-b { background: #1e40af; }
+        .grade-c { background: #b45309; }
+        .grade-d { background: #991b1b; }
+        .grade-e { background: #7c2d12; }
+        .grade-f { background: #1f2937; }
+
+        .watermark {
+            position: absolute;
+            opacity: 0.1;
+            font-size: 120px;
+            font-weight: 900;
+            color: #1e40af;
+            transform: rotate(-45deg);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .glass-header {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: white;
+            }
+            
+            .toast-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+            
+            .child-card {
+                padding: 16px;
+            }
+            
+            .school-header {
+                padding: 16px 0;
+            }
+            
+            .school-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[99] lg:hidden hidden" onclick="mobileSidebarToggle()"></div>
+
+    <!-- Professional Nigerian Report Card Modal -->
+    <div id="reportCardModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000] hidden">
+        <div class="bg-white rounded-lg w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto report-card-container">
+            <div id="reportCardContent">
+                <!-- Professional Nigerian-style report card loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 z-[100] lg:relative lg:translate-x-0 -translate-x-full transition-transform duration-300 flex flex-col shadow-xl lg:shadow-none">
+            
+            <!-- Parent Header -->
+            <div class="h-20 flex items-center px-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-100">
+                            <i class="fas fa-users text-white text-lg"></i>
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                    </div>
+                    <div>
+                        <span class="text-lg font-black tracking-tight text-slate-900">Johnson Family</span>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">PARENT PORTAL</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Family Quick Info -->
+            <div class="p-6 border-b border-slate-100">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Children:</span>
+                        <span class="text-sm font-black text-emerald-600">2</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Current Term:</span>
+                        <span class="text-sm font-bold text-blue-600">Term 3</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-slate-600">Avg GPA:</span>
+                        <span class="text-sm font-bold text-emerald-600">3.7</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 space-y-8 custom-scrollbar">
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Dashboard</p>
+                    <nav class="space-y-1">
+                        <a href="parent-dashboard.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <span>Overview</span>
+                        </a>
+                        <a href="parent-children.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                            <span>My Children</span>
+                        </a>
+                        <a href="parent-schedule.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <span>School Calendar</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Academic</p>
+                    <nav class="space-y-1">
+                        <a href="#" class="sidebar-link active-link flex items-center gap-3 px-6 py-3 text-sm font-semibold">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <span>Report Cards</span>
+                        </a>
+                        <a href="parent-attendance.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <span>Attendance</span>
+                        </a>
+                        <a href="parent-assignments.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <span>Assignments</span>
+                            <span class="ml-auto bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-full">2</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Financial</p>
+                    <nav class="space-y-1">
+                        <a href="parent-fees.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            <span>Fee Statements</span>
+                        </a>
+                        <a href="parent-payments.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <span>Payment History</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Communication</p>
+                    <nav class="space-y-1">
+                        <a href="parent-messages.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <span>Messages</span>
+                            <span class="ml-auto bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full">3</span>
+                        </a>
+                        <a href="parent-announcements.html" class="sidebar-link flex items-center gap-3 px-6 py-3 text-sm font-medium text-slate-600">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <span>Announcements</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Quick Contact -->
+            <div class="p-6 border-t border-slate-100">
+                <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-phone-alt text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400">SCHOOL OFFICE</p>
+                            <p class="text-sm font-black text-slate-900">(01) 234-5678</p>
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-500">
+                        <i class="fas fa-clock mr-1"></i> Mon-Fri, 8AM-4PM
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- Header -->
+            <header class="h-20 glass-header px-6 lg:px-8 flex items-center justify-between shrink-0 z-40">
+                <div class="flex items-center gap-3">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition">
+                        <i class="fas fa-bars-staggered"></i>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-lg font-black text-slate-900 tracking-tight">Academic Reports</h1>
+                        <div class="hidden lg:flex items-center gap-2">
+                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            <span class="text-xs font-black text-emerald-600 uppercase tracking-widest">Term 3 2024/2025</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Quick Stats -->
+                    <div class="hidden md:flex items-center gap-6 bg-white border border-slate-200 px-4 py-2 rounded-xl">
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Children</p>
+                            <p class="text-sm font-black text-emerald-600">2</p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avg GPA</p>
+                            <p class="text-sm font-black text-emerald-600">3.7</p>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Reports</p>
+                            <p class="text-sm font-black text-blue-600">2</p>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="downloadAllReports()" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                            <i class="fas fa-download"></i>
+                            <span class="hidden sm:inline ml-2">Download All</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tab Navigation -->
+            <div class="border-b border-slate-200 bg-white">
+                <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                    <div class="flex overflow-x-auto">
+                        <button class="tab-button active" onclick="switchTab('overview')" data-tab="overview">
+                            <i class="fas fa-chart-line mr-2"></i>Performance
+                        </button>
+                        <button class="tab-button" onclick="switchTab('reports')" data-tab="reports">
+                            <i class="fas fa-file-alt mr-2"></i>Report Cards
+                        </button>
+                        <button class="tab-button" onclick="switchTab('grades')" data-tab="grades">
+                            <i class="fas fa-list mr-2"></i>Subject Grades
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar">
+                <!-- Welcome Section -->
+                <div class="max-w-7xl mx-auto mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h2 class="text-2xl lg:text-3xl font-black text-slate-900 mb-2">Academic Performance Reports</h2>
+                            <p class="text-slate-500 font-medium">Track your children's academic progress and download official report cards</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-slate-600">Academic Session</p>
+                                <p class="text-lg font-black text-slate-900">2024/2025</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                                <i class="fas fa-award text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Family Average -->
+                    <div class="glass-card rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.1s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">FAMILY AVERAGE</p>
+                                <p class="text-2xl font-black text-slate-900">3.7</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
+                                <i class="fas fa-chart-line text-emerald-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-emerald-600 font-bold"><i class="fas fa-arrow-up mr-1"></i> 0.3</span>
+                            <span class="text-slate-500">from last term</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Attendance Rate -->
+                    <div class="glass-card rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.2s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">ATTENDANCE RATE</p>
+                                <p class="text-2xl font-black text-slate-900">94%</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-50 to-teal-100 flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-teal-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="performance-meter">
+                            <div class="performance-fill performance-good" style="width: 94%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">Both children combined</p>
+                    </div>
+                    
+                    <!-- Reports Ready -->
+                    <div class="glass-card rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.3s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">REPORTS READY</p>
+                                <p class="text-2xl font-black text-slate-900">2</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+                                <i class="fas fa-file-alt text-blue-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <span class="text-emerald-600 font-bold"><i class="fas fa-check-circle mr-1"></i> Official</span>
+                            <span class="text-slate-500">ready to download</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Term Progress -->
+                    <div class="glass-card rounded-2xl p-6 animate-fadeInUp" style="animation-delay: 0.4s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm font-bold text-slate-400">TERM PROGRESS</p>
+                                <p class="text-2xl font-black text-slate-900">Week 10</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center">
+                                <i class="fas fa-calendar text-purple-600 text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="performance-meter">
+                            <div class="performance-fill performance-good" style="width: 83%"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">of 12 weeks completed</p>
+                    </div>
+                </div>
+
+                <!-- Children Performance Overview -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Children Cards -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-900">Children's Performance</h3>
+                                <p class="text-slate-500">Term 3 academic overview</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="selectChild('all')" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                                    Compare Performance <i class="fas fa-arrow-right ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Alex Johnson Card -->
+                            <div class="child-card child-1">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white">
+                                            <span class="text-lg font-black">AJ</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-black text-slate-900">Alex Johnson</h4>
+                                            <p class="text-sm text-slate-600">SSS 2 • Science</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-emerald-600">Average: 78%</p>
+                                        <p class="text-xs text-slate-500">Position: 8th</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-bold text-slate-700">Overall Performance:</span>
+                                        <span class="text-sm font-bold text-emerald-600">Excellent</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-excellent" style="width: 78%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-3 mb-4">
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-600">Best Subject:</span>
+                                        <span class="font-bold text-emerald-600">Mathematics (85%)</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-600">Attendance:</span>
+                                        <span class="font-bold text-emerald-600">96%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-600">Class Teacher:</span>
+                                        <span class="font-bold text-blue-600">Mr. Davis</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <button onclick="viewProfessionalReportCard('alex')" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition">
+                                        View Report Card
+                                    </button>
+                                    <button onclick="messageTeacher('alex')" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Sarah Johnson Card -->
+                            <div class="child-card child-2">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white">
+                                            <span class="text-lg font-black">SJ</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-black text-slate-900">Sarah Johnson</h4>
+                                            <p class="text-sm text-slate-600">JSS 2 • Arts</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-blue-600">Average: 68%</p>
+                                        <p class="text-xs text-slate-500">Position: 15th</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm font-bold text-slate-700">Overall Performance:</span>
+                                        <span class="text-sm font-bold text-blue-600">Good</span>
+                                    </div>
+                                    <div class="performance-meter">
+                                        <div class="performance-fill performance-good" style="width: 68%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-3 mb-4">
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-600">Best Subject:</span>
+                                        <span class="font-bold text-emerald-600">English (82%)</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-600">Attendance:</span>
+                                        <span class="font-bold text-emerald-600">92%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-slate-600">Class Teacher:</span>
+                                        <span class="font-bold text-blue-600">Mrs. Chen</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <button onclick="viewProfessionalReportCard('sarah')" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition">
+                                        View Report Card
+                                    </button>
+                                    <button onclick="messageTeacher('sarah')" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Term Selector & Quick Actions -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-black text-slate-900">Term Selection</h3>
+                            <span class="text-xs font-bold text-slate-400">2024/2025 Session</span>
+                        </div>
+                        
+                        <div class="space-y-4 mb-6">
+                            <button onclick="selectTerm(3)" class="w-full p-4 bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl text-left hover:border-blue-300 transition">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-bold text-slate-900">Third Term</p>
+                                        <p class="text-sm text-slate-600">April - July 2025</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-emerald-600">Current</p>
+                                        <p class="text-xs text-slate-500">Week 10/12</p>
+                                    </div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="selectTerm(2)" class="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-left hover:border-slate-300 transition">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-bold text-slate-900">Second Term</p>
+                                        <p class="text-sm text-slate-600">January - March 2025</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-slate-600">Completed</p>
+                                        <p class="text-xs text-slate-500">Avg: 3.5</p>
+                                    </div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="selectTerm(1)" class="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-xl text-left hover:border-slate-300 transition">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-bold text-slate-900">First Term</p>
+                                        <p class="text-sm text-slate-600">September - December 2024</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-slate-600">Completed</p>
+                                        <p class="text-xs text-slate-500">Avg: 3.4</p>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                        
+                        <!-- Quick Stats -->
+                        <div class="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl mb-6">
+                            <h4 class="font-bold text-slate-900 mb-3">Term 3 Performance</h4>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="p-3 bg-white rounded-lg">
+                                    <p class="text-xs text-slate-500">Family Average</p>
+                                    <p class="text-lg font-black text-emerald-600">3.7</p>
+                                </div>
+                                <div class="p-3 bg-white rounded-lg">
+                                    <p class="text-xs text-slate-500">Improvement</p>
+                                    <p class="text-lg font-black text-emerald-600">+0.3</p>
+                                </div>
+                                <div class="p-3 bg-white rounded-lg">
+                                    <p class="text-xs text-slate-500">Subjects Passed</p>
+                                    <p class="text-lg font-black text-emerald-600">16/16</p>
+                                </div>
+                                <div class="p-3 bg-white rounded-lg">
+                                    <p class="text-xs text-slate-500">Distinctions</p>
+                                    <p class="text-lg font-black text-emerald-600">10</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="downloadAllReports()" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:shadow-lg transition-all shadow-lg shadow-emerald-200">
+                            Download All Report Cards
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Report Cards Preview -->
+                <div class="max-w-7xl mx-auto glass-card rounded-2xl p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-black text-slate-900">Official Report Cards</h3>
+                        <div class="flex items-center gap-2">
+                            <button onclick="downloadAllReports()" class="text-sm font-bold text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-download mr-1"></i> Download All
+                            </button>
+                            <button onclick="printAllReports()" class="text-sm font-bold text-emerald-600 hover:text-emerald-800">
+                                <i class="fas fa-print mr-1"></i> Print All
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Alex's Report Card Preview -->
+                        <div class="p-6 border-2 border-blue-200 rounded-xl bg-gradient-to-br from-blue-50 to-white hover:border-blue-300 transition">
+                            <div class="text-center mb-6">
+                                <div class="inline-block px-4 py-1 bg-blue-600 text-white text-sm font-bold rounded-full mb-2">
+                                    OFFICIAL REPORT CARD
+                                </div>
+                                <h4 class="text-xl font-black text-slate-900">Alex Johnson</h4>
+                                <p class="text-sm text-slate-600">SSS 2 Science • Term 3 2024/2025</p>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-2 gap-3 text-sm">
+                                    <div class="p-3 bg-white border border-blue-200 rounded-lg">
+                                        <p class="text-xs text-slate-500">AVERAGE</p>
+                                        <p class="font-bold text-emerald-600">78% (A)</p>
+                                    </div>
+                                    <div class="p-3 bg-white border border-blue-200 rounded-lg">
+                                        <p class="text-xs text-slate-500">POSITION</p>
+                                        <p class="font-bold text-blue-600">8th of 120</p>
+                                    </div>
+                                    <div class="p-3 bg-white border border-blue-200 rounded-lg">
+                                        <p class="text-xs text-slate-500">ATTENDANCE</p>
+                                        <p class="font-bold text-emerald-600">96%</p>
+                                    </div>
+                                    <div class="p-3 bg-white border border-blue-200 rounded-lg">
+                                        <p class="text-xs text-slate-500">CONDUCT</p>
+                                        <p class="font-bold text-emerald-600">EXCELLENT</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-sm text-slate-600">
+                                    <p class="font-medium mb-1">Class Teacher: <span class="text-slate-900">Mr. Davis</span></p>
+                                    <p class="font-medium">Promotion Status: <span class="text-emerald-700">Promoted to SSS 3 Science</span></p>
+                                </div>
+                                
+                                <div class="pt-4 border-t border-blue-200">
+                                    <div class="flex gap-3">
+                                        <button onclick="viewProfessionalReportCard('alex')" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700">
+                                            View Full Card
+                                        </button>
+                                        <button onclick="downloadReportCard('alex')" class="px-6 py-3 bg-white border-2 border-blue-300 text-blue-600 font-bold rounded-xl hover:bg-blue-50">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sarah's Report Card Preview -->
+                        <div class="p-6 border-2 border-emerald-200 rounded-xl bg-gradient-to-br from-emerald-50 to-white hover:border-emerald-300 transition">
+                            <div class="text-center mb-6">
+                                <div class="inline-block px-4 py-1 bg-emerald-600 text-white text-sm font-bold rounded-full mb-2">
+                                    OFFICIAL REPORT CARD
+                                </div>
+                                <h4 class="text-xl font-black text-slate-900">Sarah Johnson</h4>
+                                <p class="text-sm text-slate-600">JSS 2 Arts • Term 3 2024/2025</p>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-2 gap-3 text-sm">
+                                    <div class="p-3 bg-white border border-emerald-200 rounded-lg">
+                                        <p class="text-xs text-slate-500">AVERAGE</p>
+                                        <p class="font-bold text-blue-600">68% (B)</p>
+                                    </div>
+                                    <div class="p-3 bg-white border border-emerald-200 rounded-lg">
+                                        <p class="text-xs text-slate-500">POSITION</p>
+                                        <p class="font-bold text-blue-600">15th of 95</p>
+                                    </div>
+                                    <div class="p-3 bg-white border border-emerald-200 rounded-lg">
+                                        <p class="text-xs text-slate-500">ATTENDANCE</p>
+                                        <p class="font-bold text-emerald-600">92%</p>
+                                    </div>
+                                    <div class="p-3 bg-white border border-emerald-200 rounded-lg">
+                                        <p class="text-xs text-slate-500">CONDUCT</p>
+                                        <p class="font-bold text-emerald-600">VERY GOOD</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-sm text-slate-600">
+                                    <p class="font-medium mb-1">Class Teacher: <span class="text-slate-900">Mrs. Chen</span></p>
+                                    <p class="font-medium">Promotion Status: <span class="text-emerald-700">Promoted to JSS 3 Arts</span></p>
+                                </div>
+                                
+                                <div class="pt-4 border-t border-emerald-200">
+                                    <div class="flex gap-3">
+                                        <button onclick="viewProfessionalReportCard('sarah')" class="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700">
+                                            View Full Card
+                                        </button>
+                                        <button onclick="downloadReportCard('sarah')" class="px-6 py-3 bg-white border-2 border-emerald-300 text-emerald-600 font-bold rounded-xl hover:bg-emerald-50">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <button onclick="requestTranscript()" class="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl text-left hover:bg-blue-200 transition group">
+                        <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                            <i class="fas fa-file-certificate text-blue-600 text-lg"></i>
+                        </div>
+                        <p class="font-bold text-slate-900">Request Transcript</p>
+                        <p class="text-sm text-slate-600 mt-1">Official academic record for applications</p>
+                    </button>
+                    
+                    <button onclick="contactAcademicAdvisor()" class="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 border-2 border-emerald-200 rounded-xl text-left hover:bg-emerald-200 transition group">
+                        <div class="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                            <i class="fas fa-user-graduate text-emerald-600 text-lg"></i>
+                        </div>
+                        <p class="font-bold text-slate-900">Academic Advisor</p>
+                        <p class="text-sm text-slate-600 mt-1">Schedule meeting for academic guidance</p>
+                    </button>
+                    
+                    <button onclick="viewPastReports()" class="p-6 bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl text-left hover:bg-purple-200 transition group">
+                        <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center mb-4 group-hover:bg-white">
+                            <i class="fas fa-archive text-purple-600 text-lg"></i>
+                        </div>
+                        <p class="font-bold text-slate-900">Past Reports</p>
+                        <p class="text-sm text-slate-600 mt-1">View previous academic terms</p>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            // Set icon based on type
+            let icon = 'fa-info-circle';
+            switch(type) {
+                case 'success': icon = 'fa-check-circle'; break;
+                case 'warning': icon = 'fa-exclamation-triangle'; break;
+                case 'error': icon = 'fa-times-circle'; break;
+                default: icon = 'fa-info-circle';
+            }
+            
+            toast.innerHTML = `
+                <i class="fas ${icon} toast-icon"></i>
+                <div class="toast-content">${message}</div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add to container
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Auto remove after duration
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.classList.add('toast-exit');
+                    setTimeout(() => {
+                        if (toast.parentElement) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }, duration);
+            }
+        }
+
+        // Mobile Sidebar Toggle
+        function mobileSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            // Update active tab button
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Show appropriate content
+            showToast(`Switched to ${tabName} view`, 'info');
+        }
+
+        // View Professional Nigerian Report Card
+        function viewProfessionalReportCard(student) {
+            const reportCards = {
+                'alex': {
+                    name: 'ALEX JOHNSON',
+                    regNo: 'GHS/2020/089',
+                    class: 'SSS 2 SCIENCE',
+                    dob: '15th March, 2008',
+                    age: '16 Years',
+                    term: 'THIRD TERM',
+                    session: '2024/2025 ACADEMIC SESSION',
+                    house: 'BLUE HOUSE',
+                    attendance: '96%',
+                    conduct: 'EXCELLENT',
+                    position: '8th out of 120 Students',
+                    totalMarks: '589 out of 800',
+                    average: '73.6%',
+                    classAverage: '65.2%',
+                    promotion: 'PROMOTED TO SSS 3 SCIENCE',
+                    teacherComment: 'Alex has shown remarkable improvement in his analytical skills this term. His performance in Mathematics is outstanding. He demonstrates excellent leadership qualities in group projects and shows initiative in class discussions.',
+                    principalComment: 'I am pleased with Alex\'s performance this term. He has maintained excellent academic standards and participated actively in school activities. His attendance record is commendable.',
+                    subjects: [
+                        { name: 'Mathematics', ca1: 18, ca2: 19, exam: 48, total: 85, grade: 'A', remark: 'Excellent', position: '3rd' },
+                        { name: 'English Language', ca1: 17, ca2: 16, exam: 45, total: 78, grade: 'A', remark: 'Very Good', position: '12th' },
+                        { name: 'Physics', ca1: 15, ca2: 14, exam: 42, total: 71, grade: 'B', remark: 'Good', position: '8th' },
+                        { name: 'Chemistry', ca1: 14, ca2: 13, exam: 40, total: 67, grade: 'B', remark: 'Good', position: '10th' },
+                        { name: 'Biology', ca1: 15, ca2: 14, exam: 43, total: 72, grade: 'B', remark: 'Good', position: '6th' },
+                        { name: 'Further Mathematics', ca1: 17, ca2: 18, exam: 46, total: 81, grade: 'A', remark: 'Excellent', position: '5th' },
+                        { name: 'French', ca1: 12, ca2: 11, exam: 33, total: 56, grade: 'C', remark: 'Average', position: '25th' },
+                        { name: 'Computer Studies', ca1: 16, ca2: 17, exam: 47, total: 80, grade: 'A', remark: 'Excellent', position: '4th' }
+                    ]
+                },
+                'sarah': {
+                    name: 'SARAH JOHNSON',
+                    regNo: 'GHS/2022/156',
+                    class: 'JSS 2 ARTS',
+                    dob: '22nd August, 2011',
+                    age: '13 Years',
+                    term: 'THIRD TERM',
+                    session: '2024/2025 ACADEMIC SESSION',
+                    house: 'GREEN HOUSE',
+                    attendance: '92%',
+                    conduct: 'VERY GOOD',
+                    position: '15th out of 95 Students',
+                    totalMarks: '555 out of 800',
+                    average: '69.4%',
+                    classAverage: '62.8%',
+                    promotion: 'PROMOTED TO JSS 3 ARTS',
+                    teacherComment: 'Sarah is a creative and diligent student. Her performance in English Language and Creative Arts is excellent. She participates actively in school cultural activities. Needs to improve concentration in Mathematics and French classes.',
+                    principalComment: 'Sarah has shown good progress this term. She maintains good academic standards and participates actively in school activities. Her attendance record is satisfactory.',
+                    subjects: [
+                        { name: 'Mathematics', ca1: 14, ca2: 13, exam: 41, total: 68, grade: 'B', remark: 'Good', position: '18th' },
+                        { name: 'English Language', ca1: 17, ca2: 18, exam: 47, total: 82, grade: 'A', remark: 'Excellent', position: '5th' },
+                        { name: 'Basic Science', ca1: 15, ca2: 14, exam: 43, total: 72, grade: 'B', remark: 'Good', position: '12th' },
+                        { name: 'Social Studies', ca1: 14, ca2: 13, exam: 41, total: 68, grade: 'B', remark: 'Good', position: '16th' },
+                        { name: 'Business Studies', ca1: 13, ca2: 12, exam: 38, total: 63, grade: 'C', remark: 'Average', position: '22nd' },
+                        { name: 'French', ca1: 10, ca2: 9, exam: 29, total: 48, grade: 'D', remark: 'Pass', position: '35th' },
+                        { name: 'Creative Arts', ca1: 18, ca2: 17, exam: 48, total: 83, grade: 'A', remark: 'Excellent', position: '3rd' },
+                        { name: 'Home Economics', ca1: 15, ca2: 14, exam: 42, total: 71, grade: 'B', remark: 'Good', position: '14th' }
+                    ]
+                }
+            };
+            
+            const report = reportCards[student];
+            if (!report) return;
+            
+            // Calculate totals
+            const totalCA1 = report.subjects.reduce((sum, subj) => sum + subj.ca1, 0);
+            const totalCA2 = report.subjects.reduce((sum, subj) => sum + subj.ca2, 0);
+            const totalExam = report.subjects.reduce((sum, subj) => sum + subj.exam, 0);
+            const totalScore = report.subjects.reduce((sum, subj) => sum + subj.total, 0);
+            
+            document.getElementById('reportCardContent').innerHTML = `
+                <div class="relative">
+                    <!-- Watermark -->
+                    <div class="watermark" style="top: 30%; left: 15%;">GREENWOOD</div>
+                    <div class="watermark" style="top: 60%; left: 60%;">HIGH SCHOOL</div>
+                    
+                    <!-- School Header -->
+                    <div class="school-header text-center">
+                        <div class="flex items-center justify-center gap-4 mb-4">
+                            <!-- School Logo -->
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-full border-4 border-amber-500 flex items-center justify-center">
+                                    <span class="text-blue-900 font-bold text-lg">GHS</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h1 class="text-2xl font-bold">GREENWOOD HIGH SCHOOL</h1>
+                                <p class="text-sm opacity-90">Plot 245, Victoria Island, Lagos</p>
+                                <p class="text-xs opacity-80 school-motto">"Knowledge, Excellence, Integrity"</p>
+                            </div>
+                        </div>
+                        <div class="official-stamp text-xs mt-2">OFFICIAL REPORT CARD</div>
+                    </div>
+                    
+                    <!-- Report Card Content -->
+                    <div class="p-8">
+                        <!-- Term Header -->
+                        <div class="text-center mb-8">
+                            <h2 class="text-xl font-bold text-slate-900">${report.term} - ${report.session}</h2>
+                            <div class="flex justify-center gap-8 mt-2 text-sm text-slate-600">
+                                <span>Student's Copy</span>
+                                <span>Issue Date: 15th December, 2024</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Student Information -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-4 border-b pb-2">STUDENT INFORMATION</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <table class="w-full">
+                                        <tbody>
+                                            <tr>
+                                                <td class="py-2 text-slate-600 w-40">Full Name:</td>
+                                                <td class="py-2 font-bold">${report.name}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-2 text-slate-600">Registration No:</td>
+                                                <td class="py-2 font-bold text-blue-900">${report.regNo}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-2 text-slate-600">Class:</td>
+                                                <td class="py-2 font-bold">${report.class}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div>
+                                    <table class="w-full">
+                                        <tbody>
+                                            <tr>
+                                                <td class="py-2 text-slate-600 w-40">Date of Birth:</td>
+                                                <td class="py-2 font-bold">${report.dob}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-2 text-slate-600">Age:</td>
+                                                <td class="py-2 font-bold">${report.age}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-2 text-slate-600">House:</td>
+                                                <td class="py-2 font-bold">${report.house}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Academic Performance Table -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-4 border-b pb-2">ACADEMIC PERFORMANCE</h3>
+                            <div class="overflow-x-auto">
+                                <table class="subject-table">
+                                    <thead>
+                                        <tr>
+                                            <th>SUBJECTS</th>
+                                            <th>1ST CA<br><span class="text-xs font-normal">(20)</span></th>
+                                            <th>2ND CA<br><span class="text-xs font-normal">(20)</span></th>
+                                            <th>EXAM<br><span class="text-xs font-normal">(60)</span></th>
+                                            <th>TOTAL<br><span class="text-xs font-normal">(100)</span></th>
+                                            <th>GRADE</th>
+                                            <th>REMARK</th>
+                                            <th>POSITION<br><span class="text-xs font-normal">in Class</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${report.subjects.map(subject => `
+                                            <tr>
+                                                <td class="subject-name">${subject.name}</td>
+                                                <td>${subject.ca1}</td>
+                                                <td>${subject.ca2}</td>
+                                                <td>${subject.exam}</td>
+                                                <td class="font-bold">${subject.total}</td>
+                                                <td><div class="grade-box grade-${subject.grade.toLowerCase()}">${subject.grade}</div></td>
+                                                <td>${subject.remark}</td>
+                                                <td>${subject.position}</td>
+                                            </tr>
+                                        `).join('')}
+                                        <tr class="total-row">
+                                            <td class="subject-name">TOTAL / AVERAGE</td>
+                                            <td>${(totalCA1/8).toFixed(1)}</td>
+                                            <td>${(totalCA2/8).toFixed(1)}</td>
+                                            <td>${(totalExam/8).toFixed(1)}</td>
+                                            <td class="font-bold">${totalScore}</td>
+                                            <td><div class="grade-box grade-${parseFloat(report.average) >= 75 ? 'a' : 'b'}">${parseFloat(report.average) >= 75 ? 'A' : 'B'}</div></td>
+                                            <td>${parseFloat(report.average) >= 75 ? 'EXCELLENT' : 'GOOD'}</td>
+                                            <td>${report.position.split(' ')[0]}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Summary Information -->
+                        <div class="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="p-4 border border-slate-300 rounded">
+                                <h4 class="font-bold text-slate-900 mb-3">ACADEMIC SUMMARY</h4>
+                                <table class="w-full">
+                                    <tbody>
+                                        <tr>
+                                            <td class="py-2 text-slate-600">Total Marks Obtained:</td>
+                                            <td class="py-2 font-bold">${report.totalMarks}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 text-slate-600">Average Score:</td>
+                                            <td class="py-2 font-bold">${report.average}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 text-slate-600">Class Average:</td>
+                                            <td class="py-2 font-bold">${report.classAverage}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 text-slate-600">Position in Class:</td>
+                                            <td class="py-2 font-bold">${report.position}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="p-4 border border-slate-300 rounded">
+                                <h4 class="font-bold text-slate-900 mb-3">BEHAVIOURAL ASSESSMENT</h4>
+                                <table class="w-full">
+                                    <tbody>
+                                        <tr>
+                                            <td class="py-2 text-slate-600">Attendance:</td>
+                                            <td class="py-2 font-bold">${report.attendance}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 text-slate-600">Conduct:</td>
+                                            <td class="py-2 font-bold">${report.conduct}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 text-slate-600">Punctuality:</td>
+                                            <td class="py-2 font-bold">Excellent</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2 text-slate-600">Promotion Status:</td>
+                                            <td class="py-2 font-bold text-emerald-700">${report.promotion}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Comments Section -->
+                        <div class="mb-8">
+                            <h3 class="text-lg font-bold text-slate-900 mb-4 border-b pb-2">COMMENTS</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="p-4 border border-slate-300 rounded">
+                                    <h4 class="font-bold text-slate-900 mb-2">Class Teacher's Comment</h4>
+                                    <p class="text-sm text-slate-700 mb-4">${report.teacherComment}</p>
+                                    <div class="text-center">
+                                        <p class="text-sm font-bold text-slate-700 mb-1">${student === 'alex' ? 'Mr. Davis' : 'Mrs. Chen'}</p>
+                                        <div class="signature-line"></div>
+                                        <p class="text-xs text-slate-500 mt-1">Class Teacher</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 border border-slate-300 rounded">
+                                    <h4 class="font-bold text-slate-900 mb-2">Principal's Comment</h4>
+                                    <p class="text-sm text-slate-700 mb-4">${report.principalComment}</p>
+                                    <div class="text-center">
+                                        <p class="text-sm font-bold text-slate-700 mb-1">Dr. Adeola Williams</p>
+                                        <div class="signature-line"></div>
+                                        <p class="text-xs text-slate-500 mt-1">Principal</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Next Term Information -->
+                        <div class="mb-8 p-4 border border-amber-300 bg-amber-50 rounded">
+                            <h4 class="font-bold text-slate-900 mb-3">NEXT TERM INFORMATION</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <p class="text-sm text-slate-600">Resumption Date:</p>
+                                    <p class="font-bold text-slate-900">13th January, 2025</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-slate-600">School Fees Due:</p>
+                                    <p class="font-bold text-slate-900">10th January, 2025</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-slate-600">Term Duration:</p>
+                                    <p class="font-bold text-slate-900">12 Weeks</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Official Signatures -->
+                        <div class="border-t border-slate-300 pt-8">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="text-center">
+                                    <p class="text-sm font-bold text-slate-700 mb-2">Class Teacher's Signature</p>
+                                    <div class="h-12 border-b border-slate-400 mx-8"></div>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-sm font-bold text-slate-700 mb-2">Principal's Signature</p>
+                                    <div class="h-12 border-b border-slate-400 mx-8"></div>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-sm font-bold text-slate-700 mb-2">School Stamp</p>
+                                    <div class="h-12 border-2 border-red-600 border-dashed mx-8 flex items-center justify-center">
+                                        <span class="text-xs font-bold text-red-600">SCHOOL STAMP</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-8">
+                                <p class="text-xs text-slate-500">This is an official document. Any alterations render it invalid.</p>
+                                <p class="text-xs font-bold text-slate-700 mt-2">Issued by Greenwood High School, Lagos</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Print Actions -->
+                    <div class="p-6 border-t border-slate-300">
+                        <div class="flex justify-center gap-4">
+                            <button onclick="printReportCard('${student}')" class="px-6 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700">
+                                <i class="fas fa-print mr-2"></i>Print Report Card
+                            </button>
+                            <button onclick="downloadReportCard('${student}')" class="px-6 py-2 bg-white border border-slate-300 text-slate-700 font-medium rounded hover:bg-slate-50">
+                                <i class="fas fa-download mr-2"></i>Download PDF
+                            </button>
+                            <button onclick="closeModal('reportCardModal')" class="px-6 py-2 bg-slate-100 text-slate-700 font-medium rounded hover:bg-slate-200">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            openModal('reportCardModal');
+        }
+
+        // Child Selection
+        function selectChild(child) {
+            showToast(`Viewing ${child === 'all' ? 'both children' : child}`, 'info');
+        }
+
+        // Term Selection
+        function selectTerm(term) {
+            const termNames = {1: 'First', 2: 'Second', 3: 'Third'};
+            showToast(`Loading ${termNames[term]} Term results`, 'info');
+        }
+
+        // Message Teacher
+        function messageTeacher(child) {
+            showToast(`Opening message form for ${child}'s teacher`, 'info');
+        }
+
+        // Download Functions
+        function downloadReportCard(child) {
+            showToast(`Downloading ${child}'s official report card`, 'success');
+            closeModal('reportCardModal');
+        }
+
+        function downloadAllReports() {
+            showToast('Downloading all report cards as PDF', 'success');
+        }
+
+        // Print Functions
+        function printReportCard(child) {
+            showToast(`Printing ${child}'s report card`, 'info');
+        }
+
+        function printAllReports() {
+            showToast('Opening print preview for all reports', 'info');
+        }
+
+        // Additional Functions
+        function requestTranscript() {
+            showToast('Transcript request submitted to school administration', 'success');
+        }
+
+        function contactAcademicAdvisor() {
+            showToast('Opening academic advisor scheduling', 'info');
+        }
+
+        function viewPastReports() {
+            showToast('Loading past academic reports', 'info');
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            showToast('Academic reports loaded successfully', 'success', 3000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Only trigger when not in input fields
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+            
+            // Ctrl/Cmd + 1: View Alex's report card
+            if ((e.ctrlKey || e.metaKey) && e.key === '1') {
+                e.preventDefault();
+                viewProfessionalReportCard('alex');
+            }
+            
+            // Ctrl/Cmd + 2: View Sarah's report card
+            if ((e.ctrlKey || e.metaKey) && e.key === '2') {
+                e.preventDefault();
+                viewProfessionalReportCard('sarah');
+            }
+            
+            // Ctrl/Cmd + D: Download all reports
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                downloadAllReports();
+            }
+            
+            // Ctrl/Cmd + P: Print all reports
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                printAllReports();
+            }
+        });
+    </script>
+</body>
+</html>

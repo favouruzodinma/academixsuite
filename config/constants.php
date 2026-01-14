@@ -10,6 +10,7 @@ define('APP_VERSION', '1.0.0');
 define('APP_ENV', IS_LOCAL ? 'development' : 'production');
 define('APP_DEBUG', IS_LOCAL);
 define('APP_URL', IS_LOCAL ? 'http://localhost/academixsuite' : 'https://yoursaas.com');
+define('APP_LOGO', APP_URL . '/assets/images/logo.png');
 
 // File Upload Constants
 define('MAX_UPLOAD_SIZE', 10 * 1024 * 1024); // 10MB
@@ -82,6 +83,14 @@ define('PAYMENT_CHEQUE', 'cheque');
 define('PAYMENT_BANK_TRANSFER', 'bank_transfer');
 define('PAYMENT_CARD', 'card');
 define('PAYMENT_ONLINE', 'online');
+
+//support
+define('SUPPORT_EMAIL', 'support@academixsuite.com');
+define('SUPPORT_PHONE', '+234 123 456 7890');
+
+//Helper Constants
+define('PDF_SAVE_DIR', __DIR__ . '/../assets/uploads/pdfs/');
+define('PDF_TEMP_DIR', sys_get_temp_dir() . '/academixsuite_pdfs/');
 
 // Date Formats
 define('DATE_FORMAT', 'Y-m-d');
