@@ -28,16 +28,16 @@ if (IS_LOCAL) {
     define('DB_PORT', '3306');
     define('DB_USER', 'root');
     define('DB_PASS', '');
-    define('DB_PLATFORM_NAME', 'school_platform');
+    define('DB_PLATFORM_NAME', 'academixsuite_platform');
     define('DB_CHARSET', 'utf8mb4');
     define('DB_COLLATION', 'utf8mb4_unicode_ci');
 } else {
     // AWS RDS Production
     define('DB_HOST', 'your-rds-endpoint.cluster-xxx.us-east-1.rds.amazonaws.com');
     define('DB_PORT', '3306');
-    define('DB_USER', 'saas_admin');
-    define('DB_PASS', 'StrongPassword123!');
-    define('DB_PLATFORM_NAME', 'school_platform');
+    define('DB_USER', 'academixsuite_platform');
+    define('DB_PASS', '!@#admin!@#');
+    define('DB_PLATFORM_NAME', 'academixsuite_platform');
     define('DB_CHARSET', 'utf8mb4');
     define('DB_COLLATION', 'utf8mb4_unicode_ci');
 }
@@ -100,7 +100,7 @@ define('APP_NAME', 'AcademixSuite');
 define('APP_VERSION', '1.0.0');
 define('APP_ENV', IS_LOCAL ? 'development' : 'production');
 define('APP_DEBUG', IS_LOCAL);
-define('APP_URL', IS_LOCAL ? 'http://localhost/academixsuite' : 'https://yoursaas.com');
+define('APP_URL', IS_LOCAL ? 'http://localhost/academixsuite' : 'https://academixsuite.com');
 
 // File Upload Constants
 define('MAX_UPLOAD_SIZE', 10 * 1024 * 1024); // 10MB

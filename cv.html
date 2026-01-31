@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAVOUR NZUBECHUKWU UZODINMA | Professional Profile</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            color: #000000;
+            background: #ffffff;
+            line-height: 1.5;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 25mm 30mm;
+            position: relative;
+        }
+        
+        /* Header with professional typography */
+        .header-container {
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .name {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            line-height: 1.1;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            border-bottom: 3px solid #000000;
+            padding-bottom: 15px;
+        }
+        
+        .title {
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: #333333;
+            margin-bottom: 25px;
+            font-style: normal;
+        }
+        
+        /* Contact information grid */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px 40px;
+            margin-top: 20px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            font-size: 14px;
+        }
+        
+        .contact-label {
+            font-weight: 600;
+            min-width: 120px;
+            color: #333333;
+        }
+        
+        /* Section styling */
+        .section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        
+        .section-header {
+            font-size: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #000000;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        /* Summary section */
+        .summary {
+            font-size: 15px;
+            line-height: 1.6;
+            text-align: justify;
+            padding-right: 10px;
+        }
+        
+        /* Skills grid with refined layout */
+        .skills-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+        
+        .skill-category {
+            margin-bottom: 0;
+        }
+        
+        .skill-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #222222;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #dddddd;
+        }
+        
+        .skill-items {
+            list-style: none;
+            padding-left: 5px;
+        }
+        
+        .skill-items li {
+            margin-bottom: 8px;
+            padding-left: 15px;
+            position: relative;
+            font-size: 14px;
+        }
+        
+        .skill-items li:before {
+            content: "—";
+            position: absolute;
+            left: 0;
+            color: #000000;
+            font-weight: bold;
+        }
+        
+        /* Experience styling */
+        .experience-item {
+            margin-bottom: 25px;
+        }
+        
+        .experience-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+        
+        .position {
+            font-size: 17px;
+            font-weight: 600;
+        }
+        
+        .company {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333333;
+        }
+        
+        .period {
+            font-size: 14px;
+            font-weight: 500;
+            color: #555555;
+            white-space: nowrap;
+        }
+        
+        .location {
+            font-size: 14px;
+            color: #555555;
+            font-style: italic;
+            margin-bottom: 12px;
+        }
+        
+        .achievements {
+            list-style: none;
+            padding-left: 5px;
+        }
+        
+        .achievements li {
+            margin-bottom: 10px;
+            padding-left: 22px;
+            position: relative;
+            text-align: justify;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .achievements li:before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            font-weight: bold;
+            color: #000000;
+            font-size: 18px;
+        }
+        
+        /* Projects styling */
+        .project-item {
+            margin-bottom: 22px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #eeeeee;
+        }
+        
+        .project-item:last-child {
+            border-bottom: none;
+        }
+        
+        .project-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .project-tech {
+            font-size: 14px;
+            color: #555555;
+            font-style: italic;
+            margin-bottom: 10px;
+            padding-left: 2px;
+        }
+        
+        /* Work approach section */
+        .approach-text {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        .objective-highlight {
+            background-color: #f8f8f8;
+            padding: 18px;
+            border-left: 3px solid #000000;
+            margin-top: 15px;
+            font-size: 15px;
+        }
+        
+        .objective-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #222222;
+        }
+        
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #000000;
+            text-align: center;
+            font-size: 12px;
+            color: #666666;
+            font-style: italic;
+        }
+        
+        /* Print button */
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 12px 28px;
+            font-family: 'Helvetica', Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            z-index: 1000;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .print-button:hover {
+            background: #222222;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+        }
+        
+        /* Print styles */
+        @media print {
+            .print-button {
+                display: none;
+            }
+            
+            body {
+                padding: 20mm 25mm;
+            }
+            
+            .section {
+                margin-bottom: 25px;
+            }
+            
+            .experience-item, .project-item {
+                page-break-inside: avoid;
+            }
+        }
+        
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        /* Divider line */
+        .divider {
+            height: 1px;
+            background: #000000;
+            margin: 30px 0;
+        }
+        
+        /* Responsive adjustments */
+        @media screen and (max-width: 800px) {
+            body {
+                padding: 15mm 20mm;
+            }
+            
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .skills-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .name {
+                font-size: 32px;
+            }
+        }
+        
+        /* Watermark effect for digital view */
+        body:before {
+            content: "";
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 120px;
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: -1;
+            font-weight: bold;
+            letter-spacing: 20px;
+            white-space: nowrap;
+            display: none; /* Hidden by default, can enable if desired */
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button" onclick="window.print()">DOWNLOAD AS PDF</button>
+    
+    <div class="header-container">
+        <div class="name">Favour Nzubechukwu Uzodinma</div>
+        <div class="title">Precision Digital Specialist | Content Systems & Data Organization Expert</div>
+        
+        <div class="contact-grid">
+            <div class="contact-item">
+                <div class="contact-label">Email:</div>
+                <div>info@academixsuite.com</div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-label">Location:</div>
+                <div>Lagos, Nigeria (Working Remotely)</div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-label">Specialization:</div>
+                <div>AI Training, Data Annotation, Content Systems</div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-label">Profile:</div>
+                <div>Micro1 Certified Specialist</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-header">Professional Profile</div>
+        <div class="summary">
+            A detail-oriented digital specialist with extensive experience in building and managing practical web systems using PHP and JavaScript. Excel in structured tasks requiring precision, systematic processes, and focused execution—transforming unstructured information into organized, actionable data. Proven ability in developing functional educational systems has cultivated exceptional pattern recognition, meticulous guideline adherence, and quality assurance expertise. Seeking to apply this methodical approach to AI training, data refinement, and content evaluation projects on the Micro1 platform.
+        </div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div class="section">
+        <div class="section-header">Core Competencies</div>
+        <div class="skills-container">
+            <div class="skill-category">
+                <div class="skill-title">Technical Expertise</div>
+                <ul class="skill-items">
+                    <li>PHP Development & MySQL Database Management</li>
+                    <li>JavaScript (ES6+) & Front-End Implementation</li>
+                    <li>HTML5, CSS3 & Responsive Web Principles</li>
+                    <li>API Integration & Data Processing</li>
+                    <li>System Documentation & Technical Writing</li>
+                </ul>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">Data & Content Management</div>
+                <ul class="skill-items">
+                    <li>Data Annotation, Labeling & Categorization</li>
+                    <li>Content Curation, Review & Quality Assurance</li>
+                    <li>Information Architecture & Taxonomy Development</li>
+                    <li>Workflow Optimization & Process Documentation</li>
+                    <li>Accuracy Validation & Error Identification</li>
+                </ul>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">Analytical & Process Skills</div>
+                <ul class="skill-items">
+                    <li>Structured Problem-Solving Methodologies</li>
+                    <li>Meticulous Attention to Detail</li>
+                    <li>Guideline Adherence & Protocol Execution</li>
+                    <li>Systematic Task Management & Organization</li>
+                    <li>Quality Control & Continuous Improvement</li>
+                </ul>
+            </div>
+            
+            <div class="skill-category">
+                <div class="skill-title">Professional Tools</div>
+                <ul class="skill-items">
+                    <li>Version Control (Git, GitHub)</li>
+                    <li>VS Code & Development Environments</li>
+                    <li>Chrome DevTools & Debugging</li>
+                    <li>Google Workspace & Collaboration Tools</li>
+                    <li>Communication Platforms (Slack, Teams)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div class="section">
+        <div class="section-header">Professional Experience</div>
+        
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <div class="position">Digital Systems Manager</div>
+                    <div class="company">AcademixSuite</div>
+                </div>
+                <div class="period">January 2023 – Present</div>
+            </div>
+            <div class="location">Lagos, Nigeria | Remote Position</div>
+            <ul class="achievements">
+                <li>Architected and maintained multiple administrative systems utilizing PHP and vanilla JavaScript to manage student data, course materials, and institutional reporting for educational clients</li>
+                <li>Developed and implemented structured data processing workflows for importing, cleaning, and organizing extensive sets of educational content and institutional records</li>
+                <li>Authored comprehensive documentation and procedural guidelines for data entry protocols and content management systems, adopted by cross-functional team members</li>
+                <li>Designed and executed manual quality assurance protocols that elevated data accuracy metrics across systems by 90+% through systematic validation processes</li>
+                <li>Established data governance frameworks that ensured consistency and reliability across multiple educational institution deployments</li>
+            </ul>
+        </div>
+        
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <div class="position">Web Content Specialist</div>
+                    <div class="company">EduTech Innovations Ltd.</div>
+                </div>
+                <div class="period">March 2021 – December 2022</div>
+            </div>
+            <div class="location">Remote Position</div>
+            <ul class="achievements">
+                <li>Managed end-to-end content curation lifecycle for digital learning platforms, ensuring all materials met established quality standards and categorization protocols</li>
+                <li>Conducted meticulous reviews of educational modules to identify inconsistencies, inaccuracies, and areas requiring enhancement or correction</li>
+                <li>Organized and applied metadata tagging to thousands of educational assets (articles, videos, assessments) to optimize search functionality and user navigation</li>
+                <li>Collaborated with subject matter experts to validate technical accuracy and pedagogical effectiveness of digital learning materials</li>
+                <li>Implemented content quality scoring system that improved resource discoverability and user engagement metrics by 40%</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div class="section">
+        <div class="section-header">Notable Projects</div>
+        
+        <div class="project-item">
+            <div class="project-title">Academic Content Organizer System</div>
+            <div class="project-tech">Technologies: PHP, MySQL, JavaScript, Custom Algorithms</div>
+            <ul class="achievements">
+                <li>Designed and developed a specialized system for categorizing and tagging educational resources across multiple dimensions including subject, difficulty level, resource type, and learning objectives</li>
+                <li>Engineered data transformation processes to convert unstructured educational content from diverse sources into standardized, searchable database structures</li>
+                <li>Created intuitive administrative interface and established comprehensive categorization taxonomy adopted by educational institutions</li>
+                <li>Reduced content discovery time by approximately 70% through implementation of advanced filtering and search capabilities</li>
+            </ul>
+        </div>
+        
+        <div class="project-item">
+            <div class="project-title">Student Record Verification Portal</div>
+            <div class="project-tech">Technologies: PHP, JavaScript, CSV/Excel Processing, Data Validation</div>
+            <ul class="achievements">
+                <li>Built a dedicated verification platform enabling administrators to review, correct, and validate student information prior to database commitment</li>
+                <li>Developed sophisticated validation logic and designed user interface that visually highlighted data discrepancies requiring human intervention</li>
+                <li>Implemented systematic verification workflows that reduced data entry errors by 85% and decreased processing time by 50%</li>
+                <li>Created audit trail functionality to track all modifications and maintain data integrity compliance</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div class="section">
+        <div class="section-header">Professional Philosophy & Objectives</div>
+        <div class="approach-text">
+            I excel in environments that demand methodical analysis and consistent application of established protocols. My professional strength is transforming ambiguous or complex information into structured, reliable outputs through systematic thinking and attention to detail. I am particularly adept at work requiring deep focus, precision, and adherence to specific guidelines—whether evaluating AI-generated content against exacting criteria, annotating data with meticulous accuracy, or executing content generation tasks with strict protocol observance.
+        </div>
+        
+        <div class="objective-highlight">
+            <div class="objective-title">Micro1 Platform Objectives</div>
+            <div>Seeking structured, task-based remote engagements that leverage my expertise in organization, precision, and systematic execution:</div>
+            <ul class="skill-items" style="margin-top: 10px;">
+                <li><strong>AI Training & Evaluation:</strong> Rating AI responses, assessing output quality, identifying inconsistencies, and applying specific conversation guidelines</li>
+                <li><strong>Data Annotation & Categorization:</strong> Precise labeling, tagging, and organization of text, image, or audio data according to detailed specifications</li>
+                <li><strong>Content Generation & Review:</strong> Creating or evaluating content with strict adherence to style guides, accuracy requirements, and quality benchmarks</li>
+                <li><strong>Structured Digital Tasks:</strong> Systematic execution of well-defined digital workflows requiring meticulous attention to detail and protocol compliance</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="footer">
+        Professional Profile Prepared for Micro1 AI Platform | Document Version: 1.0 | March 2024
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const printButton = document.querySelector('.print-button');
+            const originalTitle = document.title;
+            
+            printButton.addEventListener('click', function() {
+                document.title = "FAVOUR NZUBECHUKWU UZODINMA - Professional Profile";
+                
+                // Add slight delay for title change
+                setTimeout(() => {
+                    window.print();
+                    setTimeout(() => {
+                        document.title = originalTitle;
+                    }, 500);
+                }, 100);
+            });
+            
+            // Enhanced print instructions
+            console.log("%cPROFESSIONAL CV READY", "color: #000000; font-size: 16px; font-weight: bold;");
+            console.log("%cClick 'DOWNLOAD AS PDF' to save as high-quality PDF", "color: #333333;");
+            console.log("%cFor optimal results, use Chrome/Edge and select 'Save as PDF' with margins set to 'None'", "color: #555555; font-style: italic;");
+        });
+    </script>
+</body>
+</html>

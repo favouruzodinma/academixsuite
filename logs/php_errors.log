@@ -1,0 +1,929 @@
+[29-Jan-2026 12:55:26 Africa/Lagos] School verified: Spring blooms (ID: 13)
+[29-Jan-2026 12:55:26 Africa/Lagos] No session found, redirecting to login
+[29-Jan-2026 12:55:40 Africa/Lagos] School verified: Spring blooms (ID: 13)
+[29-Jan-2026 12:55:40 Africa/Lagos] No session found, redirecting to login
+[29-Jan-2026 12:56:38 Africa/Lagos] School verified: Spring blooms (ID: 13)
+[29-Jan-2026 12:56:38 Africa/Lagos] No session found, redirecting to login
+[29-Jan-2026 12:56:57 Africa/Lagos] School verified: Spring blooms (ID: 13)
+[29-Jan-2026 12:56:57 Africa/Lagos] No session found, redirecting to login
+[29-Jan-2026 13:02:08 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 13:02:08 Africa/Lagos] School Slug from Router: 
+[29-Jan-2026 13:02:08 Africa/Lagos] User Type: admin
+[29-Jan-2026 13:02:08 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 13:02:08 Africa/Lagos] ERROR: Empty school slug from router
+[29-Jan-2026 13:04:29 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 13:04:29 Africa/Lagos] School Slug from Router: 
+[29-Jan-2026 13:04:29 Africa/Lagos] User Type: admin
+[29-Jan-2026 13:04:29 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 13:04:29 Africa/Lagos] ERROR: Empty school slug from router
+[29-Jan-2026 13:44:26 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:44:26 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 13:44:26 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:44:26 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:44:26 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 13:44:26 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 13:44:26 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 13:44:26 Africa/Lagos] User Type: admin
+[29-Jan-2026 13:44:26 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 13:44:26 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=trial
+[29-Jan-2026 13:44:26 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 13:44:26 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 13:44:26 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 13:44:26 Africa/Lagos] School database connection successful
+[29-Jan-2026 13:44:26 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 13:44:26 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 13:44:26 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 13:44:26 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 13:44:26 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 13:44:26 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 13:44:26 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 13:44:26 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 13:44:26 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:44:59 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:44:59 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 13:44:59 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:44:59 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:44:59 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 13:44:59 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 13:44:59 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 13:44:59 Africa/Lagos] User Type: admin
+[29-Jan-2026 13:44:59 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 13:44:59 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=trial
+[29-Jan-2026 13:44:59 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 13:44:59 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 13:44:59 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 13:44:59 Africa/Lagos] School database connection successful
+[29-Jan-2026 13:44:59 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 13:44:59 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 13:44:59 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 13:44:59 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 13:44:59 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 13:44:59 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 13:44:59 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 13:44:59 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 13:44:59 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:48:23 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:48:23 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 13:48:23 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:48:23 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:48:23 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 13:48:23 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 13:48:23 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 13:48:23 Africa/Lagos] User Type: admin
+[29-Jan-2026 13:48:23 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 13:48:23 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=trial
+[29-Jan-2026 13:48:23 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 13:48:23 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 13:48:23 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 13:48:23 Africa/Lagos] School database connection successful
+[29-Jan-2026 13:48:23 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 13:48:23 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 13:48:23 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 13:48:23 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 13:48:23 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 13:48:23 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 13:48:23 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 13:48:23 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 13:48:23 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:49:18 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:49:18 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 13:49:18 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:49:18 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:49:18 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 13:49:18 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 13:49:18 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 13:49:18 Africa/Lagos] User Type: admin
+[29-Jan-2026 13:49:18 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 13:49:18 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=trial
+[29-Jan-2026 13:49:18 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 13:49:18 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 13:49:18 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 13:49:18 Africa/Lagos] School database connection successful
+[29-Jan-2026 13:49:18 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 13:49:18 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 13:49:18 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 13:49:18 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 13:49:18 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 13:49:18 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 13:49:18 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 13:49:18 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 13:49:18 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:49:36 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:49:36 Africa/Lagos] Base page: fees.php, Page path: 
+[29-Jan-2026 13:49:36 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/fees.php
+[29-Jan-2026 13:49:36 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/fees.php
+[29-Jan-2026 13:50:28 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:50:28 Africa/Lagos] Base page: attendance.php, Page path: 
+[29-Jan-2026 13:50:28 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:50:28 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:50:28 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 13:50:28 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 13:50:28 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 13:50:28 Africa/Lagos] User Type: admin
+[29-Jan-2026 13:50:28 Africa/Lagos] Current Page: attendance.php
+[29-Jan-2026 13:50:28 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=trial
+[29-Jan-2026 13:50:28 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 13:50:28 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 13:50:28 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 13:50:28 Africa/Lagos] School database connection successful
+[29-Jan-2026 13:50:28 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 13:50:28 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 13:50:28 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 13:50:28 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 13:50:28 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 13:50:28 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 13:50:28 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 13:50:28 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 13:50:28 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:51:13 Africa/Lagos] School not found in database: spring-blooms
+[29-Jan-2026 13:51:28 Africa/Lagos] School not found in database: spring-blooms
+[29-Jan-2026 13:51:39 Africa/Lagos] School not found in database: spring-blooms
+[29-Jan-2026 13:52:29 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:52:29 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 13:52:29 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:52:29 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:52:29 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 13:52:29 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 13:52:29 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 13:52:29 Africa/Lagos] User Type: admin
+[29-Jan-2026 13:52:29 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 13:52:29 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 13:52:29 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 13:52:29 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 13:52:29 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 13:52:29 Africa/Lagos] School database connection successful
+[29-Jan-2026 13:52:29 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 13:52:29 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 13:52:29 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 13:52:29 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 13:52:29 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 13:52:29 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 13:52:29 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 13:52:29 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 13:52:29 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:53:15 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:53:15 Africa/Lagos] Base page: announcements.php, Page path: 
+[29-Jan-2026 13:53:15 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:53:15 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:53:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:53:38 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:53:38 Africa/Lagos] Base page: announcements.php, Page path: 
+[29-Jan-2026 13:53:38 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:53:38 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:53:38 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:54:41 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:54:41 Africa/Lagos] Base page: announcements.php, Page path: 
+[29-Jan-2026 13:54:41 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:54:41 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:54:41 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:54:48 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:54:48 Africa/Lagos] Base page: announcements.php, Page path: 
+[29-Jan-2026 13:54:48 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:54:48 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:54:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:54:51 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:54:51 Africa/Lagos] Base page: announcements.php, Page path: 
+[29-Jan-2026 13:54:51 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:54:51 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:54:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/announcements.php
+[29-Jan-2026 13:55:28 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:55:28 Africa/Lagos] Base page: school-dashboard.php, Page path: 
+[29-Jan-2026 13:55:28 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:55:28 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:55:28 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 13:55:28 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 13:55:28 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 13:55:28 Africa/Lagos] User Type: admin
+[29-Jan-2026 13:55:28 Africa/Lagos] Current Page: school-dashboard.php
+[29-Jan-2026 13:55:28 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 13:55:28 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 13:55:28 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 13:55:28 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 13:55:28 Africa/Lagos] School database connection successful
+[29-Jan-2026 13:55:28 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 13:55:28 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 13:55:28 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 13:55:28 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 13:55:28 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 13:55:28 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 13:55:28 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 13:55:28 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 13:55:28 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:58:06 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:58:06 Africa/Lagos] Base page: finance.php, Page path: 
+[29-Jan-2026 13:58:06 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:58:06 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:58:06 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 13:58:06 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 13:58:06 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 13:58:06 Africa/Lagos] User Type: admin
+[29-Jan-2026 13:58:06 Africa/Lagos] Current Page: finance.php
+[29-Jan-2026 13:58:06 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 13:58:06 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 13:58:06 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 13:58:06 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 13:58:06 Africa/Lagos] School database connection successful
+[29-Jan-2026 13:58:06 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 13:58:06 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 13:58:06 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 13:58:06 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 13:58:06 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 13:58:06 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 13:58:06 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 13:58:06 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 13:58:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 13:58:29 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 13:58:29 Africa/Lagos] Base page: school-dashboard.php, Page path: 
+[29-Jan-2026 13:58:29 Africa/Lagos] No session found, redirecting to login
+[29-Jan-2026 14:00:20 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 14:00:20 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 14:00:20 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 14:00:20 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 14:00:20 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 14:00:20 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 14:00:20 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 14:00:20 Africa/Lagos] User Type: admin
+[29-Jan-2026 14:00:20 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 14:00:20 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 14:00:20 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 14:00:20 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 14:00:20 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 14:00:20 Africa/Lagos] School database connection successful
+[29-Jan-2026 14:00:20 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 14:00:20 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 14:00:20 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 14:00:20 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 14:00:20 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 14:00:20 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 14:00:20 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 14:00:20 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 14:00:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 14:02:12 Africa/Lagos] Failed to log activity: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'description' in 'INSERT INTO'
+[29-Jan-2026 14:03:34 Africa/Lagos] Failed to log activity: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'description' in 'INSERT INTO'
+[29-Jan-2026 14:09:07 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 14:09:07 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 14:09:07 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 14:09:07 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 14:09:07 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 14:09:07 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 14:09:07 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 14:09:07 Africa/Lagos] User Type: admin
+[29-Jan-2026 14:09:07 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 14:09:07 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 14:09:07 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 14:09:07 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 14:09:07 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 14:09:07 Africa/Lagos] School database connection successful
+[29-Jan-2026 14:09:07 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 14:09:07 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 14:09:07 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 14:09:07 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 14:09:07 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 14:09:07 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 14:09:07 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 14:09:07 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 14:09:07 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 14:11:03 Africa/Lagos] Failed to log activity: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'description' in 'INSERT INTO'
+[29-Jan-2026 14:17:23 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:17:23 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:21:07 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:21:07 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:22:27 Africa/Lagos] Activity log error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'event' in 'INSERT INTO'
+[29-Jan-2026 14:22:30 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:22:30 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:22:37 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 14:22:37 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 14:22:37 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 14:22:37 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 14:22:37 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 14:22:37 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 14:22:37 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 14:22:37 Africa/Lagos] User Type: admin
+[29-Jan-2026 14:22:37 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 14:22:37 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 14:22:37 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 14:22:37 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 14:22:37 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 14:22:37 Africa/Lagos] School database connection successful
+[29-Jan-2026 14:22:37 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 14:22:37 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 14:22:37 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 14:22:37 Africa/Lagos] Fetching current academic term...
+[29-Jan-2026 14:22:37 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 14:22:37 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 14:22:37 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 14:22:37 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 14:22:37 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 14:22:37 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 14:23:34 Africa/Lagos] Activity log error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'event' in 'INSERT INTO'
+[29-Jan-2026 14:23:35 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:23:35 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:24:01 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:24:01 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:25:34 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 14:25:34 Africa/Lagos] Base page: students.php, Page path: 
+[29-Jan-2026 14:25:34 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php
+[29-Jan-2026 14:25:34 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php
+[29-Jan-2026 14:26:08 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 14:26:08 Africa/Lagos] Base page: students.php, Page path: 
+[29-Jan-2026 14:26:08 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php
+[29-Jan-2026 14:26:08 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php
+[29-Jan-2026 14:26:35 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 14:26:35 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 14:26:35 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 14:26:35 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 14:26:35 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 14:26:35 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 14:26:35 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 14:26:35 Africa/Lagos] User Type: admin
+[29-Jan-2026 14:26:35 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 14:26:35 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 14:26:35 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 14:26:35 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 14:26:35 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 14:26:35 Africa/Lagos] School database connection successful
+[29-Jan-2026 14:26:35 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 14:26:35 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 14:26:35 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 14:26:35 Africa/Lagos] Fetching current academic term...
+[29-Jan-2026 14:26:35 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 14:26:35 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 14:26:35 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 14:26:35 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 14:26:35 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 14:26:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 14:27:17 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:27:17 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:27:56 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:27:56 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 14:43:01 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 14:43:01 Africa/Lagos] Base page: schedule.php, Page path: 
+[29-Jan-2026 14:43:01 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/schedule.php
+[29-Jan-2026 14:43:01 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/schedule.php
+[29-Jan-2026 14:43:17 Africa/Lagos] Checking authentication...
+[29-Jan-2026 14:43:17 Africa/Lagos] No school_auth in session
+[29-Jan-2026 14:43:17 Africa/Lagos] API Response: {"success":false,"error":"Authentication required. Please log in again."}
+[29-Jan-2026 14:43:20 Africa/Lagos] Checking authentication...
+[29-Jan-2026 14:43:20 Africa/Lagos] No school_auth in session
+[29-Jan-2026 14:43:20 Africa/Lagos] API Response: {"success":false,"error":"Authentication required. Please log in again."}
+[29-Jan-2026 14:43:21 Africa/Lagos] Checking authentication...
+[29-Jan-2026 14:43:21 Africa/Lagos] No school_auth in session
+[29-Jan-2026 14:43:21 Africa/Lagos] API Response: {"success":false,"error":"Authentication required. Please log in again."}
+[29-Jan-2026 15:07:35 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 15:07:35 Africa/Lagos] Base page: schedule.php, Page path: 
+[29-Jan-2026 15:07:35 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/schedule.php
+[29-Jan-2026 15:07:35 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/schedule.php
+[29-Jan-2026 15:07:44 Africa/Lagos] Checking authentication...
+[29-Jan-2026 15:07:44 Africa/Lagos] No school_auth in session
+[29-Jan-2026 15:07:44 Africa/Lagos] API Response: {"success":false,"error":"Authentication required. Please log in again."}
+[29-Jan-2026 15:07:45 Africa/Lagos] Checking authentication...
+[29-Jan-2026 15:07:45 Africa/Lagos] No school_auth in session
+[29-Jan-2026 15:07:45 Africa/Lagos] API Response: {"success":false,"error":"Authentication required. Please log in again."}
+[29-Jan-2026 15:07:46 Africa/Lagos] Checking authentication...
+[29-Jan-2026 15:07:46 Africa/Lagos] No school_auth in session
+[29-Jan-2026 15:07:46 Africa/Lagos] API Response: {"success":false,"error":"Authentication required. Please log in again."}
+[29-Jan-2026 15:08:14 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 15:08:14 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 15:08:14 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:08:14 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:08:14 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 15:08:14 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 15:08:14 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 15:08:14 Africa/Lagos] User Type: admin
+[29-Jan-2026 15:08:14 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 15:08:14 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 15:08:14 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 15:08:14 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 15:08:14 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 15:08:14 Africa/Lagos] School database connection successful
+[29-Jan-2026 15:08:14 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 15:08:14 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 15:08:14 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 15:08:14 Africa/Lagos] Fetching current academic term...
+[29-Jan-2026 15:08:14 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 15:08:14 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 15:08:14 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 15:08:14 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 15:08:14 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 15:08:14 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:08:30 Africa/Lagos] Failed to log activity: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'description' in 'INSERT INTO'
+[29-Jan-2026 15:10:53 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 15:10:53 Africa/Lagos] Base page: attendance.php, Page path: 
+[29-Jan-2026 15:10:53 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:10:53 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:10:53 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 15:10:53 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 15:10:53 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 15:10:53 Africa/Lagos] User Type: admin
+[29-Jan-2026 15:10:53 Africa/Lagos] Current Page: attendance.php
+[29-Jan-2026 15:10:53 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 15:10:53 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 15:10:53 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 15:10:53 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 15:10:53 Africa/Lagos] School database connection successful
+[29-Jan-2026 15:10:53 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 15:10:53 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 15:10:53 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 15:10:53 Africa/Lagos] Fetching current academic term...
+[29-Jan-2026 15:10:53 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 15:10:53 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 15:10:53 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 15:10:53 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 15:10:53 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 15:10:53 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:11:04 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 15:11:04 Africa/Lagos] Base page: attendance.php, Page path: 
+[29-Jan-2026 15:11:04 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:11:04 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:11:04 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 15:11:04 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 15:11:04 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 15:11:04 Africa/Lagos] User Type: admin
+[29-Jan-2026 15:11:04 Africa/Lagos] Current Page: attendance.php
+[29-Jan-2026 15:11:04 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 15:11:04 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 15:11:04 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 15:11:04 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 15:11:04 Africa/Lagos] School database connection successful
+[29-Jan-2026 15:11:04 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 15:11:04 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 15:11:04 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 15:11:04 Africa/Lagos] Fetching current academic term...
+[29-Jan-2026 15:11:04 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 15:11:04 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 15:11:04 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 15:11:04 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 15:11:04 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 15:11:04 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:11:15 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 15:11:15 Africa/Lagos] Base page: attendance.php, Page path: 
+[29-Jan-2026 15:11:15 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:11:15 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:11:15 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 15:11:15 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 15:11:15 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 15:11:15 Africa/Lagos] User Type: admin
+[29-Jan-2026 15:11:15 Africa/Lagos] Current Page: attendance.php
+[29-Jan-2026 15:11:15 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 15:11:15 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 15:11:15 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 15:11:15 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 15:11:15 Africa/Lagos] School database connection successful
+[29-Jan-2026 15:11:15 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 15:11:15 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 15:11:15 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 15:11:15 Africa/Lagos] Fetching current academic term...
+[29-Jan-2026 15:11:15 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 15:11:15 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 15:11:15 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 15:11:15 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 15:11:15 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 15:11:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:11:19 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 15:11:19 Africa/Lagos] Base page: attendance.php, Page path: 
+[29-Jan-2026 15:11:19 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:11:19 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:11:19 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 15:11:19 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 15:11:19 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 15:11:19 Africa/Lagos] User Type: admin
+[29-Jan-2026 15:11:19 Africa/Lagos] Current Page: attendance.php
+[29-Jan-2026 15:11:19 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 15:11:19 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 15:11:19 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 15:11:19 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 15:11:19 Africa/Lagos] School database connection successful
+[29-Jan-2026 15:11:19 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 15:11:19 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 15:11:19 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 15:11:19 Africa/Lagos] Fetching current academic term...
+[29-Jan-2026 15:11:19 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 15:11:19 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 15:11:19 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 15:11:19 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 15:11:19 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 15:11:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:12:13 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 15:12:13 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 15:13:11 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 15:13:11 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 15:15:30 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 15:15:30 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 15:21:11 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 15:21:11 Africa/Lagos] Base page: attendance.php, Page path: 
+[29-Jan-2026 15:21:11 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:21:11 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:21:11 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 15:21:11 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 15:21:11 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 15:21:11 Africa/Lagos] User Type: admin
+[29-Jan-2026 15:21:11 Africa/Lagos] Current Page: attendance.php
+[29-Jan-2026 15:21:11 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 15:21:11 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 15:21:11 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 15:21:11 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 15:21:11 Africa/Lagos] School database connection successful
+[29-Jan-2026 15:21:11 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 15:21:11 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 15:21:11 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 15:21:11 Africa/Lagos] Fetching current academic term...
+[29-Jan-2026 15:21:11 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 15:21:11 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 15:21:11 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 15:21:11 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 15:21:11 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 15:21:11 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:21:58 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 15:21:58 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 15:21:58 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:21:58 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:21:58 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 15:21:58 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 15:21:58 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 15:21:58 Africa/Lagos] User Type: admin
+[29-Jan-2026 15:21:58 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 15:21:58 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 15:21:58 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 15:21:58 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 15:21:58 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 15:21:58 Africa/Lagos] School database connection successful
+[29-Jan-2026 15:21:58 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 15:21:58 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 15:21:58 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 15:21:58 Africa/Lagos] Fetching current academic term...
+[29-Jan-2026 15:21:58 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 15:21:58 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 15:21:58 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 15:21:58 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 15:21:58 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 15:21:58 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:26:21 Africa/Lagos] School verified: ID=14, Name=loretto
+[29-Jan-2026 15:26:21 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 15:26:21 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:26:21 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:26:21 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 15:26:21 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 15:26:21 Africa/Lagos] School Slug from Router: loretto
+[29-Jan-2026 15:26:21 Africa/Lagos] User Type: admin
+[29-Jan-2026 15:26:21 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 15:26:21 Africa/Lagos] School: ID=14, Name=loretto, Status=active
+[29-Jan-2026 15:26:21 Africa/Lagos] User authenticated for school: loretto
+[29-Jan-2026 15:26:21 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 15:26:21 Africa/Lagos] Connecting to school database: school_14
+[29-Jan-2026 15:26:21 Africa/Lagos] School database connection successful
+[29-Jan-2026 15:26:21 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 15:26:21 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 15:26:21 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 15:26:21 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 15:26:21 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 15:26:21 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 15:26:21 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 15:26:21 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 15:26:21 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:29:13 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 15:29:13 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[29-Jan-2026 15:31:08 Africa/Lagos] School not found in database: loretto
+[29-Jan-2026 15:33:13 Africa/Lagos] School verified: ID=14, Name=loretto
+[29-Jan-2026 15:33:13 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 15:33:13 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:33:13 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:33:13 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 15:33:13 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 15:33:13 Africa/Lagos] School Slug from Router: loretto
+[29-Jan-2026 15:33:13 Africa/Lagos] User Type: admin
+[29-Jan-2026 15:33:13 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 15:33:13 Africa/Lagos] School: ID=14, Name=loretto, Status=active
+[29-Jan-2026 15:33:13 Africa/Lagos] User authenticated for school: loretto
+[29-Jan-2026 15:33:13 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 15:33:13 Africa/Lagos] Connecting to school database: school_14
+[29-Jan-2026 15:33:13 Africa/Lagos] School database connection successful
+[29-Jan-2026 15:33:13 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 15:33:13 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 15:33:13 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 15:33:13 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 15:33:13 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 15:33:13 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 15:33:13 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 15:33:13 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 15:33:13 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 15:34:01 Africa/Lagos] Error resetting database: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'last_activity_at' in 'SET'
+[29-Jan-2026 15:35:19 Africa/Lagos] Error optimizing database: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '?' at line 1
+[29-Jan-2026 21:05:24 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 21:05:24 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 21:05:24 Africa/Lagos] Session mismatch. Session: loretto, URL: spring-blooms
+[29-Jan-2026 21:10:34 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[29-Jan-2026 21:10:34 Africa/Lagos] Base page: dashboard.php, Page path: 
+[29-Jan-2026 21:10:34 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 21:10:34 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[29-Jan-2026 21:10:34 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[29-Jan-2026 21:10:34 Africa/Lagos] Autoload loaded successfully
+[29-Jan-2026 21:10:34 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 21:10:34 Africa/Lagos] User Type: admin
+[29-Jan-2026 21:10:34 Africa/Lagos] Current Page: dashboard.php
+[29-Jan-2026 21:10:34 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[29-Jan-2026 21:10:34 Africa/Lagos] User authenticated for school: spring-blooms
+[29-Jan-2026 21:10:34 Africa/Lagos] User ID: 1, User Type: admin
+[29-Jan-2026 21:10:34 Africa/Lagos] Connecting to school database: school_13
+[29-Jan-2026 21:10:34 Africa/Lagos] School database connection successful
+[29-Jan-2026 21:10:34 Africa/Lagos] Fetching school settings...
+[29-Jan-2026 21:10:34 Africa/Lagos] Settings fetched: 11 items
+[29-Jan-2026 21:10:34 Africa/Lagos] Fetching current academic year...
+[29-Jan-2026 21:10:34 Africa/Lagos] Fetching current academic term...
+[29-Jan-2026 21:10:34 Africa/Lagos] Fetching school statistics...
+[29-Jan-2026 21:10:34 Africa/Lagos] Calculating revenue metrics...
+[29-Jan-2026 21:10:34 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[29-Jan-2026 21:10:34 Africa/Lagos] All data fetched successfully from school database
+[29-Jan-2026 21:10:34 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[29-Jan-2026 21:10:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 01:53:40 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 01:53:40 Africa/Lagos] Base page: dashboard.php, Page path: 
+[30-Jan-2026 01:53:40 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 01:53:40 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 01:53:40 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[30-Jan-2026 01:53:40 Africa/Lagos] Autoload loaded successfully
+[30-Jan-2026 01:53:40 Africa/Lagos] School Slug from Router: spring-blooms
+[30-Jan-2026 01:53:40 Africa/Lagos] User Type: admin
+[30-Jan-2026 01:53:40 Africa/Lagos] Current Page: dashboard.php
+[30-Jan-2026 01:53:40 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[30-Jan-2026 01:53:40 Africa/Lagos] User authenticated for school: spring-blooms
+[30-Jan-2026 01:53:40 Africa/Lagos] User ID: 1, User Type: admin
+[30-Jan-2026 01:53:40 Africa/Lagos] Connecting to school database: school_13
+[30-Jan-2026 01:53:40 Africa/Lagos] School database connection successful
+[30-Jan-2026 01:53:40 Africa/Lagos] Fetching school settings...
+[30-Jan-2026 01:53:40 Africa/Lagos] Settings fetched: 11 items
+[30-Jan-2026 01:53:40 Africa/Lagos] Fetching current academic year...
+[30-Jan-2026 01:53:40 Africa/Lagos] Fetching current academic term...
+[30-Jan-2026 01:53:40 Africa/Lagos] Fetching school statistics...
+[30-Jan-2026 01:53:40 Africa/Lagos] Calculating revenue metrics...
+[30-Jan-2026 01:53:40 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[30-Jan-2026 01:53:40 Africa/Lagos] All data fetched successfully from school database
+[30-Jan-2026 01:53:40 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[30-Jan-2026 01:53:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 02:11:43 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 02:11:43 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 02:14:59 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 02:14:59 Africa/Lagos] Base page: dashboard.php, Page path: 
+[30-Jan-2026 02:14:59 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 02:14:59 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 02:14:59 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[30-Jan-2026 02:14:59 Africa/Lagos] Autoload loaded successfully
+[30-Jan-2026 02:14:59 Africa/Lagos] School Slug from Router: spring-blooms
+[30-Jan-2026 02:14:59 Africa/Lagos] User Type: admin
+[30-Jan-2026 02:14:59 Africa/Lagos] Current Page: dashboard.php
+[30-Jan-2026 02:14:59 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[30-Jan-2026 02:14:59 Africa/Lagos] User authenticated for school: spring-blooms
+[30-Jan-2026 02:14:59 Africa/Lagos] User ID: 1, User Type: admin
+[30-Jan-2026 02:14:59 Africa/Lagos] Connecting to school database: school_13
+[30-Jan-2026 02:14:59 Africa/Lagos] School database connection successful
+[30-Jan-2026 02:14:59 Africa/Lagos] Fetching school settings...
+[30-Jan-2026 02:14:59 Africa/Lagos] Settings fetched: 11 items
+[30-Jan-2026 02:14:59 Africa/Lagos] Fetching current academic year...
+[30-Jan-2026 02:14:59 Africa/Lagos] Fetching current academic term...
+[30-Jan-2026 02:14:59 Africa/Lagos] Fetching school statistics...
+[30-Jan-2026 02:14:59 Africa/Lagos] Calculating revenue metrics...
+[30-Jan-2026 02:14:59 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[30-Jan-2026 02:14:59 Africa/Lagos] All data fetched successfully from school database
+[30-Jan-2026 02:14:59 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[30-Jan-2026 02:14:59 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 02:15:08 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 02:15:08 Africa/Lagos] Base page: settings.php, Page path: 
+[30-Jan-2026 02:15:08 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 02:15:08 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 02:15:08 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[30-Jan-2026 02:15:08 Africa/Lagos] Autoload loaded successfully
+[30-Jan-2026 02:15:08 Africa/Lagos] School Slug from Router: spring-blooms
+[30-Jan-2026 02:15:08 Africa/Lagos] User Type: admin
+[30-Jan-2026 02:15:08 Africa/Lagos] Current Page: settings.php
+[30-Jan-2026 02:15:08 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[30-Jan-2026 02:15:08 Africa/Lagos] User authenticated for school: spring-blooms
+[30-Jan-2026 02:15:08 Africa/Lagos] User ID: 1, User Type: admin
+[30-Jan-2026 02:15:08 Africa/Lagos] Connecting to school database: school_13
+[30-Jan-2026 02:15:08 Africa/Lagos] School database connection successful
+[30-Jan-2026 02:15:08 Africa/Lagos] Fetching school settings...
+[30-Jan-2026 02:15:08 Africa/Lagos] Settings fetched: 11 items
+[30-Jan-2026 02:15:08 Africa/Lagos] Fetching current academic year...
+[30-Jan-2026 02:15:08 Africa/Lagos] Fetching current academic term...
+[30-Jan-2026 02:15:08 Africa/Lagos] Fetching school statistics...
+[30-Jan-2026 02:15:08 Africa/Lagos] Calculating revenue metrics...
+[30-Jan-2026 02:15:08 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[30-Jan-2026 02:15:08 Africa/Lagos] All data fetched successfully from school database
+[30-Jan-2026 02:15:08 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[30-Jan-2026 02:15:08 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 02:15:40 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 02:15:40 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 02:16:05 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 02:16:05 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 02:16:46 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 02:16:46 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 02:18:57 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 02:18:57 Africa/Lagos] Base page: fees.php, Page path: 
+[30-Jan-2026 02:18:57 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/fees.php
+[30-Jan-2026 02:18:57 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/fees.php
+[30-Jan-2026 02:39:06 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 02:39:06 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:03:09 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:03:09 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:04:38 Africa/Lagos] Activity log error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'event' in 'INSERT INTO'
+[30-Jan-2026 03:04:38 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:04:38 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:05:16 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:05:16 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:43:21 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:43:21 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:45:29 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:45:29 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:47:14 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:47:14 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:50:26 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:50:26 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:51:27 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:51:27 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:51:38 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 03:51:38 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 04:15:34 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 04:15:34 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 04:25:13 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 04:25:13 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 04:27:09 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 04:27:09 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 04:35:46 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 04:35:46 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 04:42:39 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 04:42:39 Africa/Lagos] Base page: dashboard.php, Page path: 
+[30-Jan-2026 04:42:39 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 04:42:39 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 04:42:39 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[30-Jan-2026 04:42:39 Africa/Lagos] Autoload loaded successfully
+[30-Jan-2026 04:42:39 Africa/Lagos] School Slug from Router: spring-blooms
+[30-Jan-2026 04:42:39 Africa/Lagos] User Type: admin
+[30-Jan-2026 04:42:39 Africa/Lagos] Current Page: dashboard.php
+[30-Jan-2026 04:42:39 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[30-Jan-2026 04:42:39 Africa/Lagos] User authenticated for school: spring-blooms
+[30-Jan-2026 04:42:39 Africa/Lagos] User ID: 1, User Type: admin
+[30-Jan-2026 04:42:39 Africa/Lagos] Connecting to school database: school_13
+[30-Jan-2026 04:42:39 Africa/Lagos] School database connection successful
+[30-Jan-2026 04:42:39 Africa/Lagos] Fetching school settings...
+[30-Jan-2026 04:42:39 Africa/Lagos] Settings fetched: 11 items
+[30-Jan-2026 04:42:39 Africa/Lagos] Fetching current academic year...
+[30-Jan-2026 04:42:39 Africa/Lagos] Fetching current academic term...
+[30-Jan-2026 04:42:39 Africa/Lagos] Fetching school statistics...
+[30-Jan-2026 04:42:39 Africa/Lagos] Calculating revenue metrics...
+[30-Jan-2026 04:42:39 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[30-Jan-2026 04:42:39 Africa/Lagos] All data fetched successfully from school database
+[30-Jan-2026 04:42:39 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[30-Jan-2026 04:42:39 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 04:49:58 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 04:49:58 Africa/Lagos] Base page: students.php, Page path: 
+[30-Jan-2026 04:49:58 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php
+[30-Jan-2026 04:49:58 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php
+[30-Jan-2026 04:50:06 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 04:50:06 Africa/Lagos] Base page: dashboard.php, Page path: 
+[30-Jan-2026 04:50:06 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 04:50:06 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 04:50:06 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[30-Jan-2026 04:50:06 Africa/Lagos] Autoload loaded successfully
+[30-Jan-2026 04:50:06 Africa/Lagos] School Slug from Router: spring-blooms
+[30-Jan-2026 04:50:06 Africa/Lagos] User Type: admin
+[30-Jan-2026 04:50:06 Africa/Lagos] Current Page: dashboard.php
+[30-Jan-2026 04:50:06 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[30-Jan-2026 04:50:06 Africa/Lagos] User authenticated for school: spring-blooms
+[30-Jan-2026 04:50:06 Africa/Lagos] User ID: 1, User Type: admin
+[30-Jan-2026 04:50:06 Africa/Lagos] Connecting to school database: school_13
+[30-Jan-2026 04:50:06 Africa/Lagos] School database connection successful
+[30-Jan-2026 04:50:06 Africa/Lagos] Fetching school settings...
+[30-Jan-2026 04:50:06 Africa/Lagos] Settings fetched: 11 items
+[30-Jan-2026 04:50:06 Africa/Lagos] Fetching current academic year...
+[30-Jan-2026 04:50:06 Africa/Lagos] Fetching current academic term...
+[30-Jan-2026 04:50:06 Africa/Lagos] Fetching school statistics...
+[30-Jan-2026 04:50:06 Africa/Lagos] Calculating revenue metrics...
+[30-Jan-2026 04:50:06 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[30-Jan-2026 04:50:06 Africa/Lagos] All data fetched successfully from school database
+[30-Jan-2026 04:50:06 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[30-Jan-2026 04:50:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 04:50:12 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 04:50:12 Africa/Lagos] Base page: teachers.php, Page path: 
+[30-Jan-2026 04:50:12 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php
+[30-Jan-2026 04:50:12 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php
+[30-Jan-2026 04:57:55 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 04:57:55 Africa/Lagos] Base page: teachers.php, Page path: 
+[30-Jan-2026 04:57:55 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php
+[30-Jan-2026 04:57:55 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php
+[30-Jan-2026 05:02:40 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 05:02:40 Africa/Lagos] Base page: dashboard.php, Page path: 
+[30-Jan-2026 05:02:40 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 05:02:40 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 05:02:40 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[30-Jan-2026 05:02:40 Africa/Lagos] Autoload loaded successfully
+[30-Jan-2026 05:02:40 Africa/Lagos] School Slug from Router: spring-blooms
+[30-Jan-2026 05:02:40 Africa/Lagos] User Type: admin
+[30-Jan-2026 05:02:40 Africa/Lagos] Current Page: dashboard.php
+[30-Jan-2026 05:02:40 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[30-Jan-2026 05:02:40 Africa/Lagos] User authenticated for school: spring-blooms
+[30-Jan-2026 05:02:40 Africa/Lagos] User ID: 1, User Type: admin
+[30-Jan-2026 05:02:40 Africa/Lagos] Connecting to school database: school_13
+[30-Jan-2026 05:02:40 Africa/Lagos] School database connection successful
+[30-Jan-2026 05:02:40 Africa/Lagos] Fetching school settings...
+[30-Jan-2026 05:02:40 Africa/Lagos] Settings fetched: 11 items
+[30-Jan-2026 05:02:40 Africa/Lagos] Fetching current academic year...
+[30-Jan-2026 05:02:40 Africa/Lagos] Fetching current academic term...
+[30-Jan-2026 05:02:40 Africa/Lagos] Fetching school statistics...
+[30-Jan-2026 05:02:40 Africa/Lagos] Calculating revenue metrics...
+[30-Jan-2026 05:02:40 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[30-Jan-2026 05:02:40 Africa/Lagos] All data fetched successfully from school database
+[30-Jan-2026 05:02:40 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[30-Jan-2026 05:02:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 05:30:36 Africa/Lagos] Failed to log activity: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'description' in 'INSERT INTO'
+[30-Jan-2026 05:31:28 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 05:31:28 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 07:36:33 Africa/Lagos] Failed to log activity: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'description' in 'INSERT INTO'
+[30-Jan-2026 07:37:39 Africa/Lagos] Error fetching classes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 07:37:39 Africa/Lagos] Error fetching sections: SQLSTATE[42S22]: Column not found: 1054 Unknown column 't.name' in 'SELECT'
+[30-Jan-2026 08:32:15 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 08:32:15 Africa/Lagos] Base page: dashboard.php, Page path: 
+[30-Jan-2026 08:32:15 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 08:32:15 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 08:32:15 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[30-Jan-2026 08:32:15 Africa/Lagos] Autoload loaded successfully
+[30-Jan-2026 08:32:15 Africa/Lagos] School Slug from Router: spring-blooms
+[30-Jan-2026 08:32:15 Africa/Lagos] User Type: admin
+[30-Jan-2026 08:32:15 Africa/Lagos] Current Page: dashboard.php
+[30-Jan-2026 08:32:15 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[30-Jan-2026 08:32:15 Africa/Lagos] User authenticated for school: spring-blooms
+[30-Jan-2026 08:32:15 Africa/Lagos] User ID: 1, User Type: admin
+[30-Jan-2026 08:32:15 Africa/Lagos] Connecting to school database: school_13
+[30-Jan-2026 08:32:15 Africa/Lagos] School database connection successful
+[30-Jan-2026 08:32:15 Africa/Lagos] Fetching school settings...
+[30-Jan-2026 08:32:15 Africa/Lagos] Settings fetched: 11 items
+[30-Jan-2026 08:32:15 Africa/Lagos] Fetching current academic year...
+[30-Jan-2026 08:32:15 Africa/Lagos] Fetching current academic term...
+[30-Jan-2026 08:32:15 Africa/Lagos] Fetching school statistics...
+[30-Jan-2026 08:32:15 Africa/Lagos] Calculating revenue metrics...
+[30-Jan-2026 08:32:15 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[30-Jan-2026 08:32:15 Africa/Lagos] All data fetched successfully from school database
+[30-Jan-2026 08:32:15 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[30-Jan-2026 08:32:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 09:34:30 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 09:34:30 Africa/Lagos] Base page: dashboard.php, Page path: 
+[30-Jan-2026 09:34:30 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 09:34:30 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 09:34:30 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[30-Jan-2026 09:34:30 Africa/Lagos] Autoload loaded successfully
+[30-Jan-2026 09:34:30 Africa/Lagos] School Slug from Router: spring-blooms
+[30-Jan-2026 09:34:30 Africa/Lagos] User Type: admin
+[30-Jan-2026 09:34:30 Africa/Lagos] Current Page: dashboard.php
+[30-Jan-2026 09:34:30 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[30-Jan-2026 09:34:30 Africa/Lagos] User authenticated for school: spring-blooms
+[30-Jan-2026 09:34:30 Africa/Lagos] User ID: 1, User Type: admin
+[30-Jan-2026 09:34:30 Africa/Lagos] Connecting to school database: school_13
+[30-Jan-2026 09:34:30 Africa/Lagos] School database connection successful
+[30-Jan-2026 09:34:30 Africa/Lagos] Fetching school settings...
+[30-Jan-2026 09:34:30 Africa/Lagos] Settings fetched: 11 items
+[30-Jan-2026 09:34:30 Africa/Lagos] Fetching current academic year...
+[30-Jan-2026 09:34:30 Africa/Lagos] Fetching current academic term...
+[30-Jan-2026 09:34:30 Africa/Lagos] Fetching school statistics...
+[30-Jan-2026 09:34:30 Africa/Lagos] Calculating revenue metrics...
+[30-Jan-2026 09:34:30 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[30-Jan-2026 09:34:30 Africa/Lagos] All data fetched successfully from school database
+[30-Jan-2026 09:34:30 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[30-Jan-2026 09:34:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[30-Jan-2026 12:23:36 Africa/Lagos] Error optimizing database: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '?' at line 1
+[30-Jan-2026 17:21:58 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[30-Jan-2026 17:21:58 Africa/Lagos] Base page: dashboard.php, Page path: 
+[30-Jan-2026 17:21:58 Africa/Lagos] No session found, redirecting to login
+[31-Jan-2026 02:05:33 Africa/Lagos] School not found in database: lorreto
+[31-Jan-2026 02:06:05 Africa/Lagos] School verified: ID=14, Name=loretto
+[31-Jan-2026 02:06:05 Africa/Lagos] Base page: dashboard.php, Page path: 
+[31-Jan-2026 02:06:05 Africa/Lagos] No session found, redirecting to login
+[31-Jan-2026 02:57:41 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[31-Jan-2026 02:57:41 Africa/Lagos] Base page: dashboard.php, Page path: 
+[31-Jan-2026 02:57:41 Africa/Lagos] No session found, redirecting to login
+[31-Jan-2026 02:57:51 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[31-Jan-2026 02:57:51 Africa/Lagos] Base page: dashboard.php, Page path: 
+[31-Jan-2026 02:57:51 Africa/Lagos] No session found, redirecting to login
+[31-Jan-2026 02:57:53 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[31-Jan-2026 02:57:53 Africa/Lagos] Base page: dashboard.php, Page path: 
+[31-Jan-2026 02:57:53 Africa/Lagos] No session found, redirecting to login
+[31-Jan-2026 03:04:37 Africa/Lagos] School verified: ID=13, Name=Spring blooms
+[31-Jan-2026 03:04:37 Africa/Lagos] Base page: dashboard.php, Page path: 
+[31-Jan-2026 03:04:37 Africa/Lagos] Found template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[31-Jan-2026 03:04:37 Africa/Lagos] Loading template: /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php
+[31-Jan-2026 03:04:37 Africa/Lagos] Loading autoload.php from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[31-Jan-2026 03:04:37 Africa/Lagos] Autoload loaded successfully
+[31-Jan-2026 03:04:37 Africa/Lagos] School Slug from Router: spring-blooms
+[31-Jan-2026 03:04:37 Africa/Lagos] User Type: admin
+[31-Jan-2026 03:04:37 Africa/Lagos] Current Page: dashboard.php
+[31-Jan-2026 03:04:37 Africa/Lagos] School: ID=13, Name=Spring blooms, Status=active
+[31-Jan-2026 03:04:37 Africa/Lagos] User authenticated for school: spring-blooms
+[31-Jan-2026 03:04:37 Africa/Lagos] User ID: 1, User Type: admin
+[31-Jan-2026 03:04:37 Africa/Lagos] Connecting to school database: school_13
+[31-Jan-2026 03:04:37 Africa/Lagos] School database connection successful
+[31-Jan-2026 03:04:37 Africa/Lagos] Fetching school settings...
+[31-Jan-2026 03:04:37 Africa/Lagos] Settings fetched: 11 items
+[31-Jan-2026 03:04:37 Africa/Lagos] Fetching current academic year...
+[31-Jan-2026 03:04:37 Africa/Lagos] Fetching current academic term...
+[31-Jan-2026 03:04:37 Africa/Lagos] Fetching school statistics...
+[31-Jan-2026 03:04:37 Africa/Lagos] Calculating revenue metrics...
+[31-Jan-2026 03:04:37 Africa/Lagos] Error calculating revenue: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_status' in 'SELECT'
+[31-Jan-2026 03:04:37 Africa/Lagos] All data fetched successfully from school database
+[31-Jan-2026 03:04:37 Africa/Lagos] =================== SCHOOL DASHBOARD END ===================
+[31-Jan-2026 03:04:37 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/dashboard.php

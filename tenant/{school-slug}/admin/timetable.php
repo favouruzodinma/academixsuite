@@ -1275,7 +1275,7 @@ $jsData = [
     'current_db_day' => strtolower($currentDay), // Add lowercase current day
     'current_month' => $currentMonth,
     'current_year' => $currentYear,
-    'api_url' => 'timetable.php' // Changed to relative path
+    'api_url' => '../../api/timetable_api.php' // Changed to relative path
 ];
 
 // End PHP output buffering and get the buffered content
@@ -3095,28 +3095,69 @@ $php_content = ob_get_clean();
         }
     }
 
-   // Update teacher dropdown function
-function updateTeacherDropdown() {
-    const teacherSelect = document.getElementById('teacherId');
-    if (!teacherSelect) return;
+    // Update teacher dropdown in modal
+    function updateTeacherDropdown() {
+        const teacherSelect = document.getElementById('teacherId');
+        if (!teacherSelect) {
+            console.error('Teacher select element not found');
+            return;
+        }
 
-    teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
+        teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
 
-    teachersList.forEach(teacher => {
-        const option = document.createElement('option');
-        option.value = teacher.id;
-        
-        // Handle both full_name and name fields
-        const fullName = teacher.full_name || teacher.name || '';
-        option.textContent = teacher.specialization ? 
-            `${fullName} - ${teacher.specialization}` : fullName;
-        
-        // Add availability info with defaults
-        option.dataset.remainingPeriods = teacher.availability?.remaining_periods || 30;
-        option.dataset.utilization = teacher.availability?.utilization_percentage || 0;
-        teacherSelect.appendChild(option);
-    });
-}
+        if (teachersList.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No teachers found';
+            option.disabled = true;
+            teacherSelect.appendChild(option);
+            return;
+        }
+
+        teachersList.forEach(teacher => {
+            const option = document.createElement('option');
+            option.value = teacher.id;
+            const fullName = teacher.full_name || `${teacher.first_name} ${teacher.last_name}`;
+            option.textContent = teacher.specialization ?
+                `${fullName} - ${teacher.specialization}` : fullName;
+            
+            option.dataset.remainingPeriods = teacher.availability?.remaining_periods || 30;
+            option.dataset.utilization = teacher.availability?.utilization_percentage || 0;
+            teacherSelect.appendChild(option);
+        });
+
+        // Add availability indicator
+        let indicator = teacherSelect.parentNode.querySelector('.availability-indicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.className = 'availability-indicator text-xs text-slate-500 mt-1 hidden';
+            teacherSelect.parentNode.appendChild(indicator);
+        }
+
+        // Show availability on selection
+        teacherSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            
+            if (selectedOption.value && selectedOption.dataset.remainingPeriods) {
+                const remaining = parseInt(selectedOption.dataset.remainingPeriods);
+                const utilization = selectedOption.dataset.utilization;
+                
+                indicator.textContent = `Available periods: ${remaining} (${utilization}% utilized)`;
+                indicator.classList.remove('hidden');
+
+                // Color code based on availability
+                if (remaining < 5) {
+                    indicator.className = 'availability-indicator text-xs text-red-600 font-medium mt-1';
+                } else if (remaining < 10) {
+                    indicator.className = 'availability-indicator text-xs text-amber-600 font-medium mt-1';
+                } else {
+                    indicator.className = 'availability-indicator text-xs text-emerald-600 font-medium mt-1';
+                }
+            } else {
+                indicator.classList.add('hidden');
+            }
+        });
+    }
 
     // Update subject dropdown in modal
     function updateSubjectDropdown() {

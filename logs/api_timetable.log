@@ -1,0 +1,102 @@
+[29-Jan-2026 13:43:17 UTC] === TIMETABLE API REQUEST ===
+[29-Jan-2026 13:43:17 UTC] Session ID: 7986afb94b6fdb53339ae21aa7fe4df5
+[29-Jan-2026 13:43:17 UTC] Session Data: Array
+(
+)
+
+[29-Jan-2026 13:43:17 UTC] Request URI: /tenant/api/timetable_api.php
+[29-Jan-2026 13:43:17 UTC] GET Params: Array
+(
+)
+
+[29-Jan-2026 13:43:17 UTC] POST Params: Array
+(
+    [action] => get_teachers
+    [school_slug] => spring-blooms
+)
+
+[29-Jan-2026 13:43:20 UTC] === TIMETABLE API REQUEST ===
+[29-Jan-2026 13:43:20 UTC] Session ID: 8f1986d0890412f9e3a95fc7d77e5fd6
+[29-Jan-2026 13:43:20 UTC] Session Data: Array
+(
+)
+
+[29-Jan-2026 13:43:20 UTC] Request URI: /tenant/api/timetable_api.php
+[29-Jan-2026 13:43:20 UTC] GET Params: Array
+(
+)
+
+[29-Jan-2026 13:43:20 UTC] POST Params: Array
+(
+    [action] => get_subjects
+    [school_slug] => spring-blooms
+)
+
+[29-Jan-2026 13:43:21 UTC] === TIMETABLE API REQUEST ===
+[29-Jan-2026 13:43:21 UTC] Session ID: 82af7183a40c5c437967316cc9ee18be
+[29-Jan-2026 13:43:21 UTC] Session Data: Array
+(
+)
+
+[29-Jan-2026 13:43:21 UTC] Request URI: /tenant/api/timetable_api.php
+[29-Jan-2026 13:43:21 UTC] GET Params: Array
+(
+)
+
+[29-Jan-2026 13:43:21 UTC] POST Params: Array
+(
+    [action] => get_classes
+    [school_slug] => spring-blooms
+)
+
+[29-Jan-2026 14:07:44 UTC] === TIMETABLE API REQUEST ===
+[29-Jan-2026 14:07:44 UTC] Session ID: 3e599784745c5ba8e66781fe527872fb
+[29-Jan-2026 14:07:44 UTC] Session Data: Array
+(
+)
+
+[29-Jan-2026 14:07:44 UTC] Request URI: /tenant/api/timetable_api.php
+[29-Jan-2026 14:07:44 UTC] GET Params: Array
+(
+)
+
+[29-Jan-2026 14:07:44 UTC] POST Params: Array
+(
+    [action] => get_teachers
+    [school_slug] => spring-blooms
+)
+
+[29-Jan-2026 14:07:45 UTC] === TIMETABLE API REQUEST ===
+[29-Jan-2026 14:07:45 UTC] Session ID: 5023327c3966e3b0e54507093e3dfc65
+[29-Jan-2026 14:07:45 UTC] Session Data: Array
+(
+)
+
+[29-Jan-2026 14:07:45 UTC] Request URI: /tenant/api/timetable_api.php
+[29-Jan-2026 14:07:45 UTC] GET Params: Array
+(
+)
+
+[29-Jan-2026 14:07:45 UTC] POST Params: Array
+(
+    [action] => get_subjects
+    [school_slug] => spring-blooms
+)
+
+[29-Jan-2026 14:07:46 UTC] === TIMETABLE API REQUEST ===
+[29-Jan-2026 14:07:46 UTC] Session ID: d7ca470422193bd9ab3a6948b3c68e9d
+[29-Jan-2026 14:07:46 UTC] Session Data: Array
+(
+)
+
+[29-Jan-2026 14:07:46 UTC] Request URI: /tenant/api/timetable_api.php
+[29-Jan-2026 14:07:46 UTC] GET Params: Array
+(
+)
+
+[29-Jan-2026 14:07:46 UTC] POST Params: Array
+(
+    [action] => get_classes
+    [school_slug] => spring-blooms
+)
+

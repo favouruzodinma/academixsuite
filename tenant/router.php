@@ -6,6 +6,7 @@
  * /tenant/thekingsinternationalsch/teacher/my-classes.php  
  * /tenant/thekingsinternationalsch/student/timetable.php
  * /tenant/thekingsinternationalsch/admin/students.php?action=view&id=123
+ * / in place of the original url tenant/{school-slug}/admin/dashboard.php
  */
 
 // Enable error reporting
@@ -36,7 +37,7 @@ error_log("Full request: " . ($_SERVER['REQUEST_URI'] ?? 'N/A'));
 // Validate school slug
 if (!preg_match('/^[a-zA-Z0-9_-]+$/', $schoolSlug)) {
     error_log("Invalid school slug format: {$schoolSlug}");
-    header("Location: /academixsuite/tenant/login.php");
+    header("Location: ./login.php");
     exit;
 }
 
@@ -175,32 +176,31 @@ $pagePath = dirname($page) !== '.' ? dirname($page) . '/' : '';
 
 error_log("Base page: {$basePage}, Page path: {$pagePath}");
 
+// Replace this section in router.php:
+
 // Handle public pages
 if (in_array($basePage, $publicPages)) {
     // For login page, redirect to actual login
     if ($basePage === 'login.php') {
-        header("Location: /academixsuite/tenant/login.php?school_slug=" . urlencode($schoolSlug));
+        header("Location: ../login.php?school_slug=" . urlencode($schoolSlug));
         exit;
     }
     
     // For logout, redirect to logout script
     if ($basePage === 'logout.php') {
-        $redirectUrl = "/academixsuite/tenant/logout.php?school_slug=" . urlencode($schoolSlug);
+        $redirectUrl = "../logout.php?school_slug=" . urlencode($schoolSlug);
         if (!empty($_GET)) {
             $redirectUrl .= '&' . http_build_query($_GET);
         }
         header("Location: {$redirectUrl}");
         exit;
     }
-    
-    // For other public pages, continue without authentication check
-    // (they'll handle their own auth if needed)
 } else {
     // For authenticated pages, check session
     
     if (empty($_SESSION['school_auth'])) {
         error_log("No session found, redirecting to login");
-        header("Location: /academixsuite/tenant/login.php?school_slug=" . urlencode($schoolSlug));
+        header("Location: ../login.php?school_slug=" . urlencode($schoolSlug));
         exit;
     }
     
@@ -208,7 +208,7 @@ if (in_array($basePage, $publicPages)) {
     if (($_SESSION['school_auth']['school_slug'] ?? '') !== $schoolSlug) {
         error_log("Session mismatch. Session: {$_SESSION['school_auth']['school_slug']}, URL: {$schoolSlug}");
         session_destroy();
-        header("Location: /academixsuite/tenant/login.php?school_slug=" . urlencode($schoolSlug));
+        header("Location: ../login.php?school_slug=" . urlencode($schoolSlug));
         exit;
     }
     
@@ -216,14 +216,7 @@ if (in_array($basePage, $publicPages)) {
     if (($_SESSION['school_auth']['user_type'] ?? '') !== $userType) {
         error_log("User type mismatch. Session: {$_SESSION['school_auth']['user_type']}, URL: {$userType}");
         $correctType = $_SESSION['school_auth']['user_type'];
-        header("Location: /academixsuite/tenant/{$schoolSlug}/{$correctType}/dashboard.php");
-        exit;
-    }
-    
-    // Verify page is allowed for this user type
-    if (!in_array($basePage, $allowedPages[$userType] ?? [])) {
-        error_log("Page not allowed: {$basePage} for user type: {$userType}");
-        header("Location: /academixsuite/tenant/{$schoolSlug}/{$userType}/dashboard.php");
+        header("Location: ../{$schoolSlug}/{$correctType}/dashboard.php");
         exit;
     }
 }
@@ -295,11 +288,11 @@ $GLOBALS['SCHOOL_DATA'] = $school;
 $GLOBALS['SCHOOL_AUTH'] = $_SESSION['school_auth'] ?? [];
 
 // Build base URL for this school/user type
-$GLOBALS['BASE_URL'] = "/academixsuite/tenant/{$schoolSlug}/{$userType}/";
+$GLOBALS['BASE_URL'] = "./{$schoolSlug}/{$userType}/";
 
 // Also set a helper for subdirectory pages
 if (!empty($pagePath)) {
-    $GLOBALS['PAGE_BASE_URL'] = "/academixsuite/tenant/{$schoolSlug}/{$userType}/{$pagePath}";
+    $GLOBALS['PAGE_BASE_URL'] = "./{$schoolSlug}/{$userType}/{$pagePath}";
 } else {
     $GLOBALS['PAGE_BASE_URL'] = $GLOBALS['BASE_URL'];
 }

@@ -1,0 +1,8 @@
+[26-Jan-2026 05:34:45 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/academixsuite/public_html/config/mail.php:3
+Stack trace:
+#0 {main}
+  thrown in /home/academixsuite/public_html/config/mail.php on line 3
+[26-Jan-2026 05:35:25 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/academixsuite/public_html/config/mail.php:3
+Stack trace:
+#0 {main}
+  thrown in /home/academixsuite/public_html/config/mail.php on line 3

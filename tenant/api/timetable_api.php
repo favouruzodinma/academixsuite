@@ -10,11 +10,28 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../../logs/api_timetable.log');
 
-// Set JSON header
+// Set session cookie parameters for cross-page access
+session_set_cookie_params([
+    'lifetime' => 86400,
+    'path' => '/academixsuite',
+    'domain' => $_SERVER['HTTP_HOST'],
+    'secure' => isset($_SERVER['HTTPS']),
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+
+// Start session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Set JSON header with CORS
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Accept, Origin');
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Max-Age: 86400');
 
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -22,51 +39,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Start session
-session_start();
+// Debug logging
+error_log("=== TIMETABLE API REQUEST ===");
+error_log("Session ID: " . session_id());
+error_log("Session Data: " . print_r($_SESSION, true));
+error_log("Request URI: " . $_SERVER['REQUEST_URI']);
+error_log("GET Params: " . print_r($_GET, true));
+error_log("POST Params: " . print_r($_POST, true));
 
 // Database configuration
-require_once __DIR__ . '/../../includes/database.php';
+require_once __DIR__ . '/../../includes/autoload.php';
 
 // Response helper function
 function jsonResponse($data, $status = 200) {
     http_response_code($status);
     echo json_encode($data);
+    error_log("API Response: " . json_encode($data));
     exit();
 }
 
 // Error response helper
 function jsonError($message, $status = 400) {
-    jsonResponse(['error' => $message], $status);
+    jsonResponse(['success' => false, 'error' => $message], $status);
 }
 
 // Authentication check
 function authenticateRequest() {
-    if (!isset($_SESSION['school_auth']) || !isset($_SESSION['school_info'])) {
-        jsonError('Authentication required', 401);
+    error_log("Checking authentication...");
+    
+    // Check if school auth exists in session
+    if (!isset($_SESSION['school_auth'])) {
+        error_log("No school_auth in session");
+        jsonError('Authentication required. Please log in again.', 401);
     }
     
-    $schoolSlug = $_GET['school_slug'] ?? '';
+    // Get school slug from request
+    $schoolSlug = $_GET['school_slug'] ?? $_POST['school_slug'] ?? '';
+    
     if (empty($schoolSlug)) {
-        jsonError('School slug required', 400);
+        $input = file_get_contents('php://input');
+        $data = json_decode($input, true);
+        $schoolSlug = $data['school_slug'] ?? '';
     }
+    
+    if (empty($schoolSlug)) {
+        jsonError('School slug parameter is required', 400);
+    }
+    
+    $schoolAuth = $_SESSION['school_auth'];
+    error_log("Session school_slug: " . ($schoolAuth['school_slug'] ?? 'none'));
+    error_log("Request school_slug: " . $schoolSlug);
     
     // Check if user has access to this school
-    $schoolAuth = $_SESSION['school_auth'];
-    $schoolInfo = $_SESSION['school_info'];
+    if (($schoolAuth['school_slug'] ?? '') !== $schoolSlug) {
+        jsonError('Unauthorized access to this school. Session mismatch.', 403);
+    }
     
-    if ($schoolAuth['school_slug'] !== $schoolSlug) {
-        jsonError('Unauthorized access to this school', 403);
+    // Check if user is admin
+    if (($schoolAuth['user_type'] ?? '') !== 'admin') {
+        jsonError('Admin privileges required', 403);
+    }
+    
+    // Get school info
+    $schoolInfo = $_SESSION['school_info'][$schoolSlug] ?? [];
+    if (empty($schoolInfo)) {
+        jsonError('School information not found', 404);
     }
     
     return [
-        'school_id' => $schoolAuth['school_id'] ?? 0,
+        'school_id' => $schoolInfo['id'] ?? 0,
         'school_slug' => $schoolSlug,
-        'school_info' => $schoolInfo[$schoolSlug] ?? [],
+        'school_info' => $schoolInfo,
         'user_id' => $schoolAuth['user_id'] ?? 0,
         'user_type' => $schoolAuth['user_type'] ?? ''
     ];
 }
+
 
 // Main API logic
 try {
@@ -77,15 +125,26 @@ try {
         jsonError('Method not allowed', 405);
     }
     
-    // Get school slug from request
-    $schoolSlug = $_GET['school_slug'] ?? '';
-    if (empty($schoolSlug)) {
-        $input = json_decode(file_get_contents('php://input'), true);
-        $schoolSlug = $input['school_slug'] ?? '';
+    // Get school slug and action
+    $schoolSlug = $_GET['school_slug'] ?? $_POST['school_slug'] ?? '';
+    $action = $_GET['action'] ?? $_POST['action'] ?? '';
+    
+    // If still empty, try JSON input
+    if (empty($schoolSlug) || empty($action)) {
+        $input = file_get_contents('php://input');
+        if (!empty($input)) {
+            $data = json_decode($input, true);
+            if (empty($schoolSlug)) $schoolSlug = $data['school_slug'] ?? '';
+            if (empty($action)) $action = $data['action'] ?? '';
+        }
     }
     
     if (empty($schoolSlug)) {
         jsonError('School slug parameter is required', 400);
+    }
+    
+    if (empty($action)) {
+        jsonError('Action parameter is required', 400);
     }
     
     // Authenticate request
@@ -97,18 +156,8 @@ try {
         jsonError('Failed to connect to school database', 500);
     }
     
-    // Get action from request
-    $action = $_GET['action'] ?? '';
-    if (empty($action)) {
-        $input = json_decode(file_get_contents('php://input'), true);
-        $action = $input['action'] ?? '';
-    }
-    
-    if (empty($action)) {
-        jsonError('Action parameter is required', 400);
-    }
-    
     // Handle different actions
+    error_log("Processing action: " . $action);
     switch ($action) {
         case 'get_teachers':
             getTeachers($db, $auth['school_id']);
@@ -135,11 +184,11 @@ try {
             break;
             
         case 'search_teachers':
-            searchTeachers($db, $auth['school_id']);
+            searchTeachers($db, $auth['school_id'], $searchTerm = '');
             break;
             
         case 'search_subjects':
-            searchSubjects($db, $auth['school_id']);
+            searchSubjects($db, $auth['school_id'], $searchTerm = '');
             break;
             
         case 'get_available_teachers':
@@ -154,24 +203,40 @@ try {
             getClassDetails($db, $auth['school_id']);
             break;
             
-        case 'get_class_teachers':
-            getClassTeachers($db, $auth['school_id']);
+        case 'get_timetable':
+            getTimetable($db, $auth['school_id']);
             break;
             
-        case 'get_class_subjects':
-            getClassSubjects($db, $auth['school_id']);
+        case 'get_period':
+            getPeriod($db, $auth['school_id']);
+            break;
+            
+        case 'save_period':
+            savePeriod($db, $auth['school_id']);
+            break;
+            
+        case 'delete_period':
+            deletePeriod($db, $auth['school_id']);
+            break;
+            
+        case 'copy_timetable':
+            copyTimetable($db, $auth['school_id']);
+            break;
+            
+        case 'generate_timetable':
+            generateTimetable($db, $auth['school_id']);
             break;
             
         default:
-            jsonError('Invalid action', 400);
+            jsonError('Invalid action: ' . $action, 400);
     }
     
 } catch (Exception $e) {
-    error_log("Timetable API Error: " . $e->getMessage());
+    error_log("Timetable API Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
     jsonError('Internal server error: ' . $e->getMessage(), 500);
 }
 
-// Function to get all teachers
+// Function to get all teachers - UPDATED FOR YOUR SCHEMA
 function getTeachers($db, $schoolId) {
     try {
         $params = [$schoolId];
@@ -179,25 +244,26 @@ function getTeachers($db, $schoolId) {
         $sql = "
             SELECT 
                 u.id,
+                u.name as full_name,
                 u.first_name,
                 u.last_name,
                 u.email,
                 u.phone,
-                u.profile_image,
+                u.profile_photo as profile_image,
                 u.is_active,
-                t.specialization,
+                t.employee_id,
                 t.qualification,
+                t.specialization,
                 t.experience_years,
-                t.subjects_taught,
-                t.max_weekly_periods,
-                t.current_weekly_periods,
-                CONCAT(u.first_name, ' ', u.last_name) as full_name
+                COALESCE(t.max_weekly_periods, 30) as max_weekly_periods,
+                COALESCE(t.current_weekly_periods, 0) as current_weekly_periods,
+                t.subjects_taught
             FROM users u
             LEFT JOIN teachers t ON u.id = t.user_id
             WHERE u.school_id = ? 
             AND u.user_type = 'teacher'
             AND u.is_active = 1
-            ORDER BY u.first_name, u.last_name
+            ORDER BY u.name
         ";
         
         $stmt = $db->prepare($sql);
@@ -207,23 +273,33 @@ function getTeachers($db, $schoolId) {
         // Format response
         $formattedTeachers = [];
         foreach ($teachers as $teacher) {
+            // Parse first and last name from full name
+            $nameParts = explode(' ', $teacher['full_name']);
+            $firstName = $teacher['first_name'] ?? $nameParts[0] ?? '';
+            $lastName = $teacher['last_name'] ?? (count($nameParts) > 1 ? end($nameParts) : '');
+            
+            $maxPeriods = $teacher['max_weekly_periods'] ?? 30;
+            $currentPeriods = $teacher['current_weekly_periods'] ?? 0;
+            $remaining = $maxPeriods - $currentPeriods;
+            
             $formattedTeachers[] = [
                 'id' => $teacher['id'],
-                'first_name' => $teacher['first_name'],
-                'last_name' => $teacher['last_name'],
+                'first_name' => $firstName,
+                'last_name' => $lastName,
                 'full_name' => $teacher['full_name'],
                 'email' => $teacher['email'],
                 'phone' => $teacher['phone'],
+                'employee_id' => $teacher['employee_id'],
                 'specialization' => $teacher['specialization'],
                 'qualification' => $teacher['qualification'],
                 'experience_years' => $teacher['experience_years'],
                 'subjects_taught' => $teacher['subjects_taught'],
-                'max_weekly_periods' => $teacher['max_weekly_periods'] ?? 30,
-                'current_weekly_periods' => $teacher['current_weekly_periods'] ?? 0,
+                'max_weekly_periods' => $maxPeriods,
+                'current_weekly_periods' => $currentPeriods,
                 'availability' => [
-                    'remaining_periods' => ($teacher['max_weekly_periods'] ?? 30) - ($teacher['current_weekly_periods'] ?? 0),
-                    'utilization_percentage' => $teacher['current_weekly_periods'] > 0 ? 
-                        round(($teacher['current_weekly_periods'] / ($teacher['max_weekly_periods'] ?? 30)) * 100, 2) : 0
+                    'remaining_periods' => $remaining,
+                    'utilization_percentage' => $maxPeriods > 0 ? 
+                        round(($currentPeriods / $maxPeriods) * 100, 2) : 0
                 ]
             ];
         }
@@ -240,7 +316,7 @@ function getTeachers($db, $schoolId) {
     }
 }
 
-// Function to get all subjects
+// Function to get all subjects - UPDATED FOR YOUR SCHEMA
 function getSubjects($db, $schoolId) {
     try {
         $params = [$schoolId];
@@ -253,14 +329,13 @@ function getSubjects($db, $schoolId) {
                 type,
                 credit_hours,
                 description,
-                is_compulsory,
                 is_active,
                 created_at
             FROM subjects
             WHERE school_id = ? 
             AND is_active = 1
             ORDER BY 
-                is_compulsory DESC,
+                type,
                 name ASC
         ";
         
@@ -275,10 +350,10 @@ function getSubjects($db, $schoolId) {
                 'id' => $subject['id'],
                 'name' => $subject['name'],
                 'code' => $subject['code'],
-                'type' => $subject['type'],
-                'credit_hours' => $subject['credit_hours'],
+                'type' => $subject['type'] ?? 'core',
+                'credit_hours' => $subject['credit_hours'] ?? 1.0,
                 'description' => $subject['description'],
-                'is_compulsory' => (bool)$subject['is_compulsory'],
+                'is_compulsory' => ($subject['type'] ?? 'core') === 'core',
                 'is_active' => (bool)$subject['is_active'],
                 'created_at' => $subject['created_at']
             ];
@@ -296,7 +371,7 @@ function getSubjects($db, $schoolId) {
     }
 }
 
-// Function to get all classes
+// Function to get all classes - UPDATED FOR YOUR SCHEMA
 function getClasses($db, $schoolId) {
     try {
         // Get current academic year
@@ -310,57 +385,55 @@ function getClasses($db, $schoolId) {
         
         $sql = "
             SELECT 
-                id,
-                name,
-                code,
-                grade_level,
-                section,
-                capacity,
-                current_students,
-                room_number,
-                class_teacher_id,
-                is_active,
-                created_at
-            FROM classes
-            WHERE school_id = ? 
-            AND academic_year_id = ?
-            AND is_active = 1
+                c.id,
+                c.name,
+                c.code,
+                c.grade_level,
+                c.section,
+                c.capacity,
+                c.current_students,
+                c.room_number,
+                c.class_teacher_id,
+                c.is_active,
+                c.created_at,
+                u.name as class_teacher_name
+            FROM classes c
+            LEFT JOIN users u ON c.class_teacher_id = u.id
+            WHERE c.school_id = ? 
+            AND c.academic_year_id = ?
+            AND c.is_active = 1
             ORDER BY 
-                grade_level ASC,
-                section ASC
+                CAST(c.grade_level AS UNSIGNED) ASC,
+                c.section ASC
         ";
         
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
         $classes = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Get class teachers' names
-        $classIds = array_column($classes, 'id');
-        $classTeachers = [];
-        
-        if (!empty($classIds)) {
-            $placeholders = str_repeat('?,', count($classIds) - 1) . '?';
-            $teacherSql = "
-                SELECT 
-                    c.id as class_id,
-                    CONCAT(u.first_name, ' ', u.last_name) as teacher_name
-                FROM classes c
-                LEFT JOIN users u ON c.class_teacher_id = u.id
-                WHERE c.id IN ($placeholders)
-            ";
-            
-            $teacherStmt = $db->prepare($teacherSql);
-            $teacherStmt->execute($classIds);
-            $teacherResults = $teacherStmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            foreach ($teacherResults as $result) {
-                $classTeachers[$result['class_id']] = $result['teacher_name'];
+        // Get student counts if not already present
+        foreach ($classes as &$class) {
+            if ($class['current_students'] === null) {
+                $countSql = "
+                    SELECT COUNT(*) as student_count 
+                    FROM students 
+                    WHERE school_id = ? 
+                    AND class_id = ? 
+                    AND status = 'active'
+                ";
+                $countStmt = $db->prepare($countSql);
+                $countStmt->execute([$schoolId, $class['id']]);
+                $result = $countStmt->fetch(PDO::FETCH_ASSOC);
+                $class['current_students'] = $result['student_count'] ?? 0;
             }
         }
         
         // Format response
         $formattedClasses = [];
         foreach ($classes as $class) {
+            $capacity = $class['capacity'] ?? 40;
+            $currentStudents = $class['current_students'] ?? 0;
+            
             $formattedClasses[] = [
                 'id' => $class['id'],
                 'name' => $class['name'],
@@ -368,16 +441,16 @@ function getClasses($db, $schoolId) {
                 'grade_level' => $class['grade_level'],
                 'section' => $class['section'],
                 'display_name' => "Grade {$class['grade_level']} - Section {$class['section']}",
-                'capacity' => $class['capacity'],
-                'current_students' => $class['current_students'],
+                'capacity' => $capacity,
+                'current_students' => $currentStudents,
                 'room_number' => $class['room_number'],
                 'class_teacher_id' => $class['class_teacher_id'],
-                'class_teacher_name' => $classTeachers[$class['id']] ?? 'Not Assigned',
+                'class_teacher_name' => $class['class_teacher_name'] ?? 'Not Assigned',
                 'is_active' => (bool)$class['is_active'],
                 'availability' => [
-                    'seats_available' => $class['capacity'] - $class['current_students'],
-                    'occupancy_percentage' => $class['capacity'] > 0 ? 
-                        round(($class['current_students'] / $class['capacity']) * 100, 2) : 0
+                    'seats_available' => $capacity - $currentStudents,
+                    'occupancy_percentage' => $capacity > 0 ? 
+                        round(($currentStudents / $capacity) * 100, 2) : 0
                 ]
             ];
         }
@@ -395,388 +468,390 @@ function getClasses($db, $schoolId) {
     }
 }
 
-// Function to get class sections by grade level
-function getClassSections($db, $schoolId) {
-    try {
-        $gradeLevel = $_GET['grade_level'] ?? '';
-        if (empty($gradeLevel)) {
-            jsonError('Grade level parameter is required');
-        }
-        
-        // Get current academic year
-        $yearSql = "SELECT id FROM academic_years WHERE school_id = ? AND is_default = 1 LIMIT 1";
-        $yearStmt = $db->prepare($yearSql);
-        $yearStmt->execute([$schoolId]);
-        $academicYear = $yearStmt->fetch(PDO::FETCH_ASSOC);
-        $academicYearId = $academicYear['id'] ?? 1;
-        
-        $params = [$schoolId, $academicYearId, $gradeLevel];
-        
-        $sql = "
-            SELECT 
-                id,
-                section,
-                name,
-                capacity
-            FROM classes
-            WHERE school_id = ? 
-            AND academic_year_id = ?
-            AND grade_level = ?
-            AND is_active = 1
-            ORDER BY section ASC
-        ";
-        
-        $stmt = $db->prepare($sql);
-        $stmt->execute($params);
-        $sections = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        jsonResponse([
-            'success' => true,
-            'sections' => $sections,
-            'count' => count($sections),
-            'grade_level' => $gradeLevel,
-            'timestamp' => date('Y-m-d H:i:s')
-        ]);
-        
-    } catch (Exception $e) {
-        jsonError('Failed to fetch class sections: ' . $e->getMessage());
-    }
-}
 
-// Function to get all grade levels
-function getGradeLevels($db, $schoolId) {
+// Function to get timetable
+function getTimetable($db, $schoolId) {
     try {
-        // Get current academic year
-        $yearSql = "SELECT id FROM academic_years WHERE school_id = ? AND is_default = 1 LIMIT 1";
-        $yearStmt = $db->prepare($yearSql);
-        $yearStmt->execute([$schoolId]);
-        $academicYear = $yearStmt->fetch(PDO::FETCH_ASSOC);
-        $academicYearId = $academicYear['id'] ?? 1;
+        $grade = $_GET['grade'] ?? $_POST['grade'] ?? '';
+        $section = $_GET['section'] ?? $_POST['section'] ?? '';
+        $day = $_GET['day'] ?? $_POST['day'] ?? '';
         
-        $params = [$schoolId, $academicYearId];
+        // Build WHERE clause
+        $whereClauses = ["t.school_id = ?"];
+        $params = [$schoolId];
+        
+        if (!empty($grade)) {
+            $whereClauses[] = "c.grade_level = ?";
+            $params[] = $grade;
+        }
+        
+        if (!empty($section)) {
+            $whereClauses[] = "c.section = ?";
+            $params[] = $section;
+        }
+        
+        if (!empty($day)) {
+            $whereClauses[] = "t.day = ?";
+            $params[] = strtolower($day);
+        }
+        
+        $whereSql = implode(' AND ', $whereClauses);
         
         $sql = "
-            SELECT DISTINCT grade_level
-            FROM classes
-            WHERE school_id = ? 
-            AND academic_year_id = ?
-            AND is_active = 1
-            ORDER BY grade_level ASC
+            SELECT 
+                t.*,
+                c.grade_level,
+                c.section,
+                c.name as class_name,
+                s.name as subject_name,
+                s.code as subject_code,
+                u.first_name as teacher_first_name,
+                u.last_name as teacher_last_name,
+                CONCAT(u.first_name, ' ', u.last_name) as teacher_full_name,
+                CONCAT('Room ', COALESCE(t.room_number, c.room_number)) as room_name,
+                CASE 
+                    WHEN t.is_break = 1 THEN 'break'
+                    ELSE 'regular'
+                END as period_type
+            FROM timetables t
+            LEFT JOIN classes c ON t.class_id = c.id
+            LEFT JOIN subjects s ON t.subject_id = s.id
+            LEFT JOIN users u ON t.teacher_id = u.id AND u.user_type = 'teacher'
+            WHERE $whereSql
+            ORDER BY 
+                c.grade_level,
+                c.section,
+                FIELD(t.day, 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'),
+                t.start_time
         ";
         
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
-        $gradeLevels = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $timetable = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         jsonResponse([
             'success' => true,
-            'grade_levels' => array_column($gradeLevels, 'grade_level'),
-            'count' => count($gradeLevels),
-            'timestamp' => date('Y-m-d H:i:s')
-        ]);
-        
-    } catch (Exception $e) {
-        jsonError('Failed to fetch grade levels: ' . $e->getMessage());
-    }
-}
-
-// Function to get teacher by ID
-function getTeacherById($db, $schoolId) {
-    try {
-        $teacherId = $_GET['teacher_id'] ?? '';
-        if (empty($teacherId)) {
-            jsonError('Teacher ID parameter is required');
-        }
-        
-        $params = [$schoolId, $teacherId];
-        
-        $sql = "
-            SELECT 
-                u.id,
-                u.first_name,
-                u.last_name,
-                u.email,
-                u.phone,
-                u.profile_image,
-                u.is_active,
-                t.specialization,
-                t.qualification,
-                t.experience_years,
-                t.subjects_taught,
-                t.max_weekly_periods,
-                t.current_weekly_periods,
-                CONCAT(u.first_name, ' ', u.last_name) as full_name
-            FROM users u
-            LEFT JOIN teachers t ON u.id = t.user_id
-            WHERE u.school_id = ? 
-            AND u.id = ?
-            AND u.user_type = 'teacher'
-            AND u.is_active = 1
-        ";
-        
-        $stmt = $db->prepare($sql);
-        $stmt->execute($params);
-        $teacher = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$teacher) {
-            jsonError('Teacher not found', 404);
-        }
-        
-        // Get teacher's current schedule
-        $scheduleSql = "
-            SELECT 
-                COUNT(*) as total_periods,
-                GROUP_CONCAT(DISTINCT day) as days_working,
-                GROUP_CONCAT(DISTINCT subject_id) as subject_ids
-            FROM timetables
-            WHERE school_id = ? 
-            AND teacher_id = ?
-        ";
-        
-        $scheduleStmt = $db->prepare($scheduleSql);
-        $scheduleStmt->execute([$schoolId, $teacherId]);
-        $schedule = $scheduleStmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Get subject names
-        $subjectNames = [];
-        if (!empty($schedule['subject_ids'])) {
-            $subjectIds = explode(',', $schedule['subject_ids']);
-            $subjectPlaceholders = str_repeat('?,', count($subjectIds) - 1) . '?';
-            
-            $subjectSql = "
-                SELECT name 
-                FROM subjects 
-                WHERE id IN ($subjectPlaceholders)
-            ";
-            
-            $subjectStmt = $db->prepare($subjectSql);
-            $subjectStmt->execute($subjectIds);
-            $subjectNames = $subjectStmt->fetchAll(PDO::FETCH_COLUMN, 0);
-        }
-        
-        jsonResponse([
-            'success' => true,
-            'teacher' => [
-                'id' => $teacher['id'],
-                'first_name' => $teacher['first_name'],
-                'last_name' => $teacher['last_name'],
-                'full_name' => $teacher['full_name'],
-                'email' => $teacher['email'],
-                'phone' => $teacher['phone'],
-                'specialization' => $teacher['specialization'],
-                'qualification' => $teacher['qualification'],
-                'experience_years' => $teacher['experience_years'],
-                'subjects_taught' => $teacher['subjects_taught'],
-                'max_weekly_periods' => $teacher['max_weekly_periods'] ?? 30,
-                'current_weekly_periods' => $teacher['current_weekly_periods'] ?? 0,
-                'availability' => [
-                    'remaining_periods' => ($teacher['max_weekly_periods'] ?? 30) - ($teacher['current_weekly_periods'] ?? 0),
-                    'utilization_percentage' => $teacher['current_weekly_periods'] > 0 ? 
-                        round(($teacher['current_weekly_periods'] / ($teacher['max_weekly_periods'] ?? 30)) * 100, 2) : 0,
-                    'total_periods_scheduled' => $schedule['total_periods'] ?? 0,
-                    'days_working' => $schedule['days_working'] ? explode(',', $schedule['days_working']) : [],
-                    'current_subjects' => $subjectNames
-                ]
+            'timetable' => $timetable,
+            'count' => count($timetable),
+            'filters' => [
+                'grade' => $grade,
+                'section' => $section,
+                'day' => $day
             ],
             'timestamp' => date('Y-m-d H:i:s')
         ]);
         
     } catch (Exception $e) {
-        jsonError('Failed to fetch teacher: ' . $e->getMessage());
+        jsonError('Failed to fetch timetable: ' . $e->getMessage());
     }
 }
 
-// Function to search teachers
-function searchTeachers($db, $schoolId) {
+// Function to get single period
+function getPeriod($db, $schoolId) {
     try {
-        $searchTerm = $_GET['search'] ?? '';
-        if (empty($searchTerm)) {
-            jsonError('Search term is required');
-        }
+        $periodId = $_GET['period_id'] ?? $_POST['period_id'] ?? '';
         
-        $params = [$schoolId];
-        $searchParam = "%{$searchTerm}%";
+        if (empty($periodId)) {
+            jsonError('Period ID is required');
+        }
         
         $sql = "
             SELECT 
-                u.id,
-                u.first_name,
-                u.last_name,
-                u.email,
-                u.phone,
-                t.specialization,
-                CONCAT(u.first_name, ' ', u.last_name) as full_name
-            FROM users u
-            LEFT JOIN teachers t ON u.id = t.user_id
-            WHERE u.school_id = ? 
-            AND u.user_type = 'teacher'
-            AND u.is_active = 1
-            AND (
-                u.first_name LIKE ? OR
-                u.last_name LIKE ? OR
-                u.email LIKE ? OR
-                t.specialization LIKE ?
-            )
-            ORDER BY u.first_name, u.last_name
-            LIMIT 20
+                t.*,
+                c.grade_level,
+                c.section,
+                c.name as class_name,
+                s.name as subject_name,
+                u.first_name as teacher_first_name,
+                u.last_name as teacher_last_name,
+                CONCAT('Room ', COALESCE(t.room_number, c.room_number)) as room_name,
+                CASE 
+                    WHEN t.is_break = 1 THEN 'break'
+                    ELSE 'regular'
+                END as period_type
+            FROM timetables t
+            LEFT JOIN classes c ON t.class_id = c.id
+            LEFT JOIN subjects s ON t.subject_id = s.id
+            LEFT JOIN users u ON t.teacher_id = u.id AND u.user_type = 'teacher'
+            WHERE t.id = ? AND t.school_id = ?
         ";
         
         $stmt = $db->prepare($sql);
-        $stmt->execute(array_merge($params, [$searchParam, $searchParam, $searchParam, $searchParam]));
-        $teachers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute([$periodId, $schoolId]);
+        $period = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$period) {
+            jsonError('Period not found', 404);
+        }
         
         jsonResponse([
             'success' => true,
-            'teachers' => $teachers,
-            'count' => count($teachers),
-            'search_term' => $searchTerm,
+            'period' => $period,
             'timestamp' => date('Y-m-d H:i:s')
         ]);
         
     } catch (Exception $e) {
-        jsonError('Failed to search teachers: ' . $e->getMessage());
+        jsonError('Failed to fetch period: ' . $e->getMessage());
     }
 }
 
-// Function to search subjects
-function searchSubjects($db, $schoolId) {
+// Function to save period
+function savePeriod($db, $schoolId) {
     try {
-        $searchTerm = $_GET['search'] ?? '';
-        if (empty($searchTerm)) {
-            jsonError('Search term is required');
+        $periodId = $_POST['period_id'] ?? null;
+        $periodData = isset($_POST['period_data']) ? 
+            json_decode($_POST['period_data'], true) : [];
+        
+        if (empty($periodData)) {
+            $input = file_get_contents('php://input');
+            $data = json_decode($input, true);
+            $periodId = $data['period_id'] ?? null;
+            $periodData = $data['period_data'] ?? [];
         }
         
-        $params = [$schoolId];
-        $searchParam = "%{$searchTerm}%";
-        
-        $sql = "
-            SELECT 
-                id,
-                name,
-                code,
-                type,
-                credit_hours
-            FROM subjects
-            WHERE school_id = ? 
-            AND is_active = 1
-            AND (
-                name LIKE ? OR
-                code LIKE ? OR
-                type LIKE ?
-            )
-            ORDER BY name ASC
-            LIMIT 20
-        ";
-        
-        $stmt = $db->prepare($sql);
-        $stmt->execute(array_merge($params, [$searchParam, $searchParam, $searchParam]));
-        $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        jsonResponse([
-            'success' => true,
-            'subjects' => $subjects,
-            'count' => count($subjects),
-            'search_term' => $searchTerm,
-            'timestamp' => date('Y-m-d H:i:s')
-        ]);
-        
-    } catch (Exception $e) {
-        jsonError('Failed to search subjects: ' . $e->getMessage());
-    }
-}
-
-// Function to get available teachers for a specific time slot
-function getAvailableTeachers($db, $schoolId) {
-    try {
-        $day = $_GET['day'] ?? '';
-        $startTime = $_GET['start_time'] ?? '';
-        $endTime = $_GET['end_time'] ?? '';
-        
-        if (empty($day) || empty($startTime) || empty($endTime)) {
-            jsonError('Day, start_time, and end_time parameters are required');
+        if (empty($periodData)) {
+            jsonError('Invalid period data');
         }
         
-        // Convert day to lowercase for consistency
-        $day = strtolower($day);
+        // Validate required fields
+        $requiredFields = ['class_id', 'subject_id', 'teacher_id', 'day', 'start_time', 'end_time'];
+        foreach ($requiredFields as $field) {
+            if (empty($periodData[$field])) {
+                jsonError("Missing required field: $field");
+            }
+        }
         
-        // First, get all teachers
-        $teacherSql = "
-            SELECT 
-                u.id,
-                u.first_name,
-                u.last_name,
-                t.max_weekly_periods,
-                t.current_weekly_periods,
-                CONCAT(u.first_name, ' ', u.last_name) as full_name
-            FROM users u
-            LEFT JOIN teachers t ON u.id = t.user_id
-            WHERE u.school_id = ? 
-            AND u.user_type = 'teacher'
-            AND u.is_active = 1
-        ";
+        // Get current academic year and term
+        $yearSql = "SELECT id FROM academic_years WHERE school_id = ? AND is_default = 1 LIMIT 1";
+        $yearStmt = $db->prepare($yearSql);
+        $yearStmt->execute([$schoolId]);
+        $academicYear = $yearStmt->fetch(PDO::FETCH_ASSOC);
+        $academicYearId = $academicYear['id'] ?? 1;
         
-        $teacherStmt = $db->prepare($teacherSql);
-        $teacherStmt->execute([$schoolId]);
-        $allTeachers = $teacherStmt->fetchAll(PDO::FETCH_ASSOC);
+        $termSql = "SELECT id FROM academic_terms WHERE school_id = ? AND is_default = 1 LIMIT 1";
+        $termStmt = $db->prepare($termSql);
+        $termStmt->execute([$schoolId]);
+        $academicTerm = $termStmt->fetch(PDO::FETCH_ASSOC);
+        $academicTermId = $academicTerm['id'] ?? 1;
         
-        // Get teachers who are busy during the requested time
-        $busySql = "
-            SELECT DISTINCT teacher_id
+        // Check for conflicts
+        $conflictSql = "
+            SELECT COUNT(*) as conflict_count
             FROM timetables
             WHERE school_id = ?
+            AND teacher_id = ?
             AND day = ?
             AND (
                 (start_time <= ? AND end_time > ?) OR
                 (start_time < ? AND end_time >= ?) OR
                 (start_time >= ? AND end_time <= ?)
             )
+            AND id != ?
         ";
         
-        $busyStmt = $db->prepare($busySql);
-        $busyStmt->execute([
-            $schoolId, $day, 
-            $startTime, $startTime,
-            $endTime, $endTime,
-            $startTime, $endTime
-        ]);
-        $busyTeachers = $busyStmt->fetchAll(PDO::FETCH_COLUMN, 0);
+        $conflictParams = [
+            $schoolId,
+            $periodData['teacher_id'],
+            strtolower($periodData['day']),
+            $periodData['start_time'],
+            $periodData['start_time'],
+            $periodData['end_time'],
+            $periodData['end_time'],
+            $periodData['start_time'],
+            $periodData['end_time'],
+            $periodId ?: 0
+        ];
         
-        // Filter available teachers
-        $availableTeachers = [];
-        foreach ($allTeachers as $teacher) {
-            if (!in_array($teacher['id'], $busyTeachers)) {
-                $remainingPeriods = ($teacher['max_weekly_periods'] ?? 30) - ($teacher['current_weekly_periods'] ?? 0);
-                
-                if ($remainingPeriods > 0) {
-                    $availableTeachers[] = [
-                        'id' => $teacher['id'],
-                        'full_name' => $teacher['full_name'],
-                        'first_name' => $teacher['first_name'],
-                        'last_name' => $teacher['last_name'],
-                        'remaining_periods' => $remainingPeriods,
-                        'current_weekly_periods' => $teacher['current_weekly_periods'] ?? 0,
-                        'max_weekly_periods' => $teacher['max_weekly_periods'] ?? 30
-                    ];
-                }
-            }
+        $conflictStmt = $db->prepare($conflictSql);
+        $conflictStmt->execute($conflictParams);
+        $conflict = $conflictStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($conflict['conflict_count'] > 0) {
+            jsonError('Teacher has conflicting schedule');
+        }
+        
+        // Calculate period number based on start time
+        $periodNumber = calculatePeriodNumber($periodData['start_time']);
+        $isBreak = ($periodData['period_type'] ?? 'regular') === 'break' ? 1 : 0;
+        
+        if ($periodId) {
+            // Update existing period
+            $sql = "
+                UPDATE timetables SET
+                    class_id = ?,
+                    subject_id = ?,
+                    teacher_id = ?,
+                    room_number = ?,
+                    day = ?,
+                    start_time = ?,
+                    end_time = ?,
+                    period_number = ?,
+                    is_break = ?,
+                    updated_at = NOW()
+                WHERE id = ? AND school_id = ?
+            ";
+            
+            $params = [
+                $periodData['class_id'],
+                $periodData['subject_id'],
+                $periodData['teacher_id'],
+                $periodData['room_number'] ?? null,
+                strtolower($periodData['day']),
+                $periodData['start_time'],
+                $periodData['end_time'],
+                $periodNumber,
+                $isBreak,
+                $periodId,
+                $schoolId
+            ];
+            
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            
+            $message = 'Period updated successfully';
+        } else {
+            // Insert new period
+            $sql = "
+                INSERT INTO timetables (
+                    school_id, class_id, subject_id, teacher_id,
+                    room_number, day, start_time, end_time,
+                    period_number, is_break,
+                    academic_year_id, academic_term_id,
+                    created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+            ";
+            
+            $params = [
+                $schoolId,
+                $periodData['class_id'],
+                $periodData['subject_id'],
+                $periodData['teacher_id'],
+                $periodData['room_number'] ?? null,
+                strtolower($periodData['day']),
+                $periodData['start_time'],
+                $periodData['end_time'],
+                $periodNumber,
+                $isBreak,
+                $academicYearId,
+                $academicTermId
+            ];
+            
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            $periodId = $db->lastInsertId();
+            
+            // Update teacher's current weekly periods
+            updateTeacherPeriods($db, $periodData['teacher_id'], $schoolId, 1);
+            
+            $message = 'Period added successfully';
         }
         
         jsonResponse([
             'success' => true,
-            'available_teachers' => $availableTeachers,
-            'count' => count($availableTeachers),
-            'day' => $day,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
+            'message' => $message,
+            'period_id' => $periodId,
             'timestamp' => date('Y-m-d H:i:s')
         ]);
         
     } catch (Exception $e) {
-        jsonError('Failed to get available teachers: ' . $e->getMessage());
+        jsonError('Failed to save period: ' . $e->getMessage());
     }
 }
 
-// Function to get teacher workload
+// Helper function to calculate period number
+function calculatePeriodNumber($startTime) {
+    $timeSlots = [
+        '08:00:00' => 1,
+        '08:45:00' => 2,
+        '09:30:00' => 3,
+        '10:15:00' => 4,
+        '11:00:00' => 5,
+        '11:45:00' => 6,
+        '12:30:00' => 7,
+        '13:15:00' => 8,
+        '14:00:00' => 9,
+        '14:45:00' => 10,
+        '15:30:00' => 11,
+        '16:15:00' => 12
+    ];
+    
+    return $timeSlots[$startTime] ?? 1;
+}
+
+// Helper function to update teacher periods
+function updateTeacherPeriods($db, $teacherId, $schoolId, $increment = 1) {
+    try {
+        // Check if teacher record exists
+        $checkSql = "SELECT id FROM teachers WHERE user_id = ?";
+        $checkStmt = $db->prepare($checkSql);
+        $checkStmt->execute([$teacherId]);
+        $teacherRecord = $checkStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($teacherRecord) {
+            // Update existing record
+            $updateSql = "
+                UPDATE teachers 
+                SET current_weekly_periods = COALESCE(current_weekly_periods, 0) + ?
+                WHERE user_id = ?
+            ";
+            $updateStmt = $db->prepare($updateSql);
+            $updateStmt->execute([$increment, $teacherId]);
+        } else {
+            // Create new record
+            $insertSql = "
+                INSERT INTO teachers (user_id, current_weekly_periods, created_at)
+                VALUES (?, ?, NOW())
+            ";
+            $insertStmt = $db->prepare($insertSql);
+            $insertStmt->execute([$teacherId, $increment]);
+        }
+    } catch (Exception $e) {
+        error_log("Error updating teacher periods: " . $e->getMessage());
+    }
+}
+
+// Function to delete period
+function deletePeriod($db, $schoolId) {
+    try {
+        $periodId = $_POST['period_id'] ?? $_GET['period_id'] ?? '';
+        
+        if (empty($periodId)) {
+            $input = file_get_contents('php://input');
+            $data = json_decode($input, true);
+            $periodId = $data['period_id'] ?? '';
+        }
+        
+        if (empty($periodId)) {
+            jsonError('Period ID is required');
+        }
+        
+        // Get period info before deletion
+        $periodSql = "SELECT teacher_id FROM timetables WHERE id = ? AND school_id = ?";
+        $periodStmt = $db->prepare($periodSql);
+        $periodStmt->execute([$periodId, $schoolId]);
+        $period = $periodStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($period && $period['teacher_id']) {
+            // Decrement teacher's current weekly periods
+            updateTeacherPeriods($db, $period['teacher_id'], $schoolId, -1);
+        }
+        
+        $stmt = $db->prepare("DELETE FROM timetables WHERE id = ? AND school_id = ?");
+        $stmt->execute([$periodId, $schoolId]);
+        
+        jsonResponse([
+            'success' => true,
+            'message' => 'Period deleted successfully',
+            'timestamp' => date('Y-m-d H:i:s')
+        ]);
+        
+    } catch (Exception $e) {
+        jsonError('Failed to delete period: ' . $e->getMessage());
+    }
+}
+
+
+// Function to get teacher workload - UPDATED FOR YOUR SCHEMA
 function getTeacherLoad($db, $schoolId) {
     try {
         $teacherId = $_GET['teacher_id'] ?? '';
@@ -806,10 +881,9 @@ function getTeacherLoad($db, $schoolId) {
         // Get teacher info
         $teacherSql = "
             SELECT 
-                u.first_name,
-                u.last_name,
-                t.max_weekly_periods,
-                t.current_weekly_periods
+                u.name as full_name,
+                COALESCE(t.max_weekly_periods, 30) as max_weekly_periods,
+                COALESCE(t.current_weekly_periods, 0) as current_weekly_periods
             FROM users u
             LEFT JOIN teachers t ON u.id = t.user_id
             WHERE u.id = ?
@@ -819,7 +893,11 @@ function getTeacherLoad($db, $schoolId) {
         $teacherStmt->execute([$teacherId]);
         $teacher = $teacherStmt->fetch(PDO::FETCH_ASSOC);
         
-        // Calculate workload statistics
+        if (!$teacher) {
+            jsonError('Teacher not found');
+        }
+        
+        // Calculate workload statistics from timetable
         $totalPeriods = array_sum(array_column($schedule, 'periods_per_day'));
         $maxPeriods = $teacher['max_weekly_periods'] ?? 30;
         $utilizationPercentage = $maxPeriods > 0 ? round(($totalPeriods / $maxPeriods) * 100, 2) : 0;
@@ -828,7 +906,7 @@ function getTeacherLoad($db, $schoolId) {
             'success' => true,
             'teacher' => [
                 'id' => $teacherId,
-                'full_name' => $teacher['first_name'] . ' ' . $teacher['last_name'],
+                'full_name' => $teacher['full_name'],
                 'max_weekly_periods' => $maxPeriods,
                 'current_weekly_periods' => $totalPeriods,
                 'remaining_periods' => $maxPeriods - $totalPeriods,
@@ -850,171 +928,139 @@ function getTeacherLoad($db, $schoolId) {
     }
 }
 
-// Function to get class details
-function getClassDetails($db, $schoolId) {
+// Debug function to check database structure
+function debugDatabase($db) {
     try {
-        $classId = $_GET['class_id'] ?? '';
-        if (empty($classId)) {
-            jsonError('Class ID parameter is required');
-        }
-        
-        // Get current academic year
-        $yearSql = "SELECT id FROM academic_years WHERE school_id = ? AND is_default = 1 LIMIT 1";
-        $yearStmt = $db->prepare($yearSql);
-        $yearStmt->execute([$schoolId]);
-        $academicYear = $yearStmt->fetch(PDO::FETCH_ASSOC);
-        $academicYearId = $academicYear['id'] ?? 1;
-        
-        $params = [$schoolId, $academicYearId, $classId];
-        
-        $sql = "
-            SELECT 
-                c.*,
-                CONCAT(u.first_name, ' ', u.last_name) as class_teacher_name,
-                u.email as class_teacher_email
-            FROM classes c
-            LEFT JOIN users u ON c.class_teacher_id = u.id
-            WHERE c.school_id = ? 
-            AND c.academic_year_id = ?
-            AND c.id = ?
-        ";
-        
+        // Check teachers table structure
+        $sql = "DESCRIBE teachers";
         $stmt = $db->prepare($sql);
-        $stmt->execute($params);
-        $class = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$class) {
-            jsonError('Class not found', 404);
-        }
-        
-        // Get class timetable
-        $timetableSql = "
-            SELECT 
-                COUNT(*) as total_periods,
-                GROUP_CONCAT(DISTINCT day) as scheduled_days,
-                GROUP_CONCAT(DISTINCT subject_id) as subject_ids,
-                GROUP_CONCAT(DISTINCT teacher_id) as teacher_ids
-            FROM timetables
-            WHERE school_id = ? 
-            AND class_id = ?
-        ";
-        
-        $timetableStmt = $db->prepare($timetableSql);
-        $timetableStmt->execute([$schoolId, $classId]);
-        $timetable = $timetableStmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->execute();
+        $structure = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         jsonResponse([
             'success' => true,
-            'class' => [
-                'id' => $class['id'],
-                'name' => $class['name'],
-                'code' => $class['code'],
-                'grade_level' => $class['grade_level'],
-                'section' => $class['section'],
-                'display_name' => "Grade {$class['grade_level']} - Section {$class['section']}",
-                'capacity' => $class['capacity'],
-                'current_students' => $class['current_students'],
-                'room_number' => $class['room_number'],
-                'class_teacher_id' => $class['class_teacher_id'],
-                'class_teacher_name' => $class['class_teacher_name'],
-                'class_teacher_email' => $class['class_teacher_email'],
-                'is_active' => (bool)$class['is_active']
-            ],
-            'timetable_summary' => [
-                'total_periods' => $timetable['total_periods'] ?? 0,
-                'scheduled_days' => $timetable['scheduled_days'] ? explode(',', $timetable['scheduled_days']) : [],
-                'total_subjects' => $timetable['subject_ids'] ? count(explode(',', $timetable['subject_ids'])) : 0,
-                'total_teachers' => $timetable['teacher_ids'] ? count(explode(',', $timetable['teacher_ids'])) : 0
-            ],
+            'teachers_table_structure' => $structure,
             'timestamp' => date('Y-m-d H:i:s')
         ]);
         
     } catch (Exception $e) {
-        jsonError('Failed to get class details: ' . $e->getMessage());
+        jsonError('Debug failed: ' . $e->getMessage());
     }
 }
 
-// Function to get class teachers
-function getClassTeachers($db, $schoolId) {
+// Add to the beginning of your API
+error_log("Session ID: " . session_id());
+error_log("School Auth: " . print_r($_SESSION['school_auth'] ?? 'Not set', true));
+error_log("School Info: " . print_r($_SESSION['school_info'] ?? 'Not set', true));
+
+// Function to copy timetable
+function copyTimetable($db, $schoolId) {
     try {
-        $classId = $_GET['class_id'] ?? '';
-        if (empty($classId)) {
-            jsonError('Class ID parameter is required');
+        $sourceClassId = $_POST['source_class_id'] ?? '';
+        $targetClassIds = isset($_POST['target_class_ids']) ? 
+            json_decode($_POST['target_class_ids'], true) : [];
+        $overwrite = $_POST['overwrite'] ?? false;
+        
+        if (empty($sourceClassId) || empty($targetClassIds)) {
+            jsonError('Source class and target classes are required');
         }
         
-        $sql = "
-            SELECT DISTINCT 
-                t.teacher_id,
-                u.first_name,
-                u.last_name,
-                u.email,
-                sub.name as subject_name,
-                COUNT(*) as periods_per_week
-            FROM timetables t
-            JOIN users u ON t.teacher_id = u.id
-            JOIN subjects sub ON t.subject_id = sub.id
-            WHERE t.school_id = ? 
-            AND t.class_id = ?
-            GROUP BY t.teacher_id, sub.name
-            ORDER BY u.first_name, u.last_name
-        ";
+        // Get source class timetable
+        $sourceSql = "SELECT * FROM timetables WHERE class_id = ? AND school_id = ?";
+        $sourceStmt = $db->prepare($sourceSql);
+        $sourceStmt->execute([$sourceClassId, $schoolId]);
+        $sourcePeriods = $sourceStmt->fetchAll(PDO::FETCH_ASSOC);
         
-        $stmt = $db->prepare($sql);
-        $stmt->execute([$schoolId, $classId]);
-        $teachers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($sourcePeriods)) {
+            jsonError('No timetable found for source class');
+        }
         
-        jsonResponse([
+        $copiedCount = 0;
+        $errors = [];
+        
+        foreach ($targetClassIds as $targetClassId) {
+            if ($overwrite) {
+                // Delete existing periods for target class
+                $deleteStmt = $db->prepare("DELETE FROM timetables WHERE class_id = ? AND school_id = ?");
+                $deleteStmt->execute([$targetClassId, $schoolId]);
+            }
+            
+            // Copy each period
+            foreach ($sourcePeriods as $period) {
+                $copySql = "
+                    INSERT INTO timetables (
+                        school_id, class_id, subject_id, teacher_id,
+                        room_number, day, start_time, end_time,
+                        period_number, is_break, academic_year_id, academic_term_id,
+                        created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+                ";
+                
+                try {
+                    $copyStmt = $db->prepare($copySql);
+                    $copyStmt->execute([
+                        $schoolId,
+                        $targetClassId,
+                        $period['subject_id'],
+                        $period['teacher_id'],
+                        $period['room_number'],
+                        $period['day'],
+                        $period['start_time'],
+                        $period['end_time'],
+                        $period['period_number'],
+                        $period['is_break'],
+                        $period['academic_year_id'] ?? 1,
+                        $period['academic_term_id'] ?? 1
+                    ]);
+                    
+                    // Update teacher's current weekly periods
+                    updateTeacherPeriods($db, $period['teacher_id'], $schoolId, 1);
+                    
+                    $copiedCount++;
+                } catch (Exception $e) {
+                    $errors[] = "Failed to copy to class $targetClassId: " . $e->getMessage();
+                }
+            }
+        }
+        
+        $response = [
             'success' => true,
-            'teachers' => $teachers,
-            'count' => count($teachers),
-            'class_id' => $classId,
+            'message' => "Timetable copied to " . count($targetClassIds) . " class(es)",
+            'copied' => $copiedCount,
             'timestamp' => date('Y-m-d H:i:s')
-        ]);
+        ];
+        
+        if (!empty($errors)) {
+            $response['warnings'] = $errors;
+        }
+        
+        jsonResponse($response);
         
     } catch (Exception $e) {
-        jsonError('Failed to get class teachers: ' . $e->getMessage());
+        jsonError('Failed to copy timetable: ' . $e->getMessage());
     }
 }
 
-// Function to get class subjects
-function getClassSubjects($db, $schoolId) {
+// Function to generate timetable
+function generateTimetable($db, $schoolId) {
     try {
-        $classId = $_GET['class_id'] ?? '';
-        if (empty($classId)) {
-            jsonError('Class ID parameter is required');
-        }
+        $grade = $_POST['grade'] ?? $_GET['grade'] ?? '';
         
-        $sql = "
-            SELECT DISTINCT 
-                t.subject_id,
-                s.name,
-                s.code,
-                s.type,
-                s.credit_hours,
-                COUNT(*) as periods_per_week,
-                GROUP_CONCAT(DISTINCT CONCAT(u.first_name, ' ', u.last_name)) as teachers
-            FROM timetables t
-            JOIN subjects s ON t.subject_id = s.id
-            LEFT JOIN users u ON t.teacher_id = u.id
-            WHERE t.school_id = ? 
-            AND t.class_id = ?
-            GROUP BY t.subject_id
-            ORDER BY s.name
-        ";
-        
-        $stmt = $db->prepare($sql);
-        $stmt->execute([$schoolId, $classId]);
-        $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+        // This would contain complex logic to auto-generate timetable
+        // For now, return success message
         jsonResponse([
             'success' => true,
-            'subjects' => $subjects,
-            'count' => count($subjects),
-            'class_id' => $classId,
+            'message' => 'Timetable generation feature coming soon',
+            'generated' => 0,
+            'grade' => $grade,
             'timestamp' => date('Y-m-d H:i:s')
         ]);
         
     } catch (Exception $e) {
-        jsonError('Failed to get class subjects: ' . $e->getMessage());
+        jsonError('Failed to generate timetable: ' . $e->getMessage());
     }
 }
+
+// ... [Include other existing functions from your API] ...
+
+?>

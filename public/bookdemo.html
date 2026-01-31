@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book a Demo | Academixsuite</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    h1,h2,h3 { font-family: 'Space Grotesk', sans-serif; }
+    .glass-nav {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 1rem;
+      margin: 1rem auto;
+      width: 95%;
+      max-width: 1200px;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+
+<!-- NAVBAR -->
+<nav class="glass-nav sticky top-4 z-[1000]">
+  <div class="flex items-center justify-between px-6 py-4">
+    <img src="./img/logo.png" class="h-14"/>
+
+    <div class="hidden lg:flex space-x-10 font-semibold text-slate-600 uppercase text-xs tracking-widest">
+      <a href="index.html">Platform</a>
+      <a href="capabilities.html">Capabilities</a>
+      <a href="pricingpage.html">Pricing</a>
+      <a href="blog.html">Blog</a>
+    </div>
+
+    <div class="hidden lg:flex items-center space-x-4">
+      <a href="loginpage.html" class="text-sm font-bold">Log In</a>
+      <a href="#demo-form" class="bg-slate-900 text-white px-6 py-2.5 rounded-full font-bold">
+        Book Demo
+      </a>
+    </div>
+
+    <button id="menuBtn" class="lg:hidden text-2xl">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+
+  <div id="mobileMenu" class="hidden lg:hidden px-6 pb-6">
+    <div class="flex flex-col space-y-5 font-bold">
+      <a href="index.html">Platform</a>
+      <a href="capabilities.html">Capabilities</a>
+      <a href="pricingpage.html">Pricing</a>
+      <a href="blog.html">Blog</a>
+      <hr>
+      <a href="loginpage.html">Log In</a>
+      <a href="#demo-form" class="bg-slate-900 text-white py-3 text-center rounded-full">
+        Book Demo
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="py-28 px-6 bg-slate-900 text-center text-white">
+  <h1 class="text-4xl md:text-6xl font-black mb-6">
+    See Academixsuite in Action
+  </h1>
+  <p class="max-w-3xl mx-auto text-slate-600 text-lg mb-10">
+    Watch how modern schools run everything — from administration
+    to teaching and parent engagement — on one powerful platform.
+  </p>
+</section>
+
+
+
+<!-- DEMO EXPERIENCES -->
+<section class="py-28 px-6 bg-slate-50">
+  <div class="container mx-auto max-w-6xl">
+
+    <!-- Section Header -->
+    <div class="text-center mb-20">
+      <h2 class="text-3xl md:text-5xl font-black mb-6">
+        Choose Your Demo Experience
+      </h2>
+      <p class="max-w-3xl mx-auto text-slate-600 text-lg">
+        See exactly how Academixsuite works for your role — from administration
+        to teaching, learning, and parent engagement.
+      </p>
+    </div>
+
+    <!-- Cards -->
+    <div class="grid lg:grid-cols-3 gap-10">
+
+      <!-- ADMIN / TEACHERS -->
+      <div class="bg-white rounded-3xl shadow-lg p-8 hover:shadow-xl transition">
+        <div class="mb-6">
+          <span class="inline-block bg-indigo-50 text-indigo-600 text-xs font-black px-4 py-1 rounded-full uppercase tracking-widest">
+            Admin & Teachers
+          </span>
+        </div>
+
+        <h3 class="text-2xl font-black mb-4">
+          School Administration Demo
+        </h3>
+
+        <p class="text-slate-600 mb-8">
+          Experience how school owners and administrators manage student records,
+          staff, attendance, fees, and reports — all from one powerful dashboard.
+        </p>
+
+        <ul class="space-y-3 text-sm font-bold text-slate-600 mb-10">
+          <li>✔ Smart attendance & class tracking</li>
+          <li>✔ Automated reports & analytics</li>
+          <li>✔ Staff & role management</li>
+          <li>✔ Centralized school operations</li>
+        </ul>
+
+        <a href="#demo-form"
+          class="inline-flex items-center justify-center w-full bg-slate-900 text-white py-4 rounded-full font-black hover:bg-indigo-600 transition">
+          Book Admin Demo
+        </a>
+      </div>
+
+      <!-- LEARNING MANAGEMENT -->
+      <div class="bg-white rounded-3xl shadow-lg p-8 hover:shadow-xl transition border-2 border-indigo-600">
+        <div class="mb-6">
+          <span class="inline-block bg-indigo-600 text-white text-xs font-black px-4 py-1 rounded-full uppercase tracking-widest">
+            Learning
+          </span>
+        </div>
+
+        <h3 class="text-2xl font-black mb-4">
+          Learning Management Demo
+        </h3>
+
+        <p class="text-slate-600 mb-8">
+          See how teachers deliver lessons, share materials, manage assignments,
+          and track student progress in real time — online or in-class.
+        </p>
+
+        <ul class="space-y-3 text-sm font-bold text-slate-600 mb-10">
+          <li>✔ Digital classrooms & lessons</li>
+          <li>✔ Assignments & grading</li>
+          <li>✔ Student performance tracking</li>
+          <li>✔ Secure learning environment</li>
+        </ul>
+
+        <a href="#demo-form"
+          class="inline-flex items-center justify-center w-full bg-indigo-600 text-white py-4 rounded-full font-black hover:bg-slate-900 transition">
+          Book Learning Demo
+        </a>
+      </div>
+
+      <!-- PARENTS / STUDENTS -->
+      <div class="bg-white rounded-3xl shadow-lg p-8 hover:shadow-xl transition">
+        <div class="mb-6">
+          <span class="inline-block bg-emerald-50 text-emerald-600 text-xs font-black px-4 py-1 rounded-full uppercase tracking-widest">
+            Parents & Students
+          </span>
+        </div>
+
+        <h3 class="text-2xl font-black mb-4">
+          Parent & Student Experience
+        </h3>
+
+        <p class="text-slate-600 mb-8">
+          Explore the parent and student portals — from fee payments and results
+          to announcements, messages, and academic progress.
+        </p>
+
+        <ul class="space-y-3 text-sm font-bold text-slate-600 mb-10">
+          <li>✔ Fee payments & receipts</li>
+          <li>✔ Academic results & reports</li>
+          <li>✔ School announcements</li>
+          <li>✔ Transparent communication</li>
+        </ul>
+
+        <a href="#demo-form"
+          class="inline-flex items-center justify-center w-full bg-slate-900 text-white py-4 rounded-full font-black hover:bg-emerald-600 transition">
+          Book Parent Demo
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO DEMO CARDS -->
+<section class="py-28 px-6">
+  <div class="container mx-auto max-w-6xl">
+
+    <div class="text-center mb-20">
+      <h2 class="text-3xl md:text-5xl font-black mb-6">
+        Watch Role-Based Demos
+      </h2>
+      <p class="max-w-3xl mx-auto text-slate-600 text-lg">
+        Choose a demo that matches your role and see exactly how
+        Academixsuite works for you.
+      </p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-10">
+
+      <!-- ADMIN VIDEO -->
+      <div class="group bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl transition">
+        <div class="relative">
+          <img src="./img/pic2.png" class="w-full h-56 object-cover">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center text-slate-900 text-xl group-hover:scale-110 transition">
+              <i class="fas fa-play"></i>
+            </div>
+          </div>
+        </div>
+        <div class="p-8">
+          <h3 class="text-xl font-black mb-3">Admin & Teachers Demo</h3>
+          <p class="text-slate-600 text-sm mb-6">
+            Attendance, reports, staff management, fees, and full
+            school control from one dashboard.
+          </p>
+          <a href="#demo-form" class="font-black text-indigo-600">
+            Book This Demo →
+          </a>
+        </div>
+      </div>
+
+      <!-- LMS VIDEO -->
+      <div class="group bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl transition border-2 border-indigo-600">
+        <div class="relative">
+          <img src="./img/pic.png" class="w-full h-56 object-cover">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl group-hover:scale-110 transition">
+              <i class="fas fa-play"></i>
+            </div>
+          </div>
+        </div>
+        <div class="p-8">
+          <h3 class="text-xl font-black mb-3">Learning Management Demo</h3>
+          <p class="text-slate-600 text-sm mb-6">
+            Digital classrooms, assignments, grading, and
+            real-time student progress tracking.
+          </p>
+          <a href="#demo-form" class="font-black text-indigo-600">
+            Book This Demo →
+          </a>
+        </div>
+      </div>
+
+      <!-- PARENT VIDEO -->
+      <div class="group bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-xl transition">
+        <div class="relative">
+          <img src="./img/pic3.png" class="w-full h-56 object-cover">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center text-slate-900 text-xl group-hover:scale-110 transition">
+              <i class="fas fa-play"></i>
+            </div>
+          </div>
+        </div>
+        <div class="p-8">
+          <h3 class="text-xl font-black mb-3">Parent & Student Demo</h3>
+          <p class="text-slate-600 text-sm mb-6">
+            Fees, results, announcements, and transparent
+            communication with schools.
+          </p>
+          <a href="#demo-form" class="font-black text-indigo-600">
+            Book This Demo →
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- DEMO FORM -->
+
+
+
+
+
+<!-- HOW IT WORKS -->
+<section class="bg-slate-900 py-24 text-slate-100 overflow-hidden">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-4xl font-black text-center mb-20">
+      Get Started  <span class="text-blue-500">3 Simple Steps</span>
+    </h2>
+
+    <div class="relative">
+      <div class="absolute left-1/2 top-0 h-full w-[2px] bg-slate-700 -translate-x-1/2"></div>
+
+      <!-- STEP 1 -->
+      <div class="grid md:grid-cols-2 gap-12 items-center mb-20 step step-left">
+        <div class="md:text-right">
+          <h3 class="text-2xl font-extrabold mb-3">1. Create Your Account</h3>
+          <p class="text-slate-400 text-sm max-w-md md:ml-auto">
+            Apply through our onboarding process and get instant access.
+          </p>
+        </div>
+        <div class="relative flex justify-center md:justify-start">
+          <span class="absolute left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-blue-600 border-4 border-slate-900"></span>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="grid md:grid-cols-2 gap-12 items-center mb-20 step step-right">
+        <div class="md:order-2">
+          <h3 class="text-2xl font-extrabold mb-3">2. Set Up Your Learning Space</h3>
+          <p class="text-slate-400 text-sm max-w-md">
+            Configure classes, staff, students, fees, and academics.
+          </p>
+        </div>
+        <div class="relative flex justify-center md:justify-end md:order-1">
+          <span class="absolute left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-indigo-600 border-4 border-slate-900"></span>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="grid md:grid-cols-2 gap-12 items-center step step-left">
+        <div class="md:text-right">
+          <h3 class="text-2xl font-extrabold mb-3">3. Manage & Scale</h3>
+          <p class="text-slate-400 text-sm max-w-md md:ml-auto">
+            Manage operations and scale effortlessly as you grow.
+          </p>
+        </div>
+        <div class="relative flex justify-center md:justify-start">
+          <span class="absolute left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-emerald-600 border-4 border-slate-900"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="demo-form" class="py-24 px-6 bg-slate-900">
+  <div class="container mx-auto max-w-3xl bg-white rounded-3xl shadow-xl p-8 md:p-12">
+
+    <h3 class="text-2xl font-black mb-8 text-center">
+      Book your personalized demo
+    </h3>
+
+    <form class="space-y-6">
+      <div class="grid md:grid-cols-2 gap-6">
+        <input class="border rounded-xl px-4 py-3" placeholder="School Name"/>
+        <input class="border rounded-xl px-4 py-3" placeholder="Your Full Name"/>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <input class="border rounded-xl px-4 py-3" placeholder="Email Address"/>
+        <input class="border rounded-xl px-4 py-3" placeholder="Phone Number"/>
+      </div>
+
+      <textarea rows="4" class="border rounded-xl px-4 py-3 w-full"
+        placeholder="What would you like to see in the demo?"></textarea>
+
+      <button class="w-full bg-slate-900 text-white py-4 rounded-full font-bold text-lg hover:bg-indigo-600 transition">
+        Book My Free Demo
+      </button>
+    </form>
+  </div>
+</section>
+
+<footer class="bg-white border-t border-slate-100 px-4 md:px-6">
+  <div class="container mx-auto pt-12 md:pt-24 pb-10 md:pb-16">
+
+    <!-- TOP GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-16 mb-12 md:mb-20">
+
+      <!-- BRAND / LINKS -->
+      <div class="md:col-span-2">
+        <!-- Logo -->
+        <div class="flex items-center space-x-2 mb-8">
+          <img src="./img/logo.png" alt="Academixsuite " class="h-8">
+        </div>
+
+        <!-- Links -->
+        <h5 class="font-black text-slate-900 uppercase text-xs tracking-widest mb-6">
+          Links
+        </h5>
+        <ul class="space-y-4 text-slate-500 font-bold text-sm">
+          <li><a href="blog.html" class="hover:text-blue-600 transition">Our Blog</a></li>
+          <li><a href="affliate.html" class="hover:text-blue-600 transition">Affiliate / Partnership</a></li>
+          <li><a href="loginpage.html" class="hover:text-blue-600 transition">Login</a></li>
+          <li><a href="#" class="hover:text-blue-600 transition">Schools</a></li>
+          <li><a href="uses.html" class="hover:text-blue-600 transition">Use Cases</a></li>
+        </ul>
+      </div>
+
+      <!-- COMPANY -->
+      <div>
+        <h5 class="font-black text-slate-900 uppercase text-xs tracking-widest mb-6">
+          Company
+        </h5>
+        <ul class="space-y-4 text-slate-500 font-bold text-sm">
+          <li><a href="About.html" class="hover:text-blue-600 transition">About Us</a></li>
+          <li><a href="capabilities" class="hover:text-blue-600 transition">Events</a></li>
+          <li><a href="privacy.html" class="hover:text-blue-600 transition">Privacy Policy</a></li>
+          <li><a href="terms.html" class="hover:text-blue-600 transition">Terms & Conditions</a></li>
+          <li><a href="pricingpage.html" class="hover:text-blue-600 transition">Pricing</a></li>
+          <li><a href="help.html" class="hover:text-blue-600 transition">Help</a></li>
+          <li><a href="contact.html" class="hover:text-blue-600 transition">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <!-- CONNECT -->
+      <div>
+        <h5 class="font-black text-slate-900 uppercase text-xs tracking-widest mb-6">
+          Connect
+        </h5>
+
+        <p class="text-slate-500 font-bold text-sm mb-3">
+          Location: Victoria Island
+        </p>
+        <p class="text-slate-500 font-bold text-sm mb-4">
+          Email: <a href="mailto:hello@edumanagepro.com" class="hover:text-blue-600 transition">
+            hello@edumanagepro.com
+          </a>
+        </p>
+
+        <!-- Social Icons -->
+        <div class="flex space-x-4 text-slate-400 text-xl pt-2">
+          <i class="fab fa-linkedin hover:text-blue-600 cursor-pointer"></i>
+          <i class="fab fa-twitter hover:text-blue-600 cursor-pointer"></i>
+          <i class="fab fa-instagram hover:text-blue-600 cursor-pointer"></i>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM -->
+    <div class="text-center pt-8 border-t border-slate-100">
+      <p class="text-slate-400 font-black text-[10px] uppercase tracking-[0.4em]">
+        © 2026 Academixsuite. Engineering Educational Excellence.
+      </p>
+    </div>
+
+  </div>
+</footer>
+<script>
+  const menuBtn = document.getElementById("menuBtn");
+  const mobileMenu = document.getElementById("mobileMenu");
+  const icon = menuBtn.querySelector("i");
+
+  menuBtn.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
+    icon.classList.toggle("fa-bars");
+    icon.classList.toggle("fa-times");
+  });
+</script>
+
+<!-- SCROLL SCRIPT -->
+<script>
+  const steps = document.querySelectorAll(".step");
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("show");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.2 }
+  );
+
+  steps.forEach(step => observer.observe(step));
+</script>
+</body>
+</html>

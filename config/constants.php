@@ -9,7 +9,7 @@ define('APP_NAME', 'AcademixSuite');
 define('APP_VERSION', '1.0.0');
 define('APP_ENV', IS_LOCAL ? 'development' : 'production');
 define('APP_DEBUG', IS_LOCAL);
-define('APP_URL', IS_LOCAL ? 'http://localhost/academixsuite' : 'https://yoursaas.com');
+define('APP_URL', IS_LOCAL ? 'http://localhost/academixsuite' : 'https://www.academixsuite.com');
 define('APP_LOGO', APP_URL . '/assets/images/logo.png');
 
 // File Upload Constants
@@ -100,7 +100,7 @@ define('DISPLAY_DATETIME_FORMAT', 'd M, Y h:i A');
 
 // Currency
 define('CURRENCY', 'NGN');
-define('CURRENCY_SYMBOL', '₦');
+//define('CURRENCY_SYMBOL', '₦');
 
 // Pagination
 define('ITEMS_PER_PAGE', 20);

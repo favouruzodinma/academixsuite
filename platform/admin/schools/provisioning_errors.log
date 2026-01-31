@@ -1,0 +1,1123 @@
+[14-Jan-2026 16:17:43 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 16:17:43 UTC] Timestamp: 2026-01-14 16:17:43
+[14-Jan-2026 17:17:43 Africa/Lagos] System files loaded
+[14-Jan-2026 17:17:43 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 17:17:43 Africa/Lagos] Platform database connected
+[14-Jan-2026 17:17:43 Africa/Lagos] Generated slug: nobsams-international
+[14-Jan-2026 17:17:43 Africa/Lagos] Selected plan: Starter
+[14-Jan-2026 17:17:43 Africa/Lagos] Prepared school data
+[14-Jan-2026 17:17:43 Africa/Lagos] Transaction rolled back: SQLSTATE[HY000]: General error: 1364 Field 'id' doesn't have a default value
+[14-Jan-2026 17:17:43 Africa/Lagos] Error trace: #0 /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php(286): PDOStatement->execute()
+#1 {main}
+[14-Jan-2026 17:17:43 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 17:17:43 Africa/Lagos] Error: SQLSTATE[HY000]: General error: 1364 Field 'id' doesn't have a default value
+[14-Jan-2026 17:17:43 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 17:17:43 Africa/Lagos] Line: 286
+[14-Jan-2026 16:17:53 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 16:17:53 UTC] Timestamp: 2026-01-14 16:17:53
+[14-Jan-2026 17:17:53 Africa/Lagos] System files loaded
+[14-Jan-2026 17:17:53 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 17:17:53 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 17:17:53 Africa/Lagos] Error: Security validation failed. Please refresh the page and try again.
+[14-Jan-2026 17:17:53 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 17:17:53 Africa/Lagos] Line: 69
+[14-Jan-2026 16:20:35 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 16:20:35 UTC] Timestamp: 2026-01-14 16:20:35
+[14-Jan-2026 17:20:35 Africa/Lagos] System files loaded
+[14-Jan-2026 17:20:35 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 17:20:35 Africa/Lagos] Platform database connected
+[14-Jan-2026 17:20:35 Africa/Lagos] Generated slug: brook-harry
+[14-Jan-2026 17:20:35 Africa/Lagos] Selected plan: Starter
+[14-Jan-2026 17:20:35 Africa/Lagos] Prepared school data
+[14-Jan-2026 17:20:35 Africa/Lagos] Transaction rolled back: SQLSTATE[HY000]: General error: 1364 Field 'id' doesn't have a default value
+[14-Jan-2026 17:20:35 Africa/Lagos] Error trace: #0 /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php(286): PDOStatement->execute()
+#1 {main}
+[14-Jan-2026 17:20:35 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 17:20:35 Africa/Lagos] Error: SQLSTATE[HY000]: General error: 1364 Field 'id' doesn't have a default value
+[14-Jan-2026 17:20:35 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 17:20:35 Africa/Lagos] Line: 286
+[14-Jan-2026 16:31:43 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 16:31:43 UTC] Timestamp: 2026-01-14 16:31:43
+[14-Jan-2026 17:31:43 Africa/Lagos] System files loaded
+[14-Jan-2026 17:31:43 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 17:31:43 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 17:31:43 Africa/Lagos] Error: Security validation failed. Please refresh the page and try again.
+[14-Jan-2026 17:31:43 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 17:31:43 Africa/Lagos] Line: 69
+[14-Jan-2026 16:33:48 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 16:33:48 UTC] Timestamp: 2026-01-14 16:33:48
+[14-Jan-2026 17:33:48 Africa/Lagos] System files loaded
+[14-Jan-2026 17:33:48 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 17:33:48 Africa/Lagos] Platform database connected
+[14-Jan-2026 17:33:48 Africa/Lagos] Generated slug: brook-harry
+[14-Jan-2026 17:33:48 Africa/Lagos] Selected plan: Starter
+[14-Jan-2026 17:33:48 Africa/Lagos] Prepared school data
+[14-Jan-2026 17:33:48 Africa/Lagos] School inserted with ID: 1
+[14-Jan-2026 17:33:48 Africa/Lagos] Updated database name to: school_1
+[14-Jan-2026 17:33:48 Africa/Lagos] Processing logo upload
+[14-Jan-2026 17:33:48 Africa/Lagos] Logo uploaded: assets/uploads/schools/1/logo-brook-harry.jpeg
+[14-Jan-2026 17:33:48 Africa/Lagos] Creating school database...
+[14-Jan-2026 17:33:48 Africa/Lagos] [INFO] Creating school database: school_1
+[14-Jan-2026 17:33:48 Africa/Lagos] [ERROR] Failed to create school database - Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_1' in /home/faragutb/public_html/lumowallet.com/includes/Database.php:126
+[14-Jan-2026 17:33:48 Africa/Lagos] Transaction rolled back: Database creation failed: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_1'
+[14-Jan-2026 17:33:48 Africa/Lagos] Error trace: #0 {main}
+[14-Jan-2026 17:33:48 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 17:33:48 Africa/Lagos] Error: Database creation failed: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_1'
+[14-Jan-2026 17:33:48 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 17:33:48 Africa/Lagos] Line: 346
+[14-Jan-2026 16:34:03 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 16:34:03 UTC] Timestamp: 2026-01-14 16:34:03
+[14-Jan-2026 17:34:03 Africa/Lagos] System files loaded
+[14-Jan-2026 17:34:03 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 17:34:03 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 17:34:03 Africa/Lagos] Error: Security validation failed. Please refresh the page and try again.
+[14-Jan-2026 17:34:03 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 17:34:03 Africa/Lagos] Line: 69
+[14-Jan-2026 16:43:44 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 16:43:44 UTC] Timestamp: 2026-01-14 16:43:44
+[14-Jan-2026 17:43:44 Africa/Lagos] System files loaded
+[14-Jan-2026 17:43:44 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 17:43:44 Africa/Lagos] Platform database connected
+[14-Jan-2026 17:43:44 Africa/Lagos] Generated slug: brook-harry
+[14-Jan-2026 17:43:44 Africa/Lagos] Selected plan: Starter
+[14-Jan-2026 17:43:44 Africa/Lagos] Prepared school data
+[14-Jan-2026 17:43:44 Africa/Lagos] School inserted with ID: 1
+[14-Jan-2026 17:43:44 Africa/Lagos] Updated database name to: school_1
+[14-Jan-2026 17:43:44 Africa/Lagos] Processing logo upload
+[14-Jan-2026 17:43:44 Africa/Lagos] Logo uploaded: assets/uploads/schools/1/logo-brook-harry.jpeg
+[14-Jan-2026 17:43:44 Africa/Lagos] Checking database creation permissions...
+[14-Jan-2026 17:43:44 Africa/Lagos] Database creation permissions: DENIED - SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'test_permission_1768409024'
+[14-Jan-2026 17:43:44 Africa/Lagos] Using single database mode (Tenant class not available or no CREATE permission)
+[14-Jan-2026 17:43:44 Africa/Lagos] Creating admin record in platform database...
+[14-Jan-2026 17:43:44 Africa/Lagos] Invalid admin role 'administrator' provided. Defaulting to 'owner'.
+[14-Jan-2026 17:43:44 Africa/Lagos] Admin record created with role: owner
+[14-Jan-2026 17:43:44 Africa/Lagos] Creating subscription record...
+[14-Jan-2026 17:43:44 Africa/Lagos] No active transaction to rollback: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'trial_ends_at' in 'INSERT INTO'
+[14-Jan-2026 17:43:44 Africa/Lagos] Error trace: #0 /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php(485): PDO->prepare('\n              ...')
+#1 {main}
+[14-Jan-2026 17:43:44 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 17:43:44 Africa/Lagos] Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'trial_ends_at' in 'INSERT INTO'
+[14-Jan-2026 17:43:44 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 17:43:44 Africa/Lagos] Line: 485
+[14-Jan-2026 16:51:58 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 16:51:58 UTC] Timestamp: 2026-01-14 16:51:58
+[14-Jan-2026 17:51:58 Africa/Lagos] System files loaded
+[14-Jan-2026 17:51:58 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 17:51:58 Africa/Lagos] Platform database connected
+[14-Jan-2026 17:51:58 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 17:51:58 Africa/Lagos] Error: An administrator with this email already exists in another school.
+[14-Jan-2026 17:51:58 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 17:51:58 Africa/Lagos] Line: 126
+[14-Jan-2026 16:52:21 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 16:52:21 UTC] Timestamp: 2026-01-14 16:52:21
+[14-Jan-2026 17:52:21 Africa/Lagos] System files loaded
+[14-Jan-2026 17:52:21 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 17:52:21 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 17:52:21 Africa/Lagos] Error: Security validation failed. Please refresh the page and try again.
+[14-Jan-2026 17:52:21 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 17:52:21 Africa/Lagos] Line: 69
+[14-Jan-2026 16:53:42 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 16:53:42 UTC] Timestamp: 2026-01-14 16:53:42
+[14-Jan-2026 17:53:42 Africa/Lagos] System files loaded
+[14-Jan-2026 17:53:42 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 17:53:42 Africa/Lagos] Platform database connected
+[14-Jan-2026 17:53:42 Africa/Lagos] Generated slug: brook-harry
+[14-Jan-2026 17:53:42 Africa/Lagos] Selected plan: Starter
+[14-Jan-2026 17:53:42 Africa/Lagos] Prepared school data
+[14-Jan-2026 17:53:42 Africa/Lagos] School inserted with ID: 1
+[14-Jan-2026 17:53:42 Africa/Lagos] Updated database name to: school_1
+[14-Jan-2026 17:53:42 Africa/Lagos] Processing logo upload
+[14-Jan-2026 17:53:42 Africa/Lagos] Logo uploaded: assets/uploads/schools/1/logo-brook-harry.jpeg
+[14-Jan-2026 17:53:42 Africa/Lagos] Skipping separate database creation (using shared database)...
+[14-Jan-2026 17:53:42 Africa/Lagos] Creating admin record in platform database...
+[14-Jan-2026 17:53:42 Africa/Lagos] Invalid admin role 'administrator' provided. Defaulting to 'owner'.
+[14-Jan-2026 17:53:42 Africa/Lagos] Admin record created with role: owner
+[14-Jan-2026 17:53:42 Africa/Lagos] Creating subscription record...
+[14-Jan-2026 17:53:42 Africa/Lagos] Subscriptions table has trial_ends_at column: NO
+[14-Jan-2026 17:53:42 Africa/Lagos] Transaction rolled back: SQLSTATE[01000]: Warning: 1265 Data truncated for column 'status' at row 1
+[14-Jan-2026 17:53:42 Africa/Lagos] Error trace: #0 /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php(475): PDOStatement->execute(Array)
+#1 {main}
+[14-Jan-2026 17:53:42 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 17:53:42 Africa/Lagos] Error: SQLSTATE[01000]: Warning: 1265 Data truncated for column 'status' at row 1
+[14-Jan-2026 17:53:42 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 17:53:42 Africa/Lagos] Line: 475
+[14-Jan-2026 16:56:41 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 16:56:42 UTC] Timestamp: 2026-01-14 16:56:42
+[14-Jan-2026 17:56:42 Africa/Lagos] System files loaded
+[14-Jan-2026 17:56:42 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 17:56:42 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 17:56:42 Africa/Lagos] Error: Security validation failed. Please refresh the page and try again.
+[14-Jan-2026 17:56:42 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 17:56:42 Africa/Lagos] Line: 69
+[14-Jan-2026 16:57:38 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 16:57:38 UTC] Timestamp: 2026-01-14 16:57:38
+[14-Jan-2026 17:57:38 Africa/Lagos] System files loaded
+[14-Jan-2026 17:57:38 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 17:57:38 Africa/Lagos] Platform database connected
+[14-Jan-2026 17:57:38 Africa/Lagos] Generated slug: brook-harry
+[14-Jan-2026 17:57:38 Africa/Lagos] Selected plan: Starter
+[14-Jan-2026 17:57:38 Africa/Lagos] Prepared school data
+[14-Jan-2026 17:57:38 Africa/Lagos] School inserted with ID: 2
+[14-Jan-2026 17:57:38 Africa/Lagos] Updated database name to: school_2
+[14-Jan-2026 17:57:38 Africa/Lagos] Processing logo upload
+[14-Jan-2026 17:57:38 Africa/Lagos] Logo uploaded: assets/uploads/schools/2/logo-brook-harry.jpeg
+[14-Jan-2026 17:57:38 Africa/Lagos] Skipping separate database creation (using shared database)...
+[14-Jan-2026 17:57:38 Africa/Lagos] Creating admin record in platform database...
+[14-Jan-2026 17:57:38 Africa/Lagos] Invalid admin role 'administrator' provided. Defaulting to 'owner'.
+[14-Jan-2026 17:57:38 Africa/Lagos] Admin record created with role: owner
+[14-Jan-2026 17:57:38 Africa/Lagos] Creating subscription record...
+[14-Jan-2026 17:57:38 Africa/Lagos] Subscriptions table has trial_ends_at column: NO
+[14-Jan-2026 17:57:38 Africa/Lagos] Subscription created with ID: 1
+[14-Jan-2026 17:57:38 Africa/Lagos] Creating trial invoice...
+[14-Jan-2026 17:57:38 Africa/Lagos] Invoices table has is_trial column: YES
+[14-Jan-2026 17:57:38 Africa/Lagos] Transaction rolled back: SQLSTATE[01000]: Warning: 1265 Data truncated for column 'status' at row 1
+[14-Jan-2026 17:57:38 Africa/Lagos] Error trace: #0 /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php(560): PDOStatement->execute(Array)
+#1 {main}
+[14-Jan-2026 17:57:38 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 17:57:38 Africa/Lagos] Error: SQLSTATE[01000]: Warning: 1265 Data truncated for column 'status' at row 1
+[14-Jan-2026 17:57:38 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 17:57:38 Africa/Lagos] Line: 560
+[14-Jan-2026 17:01:30 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 17:01:30 UTC] Timestamp: 2026-01-14 17:01:30
+[14-Jan-2026 18:01:30 Africa/Lagos] System files loaded
+[14-Jan-2026 18:01:30 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 18:01:30 Africa/Lagos] Platform database connected
+[14-Jan-2026 18:01:30 Africa/Lagos] Generated slug: brook-harry
+[14-Jan-2026 18:01:30 Africa/Lagos] Selected plan: Starter
+[14-Jan-2026 18:01:30 Africa/Lagos] Prepared school data
+[14-Jan-2026 18:01:30 Africa/Lagos] School inserted with ID: 3
+[14-Jan-2026 18:01:30 Africa/Lagos] Updated database name to: school_3
+[14-Jan-2026 18:01:30 Africa/Lagos] Processing logo upload
+[14-Jan-2026 18:01:30 Africa/Lagos] Logo uploaded: assets/uploads/schools/3/logo-brook-harry.jpeg
+[14-Jan-2026 18:01:30 Africa/Lagos] Skipping separate database creation (using shared database)...
+[14-Jan-2026 18:01:30 Africa/Lagos] Creating admin record in platform database...
+[14-Jan-2026 18:01:30 Africa/Lagos] Invalid admin role 'administrator' provided. Defaulting to 'owner'.
+[14-Jan-2026 18:01:30 Africa/Lagos] Admin record created with role: owner
+[14-Jan-2026 18:01:30 Africa/Lagos] Creating subscription record...
+[14-Jan-2026 18:01:30 Africa/Lagos] Subscriptions table has trial_ends_at column: NO
+[14-Jan-2026 18:01:30 Africa/Lagos] Subscription created with ID: 2
+[14-Jan-2026 18:01:30 Africa/Lagos] Creating trial invoice...
+[14-Jan-2026 18:01:30 Africa/Lagos] Invoices table has is_trial column: YES
+[14-Jan-2026 18:01:30 Africa/Lagos] Trial invoice created: INV-20260114-0003
+[14-Jan-2026 18:01:30 Africa/Lagos] Transaction committed successfully
+[14-Jan-2026 18:01:30 Africa/Lagos] [INFO] Creating directories at: /home/faragutb/assets/uploads/schools/
+[14-Jan-2026 18:01:31 Africa/Lagos] Failed to log email: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'to_email' in 'INSERT INTO'
+[14-Jan-2026 18:01:31 Africa/Lagos] Failed to log email: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'to_email' in 'INSERT INTO'
+[14-Jan-2026 18:01:31 Africa/Lagos] Provisioning emails logged to database - Trial: 7 days remaining
+[14-Jan-2026 18:01:31 Africa/Lagos] === PROVISIONING COMPLETED SUCCESSFULLY ===
+[14-Jan-2026 17:32:31 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 17:32:31 UTC] Timestamp: 2026-01-14 17:32:31
+[14-Jan-2026 18:32:31 Africa/Lagos] System files loaded
+[14-Jan-2026 18:32:31 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 18:32:31 Africa/Lagos] Platform database connected
+[14-Jan-2026 18:32:31 Africa/Lagos] Generated slug: brook-stone
+[14-Jan-2026 18:32:31 Africa/Lagos] Selected plan: Starter
+[14-Jan-2026 18:32:31 Africa/Lagos] Prepared school data
+[14-Jan-2026 18:32:31 Africa/Lagos] School inserted with ID: 4
+[14-Jan-2026 18:32:31 Africa/Lagos] Updated database name to: school_4
+[14-Jan-2026 18:32:31 Africa/Lagos] Processing logo upload
+[14-Jan-2026 18:32:32 Africa/Lagos] Logo uploaded: assets/uploads/schools/4/logo-brook-stone.jpeg
+[14-Jan-2026 18:32:32 Africa/Lagos] Skipping separate database creation (using shared database)...
+[14-Jan-2026 18:32:32 Africa/Lagos] Creating admin record in platform database...
+[14-Jan-2026 18:32:32 Africa/Lagos] Invalid admin role 'administrator' provided. Defaulting to 'owner'.
+[14-Jan-2026 18:32:32 Africa/Lagos] Admin record created with role: owner
+[14-Jan-2026 18:32:32 Africa/Lagos] Creating subscription record...
+[14-Jan-2026 18:32:32 Africa/Lagos] Subscriptions table has trial_ends_at column: NO
+[14-Jan-2026 18:32:32 Africa/Lagos] Subscription created with ID: 3
+[14-Jan-2026 18:32:32 Africa/Lagos] Creating trial invoice...
+[14-Jan-2026 18:32:32 Africa/Lagos] Invoices table has is_trial column: YES
+[14-Jan-2026 18:32:32 Africa/Lagos] Trial invoice created: INV-20260114-0004
+[14-Jan-2026 18:32:32 Africa/Lagos] Transaction committed successfully
+[14-Jan-2026 18:32:32 Africa/Lagos] Creating school directories...
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1327
+[14-Jan-2026 18:32:32 Africa/Lagos] Warning: Could not create directory: /home/assets/uploads/schools/4/logos
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1327
+[14-Jan-2026 18:32:32 Africa/Lagos] Warning: Could not create directory: /home/assets/uploads/schools/4/students
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1327
+[14-Jan-2026 18:32:32 Africa/Lagos] Warning: Could not create directory: /home/assets/uploads/schools/4/teachers
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1327
+[14-Jan-2026 18:32:32 Africa/Lagos] Warning: Could not create directory: /home/assets/uploads/schools/4/documents
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1327
+[14-Jan-2026 18:32:32 Africa/Lagos] Warning: Could not create directory: /home/assets/uploads/schools/4/reports
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1327
+[14-Jan-2026 18:32:32 Africa/Lagos] Warning: Could not create directory: /home/assets/uploads/schools/4/backups
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1327
+[14-Jan-2026 18:32:32 Africa/Lagos] Warning: Could not create directory: /home/assets/uploads/schools/4/attachments
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1327
+[14-Jan-2026 18:32:32 Africa/Lagos] Warning: Could not create directory: /home/assets/uploads/schools/4/profile-photos
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1327
+[14-Jan-2026 18:32:32 Africa/Lagos] Warning: Could not create directory: /home/assets/uploads/schools/4/homework
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1327
+[14-Jan-2026 18:32:32 Africa/Lagos] Warning: Could not create directory: /home/assets/uploads/schools/4/exam-papers
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1327
+[14-Jan-2026 18:32:32 Africa/Lagos] Warning: Could not create directory: /home/assets/uploads/schools/4/certificates
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1327
+[14-Jan-2026 18:32:32 Africa/Lagos] Warning: Could not create directory: /home/assets/uploads/schools/4/notices
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  file_put_contents(/home/assets/uploads/schools/4/.htaccess): Failed to open stream: No such file or directory in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1337
+[14-Jan-2026 18:32:32 Africa/Lagos] PHP Warning:  file_put_contents(/home/assets/uploads/schools/4/index.html): Failed to open stream: No such file or directory in /home/faragutb/public_html/lumowallet.com/includes/Tenant.php on line 1340
+[14-Jan-2026 18:32:32 Africa/Lagos] School directories created
+[14-Jan-2026 18:32:32 Africa/Lagos] Failed to log email: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'to_email' in 'INSERT INTO'
+[14-Jan-2026 18:32:32 Africa/Lagos] Failed to log email: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'to_email' in 'INSERT INTO'
+[14-Jan-2026 18:32:32 Africa/Lagos] Provisioning emails logged to database - Trial: 7 days remaining
+[14-Jan-2026 18:32:32 Africa/Lagos] === PROVISIONING COMPLETED SUCCESSFULLY ===
+[14-Jan-2026 17:47:00 UTC] === SCHOOL PROVISIONING STARTED ===
+[14-Jan-2026 17:47:00 UTC] Timestamp: 2026-01-14 17:47:00
+[14-Jan-2026 18:47:00 Africa/Lagos] System files loaded
+[14-Jan-2026 18:47:00 Africa/Lagos] Super Admin: Super Admin
+[14-Jan-2026 18:47:00 Africa/Lagos] Platform database connected
+[14-Jan-2026 18:47:00 Africa/Lagos] Generated slug: zube-tech
+[14-Jan-2026 18:47:00 Africa/Lagos] Selected plan: Starter
+[14-Jan-2026 18:47:00 Africa/Lagos] Prepared school data
+[14-Jan-2026 18:47:00 Africa/Lagos] School inserted with ID: 5
+[14-Jan-2026 18:47:00 Africa/Lagos] Processing logo upload
+[14-Jan-2026 18:47:00 Africa/Lagos] Logo uploaded: assets/uploads/schools/5/logo-zube-tech.jpeg
+[14-Jan-2026 18:47:00 Africa/Lagos] Creating separate school database...
+[14-Jan-2026 18:47:00 Africa/Lagos] === STARTING SCHOOL DATABASE CREATION ===
+[14-Jan-2026 18:47:00 Africa/Lagos] School ID: 5
+[14-Jan-2026 18:47:00 Africa/Lagos] Database Name: school_5
+[14-Jan-2026 18:47:00 Africa/Lagos] School Name: zube tech
+[14-Jan-2026 18:47:00 Africa/Lagos] Creating database: school_5
+[14-Jan-2026 18:47:00 Africa/Lagos] Database creation error: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_5'
+[14-Jan-2026 18:47:00 Africa/Lagos] DATABASE CREATION FAILED: Cannot create database 'school_5': SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_5'
+[14-Jan-2026 18:47:00 Africa/Lagos] Trace: #0 /home/faragutb/public_html/lumowallet.com/includes/Tenant.php(33): Tenant->createDatabase()
+#1 /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php(337): Tenant->createSchoolDatabase('5', 'zube tech', 'zubetechhub@gma...', 'gDU0Rc@2Se&Z')
+#2 {main}
+[14-Jan-2026 18:47:00 Africa/Lagos] Cleanup failed: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_5'
+[14-Jan-2026 18:47:00 Africa/Lagos] Transaction rolled back: School database creation failed: Failed to create school database: Cannot create database 'school_5': SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_5'
+[14-Jan-2026 18:47:00 Africa/Lagos] Error trace: #0 {main}
+[14-Jan-2026 18:47:00 Africa/Lagos] === PROVISIONING FAILED ===
+[14-Jan-2026 18:47:00 Africa/Lagos] Error: School database creation failed: Failed to create school database: Cannot create database 'school_5': SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_5'
+[14-Jan-2026 18:47:00 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[14-Jan-2026 18:47:00 Africa/Lagos] Line: 371
+[15-Jan-2026 01:22:27 UTC] === SCHOOL PROVISIONING STARTED ===
+[15-Jan-2026 01:22:27 UTC] Timestamp: 2026-01-15 01:22:27
+[15-Jan-2026 02:22:27 Africa/Lagos] System files loaded
+[15-Jan-2026 02:22:27 Africa/Lagos] Super Admin: Super Admin
+[15-Jan-2026 02:22:27 Africa/Lagos] Platform database connected
+[15-Jan-2026 02:22:27 Africa/Lagos] Generated slug: brook-harry
+[15-Jan-2026 02:22:27 Africa/Lagos] Selected plan: Professional
+[15-Jan-2026 02:22:27 Africa/Lagos] Prepared school data
+[15-Jan-2026 02:22:27 Africa/Lagos] School inserted with ID: 4
+[15-Jan-2026 02:22:27 Africa/Lagos] Processing logo upload
+[15-Jan-2026 02:22:27 Africa/Lagos] Logo uploaded: assets/uploads/schools/4/logo-brook-harry.jpeg
+[15-Jan-2026 02:22:27 Africa/Lagos] Creating separate school database...
+[15-Jan-2026 02:22:27 Africa/Lagos] [INFO] Creating school database: school_4
+[15-Jan-2026 02:22:27 Africa/Lagos] [ERROR] Failed to create school database - Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_4' in /home/faragutb/public_html/lumowallet.com/includes/Database.php:126
+[15-Jan-2026 02:22:27 Africa/Lagos] Transaction rolled back: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_4'
+[15-Jan-2026 02:22:27 Africa/Lagos] Error trace: #0 {main}
+[15-Jan-2026 02:22:27 Africa/Lagos] === PROVISIONING FAILED ===
+[15-Jan-2026 02:22:27 Africa/Lagos] Error: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_4'
+[15-Jan-2026 02:22:27 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[15-Jan-2026 02:22:27 Africa/Lagos] Line: 373
+[15-Jan-2026 01:30:56 UTC] === SCHOOL PROVISIONING STARTED ===
+[15-Jan-2026 01:30:56 UTC] Timestamp: 2026-01-15 01:30:56
+[15-Jan-2026 02:30:56 Africa/Lagos] System files loaded
+[15-Jan-2026 02:30:56 Africa/Lagos] Super Admin: Super Admin
+[15-Jan-2026 02:30:56 Africa/Lagos] Platform database connected
+[15-Jan-2026 02:30:56 Africa/Lagos] === PROVISIONING FAILED ===
+[15-Jan-2026 02:30:56 Africa/Lagos] Error: A school with this email already exists.
+[15-Jan-2026 02:30:56 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[15-Jan-2026 02:30:56 Africa/Lagos] Line: 119
+[15-Jan-2026 01:40:47 UTC] === SCHOOL PROVISIONING STARTED ===
+[15-Jan-2026 01:40:47 UTC] Timestamp: 2026-01-15 01:40:47
+[15-Jan-2026 02:40:47 Africa/Lagos] System files loaded
+[15-Jan-2026 02:40:47 Africa/Lagos] Super Admin: Super Admin
+[15-Jan-2026 02:40:47 Africa/Lagos] Platform database connected
+[15-Jan-2026 02:40:47 Africa/Lagos] Generated slug: brook-harry
+[15-Jan-2026 02:40:47 Africa/Lagos] Selected plan: Enterprise
+[15-Jan-2026 02:40:47 Africa/Lagos] Prepared school data
+[15-Jan-2026 02:40:47 Africa/Lagos] School inserted with ID: 5
+[15-Jan-2026 02:40:47 Africa/Lagos] Processing logo upload
+[15-Jan-2026 02:40:47 Africa/Lagos] Logo uploaded: assets/uploads/schools/5/logo-brook-harry.jpeg
+[15-Jan-2026 02:40:47 Africa/Lagos] Creating separate school database...
+[15-Jan-2026 02:40:47 Africa/Lagos] [INFO] Creating school database: school_5
+[15-Jan-2026 02:40:47 Africa/Lagos] [ERROR] Failed to create school database - Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_5' in /home/faragutb/public_html/lumowallet.com/includes/Database.php:149
+[15-Jan-2026 02:40:47 Africa/Lagos] Transaction rolled back: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_5'
+[15-Jan-2026 02:40:47 Africa/Lagos] Error trace: #0 {main}
+[15-Jan-2026 02:40:47 Africa/Lagos] === PROVISIONING FAILED ===
+[15-Jan-2026 02:40:47 Africa/Lagos] Error: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_5'
+[15-Jan-2026 02:40:47 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[15-Jan-2026 02:40:47 Africa/Lagos] Line: 373
+[15-Jan-2026 02:17:37 UTC] === SCHOOL PROVISIONING STARTED ===
+[15-Jan-2026 02:17:37 UTC] Timestamp: 2026-01-15 02:17:37
+[15-Jan-2026 03:17:37 Africa/Lagos] System files loaded
+[15-Jan-2026 03:17:37 Africa/Lagos] Super Admin: Super Admin
+[15-Jan-2026 03:17:37 Africa/Lagos] Platform database connected
+[15-Jan-2026 03:17:37 Africa/Lagos] Generated slug: brook-harry
+[15-Jan-2026 03:17:37 Africa/Lagos] Selected plan: Enterprise
+[15-Jan-2026 03:17:37 Africa/Lagos] Prepared school data
+[15-Jan-2026 03:17:37 Africa/Lagos] School inserted with ID: 6
+[15-Jan-2026 03:17:37 Africa/Lagos] Processing logo upload
+[15-Jan-2026 03:17:37 Africa/Lagos] Logo uploaded: assets/uploads/schools/6/logo-brook-harry.jpeg
+[15-Jan-2026 03:17:37 Africa/Lagos] Creating separate school database...
+[15-Jan-2026 03:17:37 Africa/Lagos] [INFO] Creating school database: school_6
+[15-Jan-2026 03:17:37 Africa/Lagos] [ERROR] Failed to create school database - Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_6' in /home/faragutb/public_html/lumowallet.com/includes/Database.php:149
+[15-Jan-2026 03:17:37 Africa/Lagos] Transaction rolled back: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_6'
+[15-Jan-2026 03:17:37 Africa/Lagos] Error trace: #0 {main}
+[15-Jan-2026 03:17:37 Africa/Lagos] === PROVISIONING FAILED ===
+[15-Jan-2026 03:17:37 Africa/Lagos] Error: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'faragutb_school_platform'@'localhost' to database 'school_6'
+[15-Jan-2026 03:17:37 Africa/Lagos] File: /home/faragutb/public_html/lumowallet.com/platform/admin/schools/process_provision.php
+[15-Jan-2026 03:17:37 Africa/Lagos] Line: 373
+[20-Jan-2026 07:40:34 UTC] === SCHOOL PROVISIONING STARTED ===
+[20-Jan-2026 07:40:34 UTC] Timestamp: 2026-01-20 07:40:34
+[20-Jan-2026 08:40:34 Africa/Lagos] System files loaded
+[20-Jan-2026 08:40:34 Africa/Lagos] Super Admin: Super Admin
+[20-Jan-2026 08:40:34 Africa/Lagos] Platform database connected
+[20-Jan-2026 08:40:34 Africa/Lagos] Generated slug: brook-harry-1768894834
+[20-Jan-2026 08:40:34 Africa/Lagos] Selected plan: Starter
+[20-Jan-2026 08:40:34 Africa/Lagos] Prepared school data
+[20-Jan-2026 08:40:34 Africa/Lagos] School inserted with ID: 6
+[20-Jan-2026 08:40:34 Africa/Lagos] Processing logo upload
+[20-Jan-2026 08:40:34 Africa/Lagos] Logo uploaded: assets/uploads/schools/6/logo-brook-harry-1768894834.jpeg
+[20-Jan-2026 08:40:34 Africa/Lagos] Creating separate school database...
+[20-Jan-2026 08:40:34 Africa/Lagos] [INFO] Creating school database: school_6
+[20-Jan-2026 08:40:34 Africa/Lagos] [ERROR] Failed to create school database - Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'academixsuite_platfrom'@'localhost' to database 'school_6' in /home/academixsuite/public_html/includes/Database.php:149
+[20-Jan-2026 08:40:34 Africa/Lagos] Transaction rolled back: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'academixsuite_platfrom'@'localhost' to database 'school_6'
+[20-Jan-2026 08:40:34 Africa/Lagos] Error trace: #0 {main}
+[20-Jan-2026 08:40:34 Africa/Lagos] === PROVISIONING FAILED ===
+[20-Jan-2026 08:40:34 Africa/Lagos] Error: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'academixsuite_platfrom'@'localhost' to database 'school_6'
+[20-Jan-2026 08:40:34 Africa/Lagos] File: /home/academixsuite/public_html/platform/admin/schools/process_provision.php
+[20-Jan-2026 08:40:34 Africa/Lagos] Line: 373
+[20-Jan-2026 13:54:43 UTC] === SCHOOL PROVISIONING STARTED ===
+[20-Jan-2026 13:54:43 UTC] Timestamp: 2026-01-20 13:54:43
+[20-Jan-2026 14:54:43 Africa/Lagos] System files loaded
+[20-Jan-2026 14:54:43 Africa/Lagos] Super Admin: Super Admin
+[20-Jan-2026 14:54:43 Africa/Lagos] Platform database connected
+[20-Jan-2026 14:54:43 Africa/Lagos] Generated slug: futo
+[20-Jan-2026 14:54:43 Africa/Lagos] Selected plan: Free Trial
+[20-Jan-2026 14:54:43 Africa/Lagos] Prepared school data
+[20-Jan-2026 14:54:43 Africa/Lagos] School inserted with ID: 7
+[20-Jan-2026 14:54:43 Africa/Lagos] Processing logo upload
+[20-Jan-2026 14:54:43 Africa/Lagos] Logo uploaded: assets/uploads/schools/7/logo-futo.jpg
+[20-Jan-2026 14:54:43 Africa/Lagos] Creating separate school database...
+[20-Jan-2026 14:54:43 Africa/Lagos] [INFO] Creating school database: school_7
+[20-Jan-2026 14:54:43 Africa/Lagos] [ERROR] Failed to create school database - Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'academixsuite_platfrom'@'localhost' to database 'school_7' in /home/academixsuite/public_html/includes/Database.php:149
+[20-Jan-2026 14:54:43 Africa/Lagos] Transaction rolled back: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'academixsuite_platfrom'@'localhost' to database 'school_7'
+[20-Jan-2026 14:54:43 Africa/Lagos] Error trace: #0 {main}
+[20-Jan-2026 14:54:43 Africa/Lagos] === PROVISIONING FAILED ===
+[20-Jan-2026 14:54:43 Africa/Lagos] Error: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'academixsuite_platfrom'@'localhost' to database 'school_7'
+[20-Jan-2026 14:54:43 Africa/Lagos] File: /home/academixsuite/public_html/platform/admin/schools/process_provision.php
+[20-Jan-2026 14:54:43 Africa/Lagos] Line: 373
+[28-Jan-2026 08:27:04 UTC] === SCHOOL PROVISIONING STARTED ===
+[28-Jan-2026 08:27:04 UTC] Timestamp: 2026-01-28 08:27:04
+[28-Jan-2026 09:27:04 Africa/Lagos] System files loaded
+[28-Jan-2026 09:27:04 Africa/Lagos] Super Admin: Super Admin
+[28-Jan-2026 09:27:04 Africa/Lagos] Platform database connected
+[28-Jan-2026 09:27:04 Africa/Lagos] Generated slug: damtoj
+[28-Jan-2026 09:27:04 Africa/Lagos] Selected plan: Starter
+[28-Jan-2026 09:27:04 Africa/Lagos] Prepared school data
+[28-Jan-2026 09:27:04 Africa/Lagos] School inserted with ID: 6
+[28-Jan-2026 09:27:04 Africa/Lagos] Processing logo upload
+[28-Jan-2026 09:27:04 Africa/Lagos] Logo uploaded: assets/uploads/schools/6/logo-damtoj.png
+[28-Jan-2026 09:27:04 Africa/Lagos] Creating separate school database...
+[28-Jan-2026 09:27:04 Africa/Lagos] [INFO] Creating school database: school_6
+[28-Jan-2026 09:27:04 Africa/Lagos] [ERROR] Failed to create school database - Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'academixsuite_platfrom'@'localhost' to database 'school_6' in /home/academixsuite/public_html/includes/Database.php:149
+[28-Jan-2026 09:27:04 Africa/Lagos] Transaction rolled back: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'academixsuite_platfrom'@'localhost' to database 'school_6'
+[28-Jan-2026 09:27:04 Africa/Lagos] Error trace: #0 {main}
+[28-Jan-2026 09:27:04 Africa/Lagos] === PROVISIONING FAILED ===
+[28-Jan-2026 09:27:04 Africa/Lagos] Error: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'academixsuite_platfrom'@'localhost' to database 'school_6'
+[28-Jan-2026 09:27:04 Africa/Lagos] File: /home/academixsuite/public_html/platform/admin/schools/process_provision.php
+[28-Jan-2026 09:27:04 Africa/Lagos] Line: 373
+[28-Jan-2026 08:42:12 UTC] === SCHOOL PROVISIONING STARTED ===
+[28-Jan-2026 08:42:12 UTC] Timestamp: 2026-01-28 08:42:12
+[28-Jan-2026 09:42:12 Africa/Lagos] System files loaded
+[28-Jan-2026 09:42:12 Africa/Lagos] Super Admin: Super Admin
+[28-Jan-2026 09:42:12 Africa/Lagos] Platform database connected
+[28-Jan-2026 09:42:12 Africa/Lagos] Generated slug: damtoj-1769589732
+[28-Jan-2026 09:42:12 Africa/Lagos] Selected plan: Starter
+[28-Jan-2026 09:42:12 Africa/Lagos] Prepared school data
+[28-Jan-2026 09:42:12 Africa/Lagos] School inserted with ID: 7
+[28-Jan-2026 09:42:12 Africa/Lagos] Processing logo upload
+[28-Jan-2026 09:42:12 Africa/Lagos] Logo uploaded: assets/uploads/schools/7/logo-damtoj-1769589732.png
+[28-Jan-2026 09:42:12 Africa/Lagos] Creating separate school database...
+[28-Jan-2026 09:42:12 Africa/Lagos] [INFO] Creating school database: school_7
+[28-Jan-2026 09:42:12 Africa/Lagos] [ERROR] Failed to create school database - Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'academixsuite_platfrom'@'localhost' to database 'school_7' in /home/academixsuite/public_html/includes/Database.php:130
+[28-Jan-2026 09:42:12 Africa/Lagos] Transaction rolled back: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'academixsuite_platfrom'@'localhost' to database 'school_7'
+[28-Jan-2026 09:42:12 Africa/Lagos] Error trace: #0 {main}
+[28-Jan-2026 09:42:12 Africa/Lagos] === PROVISIONING FAILED ===
+[28-Jan-2026 09:42:12 Africa/Lagos] Error: School database creation failed: Failed to create school database: Failed to create school database: Failed to create school database: SQLSTATE[42000]: Syntax error or access violation: 1044 Access denied for user 'academixsuite_platfrom'@'localhost' to database 'school_7'
+[28-Jan-2026 09:42:12 Africa/Lagos] File: /home/academixsuite/public_html/platform/admin/schools/process_provision.php
+[28-Jan-2026 09:42:12 Africa/Lagos] Line: 373
+[28-Jan-2026 08:51:05 UTC] === SCHOOL PROVISIONING STARTED ===
+[28-Jan-2026 08:51:05 UTC] Timestamp: 2026-01-28 08:51:05
+[28-Jan-2026 09:51:05 Africa/Lagos] System files loaded
+[28-Jan-2026 09:51:05 Africa/Lagos] Super Admin: Super Admin
+[28-Jan-2026 09:51:05 Africa/Lagos] Platform database connected
+[28-Jan-2026 09:51:05 Africa/Lagos] Generated slug: damtoj
+[28-Jan-2026 09:51:05 Africa/Lagos] Selected plan: Starter
+[28-Jan-2026 09:51:05 Africa/Lagos] Prepared school data
+[28-Jan-2026 09:51:05 Africa/Lagos] School inserted with ID: 8
+[28-Jan-2026 09:51:05 Africa/Lagos] Processing logo upload
+[28-Jan-2026 09:51:05 Africa/Lagos] Logo uploaded: assets/uploads/schools/8/logo-damtoj.png
+[28-Jan-2026 09:51:05 Africa/Lagos] Creating separate school database...
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Creating school database: school_8
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] School database connection established
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Creating COMPLETE schema with ALL tables for school ID: 8
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: academic_terms
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: academic_years
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: announcements
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: attendance
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: classes
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: class_subjects
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: events
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: exams
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: exam_grades
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: fee_categories
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: fee_structures
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: guardians
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: homework
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: invoices
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: invoice_items
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: payments
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: roles
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: sections
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: settings
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: students
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: subjects
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: teachers
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: timetables
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: users
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: user_roles
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: subscriptions
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: billing_history
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: payment_methods
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: invoices_v2
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: storage_usage
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: file_storage
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: performance_metrics
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: api_logs
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: audit_logs
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: security_logs
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: rate_limits
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: login_attempts
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: backup_history
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: recovery_points
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: notifications
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: email_templates
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: sms_logs
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: api_keys
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: api_usage
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: maintenance_logs
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Created table: system_alerts
+[28-Jan-2026 09:51:05 Africa/Lagos] [INFO] Inserted default data for school ID: 8
+[28-Jan-2026 09:51:06 Africa/Lagos] [INFO] Created performance indexes
+[28-Jan-2026 09:51:06 Africa/Lagos] [INFO] Created 46 tables successfully
+[28-Jan-2026 09:51:06 Africa/Lagos] [INFO] Admin user created with ID: 1
+[28-Jan-2026 09:51:06 Africa/Lagos] [INFO] Assigned role ID 2 to admin user
+[28-Jan-2026 09:51:06 Africa/Lagos] [ERROR] Error initializing subscription data - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '8' for key 'unique_school_subscription' in /home/academixsuite/public_html/includes/Tenant.php:2572
+[28-Jan-2026 09:51:06 Africa/Lagos] [INFO] Initial backup triggered for school ID: 8
+[28-Jan-2026 09:51:06 Africa/Lagos] [INFO] Total tables created in school_8: 46
+[28-Jan-2026 09:51:06 Africa/Lagos] Database created: school_8
+[28-Jan-2026 09:51:06 Africa/Lagos] [INFO] Creating directories at: /home/assets/uploads/schools/
+[28-Jan-2026 09:51:06 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/academixsuite/public_html/includes/Tenant.php on line 3063
+[28-Jan-2026 09:51:06 Africa/Lagos] [ERROR] Failed to create base uploads directory
+[28-Jan-2026 09:51:06 Africa/Lagos] School directories created
+[28-Jan-2026 09:51:06 Africa/Lagos] Successfully connected to school database. Table count: 46
+[28-Jan-2026 09:51:06 Africa/Lagos] Creating admin record in platform database...
+[28-Jan-2026 09:51:06 Africa/Lagos] Invalid admin role 'administrator' provided. Defaulting to 'owner'.
+[28-Jan-2026 09:51:06 Africa/Lagos] Admin record created with role: owner
+[28-Jan-2026 09:51:06 Africa/Lagos] Creating subscription record...
+[28-Jan-2026 09:51:06 Africa/Lagos] Subscriptions table has trial_ends_at column: YES
+[28-Jan-2026 09:51:06 Africa/Lagos] Subscription created with ID: 4
+[28-Jan-2026 09:51:06 Africa/Lagos] Creating trial invoice...
+[28-Jan-2026 09:51:06 Africa/Lagos] Invoices table has is_trial column: YES
+[28-Jan-2026 09:51:06 Africa/Lagos] Trial invoice created: INV-20260128-0008
+[28-Jan-2026 09:51:06 Africa/Lagos] No active transaction to rollback: There is no active transaction
+[28-Jan-2026 09:51:06 Africa/Lagos] Error trace: #0 /home/academixsuite/public_html/platform/admin/schools/process_provision.php(675): PDO->commit()
+#1 {main}
+[28-Jan-2026 09:51:06 Africa/Lagos] === PROVISIONING FAILED ===
+[28-Jan-2026 09:51:06 Africa/Lagos] Error: There is no active transaction
+[28-Jan-2026 09:51:06 Africa/Lagos] File: /home/academixsuite/public_html/platform/admin/schools/process_provision.php
+[28-Jan-2026 09:51:06 Africa/Lagos] Line: 675
+[28-Jan-2026 08:55:38 UTC] === SCHOOL PROVISIONING STARTED ===
+[28-Jan-2026 08:55:38 UTC] Timestamp: 2026-01-28 08:55:38
+[28-Jan-2026 09:55:38 Africa/Lagos] System files loaded
+[28-Jan-2026 09:55:38 Africa/Lagos] Super Admin: Super Admin
+[28-Jan-2026 09:55:38 Africa/Lagos] Platform database connected
+[28-Jan-2026 09:55:38 Africa/Lagos] === PROVISIONING FAILED ===
+[28-Jan-2026 09:55:38 Africa/Lagos] Error: A school with this email already exists.
+[28-Jan-2026 09:55:38 Africa/Lagos] File: /home/academixsuite/public_html/platform/admin/schools/process_provision.php
+[28-Jan-2026 09:55:38 Africa/Lagos] Line: 119
+[28-Jan-2026 08:56:03 UTC] === SCHOOL PROVISIONING STARTED ===
+[28-Jan-2026 08:56:03 UTC] Timestamp: 2026-01-28 08:56:03
+[28-Jan-2026 09:56:03 Africa/Lagos] System files loaded
+[28-Jan-2026 09:56:03 Africa/Lagos] Super Admin: Super Admin
+[28-Jan-2026 09:56:03 Africa/Lagos] === PROVISIONING FAILED ===
+[28-Jan-2026 09:56:03 Africa/Lagos] Error: Security validation failed. Please refresh the page and try again.
+[28-Jan-2026 09:56:03 Africa/Lagos] File: /home/academixsuite/public_html/platform/admin/schools/process_provision.php
+[28-Jan-2026 09:56:03 Africa/Lagos] Line: 69
+[28-Jan-2026 08:58:11 UTC] === SCHOOL PROVISIONING STARTED ===
+[28-Jan-2026 08:58:11 UTC] Timestamp: 2026-01-28 08:58:11
+[28-Jan-2026 09:58:11 Africa/Lagos] System files loaded
+[28-Jan-2026 09:58:11 Africa/Lagos] Super Admin: Super Admin
+[28-Jan-2026 09:58:11 Africa/Lagos] Platform database connected
+[28-Jan-2026 09:58:11 Africa/Lagos] Generated slug: mutexia-limited
+[28-Jan-2026 09:58:11 Africa/Lagos] Selected plan: Starter
+[28-Jan-2026 09:58:11 Africa/Lagos] Prepared school data
+[28-Jan-2026 09:58:11 Africa/Lagos] School inserted with ID: 9
+[28-Jan-2026 09:58:11 Africa/Lagos] Processing logo upload
+[28-Jan-2026 09:58:11 Africa/Lagos] Logo uploaded: assets/uploads/schools/9/logo-mutexia-limited.png
+[28-Jan-2026 09:58:11 Africa/Lagos] Creating separate school database...
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Creating school database: school_9
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] School database connection established
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Creating COMPLETE schema with ALL tables for school ID: 9
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: academic_terms
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: academic_years
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: announcements
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: attendance
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: classes
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: class_subjects
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: events
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: exams
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: exam_grades
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: fee_categories
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: fee_structures
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: guardians
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: homework
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: invoices
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: invoice_items
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: payments
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: roles
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: sections
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: settings
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: students
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: subjects
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: teachers
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: timetables
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: users
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: user_roles
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: subscriptions
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: billing_history
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: payment_methods
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: invoices_v2
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: storage_usage
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: file_storage
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: performance_metrics
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: api_logs
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: audit_logs
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: security_logs
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: rate_limits
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: login_attempts
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: backup_history
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: recovery_points
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: notifications
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: email_templates
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: sms_logs
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: api_keys
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: api_usage
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: maintenance_logs
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created table: system_alerts
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Inserted default data for school ID: 9
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created performance indexes
+[28-Jan-2026 09:58:11 Africa/Lagos] [INFO] Created 46 tables successfully
+[28-Jan-2026 09:58:12 Africa/Lagos] [INFO] Admin user created with ID: 1
+[28-Jan-2026 09:58:12 Africa/Lagos] [INFO] Assigned role ID 2 to admin user
+[28-Jan-2026 09:58:12 Africa/Lagos] [ERROR] Error initializing subscription data - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '9' for key 'unique_school_subscription' in /home/academixsuite/public_html/includes/Tenant.php:2572
+[28-Jan-2026 09:58:12 Africa/Lagos] [INFO] Initial backup triggered for school ID: 9
+[28-Jan-2026 09:58:12 Africa/Lagos] [INFO] Total tables created in school_9: 46
+[28-Jan-2026 09:58:12 Africa/Lagos] Database created: school_9
+[28-Jan-2026 09:58:12 Africa/Lagos] [INFO] Creating directories at: /home/assets/uploads/schools/
+[28-Jan-2026 09:58:12 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/academixsuite/public_html/includes/Tenant.php on line 3063
+[28-Jan-2026 09:58:12 Africa/Lagos] [ERROR] Failed to create base uploads directory
+[28-Jan-2026 09:58:12 Africa/Lagos] School directories created
+[28-Jan-2026 09:58:12 Africa/Lagos] Successfully connected to school database. Table count: 46
+[28-Jan-2026 09:58:12 Africa/Lagos] Creating admin record in platform database...
+[28-Jan-2026 09:58:12 Africa/Lagos] Invalid admin role 'administrator' provided. Defaulting to 'owner'.
+[28-Jan-2026 09:58:12 Africa/Lagos] Admin record created with role: owner
+[28-Jan-2026 09:58:12 Africa/Lagos] Creating subscription record...
+[28-Jan-2026 09:58:12 Africa/Lagos] Subscriptions table has trial_ends_at column: YES
+[28-Jan-2026 09:58:12 Africa/Lagos] Subscription created with ID: 5
+[28-Jan-2026 09:58:12 Africa/Lagos] Creating trial invoice...
+[28-Jan-2026 09:58:12 Africa/Lagos] Invoices table has is_trial column: YES
+[28-Jan-2026 09:58:12 Africa/Lagos] Trial invoice created: INV-20260128-0009
+[28-Jan-2026 09:58:12 Africa/Lagos] No active transaction to rollback: There is no active transaction
+[28-Jan-2026 09:58:12 Africa/Lagos] Error trace: #0 /home/academixsuite/public_html/platform/admin/schools/process_provision.php(675): PDO->commit()
+#1 {main}
+[28-Jan-2026 09:58:12 Africa/Lagos] === PROVISIONING FAILED ===
+[28-Jan-2026 09:58:12 Africa/Lagos] Error: There is no active transaction
+[28-Jan-2026 09:58:12 Africa/Lagos] File: /home/academixsuite/public_html/platform/admin/schools/process_provision.php
+[28-Jan-2026 09:58:12 Africa/Lagos] Line: 675
+[28-Jan-2026 09:30:28 UTC] === SCHOOL PROVISIONING STARTED ===
+[28-Jan-2026 09:30:28 UTC] Timestamp: 2026-01-28 09:30:28
+[28-Jan-2026 10:30:28 Africa/Lagos] System files loaded
+[28-Jan-2026 10:30:28 Africa/Lagos] Super Admin: Super Admin
+[28-Jan-2026 10:30:28 Africa/Lagos] Platform database connected
+[28-Jan-2026 10:30:28 Africa/Lagos] Generated slug: mutexia-limited
+[28-Jan-2026 10:30:28 Africa/Lagos] Selected plan: Starter
+[28-Jan-2026 10:30:28 Africa/Lagos] Prepared school data
+[28-Jan-2026 10:30:28 Africa/Lagos] Platform transaction started
+[28-Jan-2026 10:30:28 Africa/Lagos] School inserted with ID: 10
+[28-Jan-2026 10:30:28 Africa/Lagos] Processing logo upload
+[28-Jan-2026 10:30:28 Africa/Lagos] Logo uploaded: assets/uploads/schools/10/logo-mutexia-limited.png
+[28-Jan-2026 10:30:28 Africa/Lagos] Creating separate school database using Tenant class...
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Creating school database: school_10
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] School database connection established
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Creating COMPLETE schema with ALL tables for school ID: 10
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: academic_terms
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: academic_years
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: announcements
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: attendance
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: classes
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: class_subjects
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: events
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: exams
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: exam_grades
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: fee_categories
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: fee_structures
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: guardians
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: homework
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: invoices
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: invoice_items
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: payments
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: roles
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: sections
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: settings
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: students
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: subjects
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: teachers
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: timetables
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: users
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: user_roles
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: subscriptions
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: billing_history
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: payment_methods
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: invoices_v2
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: storage_usage
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: file_storage
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: performance_metrics
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: api_logs
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: audit_logs
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: security_logs
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: rate_limits
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: login_attempts
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: backup_history
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: recovery_points
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: notifications
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: email_templates
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: sms_logs
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: api_keys
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: api_usage
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: maintenance_logs
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created table: system_alerts
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Inserted default data for school ID: 10
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created performance indexes
+[28-Jan-2026 10:30:28 Africa/Lagos] [INFO] Created 46 tables successfully
+[28-Jan-2026 10:30:29 Africa/Lagos] [INFO] Admin user created with ID: 1
+[28-Jan-2026 10:30:29 Africa/Lagos] [INFO] Assigned role ID 2 to admin user
+[28-Jan-2026 10:30:29 Africa/Lagos] [ERROR] Error initializing subscription data - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '10' for key 'unique_school_subscription' in /home/academixsuite/public_html/includes/Tenant.php:2572
+[28-Jan-2026 10:30:29 Africa/Lagos] [INFO] Initial backup triggered for school ID: 10
+[28-Jan-2026 10:30:29 Africa/Lagos] [INFO] Total tables created in school_10: 46
+[28-Jan-2026 10:30:29 Africa/Lagos] Database created: school_10
+[28-Jan-2026 10:30:29 Africa/Lagos] [INFO] Creating directories at: /home/assets/uploads/schools/
+[28-Jan-2026 10:30:29 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/academixsuite/public_html/includes/Tenant.php on line 3063
+[28-Jan-2026 10:30:29 Africa/Lagos] [ERROR] Failed to create base uploads directory
+[28-Jan-2026 10:30:29 Africa/Lagos] School directories created
+[28-Jan-2026 10:30:29 Africa/Lagos] [INFO] Ensuring portal for: mutexia-limited
+[28-Jan-2026 10:30:29 Africa/Lagos] [INFO] School portal created successfully: /home/academixsuite/public_html/includes/../../tenant/mutexia-limited/
+[28-Jan-2026 10:30:29 Africa/Lagos] School portal ensured
+[28-Jan-2026 10:30:29 Africa/Lagos] Successfully connected to school database. Table count: 46
+[28-Jan-2026 10:30:29 Africa/Lagos] [ERROR] Failed to create admin user - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '10-mutexia1@gmail.com' for key 'unique_email_school' in /home/academixsuite/public_html/includes/Tenant.php:2394
+[28-Jan-2026 10:30:29 Africa/Lagos] Warning: Could not create admin user in school database
+[28-Jan-2026 10:30:29 Africa/Lagos] Creating admin record in platform database...
+[28-Jan-2026 10:30:29 Africa/Lagos] Invalid admin role 'administrator' provided. Defaulting to 'owner'.
+[28-Jan-2026 10:30:29 Africa/Lagos] Admin record created in platform with ID: 13, role: owner
+[28-Jan-2026 10:30:29 Africa/Lagos] Creating subscription record...
+[28-Jan-2026 10:30:29 Africa/Lagos] Subscriptions table has trial_ends_at column: YES
+[28-Jan-2026 10:30:29 Africa/Lagos] Subscription created with ID: 6
+[28-Jan-2026 10:30:29 Africa/Lagos] Creating trial invoice...
+[28-Jan-2026 10:30:29 Africa/Lagos] Invoices table has is_trial column: YES
+[28-Jan-2026 10:30:29 Africa/Lagos] Trial invoice created: INV-20260128-0010
+[28-Jan-2026 10:30:29 Africa/Lagos] No active transaction to rollback (but transactionStarted was true): There is no active transaction
+[28-Jan-2026 10:30:29 Africa/Lagos] Error trace: #0 /home/academixsuite/public_html/platform/admin/schools/process_provision.php(720): PDO->commit()
+#1 {main}
+[28-Jan-2026 10:30:29 Africa/Lagos] === PROVISIONING FAILED ===
+[28-Jan-2026 10:30:29 Africa/Lagos] Error: There is no active transaction
+[28-Jan-2026 10:30:29 Africa/Lagos] File: /home/academixsuite/public_html/platform/admin/schools/process_provision.php
+[28-Jan-2026 10:30:29 Africa/Lagos] Line: 720
+[28-Jan-2026 09:33:55 UTC] === SCHOOL PROVISIONING STARTED ===
+[28-Jan-2026 09:33:55 UTC] Timestamp: 2026-01-28 09:33:55
+[28-Jan-2026 10:33:55 Africa/Lagos] System files loaded
+[28-Jan-2026 10:33:55 Africa/Lagos] Super Admin: Super Admin
+[28-Jan-2026 10:33:55 Africa/Lagos] Platform database connected
+[28-Jan-2026 10:33:55 Africa/Lagos] Generated slug: mutexia-limited
+[28-Jan-2026 10:33:55 Africa/Lagos] Selected plan: Professional
+[28-Jan-2026 10:33:55 Africa/Lagos] Prepared school data
+[28-Jan-2026 10:33:55 Africa/Lagos] Platform transaction started
+[28-Jan-2026 10:33:55 Africa/Lagos] School inserted with ID: 11
+[28-Jan-2026 10:33:55 Africa/Lagos] Processing logo upload
+[28-Jan-2026 10:33:55 Africa/Lagos] Logo uploaded: assets/uploads/schools/11/logo-mutexia-limited.png
+[28-Jan-2026 10:33:55 Africa/Lagos] Creating separate school database using Tenant class...
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Creating school database: school_11
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] School database connection established
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Creating COMPLETE schema with ALL tables for school ID: 11
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: academic_terms
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: academic_years
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: announcements
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: attendance
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: classes
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: class_subjects
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: events
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: exams
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: exam_grades
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: fee_categories
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: fee_structures
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: guardians
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: homework
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: invoices
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: invoice_items
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: payments
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: roles
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: sections
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: settings
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: students
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: subjects
+[28-Jan-2026 10:33:55 Africa/Lagos] [INFO] Created table: teachers
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: timetables
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: users
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: user_roles
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: subscriptions
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: billing_history
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: payment_methods
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: invoices_v2
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: storage_usage
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: file_storage
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: performance_metrics
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: api_logs
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: audit_logs
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: security_logs
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: rate_limits
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: login_attempts
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: backup_history
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: recovery_points
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: notifications
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: email_templates
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: sms_logs
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: api_keys
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: api_usage
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: maintenance_logs
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created table: system_alerts
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Inserted default data for school ID: 11
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created performance indexes
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Created 46 tables successfully
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Admin user created with ID: 1
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Assigned role ID 2 to admin user
+[28-Jan-2026 10:33:56 Africa/Lagos] [ERROR] Error initializing subscription data - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '11' for key 'unique_school_subscription' in /home/academixsuite/public_html/includes/Tenant.php:2572
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Initial backup triggered for school ID: 11
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Total tables created in school_11: 46
+[28-Jan-2026 10:33:56 Africa/Lagos] Database created: school_11
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Creating directories at: /home/assets/uploads/schools/
+[28-Jan-2026 10:33:56 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/academixsuite/public_html/includes/Tenant.php on line 3063
+[28-Jan-2026 10:33:56 Africa/Lagos] [ERROR] Failed to create base uploads directory
+[28-Jan-2026 10:33:56 Africa/Lagos] School directories created
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Ensuring portal for: mutexia-limited
+[28-Jan-2026 10:33:56 Africa/Lagos] [INFO] Portal already exists: /home/academixsuite/public_html/includes/../../tenant/mutexia-limited/
+[28-Jan-2026 10:33:56 Africa/Lagos] School portal ensured
+[28-Jan-2026 10:33:56 Africa/Lagos] Successfully connected to school database. Table count: 46
+[28-Jan-2026 10:33:56 Africa/Lagos] [ERROR] Failed to create admin user - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '11-mutexia1@gmail.com' for key 'unique_email_school' in /home/academixsuite/public_html/includes/Tenant.php:2394
+[28-Jan-2026 10:33:56 Africa/Lagos] Warning: Could not create admin user in school database
+[28-Jan-2026 10:33:56 Africa/Lagos] Creating admin record in platform database...
+[28-Jan-2026 10:33:56 Africa/Lagos] Invalid admin role 'administrator' provided. Defaulting to 'owner'.
+[28-Jan-2026 10:33:56 Africa/Lagos] Admin record created in platform with ID: 14, role: owner
+[28-Jan-2026 10:33:56 Africa/Lagos] Creating subscription record...
+[28-Jan-2026 10:33:56 Africa/Lagos] Subscriptions table has trial_ends_at column: YES
+[28-Jan-2026 10:33:56 Africa/Lagos] Subscription created with ID: 7
+[28-Jan-2026 10:33:56 Africa/Lagos] Creating trial invoice...
+[28-Jan-2026 10:33:56 Africa/Lagos] Invoices table has is_trial column: YES
+[28-Jan-2026 10:33:56 Africa/Lagos] Trial invoice created: INV-20260128-0011
+[28-Jan-2026 10:33:56 Africa/Lagos] No active transaction to rollback (but transactionStarted was true): There is no active transaction
+[28-Jan-2026 10:33:56 Africa/Lagos] Error trace: #0 /home/academixsuite/public_html/platform/admin/schools/process_provision.php(720): PDO->commit()
+#1 {main}
+[28-Jan-2026 10:33:56 Africa/Lagos] === PROVISIONING FAILED ===
+[28-Jan-2026 10:33:56 Africa/Lagos] Error: There is no active transaction
+[28-Jan-2026 10:33:56 Africa/Lagos] File: /home/academixsuite/public_html/platform/admin/schools/process_provision.php
+[28-Jan-2026 10:33:56 Africa/Lagos] Line: 720
+[28-Jan-2026 09:47:57 UTC] === SCHOOL PROVISIONING STARTED ===
+[28-Jan-2026 09:47:57 UTC] Timestamp: 2026-01-28 09:47:57
+[28-Jan-2026 10:47:57 Africa/Lagos] System files loaded
+[28-Jan-2026 10:47:57 Africa/Lagos] Super Admin: Super Admin
+[28-Jan-2026 10:47:57 Africa/Lagos] Platform database connected
+[28-Jan-2026 10:47:57 Africa/Lagos] Generated slug: mutexia-limited
+[28-Jan-2026 10:47:57 Africa/Lagos] Selected plan: Professional
+[28-Jan-2026 10:47:57 Africa/Lagos] Prepared school data
+[28-Jan-2026 10:47:57 Africa/Lagos] Platform transaction started
+[28-Jan-2026 10:47:57 Africa/Lagos] School inserted with ID: 12
+[28-Jan-2026 10:47:57 Africa/Lagos] Processing logo upload
+[28-Jan-2026 10:47:57 Africa/Lagos] Logo uploaded: assets/uploads/schools/12/logo-mutexia-limited.png
+[28-Jan-2026 10:47:57 Africa/Lagos] Creating separate school database using Tenant class...
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Creating school database: school_12
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] School database connection established
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Creating COMPLETE schema with ALL tables for school ID: 12
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: academic_terms
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: academic_years
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: announcements
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: attendance
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: classes
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: class_subjects
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: events
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: exams
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: exam_grades
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: fee_categories
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: fee_structures
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: guardians
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: homework
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: invoices
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: invoice_items
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: payments
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: roles
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: sections
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: settings
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: students
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: subjects
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: teachers
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: timetables
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: users
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: user_roles
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: subscriptions
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: billing_history
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: payment_methods
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: invoices_v2
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: storage_usage
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: file_storage
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: performance_metrics
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: api_logs
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: audit_logs
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: security_logs
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: rate_limits
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: login_attempts
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: backup_history
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: recovery_points
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: notifications
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: email_templates
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: sms_logs
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: api_keys
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: api_usage
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: maintenance_logs
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created table: system_alerts
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Inserted default data for school ID: 12
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created performance indexes
+[28-Jan-2026 10:47:57 Africa/Lagos] [INFO] Created 46 tables successfully
+[28-Jan-2026 10:47:58 Africa/Lagos] [INFO] Admin user created with ID: 1
+[28-Jan-2026 10:47:58 Africa/Lagos] [INFO] Assigned role ID 2 to admin user
+[28-Jan-2026 10:47:58 Africa/Lagos] [ERROR] Error initializing subscription data - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '12' for key 'unique_school_subscription' in /home/academixsuite/public_html/includes/Tenant.php:2572
+[28-Jan-2026 10:47:58 Africa/Lagos] [INFO] Initial backup triggered for school ID: 12
+[28-Jan-2026 10:47:58 Africa/Lagos] [INFO] Total tables created in school_12: 46
+[28-Jan-2026 10:47:58 Africa/Lagos] Database created: school_12
+[28-Jan-2026 10:47:58 Africa/Lagos] [INFO] Creating directories at: /home/assets/uploads/schools/
+[28-Jan-2026 10:47:58 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/academixsuite/public_html/includes/Tenant.php on line 3063
+[28-Jan-2026 10:47:58 Africa/Lagos] [ERROR] Failed to create base uploads directory
+[28-Jan-2026 10:47:58 Africa/Lagos] School directories created
+[28-Jan-2026 10:47:58 Africa/Lagos] [INFO] Ensuring portal for: mutexia-limited
+[28-Jan-2026 10:47:58 Africa/Lagos] [INFO] Portal already exists: /home/academixsuite/public_html/includes/../../tenant/mutexia-limited/
+[28-Jan-2026 10:47:58 Africa/Lagos] School portal ensured
+[28-Jan-2026 10:47:58 Africa/Lagos] Successfully connected to school database. Table count: 46
+[28-Jan-2026 10:47:58 Africa/Lagos] [ERROR] Failed to create admin user - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '12-mutexia1@gmail.com' for key 'unique_email_school' in /home/academixsuite/public_html/includes/Tenant.php:2394
+[28-Jan-2026 10:47:58 Africa/Lagos] Warning: Could not create admin user in school database
+[28-Jan-2026 10:47:58 Africa/Lagos] Creating admin record in platform database...
+[28-Jan-2026 10:47:58 Africa/Lagos] Invalid admin role 'administrator' provided. Defaulting to 'owner'.
+[28-Jan-2026 10:47:58 Africa/Lagos] Admin record created in platform with ID: 15, role: owner
+[28-Jan-2026 10:47:58 Africa/Lagos] Creating subscription record...
+[28-Jan-2026 10:47:58 Africa/Lagos] Subscriptions table has trial_ends_at column: YES
+[28-Jan-2026 10:47:58 Africa/Lagos] Subscription created with ID: 8
+[28-Jan-2026 10:47:58 Africa/Lagos] Creating trial invoice...
+[28-Jan-2026 10:47:58 Africa/Lagos] Invoices table has is_trial column: YES
+[28-Jan-2026 10:47:58 Africa/Lagos] Trial invoice created: INV-20260128-0012
+[28-Jan-2026 10:47:58 Africa/Lagos] No active transaction to rollback (but transactionStarted was true): There is no active transaction
+[28-Jan-2026 10:47:58 Africa/Lagos] Error trace: #0 /home/academixsuite/public_html/platform/admin/schools/process_provision.php(720): PDO->commit()
+#1 {main}
+[28-Jan-2026 10:47:58 Africa/Lagos] === PROVISIONING FAILED ===
+[28-Jan-2026 10:47:58 Africa/Lagos] Error: There is no active transaction
+[28-Jan-2026 10:47:58 Africa/Lagos] File: /home/academixsuite/public_html/platform/admin/schools/process_provision.php
+[28-Jan-2026 10:47:58 Africa/Lagos] Line: 720
+[28-Jan-2026 09:53:47 UTC] === SCHOOL PROVISIONING STARTED ===
+[28-Jan-2026 09:53:47 UTC] Timestamp: 2026-01-28 09:53:47
+[28-Jan-2026 10:53:47 Africa/Lagos] System files loaded
+[28-Jan-2026 10:53:47 Africa/Lagos] Super Admin: Super Admin
+[28-Jan-2026 10:53:47 Africa/Lagos] Platform database connected
+[28-Jan-2026 10:53:47 Africa/Lagos] Generated slug: spring-blooms
+[28-Jan-2026 10:53:47 Africa/Lagos] Selected plan: Professional
+[28-Jan-2026 10:53:47 Africa/Lagos] Prepared school data
+[28-Jan-2026 10:53:47 Africa/Lagos] Platform transaction started
+[28-Jan-2026 10:53:47 Africa/Lagos] School inserted with ID: 13
+[28-Jan-2026 10:53:47 Africa/Lagos] Processing logo upload
+[28-Jan-2026 10:53:47 Africa/Lagos] Logo uploaded: assets/uploads/schools/13/logo-spring-blooms.png
+[28-Jan-2026 10:53:47 Africa/Lagos] Creating separate school database using Tenant class...
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Creating school database: school_13
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] School database connection established
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Creating COMPLETE schema with ALL tables for school ID: 13
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: academic_terms
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: academic_years
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: announcements
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: attendance
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: classes
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: class_subjects
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: events
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: exams
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: exam_grades
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: fee_categories
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: fee_structures
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: guardians
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: homework
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: invoices
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: invoice_items
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: payments
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: roles
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: sections
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: settings
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: students
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: subjects
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: teachers
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: timetables
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: users
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: user_roles
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: subscriptions
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: billing_history
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: payment_methods
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: invoices_v2
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: storage_usage
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: file_storage
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: performance_metrics
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: api_logs
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: audit_logs
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: security_logs
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: rate_limits
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: login_attempts
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: backup_history
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: recovery_points
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: notifications
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: email_templates
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: sms_logs
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: api_keys
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: api_usage
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: maintenance_logs
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created table: system_alerts
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Inserted default data for school ID: 13
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created performance indexes
+[28-Jan-2026 10:53:47 Africa/Lagos] [INFO] Created 46 tables successfully
+[28-Jan-2026 10:53:48 Africa/Lagos] [INFO] Admin user created with ID: 1
+[28-Jan-2026 10:53:48 Africa/Lagos] [INFO] Assigned role ID 2 to admin user
+[28-Jan-2026 10:53:48 Africa/Lagos] [ERROR] Error initializing subscription data - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '13' for key 'unique_school_subscription' in /home/academixsuite/public_html/includes/Tenant.php:2572
+[28-Jan-2026 10:53:48 Africa/Lagos] [INFO] Initial backup triggered for school ID: 13
+[28-Jan-2026 10:53:48 Africa/Lagos] [INFO] Total tables created in school_13: 46
+[28-Jan-2026 10:53:48 Africa/Lagos] Database created: school_13
+[28-Jan-2026 10:53:48 Africa/Lagos] [INFO] Creating directories at: /home/assets/uploads/schools/
+[28-Jan-2026 10:53:48 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/academixsuite/public_html/includes/Tenant.php on line 3063
+[28-Jan-2026 10:53:48 Africa/Lagos] [ERROR] Failed to create base uploads directory
+[28-Jan-2026 10:53:48 Africa/Lagos] School directories created
+[28-Jan-2026 10:53:48 Africa/Lagos] [INFO] Ensuring portal for: spring-blooms
+[28-Jan-2026 10:53:48 Africa/Lagos] [INFO] School portal created successfully: /home/academixsuite/public_html/includes/../../tenant/spring-blooms/
+[28-Jan-2026 10:53:48 Africa/Lagos] School portal ensured
+[28-Jan-2026 10:53:48 Africa/Lagos] Successfully connected to school database. Table count: 46
+[28-Jan-2026 10:53:48 Africa/Lagos] [ERROR] Failed to create admin user - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '13-favourhenry05@gmail.com' for key 'unique_email_school' in /home/academixsuite/public_html/includes/Tenant.php:2394
+[28-Jan-2026 10:53:48 Africa/Lagos] Warning: Could not create admin user in school database
+[28-Jan-2026 10:53:48 Africa/Lagos] Creating admin record in platform database...
+[28-Jan-2026 10:53:48 Africa/Lagos] Invalid admin role 'administrator' provided. Defaulting to 'owner'.
+[28-Jan-2026 10:53:48 Africa/Lagos] Admin record created in platform with ID: 16, role: owner
+[28-Jan-2026 10:53:48 Africa/Lagos] Creating subscription record...
+[28-Jan-2026 10:53:48 Africa/Lagos] Subscriptions table has trial_ends_at column: YES
+[28-Jan-2026 10:53:48 Africa/Lagos] Subscription created with ID: 9
+[28-Jan-2026 10:53:48 Africa/Lagos] Creating trial invoice...
+[28-Jan-2026 10:53:48 Africa/Lagos] Invoices table has is_trial column: YES
+[28-Jan-2026 10:53:48 Africa/Lagos] Trial invoice created: INV-20260128-0013
+[28-Jan-2026 10:53:48 Africa/Lagos] No active transaction to rollback (but transactionStarted was true): There is no active transaction
+[28-Jan-2026 10:53:48 Africa/Lagos] Error trace: #0 /home/academixsuite/public_html/platform/admin/schools/process_provision.php(720): PDO->commit()
+#1 {main}
+[28-Jan-2026 10:53:48 Africa/Lagos] === PROVISIONING FAILED ===
+[28-Jan-2026 10:53:48 Africa/Lagos] Error: There is no active transaction
+[28-Jan-2026 10:53:48 Africa/Lagos] File: /home/academixsuite/public_html/platform/admin/schools/process_provision.php
+[28-Jan-2026 10:53:48 Africa/Lagos] Line: 720
+[28-Jan-2026 14:22:28 UTC] === SCHOOL PROVISIONING STARTED ===
+[28-Jan-2026 14:22:28 UTC] Timestamp: 2026-01-28 14:22:28
+[28-Jan-2026 15:22:28 Africa/Lagos] System files loaded
+[28-Jan-2026 15:22:28 Africa/Lagos] Super Admin: Super Admin
+[28-Jan-2026 15:22:28 Africa/Lagos] Platform database connected
+[28-Jan-2026 15:22:28 Africa/Lagos] Generated slug: loretto
+[28-Jan-2026 15:22:28 Africa/Lagos] Selected plan: Enterprise
+[28-Jan-2026 15:22:28 Africa/Lagos] Prepared school data
+[28-Jan-2026 15:22:28 Africa/Lagos] Auto-commit status: ON
+[28-Jan-2026 15:22:28 Africa/Lagos] Platform transaction started successfully
+[28-Jan-2026 15:22:28 Africa/Lagos] School inserted with ID: 14
+[28-Jan-2026 15:22:28 Africa/Lagos] Processing logo upload
+[28-Jan-2026 15:22:28 Africa/Lagos] Logo uploaded: assets/uploads/schools/14/logo-loretto.png
+[28-Jan-2026 15:22:28 Africa/Lagos] Creating separate school database using Tenant class...
+[28-Jan-2026 15:22:28 Africa/Lagos] Transaction status before database creation: ACTIVE
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Creating school database: school_14
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] School database connection established
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Creating COMPLETE schema with ALL tables for school ID: 14
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: academic_terms
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: academic_years
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: announcements
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: attendance
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: classes
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: class_subjects
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: events
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: exams
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: exam_grades
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: fee_categories
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: fee_structures
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: guardians
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: homework
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: invoices
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: invoice_items
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: payments
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: roles
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: sections
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: settings
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: students
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: subjects
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: teachers
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: timetables
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: users
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: user_roles
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: subscriptions
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: billing_history
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: payment_methods
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: invoices_v2
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: storage_usage
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: file_storage
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: performance_metrics
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: api_logs
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: audit_logs
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: security_logs
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: rate_limits
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: login_attempts
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: backup_history
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: recovery_points
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: notifications
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: email_templates
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: sms_logs
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: api_keys
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: api_usage
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: maintenance_logs
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created table: system_alerts
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Inserted default data for school ID: 14
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created performance indexes
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Created 46 tables successfully
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Admin user created with ID: 1
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Assigned role ID 2 to admin user
+[28-Jan-2026 15:22:28 Africa/Lagos] [ERROR] Error initializing subscription data - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '14' for key 'unique_school_subscription' in /home/academixsuite/public_html/includes/Tenant.php:2572
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Initial backup triggered for school ID: 14
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Total tables created in school_14: 46
+[28-Jan-2026 15:22:28 Africa/Lagos] Transaction status after database creation: ACTIVE
+[28-Jan-2026 15:22:28 Africa/Lagos] Database created: school_14
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Creating directories at: /home/assets/uploads/schools/
+[28-Jan-2026 15:22:28 Africa/Lagos] PHP Warning:  mkdir(): Permission denied in /home/academixsuite/public_html/includes/Tenant.php on line 3063
+[28-Jan-2026 15:22:28 Africa/Lagos] [ERROR] Failed to create base uploads directory
+[28-Jan-2026 15:22:28 Africa/Lagos] School directories created
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] Ensuring portal for: loretto
+[28-Jan-2026 15:22:28 Africa/Lagos] [INFO] School portal created successfully: /home/academixsuite/public_html/includes/../../tenant/loretto/
+[28-Jan-2026 15:22:28 Africa/Lagos] School portal ensured
+[28-Jan-2026 15:22:28 Africa/Lagos] Successfully connected to school database. Table count: 46
+[28-Jan-2026 15:22:29 Africa/Lagos] [ERROR] Failed to create admin user - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '14-webtester@gmail.com' for key 'unique_email_school' in /home/academixsuite/public_html/includes/Tenant.php:2394
+[28-Jan-2026 15:22:29 Africa/Lagos] Warning: Could not create admin user in school database
+[28-Jan-2026 15:22:29 Africa/Lagos] Creating admin record in platform database...
+[28-Jan-2026 15:22:29 Africa/Lagos] Invalid admin role 'administrator' provided. Defaulting to 'owner'.
+[28-Jan-2026 15:22:29 Africa/Lagos] Admin record created in platform with ID: 17, role: owner
+[28-Jan-2026 15:22:29 Africa/Lagos] Creating subscription record...
+[28-Jan-2026 15:22:29 Africa/Lagos] Subscriptions table has trial_ends_at column: YES
+[28-Jan-2026 15:22:29 Africa/Lagos] Subscription created with ID: 10
+[28-Jan-2026 15:22:29 Africa/Lagos] Creating trial invoice...
+[28-Jan-2026 15:22:29 Africa/Lagos] Invoices table has is_trial column: YES
+[28-Jan-2026 15:22:29 Africa/Lagos] Trial invoice created: INV-20260128-0014
+[28-Jan-2026 15:22:29 Africa/Lagos] Platform transaction committed successfully
+[28-Jan-2026 15:22:29 Africa/Lagos] Provisioning emails logged to database - Trial: 7 days remaining
+[28-Jan-2026 15:22:29 Africa/Lagos] === PROVISIONING COMPLETED SUCCESSFULLY ===

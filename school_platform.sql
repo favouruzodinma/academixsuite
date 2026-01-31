@@ -609,6 +609,7 @@ CREATE TABLE `subscriptions` (
   `plan_id` int(10) UNSIGNED NOT NULL,
   `stripe_subscription_id` varchar(255) DEFAULT NULL,
   `paystack_subscription_code` varchar(255) DEFAULT NULL,
+  `description` varchar(500) DEFAULT NULL,
   `status` enum('active','pending','canceled','past_due') DEFAULT 'pending',
   `billing_cycle` enum('monthly','yearly') DEFAULT 'monthly',
   `amount` decimal(10,2) NOT NULL,

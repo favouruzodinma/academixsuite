@@ -1,0 +1,2 @@
+[14-Jan-2026 17:08:43 Africa/Lagos] Error saving plan: SQLSTATE[HY000]: General error: 1364 Field 'id' doesn't have a default value
+[14-Jan-2026 17:11:01 Africa/Lagos] Error logging audit: SQLSTATE[HY000]: General error: 1364 Field 'id' doesn't have a default value

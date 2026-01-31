@@ -1,0 +1,34 @@
+[29-Jan-2026 14:25:34 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[29-Jan-2026 14:25:34 Africa/Lagos] Request URI: /tenant/spring-blooms/admin/students.php
+[29-Jan-2026 14:25:34 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 14:25:34 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php:136
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(308): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php on line 136
+[29-Jan-2026 14:26:08 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[29-Jan-2026 14:26:08 Africa/Lagos] Request URI: /tenant/spring-blooms/admin/students.php
+[29-Jan-2026 14:26:08 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 14:26:08 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php:136
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(308): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php on line 136
+[29-Jan-2026 14:43:01 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[29-Jan-2026 14:43:01 Africa/Lagos] Request URI: /tenant/spring-blooms/admin/schedule.php
+[29-Jan-2026 14:43:01 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 14:43:01 Africa/Lagos] Error loading initial data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'section' in 'SELECT'
+[29-Jan-2026 14:43:01 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/schedule.php
+[29-Jan-2026 15:07:35 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[29-Jan-2026 15:07:35 Africa/Lagos] Request URI: /tenant/spring-blooms/admin/schedule.php
+[29-Jan-2026 15:07:35 Africa/Lagos] School Slug from Router: spring-blooms
+[29-Jan-2026 15:07:35 Africa/Lagos] Error loading initial data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'section' in 'SELECT'
+[29-Jan-2026 15:07:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/schedule.php
+[30-Jan-2026 04:49:58 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[30-Jan-2026 04:49:58 Africa/Lagos] Request URI: /tenant/spring-blooms/admin/students.php
+[30-Jan-2026 04:49:58 Africa/Lagos] School Slug from Router: spring-blooms
+[30-Jan-2026 04:49:58 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php:136
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(308): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php on line 136

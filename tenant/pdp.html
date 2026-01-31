@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AcademiXSuite - Marketing MVP Document</title>
+    <style>
+        /* PDF-like styling */
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.5;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+            width: 210mm;
+            max-width: 100%;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .document {
+            padding: 20mm 25mm;
+            background: white;
+            min-height: 297mm;
+            position: relative;
+        }
+        
+        /* Header with logo */
+        .header {
+            border-bottom: 2px solid #2c5282;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c5282;
+        }
+        
+        .tagline {
+            font-size: 14px;
+            color: #4a5568;
+            font-style: italic;
+            text-align: right;
+        }
+        
+        /* Main heading */
+        h1 {
+            font-size: 24px;
+            color: #1a202c;
+            text-align: center;
+            margin: 30px 0;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        /* Section styling */
+        .section {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            color: #2d3748;
+            background-color: #edf2f7;
+            padding: 8px 15px;
+            border-left: 4px solid #2c5282;
+            margin-bottom: 15px;
+            page-break-after: avoid;
+        }
+        
+        .subsection-title {
+            font-size: 16px;
+            color: #4a5568;
+            margin: 15px 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #cbd5e0;
+        }
+        
+        /* Content styling */
+        p {
+            margin: 8px 0;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+            page-break-inside: avoid;
+        }
+        
+        th {
+            background-color: #2c5282;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #2c5282;
+        }
+        
+        td {
+            padding: 10px;
+            border: 1px solid #cbd5e0;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+        
+        /* Callout boxes */
+        .callout {
+            background-color: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .callout.warning {
+            background-color: #fff5f5;
+            border-left-color: #f56565;
+        }
+        
+        .callout.success {
+            background-color: #f0fff4;
+            border-left-color: #48bb78;
+        }
+        
+        /* Two-column layout */
+        .two-columns {
+            display: flex;
+            gap: 25px;
+            margin: 15px 0;
+        }
+        
+        .column {
+            flex: 1;
+        }
+        
+        /* Highlight boxes */
+        .highlight {
+            background-color: #fffaf0;
+            border: 1px solid #ed8936;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        /* Pricing cards */
+        .pricing-container {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            page-break-inside: avoid;
+        }
+        
+        .pricing-card {
+            flex: 1;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .pricing-card.popular {
+            border: 2px solid #2c5282;
+            background-color: #f7fafc;
+        }
+        
+        .price {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c5282;
+            margin: 10px 0;
+        }
+        
+        .price-period {
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        /* Testimonial styling */
+        .testimonial {
+            font-style: italic;
+            background-color: #f7fafc;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 3px solid #68d391;
+        }
+        
+        .testimonial-author {
+            text-align: right;
+            font-weight: bold;
+            color: #4a5568;
+            margin-top: 10px;
+        }
+        
+        /* Comparison table */
+        .comparison {
+            margin: 20px 0;
+        }
+        
+        .comparison-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .comparison-label {
+            flex: 1;
+            font-weight: bold;
+            padding: 8px;
+        }
+        
+        .comparison-value {
+            flex: 2;
+            padding: 8px;
+            background-color: #f7fafc;
+            border-radius: 4px;
+        }
+        
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 12px;
+            color: #718096;
+        }
+        
+        /* Page break control */
+        .page-break {
+            page-break-before: always;
+            padding-top: 20mm;
+        }
+        
+        /* Page numbers */
+        .page-number {
+            position: absolute;
+            bottom: 15mm;
+            right: 25mm;
+            font-size: 12px;
+            color: #718096;
+        }
+        
+        /* Print-specific styles */
+        @media print {
+            body {
+                box-shadow: none;
+                width: 100%;
+            }
+            
+            .document {
+                padding: 15mm 20mm;
+            }
+            
+            .no-print {
+                display: none;
+            }
+            
+            .page-break {
+                padding-top: 10mm;
+            }
+        }
+        
+        /* For screen viewing */
+        @media screen {
+            body {
+                margin: 20px auto;
+                padding: 20px 0;
+            }
+        }
+        
+        /* Highlighted text */
+        .highlight-text {
+            background-color: #feebc8;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        
+        /* Metric boxes */
+        .metric-box {
+            display: inline-block;
+            padding: 8px 12px;
+            background-color: #2c5282;
+            color: white;
+            border-radius: 4px;
+            margin: 5px;
+            font-weight: bold;
+        }
+        
+        .metric-box.success {
+            background-color: #38a169;
+        }
+        
+        .metric-box.warning {
+            background-color: #d69e2e;
+        }
+    </style>
+</head>
+<body>
+    <div class="document">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">AcademiXSuite</div>
+            <div class="tagline">"Your School's Digital Backbone - Secure, Automated, and Effortless"</div>
+        </div>
+        
+        <!-- Title -->
+        <h1>School Database Management Platform<br>Marketing MVP Document</h1>
+        
+        <!-- Table of Contents -->
+        <div class="section">
+            <div class="section-title">Table of Contents</div>
+            <div class="two-columns">
+                <div class="column">
+                    <ol>
+                        <li>Core Problem We Solve</li>
+                        <li>Platform Benefits</li>
+                        <li>School Requirements</li>
+                        <li>Key Features Highlight</li>
+                        <li>Security & Compliance</li>
+                        <li>Measurable Benefits</li>
+                    </ol>
+                </div>
+                <div class="column">
+                    <ol start="7">
+                        <li>Live Demo Scenario</li>
+                        <li>Pricing Tiers</li>
+                        <li>Getting Started Process</li>
+                        <li>Support & Success</li>
+                        <li>Why Schools Choose Us</li>
+                        <li>Platform Access & Next Steps</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 1: Core Problem -->
+        <div class="section page-break">
+            <div class="section-title">1. Core Problem We Solve</div>
+            <p>Schools today face significant challenges in managing their data infrastructure. The following pain points are common across educational institutions:</p>
+            
+            <div class="callout warning">
+                <p><strong>Critical Issues Identified:</strong></p>
+                <ul>
+                    <li><strong>Fragmented Databases:</strong> Disconnected systems across departments (academics, finance, admin) creating data silos</li>
+                    <li><strong>Manual Data Entry:</strong> Error-prone processes leading to inefficiencies and inconsistencies</li>
+                    <li><strong>No Reliable Backups:</strong> Risk of losing years of student records due to inadequate systems</li>
+                    <li><strong>Compliance Headaches:</strong> Struggling to meet GDPR/FERPA regulations with manual processes</li>
+                    <li><strong>Limited Insights:</strong> Valuable data trapped in spreadsheets, unable to generate actionable insights</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Section 2: Platform Benefits -->
+        <div class="section">
+            <div class="section-title">2. Platform Benefits - "What Schools Get"</div>
+            
+            <div class="two-columns">
+                <div class="column">
+                    <div class="subsection-title">Single Source of Truth</div>
+                    <ul>
+                        <li>One centralized database for all school operations</li>
+                        <li>Real-time synchronization across all departments</li>
+                        <li>Eliminate duplicate data entry</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <div class="subsection-title">Automated Database Management</div>
+                    <ul>
+                        <li>Automatic daily backups (never lose student records)</li>
+                        <li>Performance optimization runs automatically</li>
+                        <li>Storage monitoring with alerts before limits hit</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="two-columns">
+                <div class="column">
+                    <div class="subsection-title">Built-in Data Protection</div>
+                    <ul>
+                        <li>GDPR/FERPA compliant by design</li>
+                        <li>Role-based access control (teachers see only their classes)</li>
+                        <li>Audit trails for every data change</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <div class="subsection-title">Zero Technical Expertise Required</div>
+                    <ul>
+                        <li>No SQL knowledge needed</li>
+                        <li>One-click operations (backup, restore, optimize)</li>
+                        <li>Plain English reports instead of database queries</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 3: School Requirements -->
+        <div class="section">
+            <div class="section-title">3. School Requirements - "What You Need to Do"</div>
+            
+            <div class="subsection-title">Minimal Setup (30 Minutes)</div>
+            <table>
+                <tr>
+                    <th>Step</th>
+                    <th>Requirements</th>
+                    <th>Time Estimate</th>
+                </tr>
+                <tr>
+                    <td>1. Basic School Information</td>
+                    <td>School name, logo, contact details, academic calendar, department structure</td>
+                    <td>10 minutes</td>
+                </tr>
+                <tr>
+                    <td>2. User Onboarding</td>
+                    <td>Upload staff list (Excel/CSV), define roles, set access permissions</td>
+                    <td>10 minutes</td>
+                </tr>
+                <tr>
+                    <td>3. Student Data Migration</td>
+                    <td>Provide existing records (we handle conversion), review accuracy</td>
+                    <td>10 minutes</td>
+                </tr>
+            </table>
+            
+            <div class="subsection-title">Ongoing Operations</div>
+            <div class="two-columns">
+                <div class="column">
+                    <p><strong>Daily/Weekly Tasks:</strong></p>
+                    <ul>
+                        <li>Review automated backup reports (2 minutes)</li>
+                        <li>Check system notifications</li>
+                        <li>Approve new user requests</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <p><strong>Monthly/Termly Tasks:</strong></p>
+                    <ul>
+                        <li>Review storage usage dashboard</li>
+                        <li>Export monthly reports</li>
+                        <li>Update academic terms</li>
+                        <li>Archive completed academic years</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 4: Key Features -->
+        <div class="section page-break">
+            <div class="section-title">4. Key Features Highlight</div>
+            
+            <div class="subsection-title">For School Administrators</div>
+            <div class="highlight">
+                <p><strong>Dashboard at a Glance:</strong></p>
+                <ul>
+                    <li>Real-time student counts</li>
+                    <li>Attendance statistics</li>
+                    <li>Fee collection status</li>
+                    <li>Storage usage monitor</li>
+                </ul>
+                
+                <p><strong>One-Click Operations:</strong></p>
+                <ul>
+                    <li>Backup entire database</li>
+                    <li>Restore from any point</li>
+                    <li>Generate compliance reports</li>
+                    <li>Export data for auditors</li>
+                </ul>
+            </div>
+            
+            <div class="two-columns">
+                <div class="column">
+                    <div class="subsection-title">For Teachers</div>
+                    <ul>
+                        <li>Mark attendance in 3 clicks</li>
+                        <li>Enter grades with auto-calculation</li>
+                        <li>Share reports with parents</li>
+                        <li>Track student progress</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <div class="subsection-title">For Parents</div>
+                    <ul>
+                        <li>Secure portal access</li>
+                        <li>View child's attendance</li>
+                        <li>Check academic performance</li>
+                        <li>Pay fees online</li>
+                        <li>Receive notifications</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 5: Security & Compliance -->
+        <div class="section">
+            <div class="section-title">5. Security & Compliance - "We Handle the Hard Parts"</div>
+            
+            <table>
+                <tr>
+                    <th>Compliance Area</th>
+                    <th>How We Handle It</th>
+                </tr>
+                <tr>
+                    <td><strong>Data Protection</strong></td>
+                    <td>End-to-end encryption, automatic masking of sensitive data</td>
+                </tr>
+                <tr>
+                    <td><strong>Backup Compliance</strong></td>
+                    <td>Daily encrypted backups, 30-day retention minimum</td>
+                </tr>
+                <tr>
+                    <td><strong>Access Control</strong></td>
+                    <td>Multi-level permission system, IP restrictions available</td>
+                </tr>
+                <tr>
+                    <td><strong>Audit Requirements</strong></td>
+                    <td>Complete change logs, exportable for inspections</td>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- Section 6: Measurable Benefits -->
+        <div class="section">
+            <div class="section-title">6. Measurable Benefits</div>
+            
+            <div class="subsection-title">Time Savings</div>
+            <div class="comparison">
+                <div class="comparison-row">
+                    <div class="comparison-label">Manual Reports</div>
+                    <div class="comparison-value"><span class="metric-box">90% reduction</span> in time spent</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-label">Parent Communication</div>
+                    <div class="comparison-value"><span class="metric-box">75% faster</span> response time</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-label">Administrative Tasks</div>
+                    <div class="comparison-value"><span class="metric-box">60% less time</span> required</div>
+                </div>
+            </div>
+            
+            <div class="subsection-title">Cost Savings</div>
+            <div class="comparison">
+                <div class="comparison-row">
+                    <div class="comparison-label">IT Database Specialist</div>
+                    <div class="comparison-value"><span class="metric-box success">$60k+/year saved</span></div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-label">Backup Software</div>
+                    <div class="comparison-value"><span class="metric-box success">$1,200+/year saved</span></div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-label">Paper/Printing</div>
+                    <div class="comparison-value"><span class="metric-box success">80% reduction</span> in costs</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 7: Live Demo Scenario -->
+        <div class="section page-break">
+            <div class="section-title">7. Live Demo Scenario</div>
+            
+            <p><strong>Scenario:</strong> "New Academic Year Setup"</p>
+            
+            <div class="two-columns">
+                <div class="column">
+                    <div class="callout warning">
+                        <p><strong>Without AcademiXSuite:</strong></p>
+                        <ol>
+                            <li>Manually create 500+ student records (8-10 hours)</li>
+                            <li>Set up classes and assign teachers manually</li>
+                            <li>Create fee structures for each grade level</li>
+                            <li>Configure timetables from scratch</li>
+                            <li>Risk errors in every step</li>
+                        </ol>
+                        <p><strong>Total time: 20+ hours</strong></p>
+                    </div>
+                </div>
+                
+                <div class="column">
+                    <div class="callout success">
+                        <p><strong>With AcademiXSuite:</strong></p>
+                        <ol>
+                            <li>Click "Duplicate Previous Year" (1 minute)</li>
+                            <li>Update student promotion status (30 minutes)</li>
+                            <li>System auto-generates new structures</li>
+                            <li>Review and confirm (15 minutes)</li>
+                        </ol>
+                        <p><strong>Total time: 46 minutes</strong></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="callout" style="text-align: center; margin-top: 20px;">
+                <p><strong>Time Savings: 46 minutes vs. 20+ hours</strong> (Over 95% reduction in setup time)</p>
+            </div>
+        </div>
+        
+        <!-- Section 8: Pricing -->
+        <div class="section">
+            <div class="section-title">8. Pricing Tiers</div>
+            
+            <div class="pricing-container">
+                <div class="pricing-card">
+                    <h3>Starter Plan</h3>
+                    <div class="price">$49</div>
+                    <div class="price-period">per month</div>
+                    <ul>
+                        <li>Up to 500 students</li>
+                        <li>Automated daily backups</li>
+                        <li>Basic reporting</li>
+                        <li>Email support</li>
+                    </ul>
+                </div>
+                
+                <div class="pricing-card popular">
+                    <h3>Professional Plan</h3>
+                    <div class="price">$99</div>
+                    <div class="price-period">per month</div>
+                    <ul>
+                        <li>Up to 2,000 students</li>
+                        <li>Real-time sync across campuses</li>
+                        <li>Advanced analytics</li>
+                        <li>Priority support</li>
+                        <li>Custom compliance reports</li>
+                    </ul>
+                </div>
+                
+                <div class="pricing-card">
+                    <h3>Enterprise Plan</h3>
+                    <div class="price">$199</div>
+                    <div class="price-period">per month</div>
+                    <ul>
+                        <li>Unlimited students</li>
+                        <li>Dedicated database instance</li>
+                        <li>24/7 phone support</li>
+                        <li>Custom integrations</li>
+                        <li>SLA guarantee</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="callout">
+                <p><strong>All plans include:</strong> Free data migration, training sessions, regular feature updates, and security patches.</p>
+            </div>
+        </div>
+        
+        <!-- Section 9: Getting Started -->
+        <div class="section">
+            <div class="section-title">9. Getting Started Process</div>
+            
+            <table>
+                <tr>
+                    <th>Timeline</th>
+                    <th>Activities</th>
+                    <th>Responsibility</th>
+                </tr>
+                <tr>
+                    <td><strong>Week 1: Onboarding</strong></td>
+                    <td>Account setup, data migration, review & verification, go-live preparation</td>
+                    <td>AcademiXSuite Team</td>
+                </tr>
+                <tr>
+                    <td><strong>Week 2: Live Operation</strong></td>
+                    <td>Automated backups, first reports, review meeting & optimization</td>
+                    <td>Joint Effort</td>
+                </tr>
+                <tr>
+                    <td><strong>Month 1: Optimization</strong></td>
+                    <td>Weekly check-ins, staff training, customization based on feedback</td>
+                    <td>AcademiXSuite + School Team</td>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- Section 10: Support & Success -->
+        <div class="section page-break">
+            <div class="section-title">10. Support & Success</div>
+            
+            <div class="two-columns">
+                <div class="column">
+                    <div class="subsection-title">What We Provide</div>
+                    <ul>
+                        <li>Dedicated Success Manager for first 90 days</li>
+                        <li>24/7 System Monitoring (proactive alerts)</li>
+                        <li>Quarterly Business Reviews</li>
+                        <li>Regular Training Webinars for staff</li>
+                    </ul>
+                </div>
+                
+                <div class="column">
+                    <div class="subsection-title">School Responsibilities</div>
+                    <ul>
+                        <li>Assign one Platform Champion</li>
+                        <li>Provide feedback for improvements</li>
+                        <li>Attend quarterly check-ins (30 minutes)</li>
+                        <li>Keep contact information updated</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 11: Testimonials -->
+        <div class="section">
+            <div class="section-title">11. Why Schools Choose Us</div>
+            
+            <div class="testimonial">
+                "We recovered 6 years of lost records after a system crash. AcademiXSuite's backup system saved our accreditation."
+                <div class="testimonial-author">- Principal, Greenwood School</div>
+            </div>
+            
+            <div class="testimonial">
+                "Parent complaints dropped 80% after implementing the parent portal. Everything is transparent now."
+                <div class="testimonial-author">- Administrator, Royal Academy</div>
+            </div>
+            
+            <div class="testimonial">
+                "Our teachers spend 15 hours less per week on admin work. That's time back for teaching."
+                <div class="testimonial-author">- Head Teacher, Excel College</div>
+            </div>
+        </div>
+        
+        <!-- Section 12: Platform Access -->
+        <div class="section">
+            <div class="section-title">12. Platform Access & Next Steps</div>
+            
+            <div class="subsection-title">Available Everywhere</div>
+            <div class="two-columns">
+                <div class="column">
+                    <ul>
+                        <li>Web Portal (main admin interface)</li>
+                        <li>Mobile App (teachers & parents)</li>
+                        <li>Tablet Interface (attendance & grading)</li>
+                        <li>Offline Mode (syncs when back online)</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <ul>
+                        <li>Connect with existing accounting software</li>
+                        <li>Parent payment gateways</li>
+                        <li>Government reporting systems</li>
+                        <li>SMS/Email notification services</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="subsection-title">Success Metrics We Track</div>
+            <table>
+                <tr>
+                    <th>Metric</th>
+                    <th>Baseline</th>
+                    <th>After 3 Months</th>
+                    <th>Improvement</th>
+                </tr>
+                <tr>
+                    <td>Data Entry Time</td>
+                    <td>20 hrs/week</td>
+                    <td>4 hrs/week</td>
+                    <td><span class="metric-box success">80% reduction</span></td>
+                </tr>
+                <tr>
+                    <td>Report Generation</td>
+                    <td>2-3 days</td>
+                    <td>2-3 hours</td>
+                    <td><span class="metric-box success">90% faster</span></td>
+                </tr>
+                <tr>
+                    <td>Parent Queries</td>
+                    <td>50+/week</td>
+                    <td><10/week</td>
+                    <td><span class="metric-box success">80% decrease</span></td>
+                </tr>
+                <tr>
+                    <td>System Downtime</td>
+                    <td>Variable</td>
+                    <td><99.9% uptime</td>
+                    <td><span class="metric-box success">Enterprise reliability</span></td>
+                </tr>
+            </table>
+            
+            <div class="subsection-title">Next Steps for Interested Schools</div>
+            <ol>
+                <li>Book a 30-minute demo (see live platform)</li>
+                <li>Receive customized migration plan</li>
+                <li>Try 14-day free trial (no credit card needed)</li>
+                <li>Go live with full support</li>
+            </ol>
+            
+            <div class="callout success" style="text-align: center; margin-top: 20px;">
+                <p><strong>Ready to transform your school's data management?</strong></p>
+                <p>Book a demo today and get your first month free!</p>
+                <p>Contact: demo@schoolbasepro.com | Phone: 1-800-SCHOOL-DB</p>
+                <p>Website: www.schoolbasepro.com/demo</p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>AcademiXSuite Marketing MVP Document | Confidential Business Information | Version 1.0</p>
+            <p class="no-print">This document is formatted for printing. Use Ctrl+P to print or save as PDF.</p>
+        </div>
+        
+        <!-- Page number -->
+        <div class="page-number">Page 1</div>
+    </div>
+
+    <!-- Print Button -->
+    <div class="no-print" style="position: fixed; bottom: 20px; right: 20px;">
+        <button onclick="window.print()" style="padding: 10px 20px; background: #2c5282; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Print / Save as PDF
+        </button>
+    </div>
+
+    <script>
+        // Simple page numbering
+        document.addEventListener('DOMContentLoaded', function() {
+            const pageBreaks = document.querySelectorAll('.page-break');
+            let pageNumber = 1;
+            
+            // Update page numbers
+            document.querySelector('.page-number').textContent = `Page ${pageNumber}`;
+            
+            pageBreaks.forEach((breakElement, index) => {
+                const newPageNumber = document.createElement('div');
+                newPageNumber.className = 'page-number';
+                newPageNumber.textContent = `Page ${index + 2}`;
+                breakElement.appendChild(newPageNumber);
+            });
+        });
+    </script>
+</body>
+</html>

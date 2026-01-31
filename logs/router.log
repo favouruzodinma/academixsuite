@@ -1,0 +1,114 @@
+[29-Jan-2026 12:44:26 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 12:44:26 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[29-Jan-2026 12:44:59 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 12:44:59 UTC] Full request: /tenant/spring-blooms/admin/dashboard
+[29-Jan-2026 12:48:23 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 12:48:23 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[29-Jan-2026 12:49:18 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 12:49:18 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[29-Jan-2026 12:49:36 UTC] ROUTER START: school=spring-blooms, type=admin, page=fees.php
+[29-Jan-2026 12:49:36 UTC] Full request: /tenant/spring-blooms/admin/fees.php
+[29-Jan-2026 12:50:28 UTC] ROUTER START: school=spring-blooms, type=admin, page=attendance.php
+[29-Jan-2026 12:50:28 UTC] Full request: /tenant/spring-blooms/admin/attendance.php
+[29-Jan-2026 12:51:13 UTC] ROUTER START: school=spring-blooms, type=admin, page=attendance.php
+[29-Jan-2026 12:51:13 UTC] Full request: /tenant/spring-blooms/admin/attendance.php
+[29-Jan-2026 12:51:28 UTC] ROUTER START: school=spring-blooms, type=admin, page=fees.php
+[29-Jan-2026 12:51:28 UTC] Full request: /tenant/spring-blooms/admin/fees.php
+[29-Jan-2026 12:51:39 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 12:51:39 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[29-Jan-2026 12:52:29 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 12:52:29 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[29-Jan-2026 12:53:15 UTC] ROUTER START: school=spring-blooms, type=admin, page=announcements.php
+[29-Jan-2026 12:53:15 UTC] Full request: /tenant/spring-blooms/admin/announcements.php
+[29-Jan-2026 12:53:38 UTC] ROUTER START: school=spring-blooms, type=admin, page=announcements.php
+[29-Jan-2026 12:53:38 UTC] Full request: /tenant/spring-blooms/admin/announcements.php?new=1
+[29-Jan-2026 12:54:41 UTC] ROUTER START: school=spring-blooms, type=admin, page=announcements.php
+[29-Jan-2026 12:54:41 UTC] Full request: /tenant/spring-blooms/admin/announcements.php?new=1
+[29-Jan-2026 12:54:48 UTC] ROUTER START: school=spring-blooms, type=admin, page=announcements.php
+[29-Jan-2026 12:54:48 UTC] Full request: /tenant/spring-blooms/admin/announcements.php?
+[29-Jan-2026 12:54:51 UTC] ROUTER START: school=spring-blooms, type=admin, page=announcements.php
+[29-Jan-2026 12:54:51 UTC] Full request: /tenant/spring-blooms/admin/announcements.php?
+[29-Jan-2026 12:55:28 UTC] ROUTER START: school=spring-blooms, type=admin, page=school-dashboard.php
+[29-Jan-2026 12:55:28 UTC] Full request: /tenant/spring-blooms/admin/school-dashboard.php
+[29-Jan-2026 12:58:06 UTC] ROUTER START: school=spring-blooms, type=admin, page=finance.php
+[29-Jan-2026 12:58:06 UTC] Full request: /tenant/spring-blooms/admin/finance.php
+[29-Jan-2026 12:58:29 UTC] ROUTER START: school=spring-blooms, type=admin, page=school-dashboard.php
+[29-Jan-2026 12:58:29 UTC] Full request: /tenant/spring-blooms/admin/school-dashboard.php
+[29-Jan-2026 13:00:20 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 13:00:20 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[29-Jan-2026 13:09:07 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 13:09:07 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[29-Jan-2026 13:22:37 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 13:22:37 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[29-Jan-2026 13:25:34 UTC] ROUTER START: school=spring-blooms, type=admin, page=students.php
+[29-Jan-2026 13:25:34 UTC] Full request: /tenant/spring-blooms/admin/students.php
+[29-Jan-2026 13:26:08 UTC] ROUTER START: school=spring-blooms, type=admin, page=students.php
+[29-Jan-2026 13:26:08 UTC] Full request: /tenant/spring-blooms/admin/students.php
+[29-Jan-2026 13:26:35 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 13:26:35 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[29-Jan-2026 13:43:01 UTC] ROUTER START: school=spring-blooms, type=admin, page=schedule.php
+[29-Jan-2026 13:43:01 UTC] Full request: /tenant/spring-blooms/admin/schedule.php
+[29-Jan-2026 14:07:35 UTC] ROUTER START: school=spring-blooms, type=admin, page=schedule.php
+[29-Jan-2026 14:07:35 UTC] Full request: /tenant/spring-blooms/admin/schedule.php
+[29-Jan-2026 14:08:14 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 14:08:14 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[29-Jan-2026 14:10:53 UTC] ROUTER START: school=spring-blooms, type=admin, page=attendance.php
+[29-Jan-2026 14:10:53 UTC] Full request: /tenant/spring-blooms/admin/attendance
+[29-Jan-2026 14:11:04 UTC] ROUTER START: school=spring-blooms, type=admin, page=attendance.php
+[29-Jan-2026 14:11:04 UTC] Full request: /tenant/spring-blooms/admin/attendance
+[29-Jan-2026 14:11:15 UTC] ROUTER START: school=spring-blooms, type=admin, page=attendance.php
+[29-Jan-2026 14:11:15 UTC] Full request: /tenant/spring-blooms/admin/attendance
+[29-Jan-2026 14:11:19 UTC] ROUTER START: school=spring-blooms, type=admin, page=attendance.php
+[29-Jan-2026 14:11:19 UTC] Full request: /tenant/spring-blooms/admin/attendance
+[29-Jan-2026 14:21:11 UTC] ROUTER START: school=spring-blooms, type=admin, page=attendance.php
+[29-Jan-2026 14:21:11 UTC] Full request: /tenant/spring-blooms/admin/attendance
+[29-Jan-2026 14:21:58 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 14:21:58 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[29-Jan-2026 14:26:21 UTC] ROUTER START: school=loretto, type=admin, page=dashboard.php
+[29-Jan-2026 14:26:21 UTC] Full request: /tenant/loretto/admin/dashboard.php
+[29-Jan-2026 14:31:08 UTC] ROUTER START: school=loretto, type=admin, page=dashboard.php
+[29-Jan-2026 14:31:08 UTC] Full request: /tenant/loretto/admin/dashboard.php
+[29-Jan-2026 14:33:13 UTC] ROUTER START: school=loretto, type=admin, page=dashboard.php
+[29-Jan-2026 14:33:13 UTC] Full request: /tenant/loretto/admin/dashboard.php
+[29-Jan-2026 20:05:24 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 20:05:24 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[29-Jan-2026 20:10:34 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[29-Jan-2026 20:10:34 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[30-Jan-2026 00:53:40 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[30-Jan-2026 00:53:40 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[30-Jan-2026 01:14:59 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[30-Jan-2026 01:14:59 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[30-Jan-2026 01:15:08 UTC] ROUTER START: school=spring-blooms, type=admin, page=settings.php
+[30-Jan-2026 01:15:08 UTC] Full request: /tenant/spring-blooms/admin/settings.php
+[30-Jan-2026 01:18:57 UTC] ROUTER START: school=spring-blooms, type=admin, page=fees.php
+[30-Jan-2026 01:18:57 UTC] Full request: /tenant/spring-blooms/admin/fees.php
+[30-Jan-2026 03:42:39 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[30-Jan-2026 03:42:39 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[30-Jan-2026 03:49:58 UTC] ROUTER START: school=spring-blooms, type=admin, page=students.php
+[30-Jan-2026 03:49:58 UTC] Full request: /tenant/spring-blooms/admin/students.php
+[30-Jan-2026 03:50:06 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[30-Jan-2026 03:50:06 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[30-Jan-2026 03:50:12 UTC] ROUTER START: school=spring-blooms, type=admin, page=teachers.php
+[30-Jan-2026 03:50:12 UTC] Full request: /tenant/spring-blooms/admin/teachers.php
+[30-Jan-2026 03:57:55 UTC] ROUTER START: school=spring-blooms, type=admin, page=teachers.php
+[30-Jan-2026 03:57:55 UTC] Full request: /tenant/spring-blooms/admin/teachers.php
+[30-Jan-2026 04:02:40 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[30-Jan-2026 04:02:40 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[30-Jan-2026 07:32:15 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[30-Jan-2026 07:32:15 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[30-Jan-2026 08:34:30 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[30-Jan-2026 08:34:30 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[30-Jan-2026 16:21:58 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[30-Jan-2026 16:21:58 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[31-Jan-2026 01:05:33 UTC] ROUTER START: school=lorreto, type=admin, page=dashboard.php
+[31-Jan-2026 01:05:33 UTC] Full request: /tenant/lorreto/admin/dashboard.php
+[31-Jan-2026 01:06:05 UTC] ROUTER START: school=loretto, type=admin, page=dashboard.php
+[31-Jan-2026 01:06:05 UTC] Full request: /tenant/loretto/admin/dashboard.php
+[31-Jan-2026 01:57:41 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[31-Jan-2026 01:57:41 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[31-Jan-2026 01:57:51 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[31-Jan-2026 01:57:51 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[31-Jan-2026 01:57:53 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[31-Jan-2026 01:57:53 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php
+[31-Jan-2026 02:04:37 UTC] ROUTER START: school=spring-blooms, type=admin, page=dashboard.php
+[31-Jan-2026 02:04:37 UTC] Full request: /tenant/spring-blooms/admin/dashboard.php

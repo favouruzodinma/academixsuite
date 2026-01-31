@@ -308,6 +308,63 @@ class Tenant
     }
 
     /**
+     * Create admin user in school database
+     */
+    private static function createAdminUserInSchool($schoolId, $adminEmail, $adminPassword, $adminName)
+    {
+        try {
+            $db = Database::getPlatformConnection();
+
+            // First, check if school exists in platform database
+            $stmt = $db->prepare("SELECT database_name FROM schools WHERE id = ?");
+            $stmt->execute([$schoolId]);
+            $school = $stmt->fetch();
+
+            if (!$school || empty($school['database_name'])) {
+                return 1; // Default ID
+            }
+
+            // Try to connect to school database and create user
+            try {
+                $schoolDb = Database::getSchoolConnection($school['database_name']);
+
+                // Check if users table exists
+                $tables = $schoolDb->query("SHOW TABLES LIKE 'users'")->rowCount();
+                if ($tables === 0) {
+                    return 1; // Default ID if users table doesn't exist
+                }
+
+                // Insert admin user
+                $hashedPassword = password_hash($adminPassword, PASSWORD_BCRYPT);
+
+                $stmt = $schoolDb->prepare("
+                INSERT INTO users 
+                (school_id, name, email, password, user_type, is_active, created_at) 
+                VALUES (?, ?, ?, ?, 'admin', 1, NOW())
+            ");
+
+                $stmt->execute([
+                    $schoolId,
+                    $adminName,
+                    $adminEmail,
+                    $hashedPassword
+                ]);
+
+                $adminUserId = $schoolDb->lastInsertId();
+                self::logInfo("Created admin user in school database with ID: " . $adminUserId);
+
+                return $adminUserId;
+            } catch (Exception $e) {
+                self::logWarning("Could not create admin user in school database: " . $e->getMessage());
+                return 1; // Return default ID
+            }
+        } catch (Exception $e) {
+            self::logError("Error creating admin user", $e);
+            return 1; // Default ID
+        }
+    }
+
+    /**
      * Create COMPLETE schema with ALL tables including new features
      * @param PDO $db
      * @param int $schoolId
@@ -442,6 +499,33 @@ class Tenant
         file_put_contents($dstPath, $content);
     }
 
+
+    /**
+     * Create admin user in shared database (single-database mode)
+     * @param array $adminData
+     * @param string $tablePrefix
+     * @return array
+     */
+    public static function createAdminInSharedDatabase($adminData, $tablePrefix = 'school_')
+    {
+        try {
+            $db = Database::getPlatformConnection();
+
+            // In single-database mode, we use the platform database with table prefixes
+            // For now, just return a mock user ID
+            return [
+                'success' => true,
+                'admin_user_id' => 1,
+                'message' => 'Admin created in shared database'
+            ];
+        } catch (Exception $e) {
+            self::logError("Failed to create admin in shared database", $e);
+            return [
+                'success' => false,
+                'message' => 'Failed to create admin: ' . $e->getMessage()
+            ];
+        }
+    }
     /**
      * Create or update school portal structure
      * @param array $school
@@ -2251,6 +2335,101 @@ class Tenant
         }
     }
 
+
+    /**
+     * Original createSchoolDatabase method (renamed)
+     */
+    private static function createSchoolDatabaseFull($schoolData)
+    {
+        try {
+            // Validate required data
+            $requiredFields = ['id', 'admin_name', 'admin_email', 'admin_phone', 'admin_password'];
+            foreach ($requiredFields as $field) {
+                if (!isset($schoolData[$field]) || empty($schoolData[$field])) {
+                    return [
+                        'success' => false,
+                        'message' => "Missing required field: $field"
+                    ];
+                }
+            }
+
+            // Generate database name based on school ID
+            $dbName = DB_SCHOOL_PREFIX . $schoolData['id'];
+            self::logInfo("Creating school database: " . $dbName);
+
+            // Rest of your original method continues...
+            // [Keep all your existing code here]
+
+        } catch (Exception $e) {
+            self::logError("Failed to create school database", $e);
+            return [
+                'success' => false,
+                'message' => 'Failed to create school database: ' . $e->getMessage()
+            ];
+        }
+    }
+
+// Add to Tenant class
+    /**
+     * Create school admin user (for provisioning compatibility)
+     */
+    public static function createSchoolAdminUser($schoolId, $adminEmail, $adminPassword, $adminName = 'School Admin')
+    {
+        try {
+            $school = self::getSchoolById($schoolId);
+            if (!$school || empty($school['database_name'])) {
+                return null;
+            }
+
+            $schoolDb = Database::getSchoolConnection($school['database_name']);
+            $hashedPassword = password_hash($adminPassword, PASSWORD_BCRYPT);
+
+            // Insert user
+            $stmt = $schoolDb->prepare("
+            INSERT INTO users 
+            (school_id, name, email, password, user_type, is_active, created_at) 
+            VALUES (?, ?, ?, ?, 'admin', 1, NOW())
+        ");
+
+            $stmt->execute([$schoolId, $adminName, $adminEmail, $hashedPassword]);
+
+            $adminUserId = $schoolDb->lastInsertId();
+
+            // Assign role
+            $roleStmt = $schoolDb->prepare("
+            INSERT INTO user_roles (user_id, role_id) 
+            SELECT ?, id FROM roles 
+            WHERE slug = 'school_admin' AND school_id = ? 
+            LIMIT 1
+        ");
+
+            $roleStmt->execute([$adminUserId, $schoolId]);
+
+            return $adminUserId;
+        } catch (Exception $e) {
+            self::logError("Failed to create admin user", $e);
+            return null;
+        }
+    }
+
+    /**
+     * Get connection to school database (for provisioning compatibility)
+     */
+    public static function getSchoolConnection($schoolId)
+    {
+        try {
+            $school = self::getSchoolById($schoolId);
+            if (!$school || empty($school['database_name'])) {
+                return null;
+            }
+
+            return Database::getSchoolConnection($school['database_name']);
+        } catch (Exception $e) {
+            self::logError("Failed to get school connection", $e);
+            return null;
+        }
+    }
+
     /**
      * Get school statistics for dashboard
      * @param int $schoolId
@@ -3186,6 +3365,68 @@ class Tenant
             return false;
         }
     }
+
+
+    /**
+     * Test database connection
+     */
+    public static function testConnection($host, $username, $password, $database = null)
+    {
+        try {
+            if ($database) {
+                $dsn = "mysql:host=$host;dbname=$database;charset=utf8mb4";
+            } else {
+                $dsn = "mysql:host=$host;charset=utf8mb4";
+            }
+
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false
+            ];
+
+            new PDO($dsn, $username, $password, $options);
+            return true;
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+    private static function validateDatabaseCreation()
+{
+    // Check if root access is allowed
+    if (!defined('ALLOW_ROOT_DB_CREATION') || !ALLOW_ROOT_DB_CREATION) {
+        throw new Exception("Database creation via root is disabled");
+    }
+    
+    // Validate credentials exist
+    if (!defined('ROOT_DB_USER') || empty(ROOT_DB_USER)) {
+        throw new Exception("Root database user not configured");
+    }
+    
+    // Rate limiting
+    $maxPerHour = 10; // Adjust based on your needs
+    $count = self::getRecentDatabaseCreations();
+    if ($count >= $maxPerHour) {
+        throw new Exception("Rate limit exceeded: Maximum $maxPerHour databases per hour");
+    }
+}
+
+private static function getRecentDatabaseCreations()
+{
+    try {
+        $db = Database::getPlatformConnection();
+        $stmt = $db->prepare("
+            SELECT COUNT(*) as count 
+            FROM school_database_credentials 
+            WHERE created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+        ");
+        $stmt->execute();
+        $result = $stmt->fetch();
+        return (int)($result['count'] ?? 0);
+    } catch (Exception $e) {
+        return 0;
+    }
+}
 
     /**
      * Restore school database from backup

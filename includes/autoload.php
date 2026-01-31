@@ -2,6 +2,22 @@
 /**
  * Auto-load classes and dependencies
  */
+
+
+// Load configuration
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/constants.php';
+require_once __DIR__ . '/../config/functions.php';
+
+// Load core classes
+require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Auth.php';
+require_once __DIR__ . '/Session.php';
+require_once __DIR__ . '/Tenant.php';
+require_once __DIR__ . '/SchoolSession.php';
+require_once __DIR__ . '/Utils.php';
+//require_once __DIR__ . '/AppRouter.php'; // NEW: Add router class
+
  class ErrorHandler {
     public static function register() {
         set_error_handler([self::class, 'handleError']);
@@ -40,20 +56,6 @@ spl_autoload_register(function ($className) {
         require $file;
     }
 });
-
-// Load configuration
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../config/constants.php';
-require_once __DIR__ . '/../config/functions.php';
-
-// Load core classes
-require_once __DIR__ . '/Database.php';
-require_once __DIR__ . '/Auth.php';
-require_once __DIR__ . '/Session.php';
-require_once __DIR__ . '/Tenant.php';
-require_once __DIR__ . '/SchoolSession.php';
-require_once __DIR__ . '/Utils.php';
-//require_once __DIR__ . '/AppRouter.php'; // NEW: Add router class
 
 // Initialize session if not already started
 if (session_status() === PHP_SESSION_NONE && !defined('NO_SESSION')) {

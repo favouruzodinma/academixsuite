@@ -1,0 +1,250 @@
+[30-Jan-2026 04:50:12 Africa/Lagos] === TEACHERS MANAGEMENT START ===
+[30-Jan-2026 04:50:12 Africa/Lagos] Request URI: /tenant/spring-blooms/admin/teachers.php
+[30-Jan-2026 04:50:12 Africa/Lagos] School Slug from Router: spring-blooms
+[30-Jan-2026 04:50:12 Africa/Lagos] Total teachers: 8
+[30-Jan-2026 04:50:12 Africa/Lagos] Active teachers: 8
+[30-Jan-2026 04:50:12 Africa/Lagos] On leave teachers: 0
+[30-Jan-2026 04:50:12 Africa/Lagos] New teachers this year: 1
+[30-Jan-2026 04:50:12 Africa/Lagos] Departments loaded: 8
+[30-Jan-2026 04:50:12 Africa/Lagos] Teachers loaded: 8
+[30-Jan-2026 04:50:12 Africa/Lagos] Featured teachers loaded: 4
+[30-Jan-2026 04:50:12 Africa/Lagos] Upcoming events loaded: 0
+[30-Jan-2026 04:50:12 Africa/Lagos] Qualification stats loaded
+[30-Jan-2026 04:50:12 Africa/Lagos] Department distribution loaded: 8
+[30-Jan-2026 04:50:12 Africa/Lagos] Average experience: 259.6
+[30-Jan-2026 04:50:12 Africa/Lagos] Teacher statuses loaded
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined variable $fullTimeRate in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2009
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined variable $partTimeRate in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2019
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined variable $substituteRate in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2029
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2064
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2064
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2065
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2066
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2066
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2064
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2064
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2065
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2066
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2066
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2064
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2064
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2065
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2066
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2066
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2064
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2064
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2065
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2066
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2066
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2245
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2245
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2245
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2245
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2245
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2245
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2245
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2242
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2244
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2245
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:12 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2247
+[30-Jan-2026 04:50:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php
+[30-Jan-2026 04:57:55 Africa/Lagos] === TEACHERS MANAGEMENT START ===
+[30-Jan-2026 04:57:55 Africa/Lagos] Request URI: /tenant/spring-blooms/admin/teachers.php
+[30-Jan-2026 04:57:55 Africa/Lagos] School Slug from Router: spring-blooms
+[30-Jan-2026 04:57:55 Africa/Lagos] Total teachers: 8
+[30-Jan-2026 04:57:55 Africa/Lagos] Active teachers: 8
+[30-Jan-2026 04:57:55 Africa/Lagos] On leave teachers: 0
+[30-Jan-2026 04:57:55 Africa/Lagos] New teachers this year: 1
+[30-Jan-2026 04:57:55 Africa/Lagos] Departments loaded: 8
+[30-Jan-2026 04:57:55 Africa/Lagos] Teachers loaded: 8
+[30-Jan-2026 04:57:55 Africa/Lagos] Featured teachers loaded: 4
+[30-Jan-2026 04:57:55 Africa/Lagos] Upcoming events loaded: 0
+[30-Jan-2026 04:57:55 Africa/Lagos] Qualification stats loaded
+[30-Jan-2026 04:57:55 Africa/Lagos] Department distribution loaded: 8
+[30-Jan-2026 04:57:55 Africa/Lagos] Average experience: 259.6
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2058
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2058
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2060
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2060
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2061
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2058
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2058
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2060
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2060
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2061
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2058
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2058
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2060
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2060
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2061
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2058
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2058
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2060
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2060
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2061
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2062
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2239
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2241
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2239
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2241
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2239
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2241
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2239
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2241
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2239
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2241
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2239
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2241
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2239
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2241
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2236
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2238
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2239
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "status" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2240
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "join_date" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2241
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
+[30-Jan-2026 04:58:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php

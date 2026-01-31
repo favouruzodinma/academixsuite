@@ -30,13 +30,13 @@ if (strpos($requestUri, '/platform/') === 0) {
 } elseif ($requestUri === '/login' || $requestUri === '/login.php') {
     // Global login
     if (isset($_SESSION['super_admin'])) {
-        header('Location: /academixsuite/platform/admin/dashboard.php');
+        header('Location: ./platform/admin/dashboard.php');
     } elseif (isset($_SESSION['school_auth'])) {
         $schoolSlug = $_SESSION['school_auth']['school_slug'];
         $userType = $_SESSION['school_auth']['user_type'];
-        header("Location: /academixsuite/tenant/{$schoolSlug}/{$userType}/school-dashboard.php");
+        header("Location: ./tenant/{$schoolSlug}/{$userType}/school-dashboard.php");
     } else {
-        header('Location: /academixsuite/tenant/login.php');
+        header('Location: ./tenant/login.php');
     }
     exit;
 } else {
@@ -47,7 +47,7 @@ if (strpos($requestUri, '/platform/') === 0) {
         $ext = pathinfo($publicPath, PATHINFO_EXTENSION);
         if (in_array($ext, ['php', 'html', 'htm'])) {
             require_once $publicPath;
-        } else {
+        } else {    
             header('Content-Type: ' . mime_content_type($publicPath));
             readfile($publicPath);
         }
