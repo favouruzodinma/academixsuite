@@ -16,12 +16,13 @@ $userType = $pathParts[0] ?? 'admin';
 $page = $pathParts[1] ?? 'dashboard.php';
 
 // Allowed user types and pages
-$allowedUserTypes = ['admin', 'teacher', 'student', 'parent'];
+$allowedUserTypes = ['admin', 'teacher', 'student', 'parent', 'staff'];
 $allowedPages = [
     'admin' => ['dashboard.php', 'students.php', 'teachers.php', 'classes.php', 'attendance.php', 'fees.php', 'settings.php'],
-    'teacher' => ['dashboard.php', 'my-classes.php', 'attendance.php', 'grades.php', 'assignments.php', 'messages.php'],
-    'student' => ['dashboard.php', 'timetable.php', 'assignments.php', 'grades.php', 'profile.php'],
-    'parent' => ['dashboard.php', 'children.php', 'attendance.php', 'fees.php', 'messages.php']
+    'teacher' => ['dashboard.php', 'classes.php', 'my-classes.php', 'attendance.php', 'grades.php', 'timetable.php', 'assignments.php', 'students.php', 'announcements.php', 'calendar.php', 'messages.php', 'profile.php'],
+    'student' => ['dashboard.php', 'timetable.php', 'attendance.php', 'grades.php', 'results.php', 'assignments.php', 'fees.php', 'library.php', 'announcements.php', 'calendar.php', 'messages.php', 'profile.php'],
+    'parent' => ['dashboard.php', 'children.php', 'attendance.php', 'grades.php', 'fees.php', 'schedule.php', 'announcements.php', 'messages.php', 'support.php', 'profile.php'],
+    'staff' => ['dashboard.php', 'attendance.php', 'payroll.php', 'leave.php', 'library.php', 'inventory.php', 'fees.php', 'messages.php', 'reports.php', 'work.php', 'calendar.php', 'profile.php']
 ];
 
 // Validate user type

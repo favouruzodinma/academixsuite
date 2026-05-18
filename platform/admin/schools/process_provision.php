@@ -28,6 +28,13 @@ $response = [
     'school_url' => '',
     'admin_credentials' => [],
     'trial_info' => [],
+    'email_notifications' => [
+        'welcome_email_sent' => false,
+        'invoice_email_sent' => false,
+        'platform_notification_sent' => false,
+        'email_queue_ids' => [],
+        'errors' => []
+    ],
     'debug' => []
 ];
 
@@ -154,7 +161,12 @@ try {
         );
     }
 
-    $slug = generateSlug($_POST['name']);
+    $requestedSlug = trim((string)($_POST['school_slug'] ?? ''));
+    $slug = generateSlug($requestedSlug !== '' ? $requestedSlug : $_POST['name']);
+    if ($slug === '') {
+        $slug = 'school-' . time();
+    }
+
     $stmt = $db->prepare("SELECT id FROM schools WHERE slug = ?");
     $stmt->execute([$slug]);
     if ($stmt->fetch()) {
@@ -285,15 +297,15 @@ try {
         // First check if auto-commit is on
         $autoCommit = $db->getAttribute(PDO::ATTR_AUTOCOMMIT);
         error_log("Auto-commit status: " . ($autoCommit ? 'ON' : 'OFF'));
-        
+
         // Turn off auto-commit explicitly
         $db->setAttribute(PDO::ATTR_AUTOCOMMIT, 0);
-        
+
         // Begin transaction
         $db->beginTransaction();
         $transactionStarted = true;
         error_log("Platform transaction started successfully");
-        
+
         // Double-check transaction is active
         if (!$db->inTransaction()) {
             throw new Exception("Failed to start transaction. Check PDO configuration.");
@@ -328,12 +340,18 @@ try {
                 mkdir($uploadDir, 0755, true);
             }
 
-            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            // SECURITY: pin extension to verified MIME; never to user-supplied filename.
+            $mimeToExt = [
+                'image/jpeg' => 'jpg',
+                'image/jpg'  => 'jpg',
+                'image/png'  => 'png',
+                'image/webp' => 'webp',
+            ];
             $fileType = mime_content_type($_FILES['logo_path']['tmp_name']);
 
-            if (in_array($fileType, $allowedTypes) && $_FILES['logo_path']['size'] <= 5 * 1024 * 1024) {
-                $fileExt = strtolower(pathinfo($_FILES['logo_path']['name'], PATHINFO_EXTENSION));
-                $fileName = 'logo-' . $slug . '.' . $fileExt;
+            if (isset($mimeToExt[$fileType]) && $_FILES['logo_path']['size'] <= 5 * 1024 * 1024) {
+                $fileExt = $mimeToExt[$fileType];
+                $fileName = 'logo-' . preg_replace('/[^a-z0-9_-]/i', '', $slug) . '.' . $fileExt;
                 $filePath = $uploadDir . $fileName;
 
                 if (move_uploaded_file($_FILES['logo_path']['tmp_name'], $filePath)) {
@@ -351,81 +369,74 @@ try {
         // ============================================================
         if (class_exists('Tenant')) {
             $tenant = new Tenant();
-            
+
             try {
                 error_log("Creating separate school database using Tenant class...");
-                
-                // Prepare data for database creation
+
+                // Prepare data for database creation – now includes address fields for campus
                 $adminEmail = trim($_POST['admin_email']);
                 $adminPassword = $_POST['admin_password'];
                 $schoolName = trim($_POST['name']);
-                
-                // Prepare admin data array matching Tenant.php expectations
+
                 $adminData = [
                     'id' => $schoolId,
                     'name' => $adminName,
                     'admin_name' => $adminName,
                     'admin_email' => $adminEmail,
                     'admin_phone' => $adminPhone,
-                    'admin_password' => $adminPassword
+                    'admin_password' => $adminPassword,
+                    // Campus data (used by Tenant to create default campus)
+                    'school_name' => $_POST['name'],
+                    'address'    => $_POST['address'] ?? '',
+                    'city'       => $_POST['city'] ?? '',
+                    'state'      => $_POST['state'] ?? '',
+                    'country'    => $_POST['country'] ?? 'Nigeria',
+                    'phone'      => $_POST['phone'] ?? '',
+                    'email'      => $_POST['email'] ?? ''
                 ];
-                
-                // IMPORTANT: Database creation might auto-commit!
-                // Let's check transaction status before and after
-                error_log("Transaction status before database creation: " . ($db->inTransaction() ? 'ACTIVE' : 'NOT ACTIVE'));
-                
-                // Create the complete database with all tables
+
+                // Create the complete database with all tables, default campus, and admin user
                 $databaseResult = $tenant->createSchoolDatabase($adminData);
-                
-                error_log("Transaction status after database creation: " . ($db->inTransaction() ? 'ACTIVE' : 'NOT ACTIVE'));
-                
+
                 if (!$databaseResult['success']) {
                     throw new Exception("Failed to create school database: " . ($databaseResult['message'] ?? 'Unknown error'));
                 }
-                
-                // Get the database name from result or generate it
+
+                // Get the database name and admin user ID from the result
                 $newDatabaseName = $databaseResult['database_name'] ?? 'school_' . $schoolId;
-                
+                $adminUserIdFromSchool = $databaseResult['admin_user_id'] ?? null;
+
                 // Update database name in schools table
                 $updateStmt = $db->prepare("UPDATE schools SET database_name = ? WHERE id = ?");
                 $updateStmt->execute([$newDatabaseName, $schoolId]);
-                
+
                 error_log("Database created: " . $newDatabaseName);
+                error_log("Admin user ID in school DB: " . ($adminUserIdFromSchool ?? 'unknown'));
                 $response['debug']['database_creation'] = $databaseResult;
-                
+
                 // Create school directories
                 $tenant->createSchoolDirectories($schoolId);
                 error_log("School directories created");
-                
+
                 // Ensure school portal exists
                 $schoolWithDb = array_merge($schoolData, [
                     'id' => $schoolId,
                     'database_name' => $newDatabaseName
                 ]);
-                
                 $tenant->ensureSchoolPortal($schoolWithDb);
                 error_log("School portal ensured");
-                
-                // Test connection to new database
+
+                // Test connection to new database (optional, for logging)
                 try {
                     $testConn = Database::getSchoolConnection($newDatabaseName);
                     $testStmt = $testConn->query("SELECT COUNT(*) as table_count FROM information_schema.tables WHERE table_schema = DATABASE()");
                     $tableCount = $testStmt->fetch()['table_count'];
                     error_log("Successfully connected to school database. Table count: " . $tableCount);
                     $response['debug']['database_test'] = ['connected' => true, 'table_count' => $tableCount];
-                    
-                    // Create admin user in school database using Tenant method
-                    $adminUserId = $tenant->createSchoolAdminUser($schoolId, $adminEmail, $adminPassword, $adminName);
-                    if ($adminUserId) {
-                        error_log("Admin user created in school database with ID: " . $adminUserId);
-                    } else {
-                        error_log("Warning: Could not create admin user in school database");
-                    }
-                    
                 } catch (Exception $e) {
                     error_log("Warning: Could not test database connection: " . $e->getMessage());
                 }
-                
+
             } catch (Exception $e) {
                 throw new Exception("School database creation failed: " . $e->getMessage());
             }
@@ -443,7 +454,7 @@ try {
 
         // Create admin record in platform database (school_admins table)
         error_log("Creating admin record in platform database...");
-        
+
         // Validate and set admin role
         $allowedRoles = ['owner', 'admin', 'accountant', 'principal'];
         $adminRole = trim($_POST['admin_role'] ?? 'owner');
@@ -468,16 +479,14 @@ try {
         }
 
         try {
-            // Get admin user ID from school database
-            $adminUserIdFromSchool = $response['debug']['database_creation']['admin_user_id'] ?? 1;
-            
-            // Try normal insert first
+            // Use the admin user ID from the school database (returned by Tenant)
+            $adminUserIdFromSchool = $databaseResult['admin_user_id'] ?? 1;
+
             $adminStmt = $db->prepare("
                 INSERT INTO school_admins 
                 (school_id, user_id, email, role, permissions, is_active, created_at) 
                 VALUES (?, ?, ?, ?, ?, 1, NOW())
             ");
-            
             $adminStmt->execute([
                 $schoolId,
                 $adminUserIdFromSchool,
@@ -485,21 +494,21 @@ try {
                 $adminRole,
                 $adminPermissions
             ]);
-            
             $platformAdminId = $db->lastInsertId();
-            
+
+            error_log("Admin record created in platform with ID: " . $platformAdminId . ", role: " . $adminRole);
+
         } catch (Exception $e) {
             // If AUTO_INCREMENT fails, insert with manual ID
             if (strpos($e->getMessage(), "doesn't have a default value") !== false) {
                 $adminIdStmt = $db->query("SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM school_admins");
                 $nextAdminId = $adminIdStmt->fetch(PDO::FETCH_ASSOC)['next_id'];
-                
+
                 $adminStmt = $db->prepare("
                     INSERT INTO school_admins 
                     (id, school_id, user_id, email, role, permissions, is_active, created_at) 
                     VALUES (?, ?, ?, ?, ?, ?, 1, NOW())
                 ");
-                
                 $adminStmt->execute([
                     $nextAdminId,
                     $schoolId,
@@ -508,14 +517,11 @@ try {
                     $adminRole,
                     $adminPermissions
                 ]);
-                
                 $platformAdminId = $nextAdminId;
             } else {
                 throw $e;
             }
         }
-
-        error_log("Admin record created in platform with ID: " . $platformAdminId . ", role: " . $adminRole);
 
         // Check transaction status before subscription creation
         if (!$db->inTransaction()) {
@@ -526,7 +532,7 @@ try {
 
         // Create subscription record
         error_log("Creating subscription record...");
-        
+
         $billingCycle = $_POST['billing_cycle'] ?? 'yearly';
         $amount = $plan['price_monthly'];
 
@@ -555,7 +561,7 @@ try {
                      current_period_start, current_period_end, trial_ends_at, created_at) 
                     VALUES (?, ?, 'trial', ?, ?, 'NGN', NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), ?, NOW())
                 ");
-                
+
                 $subStmt->execute([
                     $schoolId,
                     $planId,
@@ -571,7 +577,7 @@ try {
                      current_period_start, current_period_end, created_at) 
                     VALUES (?, ?, 'trial', ?, ?, 'NGN', NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW())
                 ");
-                
+
                 $subStmt->execute([
                     $schoolId,
                     $planId,
@@ -579,15 +585,15 @@ try {
                     $amount
                 ]);
             }
-            
+
             $subscriptionId = $db->lastInsertId();
-            
+
         } catch (Exception $e) {
             // If AUTO_INCREMENT fails, insert with manual ID
             if (strpos($e->getMessage(), "doesn't have a default value") !== false) {
                 $subIdStmt = $db->query("SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM subscriptions");
                 $nextSubId = $subIdStmt->fetch(PDO::FETCH_ASSOC)['next_id'];
-                
+
                 if ($hasTrialEndsAt) {
                     $subStmt = $db->prepare("
                         INSERT INTO subscriptions 
@@ -595,7 +601,7 @@ try {
                          current_period_start, current_period_end, trial_ends_at, created_at) 
                         VALUES (?, ?, ?, 'trial', ?, ?, 'NGN', NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), ?, NOW())
                     ");
-                    
+
                     $subStmt->execute([
                         $nextSubId,
                         $schoolId,
@@ -611,7 +617,7 @@ try {
                          current_period_start, current_period_end, created_at) 
                         VALUES (?, ?, ?, 'trial', ?, ?, 'NGN', NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW())
                     ");
-                    
+
                     $subStmt->execute([
                         $nextSubId,
                         $schoolId,
@@ -620,7 +626,7 @@ try {
                         $amount
                     ]);
                 }
-                
+
                 $subscriptionId = $nextSubId;
             } else {
                 throw $e;
@@ -638,9 +644,10 @@ try {
 
         // Create initial invoice
         error_log("Creating trial invoice...");
-        
+
         $invoiceNumber = 'INV-' . date('Ymd') . '-' . str_pad($schoolId, 4, '0', STR_PAD_LEFT);
-        
+        $invoiceAccessToken = function_exists('generate_invoice_access_token') ? generate_invoice_access_token() : bin2hex(random_bytes(32));
+
         // Check if invoices table has is_trial column
         try {
             $checkInvoiceColumnStmt = $db->query("SHOW COLUMNS FROM invoices LIKE 'is_trial'");
@@ -650,88 +657,116 @@ try {
             $hasIsTrial = false;
             error_log("Error checking is_trial column: " . $e->getMessage());
         }
-        
+
+        try {
+            $checkAccessTokenColumnStmt = $db->query("SHOW COLUMNS FROM invoices LIKE 'access_token'");
+            $hasAccessToken = $checkAccessTokenColumnStmt->rowCount() > 0;
+        } catch (Exception $e) {
+            $hasAccessToken = false;
+            error_log("Error checking access_token column: " . $e->getMessage());
+        }
+
         try {
             if ($hasIsTrial) {
                 // Try insert WITH is_trial
                 $invoiceStmt = $db->prepare("
                     INSERT INTO invoices 
-                    (school_id, subscription_id, invoice_number, description, amount, tax, total_amount, 
+                    (school_id, subscription_id, invoice_number" . ($hasAccessToken ? ", access_token" : "") . ", description, amount, tax, total_amount, 
                      currency, status, due_date, start_date, end_date, is_trial, created_at) 
-                    VALUES (?, ?, ?, ?, ?, 0, ?, 'NGN', 'trial', DATE_ADD(NOW(), INTERVAL 30 DAY), 
+                    VALUES (?, ?, ?" . ($hasAccessToken ? ", ?" : "") . ", ?, ?, 0, ?, 'NGN', 'trial', DATE_ADD(NOW(), INTERVAL 30 DAY), 
                            NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1, NOW())
                 ");
-                
-                $invoiceStmt->execute([
+
+                $params = [
                     $schoolId,
                     $subscriptionId,
-                    $invoiceNumber,
+                    $invoiceNumber
+                ];
+                if ($hasAccessToken) {
+                    $params[] = $invoiceAccessToken;
+                }
+                $invoiceStmt->execute(array_merge($params, [
                     "Trial subscription for " . $plan['name'] . " plan (" . $billingCycle . ") - Free 7-day trial",
                     $amount,
                     $amount
-                ]);
+                ]));
             } else {
                 // Try insert WITHOUT is_trial
                 $invoiceStmt = $db->prepare("
                     INSERT INTO invoices 
-                    (school_id, subscription_id, invoice_number, description, amount, tax, total_amount, 
+                    (school_id, subscription_id, invoice_number" . ($hasAccessToken ? ", access_token" : "") . ", description, amount, tax, total_amount, 
                      currency, status, due_date, start_date, end_date, created_at) 
-                    VALUES (?, ?, ?, ?, ?, 0, ?, 'NGN', 'trial', DATE_ADD(NOW(), INTERVAL 30 DAY), 
+                    VALUES (?, ?, ?" . ($hasAccessToken ? ", ?" : "") . ", ?, ?, 0, ?, 'NGN', 'trial', DATE_ADD(NOW(), INTERVAL 30 DAY), 
                            NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW())
                 ");
-                
-                $invoiceStmt->execute([
+
+                $params = [
                     $schoolId,
                     $subscriptionId,
-                    $invoiceNumber,
+                    $invoiceNumber
+                ];
+                if ($hasAccessToken) {
+                    $params[] = $invoiceAccessToken;
+                }
+                $invoiceStmt->execute(array_merge($params, [
                     "Trial subscription for " . $plan['name'] . " plan (" . $billingCycle . ") - Free 7-day trial",
                     $amount,
                     $amount
-                ]);
+                ]));
             }
-            
+
         } catch (Exception $e) {
             // If AUTO_INCREMENT fails, insert with manual ID
             if (strpos($e->getMessage(), "doesn't have a default value") !== false) {
                 $invIdStmt = $db->query("SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM invoices");
                 $nextInvId = $invIdStmt->fetch(PDO::FETCH_ASSOC)['next_id'];
-                
+
                 if ($hasIsTrial) {
                     $invoiceStmt = $db->prepare("
                         INSERT INTO invoices 
-                        (id, school_id, subscription_id, invoice_number, description, amount, tax, total_amount, 
+                        (id, school_id, subscription_id, invoice_number" . ($hasAccessToken ? ", access_token" : "") . ", description, amount, tax, total_amount, 
                          currency, status, due_date, start_date, end_date, is_trial, created_at) 
-                        VALUES (?, ?, ?, ?, ?, ?, 0, ?, 'NGN', 'trial', DATE_ADD(NOW(), INTERVAL 30 DAY), 
+                        VALUES (?, ?, ?, ?" . ($hasAccessToken ? ", ?" : "") . ", ?, ?, 0, ?, 'NGN', 'trial', DATE_ADD(NOW(), INTERVAL 30 DAY), 
                                NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 1, NOW())
                     ");
-                    
-                    $invoiceStmt->execute([
+
+                    $params = [
                         $nextInvId,
                         $schoolId,
                         $subscriptionId,
-                        $invoiceNumber,
+                        $invoiceNumber
+                    ];
+                    if ($hasAccessToken) {
+                        $params[] = $invoiceAccessToken;
+                    }
+                    $invoiceStmt->execute(array_merge($params, [
                         "Trial subscription for " . $plan['name'] . " plan (" . $billingCycle . ") - Free 7-day trial",
                         $amount,
                         $amount
-                    ]);
+                    ]));
                 } else {
                     $invoiceStmt = $db->prepare("
                         INSERT INTO invoices 
-                        (id, school_id, subscription_id, invoice_number, description, amount, tax, total_amount, 
+                        (id, school_id, subscription_id, invoice_number" . ($hasAccessToken ? ", access_token" : "") . ", description, amount, tax, total_amount, 
                          currency, status, due_date, start_date, end_date, created_at) 
-                        VALUES (?, ?, ?, ?, ?, ?, 0, ?, 'NGN', 'trial', DATE_ADD(NOW(), INTERVAL 30 DAY), 
+                        VALUES (?, ?, ?, ?" . ($hasAccessToken ? ", ?" : "") . ", ?, ?, 0, ?, 'NGN', 'trial', DATE_ADD(NOW(), INTERVAL 30 DAY), 
                                NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), NOW())
                     ");
-                    
-                    $invoiceStmt->execute([
+
+                    $params = [
                         $nextInvId,
                         $schoolId,
                         $subscriptionId,
-                        $invoiceNumber,
+                        $invoiceNumber
+                    ];
+                    if ($hasAccessToken) {
+                        $params[] = $invoiceAccessToken;
+                    }
+                    $invoiceStmt->execute(array_merge($params, [
                         "Trial subscription for " . $plan['name'] . " plan (" . $billingCycle . ") - Free 7-day trial",
                         $amount,
                         $amount
-                    ]);
+                    ]));
                 }
             } else {
                 throw $e;
@@ -768,9 +803,26 @@ try {
         }
 
         // Send welcome emails (outside transaction)
-        $emailResult = sendProvisioningEmails($schoolId, $slug, $_POST['admin_email'], $_POST['admin_password'], $schoolData['name'], $trialEndsAt, $plan['name']);
+        $emailResult = sendProvisioningEmails(
+            $schoolId,
+            $slug,
+            $_POST['admin_email'],
+            $_POST['admin_password'],
+            $schoolData['name'],
+            $adminName,
+            $trialEndsAt,
+            $plan['name'],
+            [
+                'database_name' => $newDatabaseName ?? 'school_' . $schoolId,
+                'database_host' => defined('DB_HOST') ? DB_HOST : 'localhost',
+                'tables_created' => $response['debug']['database_test']['table_count'] ?? 'unknown'
+            ],
+            $superAdmin['email'] ?? null
+        );
 
-        if (!$emailResult) {
+        $response['email_notifications'] = $emailResult;
+
+        if (empty($emailResult['success'])) {
             error_log("Warning: Email sending failed, but school was created successfully");
         }
 
@@ -778,11 +830,12 @@ try {
         logProvisioningActivity($schoolId, $superAdmin['id'], $_POST['name']);
 
         // Prepare success response
-        $appUrl = defined('APP_URL') ? APP_URL : 'http://localhost';
-        $schoolUrl = $appUrl . "/tenant/" . $slug . "/login.php";
+        $schoolUrl = function_exists('school_portal_url')
+            ? school_portal_url($slug, 'login.php', true)
+            : ((defined('APP_URL') ? rtrim(APP_URL, '/') : 'http://localhost') . "/tenant/" . $slug . "/login.php");
 
         $response['success'] = true;
-        $response['message'] = "School '{$_POST['name']}' has been successfully provisioned with a 7-day free trial!";
+        $response['message'] = "School '{$_POST['name']}' has been successfully provisioned with a {$trialPeriod}-day free trial!";
         $response['school_slug'] = $slug;
         $response['admin_email'] = $_POST['admin_email'];
         $response['school_id'] = $schoolId;
@@ -802,17 +855,18 @@ try {
             'currency' => 'NGN',
             'billing_cycle' => $billingCycle
         ];
-        
+
         $response['database_info'] = [
             'database_name' => $newDatabaseName ?? 'school_' . $schoolId,
             'database_host' => defined('DB_HOST') ? DB_HOST : 'localhost',
             'tables_created' => $response['debug']['database_test']['table_count'] ?? 'unknown',
             'database_mode' => 'separate-database',
-            'admin_user_id' => $adminUserId ?? 'unknown'
+            'admin_user_id' => $adminUserIdFromSchool ?? 'unknown',
+            'campus_code' => $campusCode ?? 'MAIN001'
         ];
 
         error_log("=== PROVISIONING COMPLETED SUCCESSFULLY ===");
-        
+
     } catch (Exception $e) {
         // Rollback transaction on error - safely
         if ($transactionStarted && isset($db)) {
@@ -829,12 +883,12 @@ try {
         } else {
             error_log("No transaction to rollback (transactionStarted = false): " . $e->getMessage());
         }
-        
+
         // Restore auto-commit setting
         if (isset($db) && isset($autoCommit)) {
             $db->setAttribute(PDO::ATTR_AUTOCOMMIT, $autoCommit);
         }
-        
+
         error_log("Error trace: " . $e->getTraceAsString());
         throw $e;
     } finally {
@@ -855,8 +909,7 @@ try {
     $response['message'] = $e->getMessage();
     $response['debug']['error_details'] = [
         'file' => $e->getFile(),
-        'line' => $e->getLine(),
-        'trace' => $e->getTraceAsString()
+        'line' => $e->getLine()
     ];
 
     http_response_code(500);
@@ -873,10 +926,22 @@ exit;
 /**
  * Send provisioning emails to super admin and school admin
  */
-function sendProvisioningEmails($schoolId, $schoolSlug, $adminEmail, $adminPassword, $schoolName, $trialEndsAt = null, $planName = 'Starter')
+function sendProvisioningEmails($schoolId, $schoolSlug, $adminEmail, $adminPassword, $schoolName, $adminName = null, $trialEndsAt = null, $planName = 'Starter', array $databaseInfo = [], $platformNotifyEmail = null)
 {
+    $result = [
+        'success' => false,
+        'welcome_email_sent' => false,
+        'invoice_email_sent' => false,
+        'platform_notification_sent' => false,
+        'email_queue_ids' => [],
+        'errors' => []
+    ];
+
     try {
         $db = Database::getPlatformConnection();
+        $emailQueue = new EmailQueueManager();
+        $emailQueue->setSchoolContext($schoolId);
+        $emailTemplate = new EmailTemplate();
 
         // Get school details
         $stmt = $db->prepare("SELECT name, email, database_name FROM schools WHERE id = ?");
@@ -884,253 +949,126 @@ function sendProvisioningEmails($schoolId, $schoolSlug, $adminEmail, $adminPassw
         $school = $stmt->fetch();
 
         if (!$school) {
-            error_log("School not found for email sending");
-            return false;
+            $result['errors'][] = 'School not found for email sending';
+            return $result;
         }
 
-        // Calculate trial days
+        // Get invoice details
+        $stmt = $db->prepare("SELECT * FROM invoices WHERE school_id = ? ORDER BY created_at DESC LIMIT 1");
+        $stmt->execute([$schoolId]);
+        $invoice = $stmt->fetch();
+
+        // Calculate trial info
         if (!$trialEndsAt) {
             $trialEndsAt = date('Y-m-d H:i:s', strtotime('+7 days'));
         }
         $trialDays = ceil((strtotime($trialEndsAt) - time()) / (60 * 60 * 24));
-        $trialDays = max(0, $trialDays);
-        $trialEndDate = date('F j, Y', strtotime($trialEndsAt));
 
-        // Format trial info message
-        $trialMessage = "";
-        if ($trialDays > 0) {
-            $escapedPlanName = htmlspecialchars($planName, ENT_QUOTES, 'UTF-8');
-            $trialMessage = "
-            <div style='background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: white; padding: 20px; border-radius: 8px; margin: 20px 0;'>
-                <h3 style='color: white; margin-top: 0;'>🎉 7-Day Free Trial Activated!</h3>
-                <div style='display: flex; align-items: center; gap: 20px; margin-bottom: 15px;'>
-                    <div style='flex: 1; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 6px;'>
-                        <div style='font-size: 12px; opacity: 0.9;'>TRIAL DAYS LEFT</div>
-                        <div style='font-size: 32px; font-weight: bold;'>{$trialDays}</div>
-                    </div>
-                    <div style='flex: 2;'>
-                        <p style='margin: 0 0 5px 0;'><strong>Plan:</strong> {$escapedPlanName} Plan</p>
-                        <p style='margin: 0 0 5px 0;'><strong>Trial Ends:</strong> {$trialEndDate}</p>
-                        <p style='margin: 0; font-size: 14px;'>Enjoy full access to all features during your trial period</p>
-                    </div>
-                </div>
-                <div style='background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 6px; font-size: 14px;'>
-                    <strong>⚠️ Important:</strong> No payment required during trial. You'll be notified before trial ends.
-                </div>
-            </div>
-            ";
+        $loginUrl = function_exists('school_portal_url')
+            ? school_portal_url($schoolSlug, 'login.php', true)
+            : ((defined('APP_URL') ? rtrim(APP_URL, '/') : 'http://localhost') . "/tenant/" . $schoolSlug . "/login.php");
+
+        // 1. Queue Welcome Email
+        $welcomeSubject = "Welcome to AcademixSuite - Your School Portal Is Ready";
+        $welcomeData = [
+            'admin_name' => $adminName ?? strstr($adminEmail, '@', true),
+            'school_name' => $schoolName,
+            'login_url' => $loginUrl,
+            'credentials' => [
+                'email' => $adminEmail,
+                'password' => $adminPassword
+            ],
+            'trial_info' => [
+                'trial_days' => $trialDays,
+                'trial_ends_at' => $trialEndsAt,
+                'plan' => $planName
+            ]
+        ];
+
+        $welcomeHtml = $emailTemplate->getTemplate('welcome', $welcomeData);
+        $welcomeQueueResult = $emailQueue->addToQueue($adminEmail, $welcomeSubject, $welcomeHtml, strip_tags($welcomeHtml), 1, 'welcome');
+
+        // Trigger immediate send for welcome email
+        if ($welcomeQueueResult['success']) {
+            $result['email_queue_ids'][] = $welcomeQueueResult['id'];
+            $sendResult = $emailQueue->sendEmailById($welcomeQueueResult['id']);
+            $result['welcome_email_sent'] = !empty($sendResult['success']);
+            if (empty($sendResult['success'])) {
+                $result['errors'][] = 'Welcome email: ' . ($sendResult['error'] ?? 'send failed');
+            }
+        } else {
+            $result['errors'][] = 'Welcome email queue: ' . ($welcomeQueueResult['error'] ?? 'queue failed');
         }
 
-        // Add database info
-        $databaseInfo = "";
-        if (!empty($school['database_name'])) {
-            $escapedDbName = htmlspecialchars($school['database_name'], ENT_QUOTES, 'UTF-8');
-            $databaseInfo = "
-            <div style='background: #f0f9ff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin: 15px 0;'>
-                <h4 style='color: #1e293b; margin-top: 0; margin-bottom: 10px;'>📊 Database Information</h4>
-                <p style='margin: 5px 0;'><strong>Database Name:</strong> {$escapedDbName}</p>
-                <p style='margin: 5px 0;'><strong>Database Type:</strong> Separate isolated database</p>
-                <p style='margin: 5px 0; font-size: 14px; color: #64748b;'>Your school data is stored in a completely separate, secure database.</p>
-            </div>
-            ";
+        // 2. Queue Invoice Email (if invoice exists)
+        if ($invoice) {
+            $invoiceSubject = "Your AcademixSuite Invoice - " . $invoice['invoice_number'];
+            $invoiceData = [
+                'school_name' => $schoolName,
+                'invoice_number' => $invoice['invoice_number'],
+                'amount' => number_format($invoice['total_amount'], 2),
+                'currency' => $invoice['currency'] ?? 'NGN',
+                'due_date' => date('F j, Y', strtotime($invoice['due_date'])),
+                'description' => $invoice['description'],
+                'status' => $invoice['status']
+            ];
+
+            $invoiceHtml = $emailTemplate->getTemplate('invoice', $invoiceData);
+            $invoiceQueueResult = $emailQueue->addToQueue($adminEmail, $invoiceSubject, $invoiceHtml, strip_tags($invoiceHtml), 2, 'invoice');
+
+            // Trigger immediate send for invoice
+            if ($invoiceQueueResult['success']) {
+                $result['email_queue_ids'][] = $invoiceQueueResult['id'];
+                $sendResult = $emailQueue->sendEmailById($invoiceQueueResult['id']);
+                $result['invoice_email_sent'] = !empty($sendResult['success']);
+                if (empty($sendResult['success'])) {
+                    $result['errors'][] = 'Invoice email: ' . ($sendResult['error'] ?? 'send failed');
+                }
+            } else {
+                $result['errors'][] = 'Invoice email queue: ' . ($invoiceQueueResult['error'] ?? 'queue failed');
+            }
         }
 
-        // Get super admin email
-        $superAdminStmt = $db->prepare("SELECT email FROM platform_users WHERE role = 'super_admin' AND is_active = 1 LIMIT 1");
-        $superAdminStmt->execute();
-        $superAdmin = $superAdminStmt->fetch();
-
-        // Email content for school admin
-        $appUrl = defined('APP_URL') ? APP_URL : 'http://localhost';
-        $adminSubject = "Welcome to AcademixSuite! 🎓 - Your School is Ready with 7-Day Free Trial";
-
-        // Escape variables
-        $escapedSchoolName = htmlspecialchars($schoolName, ENT_QUOTES, 'UTF-8');
-        $escapedAdminEmail = htmlspecialchars($adminEmail, ENT_QUOTES, 'UTF-8');
-        $escapedAdminPassword = htmlspecialchars($adminPassword, ENT_QUOTES, 'UTF-8');
-        $escapedSchoolSlug = htmlspecialchars($schoolSlug, ENT_QUOTES, 'UTF-8');
-        $escapedAppUrl = htmlspecialchars($appUrl, ENT_QUOTES, 'UTF-8');
-        $escapedTrialEndDate = htmlspecialchars($trialEndDate, ENT_QUOTES, 'UTF-8');
-
-        $adminMessage = "
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset='UTF-8'>
-            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-            <title>Welcome to AcademixSuite</title>
-            <style>
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-                body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #334155; margin: 0; padding: 0; background-color: #f8fafc; }
-                .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-                .header { background: linear-gradient(135deg, #3B82F6, #1D4ED8); padding: 30px; text-align: center; color: white; }
-                .logo { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
-                .tagline { opacity: 0.9; font-size: 14px; }
-                .content { padding: 30px; }
-                .welcome-text { font-size: 18px; color: #1e293b; margin-bottom: 25px; }
-                .school-name { color: #3B82F6; font-weight: 600; }
-                .credentials-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; margin: 25px 0; }
-                .credential-item { margin-bottom: 15px; }
-                .credential-label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
-                .credential-value { font-size: 16px; color: #1e293b; font-weight: 500; }
-                .login-btn { display: inline-block; background: #3B82F6; color: white; text-decoration: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; margin: 20px 0; transition: background 0.3s; }
-                .login-btn:hover { background: #2563eb; }
-                .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 25px 0; }
-                .feature { background: #f0f9ff; padding: 15px; border-radius: 8px; text-align: center; }
-                .feature-icon { font-size: 24px; margin-bottom: 10px; }
-                .feature-text { font-size: 14px; color: #0c4a6e; }
-                .footer { background: #f1f5f9; padding: 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; }
-                .important-note { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0; }
-                .security-note { background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3B82F6; }
-            </style>
-        </head>
-        <body>
-            <div class='container'>
-                <div class='header'>
-                    <div class='logo'>🎓 AcademixSuite</div>
-                    <div class='tagline'>School Management Simplified</div>
-                </div>
-                
-                <div class='content'>
-                    <h1 style='color: #1e293b; margin-top: 0;'>Welcome to AcademixSuite!</h1>
-                    
-                    <div class='welcome-text'>
-                        Your school <span class='school-name'>{$escapedSchoolName}</span> has been successfully provisioned and is ready to use.
-                    </div>
-                    
-                    {$trialMessage}
-                    {$databaseInfo}
-                    
-                    <div class='credentials-box'>
-                        <h3 style='color: #1e293b; margin-top: 0; margin-bottom: 20px;'>Your Login Credentials</h3>
-                        
-                        <div class='credential-item'>
-                            <div class='credential-label'>Email Address</div>
-                            <div class='credential-value'>{$escapedAdminEmail}</div>
-                        </div>
-                        
-                        <div class='credential-item'>
-                            <div class='credential-label'>Password</div>
-                            <div class='credential-value'>{$escapedAdminPassword}</div>
-                        </div>
-                        
-                        <div class='credential-item'>
-                            <div class='credential-label'>School URL</div>
-                            <div class='credential-value'>{$escapedAppUrl}/tenant/{$escapedSchoolSlug}/login.php</div>
-                        </div>
-                        
-                        <div style='text-align: center; margin-top: 25px;'>
-                            <a href='{$escapedAppUrl}/tenant/{$escapedSchoolSlug}/login.php' class='login-btn'>
-                                🚀 Launch Your School Portal
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <div class='features-grid'>
-                        <div class='feature'>
-                            <div class='feature-icon'>📊</div>
-                            <div class='feature-text'>Complete Database</div>
-                        </div>
-                        <div class='feature'>
-                            <div class='feature-icon'>👨‍🎓</div>
-                            <div class='feature-text'>Student Management</div>
-                        </div>
-                        <div class='feature'>
-                            <div class='feature-icon'>📚</div>
-                            <div class='feature-text'>Class & Attendance</div>
-                        </div>
-                        <div class='feature'>
-                            <div class='feature-icon'>💰</div>
-                            <div class='feature-text'>Fee Management</div>
-                        </div>
-                    </div>
-                    
-                    <div class='security-note'>
-                        <strong>🔒 Security First:</strong> Your school has a separate, isolated database for maximum security and privacy.
-                    </div>
-                    
-                    <div class='important-note'>
-                        <strong>💡 Getting Started Tips:</strong>
-                        <ul style='margin: 10px 0 0 0; padding-left: 20px;'>
-                            <li>Explore all features during your trial period</li>
-                            <li>Add your school staff and teachers</li>
-                            <li>Import or add student data</li>
-                            <li>Set up your academic calendar</li>
-                            <li>Customize your school settings</li>
-                        </ul>
-                    </div>
-                    
-                    <div style='text-align: center; margin: 30px 0;'>
-                        <div style='font-size: 14px; color: #64748b; margin-bottom: 10px;'>Need help getting started?</div>
-                        <a href='mailto:support@academixsuite.com' style='color: #3B82F6; text-decoration: none; font-weight: 500;'>
-                            📧 Contact Support
-                        </a>
-                    </div>
-                </div>
-                
-                <div class='footer'>
-                    <p>This is an automated message from AcademixSuite.</p>
-                    <p>Please do not reply to this email.</p>
-                    <p style='font-size: 11px; margin-top: 10px; color: #94a3b8;'>
-                        © " . date('Y') . " AcademixSuite. All rights reserved.<br>
-                        If you did not request this account, please contact us immediately.
-                    </p>
-                </div>
-            </div>
-        </body>
-        </html>
-        ";
-
-        // Log emails to database
-        logEmail($escapedAdminEmail, $adminSubject, $adminMessage, 'welcome');
-
-        if ($superAdmin) {
-            $superAdminEmail = htmlspecialchars($superAdmin['email'] ?? '', ENT_QUOTES, 'UTF-8');
-            $superAdminSubject = "📚 New School Provisioned: {$escapedSchoolName}";
-            logEmail($superAdminEmail, $superAdminSubject, $adminMessage, 'provisioning');
+        if (!empty($platformNotifyEmail) && filter_var($platformNotifyEmail, FILTER_VALIDATE_EMAIL)) {
+            $platformSubject = "New School Provisioned - " . $schoolName;
+            $platformHtml = $emailTemplate->getTemplate('provisioning_notification', [
+                'school_name' => $schoolName,
+                'admin_email' => $adminEmail,
+                'school_id' => $schoolId,
+                'database_info' => $databaseInfo
+            ]);
+            $platformQueueResult = $emailQueue->addToQueue($platformNotifyEmail, $platformSubject, $platformHtml, strip_tags($platformHtml), 2, 'provisioning_notification');
+            if ($platformQueueResult['success']) {
+                $result['email_queue_ids'][] = $platformQueueResult['id'];
+                $sendResult = $emailQueue->sendEmailById($platformQueueResult['id']);
+                $result['platform_notification_sent'] = !empty($sendResult['success']);
+                if (empty($sendResult['success'])) {
+                    $result['errors'][] = 'Platform notification: ' . ($sendResult['error'] ?? 'send failed');
+                }
+            } else {
+                $result['errors'][] = 'Platform notification queue: ' . ($platformQueueResult['error'] ?? 'queue failed');
+            }
         }
 
-        error_log("Provisioning emails logged to database - Trial: {$trialDays} days remaining");
-        return true;
+        error_log("Provisioning emails (Welcome, Invoice) queued successfully for school ID: " . $schoolId);
+        $result['success'] = $result['welcome_email_sent'] || $result['invoice_email_sent'] || $result['platform_notification_sent'];
+        return $result;
     } catch (Exception $e) {
-        error_log("Email sending error: " . $e->getMessage());
-        return false;
+        error_log("Error queuing provisioning emails: " . $e->getMessage());
+        $result['errors'][] = $e->getMessage();
+        return $result;
     }
 }
 
 /**
- * Log email to database
+ * Log email to database - Legacy function maintained for compatibility
  */
 function logEmail($to, $subject, $message, $template)
 {
     try {
         $db = Database::getPlatformConnection();
-        
-        try {
-            // Try normal insert
-            $stmt = $db->prepare("
-                INSERT INTO email_logs 
-                (to_email, subject, template, status, created_at) 
-                VALUES (?, ?, ?, 'sent', NOW())
-            ");
-            $stmt->execute([$to, $subject, $template]);
-        } catch (Exception $e) {
-            // If AUTO_INCREMENT fails, insert with manual ID
-            if (strpos($e->getMessage(), "doesn't have a default value") !== false) {
-                $logIdStmt = $db->query("SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM email_logs");
-                $nextLogId = $logIdStmt->fetch(PDO::FETCH_ASSOC)['next_id'];
-                
-                $stmt = $db->prepare("
-                    INSERT INTO email_logs 
-                    (id, to_email, subject, template, status, created_at) 
-                    VALUES (?, ?, ?, ?, 'sent', NOW())
-                ");
-                $stmt->execute([$nextLogId, $to, $subject, $template]);
-            } else {
-                throw $e;
-            }
-        }
-        
+        $stmt = $db->prepare("INSERT INTO email_logs (to_email, subject, template, status, created_at) VALUES (?, ?, ?, 'queued', NOW())");
+        $stmt->execute([$to, $subject, $template]);
         return true;
     } catch (Exception $e) {
         error_log("Failed to log email: " . $e->getMessage());
@@ -1157,7 +1095,7 @@ function logProvisioningActivity($schoolId, $adminId, $schoolName)
             ");
 
             $newValues = json_encode([
-                'name' => $schoolName, 
+                'name' => $schoolName,
                 'status' => 'trial',
                 'database_created' => true,
                 'database_name' => 'school_' . $schoolId
@@ -1171,13 +1109,13 @@ function logProvisioningActivity($schoolId, $adminId, $schoolName)
                 $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
                 $_SERVER['HTTP_USER_AGENT'] ?? ''
             ]);
-            
+
         } catch (Exception $e) {
             // If AUTO_INCREMENT fails, insert with manual ID
             if (strpos($e->getMessage(), "doesn't have a default value") !== false) {
                 $auditIdStmt = $db->query("SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM audit_logs");
                 $nextAuditId = $auditIdStmt->fetch(PDO::FETCH_ASSOC)['next_id'];
-                
+
                 $auditStmt = $db->prepare("
                     INSERT INTO audit_logs 
                     (id, school_id, user_id, user_type, event, auditable_type, auditable_id, 
@@ -1185,7 +1123,7 @@ function logProvisioningActivity($schoolId, $adminId, $schoolName)
                     VALUES (?, ?, ?, 'super_admin', 'school_created', 'schools', ?, 
                            ?, ?, ?, ?, NOW())
                 ");
-                
+
                 $auditStmt->execute([
                     $nextAuditId,
                     $schoolId,

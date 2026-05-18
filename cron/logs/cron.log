@@ -1,0 +1,16 @@
+[2026-05-18 18:00:14] [WARNING] [process_school_trials] Database connection failed, using file-only logging: Platform database connection failed: SQLSTATE[HY000] [2002] No such file or directory
+[2026-05-18 18:00:14] [INFO] [process_school_trials] Task started | Context: {"pid":4913,"memory_limit":"128M","max_execution_time":"0"}
+[2026-05-18 18:00:14] [INFO] [process_school_trials] Executing task: process_school_trials | Context: {"options":{"dry-run":true,"limit":"5"}}
+[2026-05-18 18:00:40] [WARNING] [process_school_trials] Database connection failed, using file-only logging: Platform database connection failed: SQLSTATE[HY000] [2002] No such file or directory
+[2026-05-18 18:00:40] [INFO] [process_school_trials] Task started | Context: {"pid":10358,"memory_limit":"128M","max_execution_time":"0"}
+[2026-05-18 18:00:40] [INFO] [process_school_trials] Executing task: process_school_trials | Context: {"options":{"dry-run":true,"limit":"5"}}
+[2026-05-18 18:01:10] [WARNING] [process_school_trials] Database connection failed, using file-only logging: Platform database connection failed: SQLSTATE[HY000] [2002] No such file or directory
+[2026-05-18 18:01:10] [INFO] [process_school_trials] Task started | Context: {"pid":16920,"memory_limit":"128M","max_execution_time":"0"}
+[2026-05-18 18:01:10] [INFO] [process_school_trials] Executing task: process_school_trials | Context: {"options":{"dry-run":true,"limit":"5"}}
+[2026-05-18 18:02:45] [WARNING] [process_school_trials] Database connection failed, using file-only logging: Platform database connection failed: SQLSTATE[HY000] [2002] No such file or directory
+[2026-05-18 18:02:45] [INFO] [process_school_trials] Task started | Context: {"pid":44545,"memory_limit":"128M","max_execution_time":"0"}
+[2026-05-18 18:02:45] [INFO] [process_school_trials] Executing task: process_school_trials | Context: {"options":{"dry-run":true,"limit":"5"}}
+[2026-05-18 18:02:45] [WARNING] [process_school_trials] Skipping database execution history because platform database is unavailable
+[2026-05-18 18:02:45] [INFO] [process_school_trials] Starting school trial expiry processing | Context: {"limit":5,"dry_run":true}
+[2026-05-18 18:02:45] [ERROR] [process_school_trials] Task execution failed: Platform database connection failed: SQLSTATE[HY000] [2002] No such file or directory | Context: {"file":"\/Applications\/XAMPP\/xamppfiles\/htdocs\/academixsuite\/includes\/Database.php","line":45,"trace":"#0 \/Applications\/XAMPP\/xamppfiles\/htdocs\/academixsuite\/cron\/tasks\/process_school_trials.php(36): Database::getPlatformConnection()\n#1 \/Applications\/XAMPP\/xamppfiles\/htdocs\/academixsuite\/cron\/cron.php(183): executeTask(Array, Object(CronLogger))\n#2 {main}"}
+[2026-05-18 18:02:45] [ERROR] [process_school_trials] Task failed | Context: {"error":"Platform database connection failed: SQLSTATE[HY000] [2002] No such file or directory","file":"\/Applications\/XAMPP\/xamppfiles\/htdocs\/academixsuite\/cron\/cron.php","line":237,"execution_time":"0.05s"}

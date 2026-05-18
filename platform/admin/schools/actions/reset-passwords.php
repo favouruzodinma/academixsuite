@@ -45,7 +45,6 @@ if (!function_exists('validateCSRFToken')) {
             return false;
         }
         
-        unset($_SESSION['csrf_tokens'][$token]);
         return true;
     }
 }
@@ -55,9 +54,8 @@ if (!validateCSRFToken($data['csrf_token'])) {
     exit;
 }
 $schoolId = $data['school_id'] ?? 0;
-$databaseName = $data['database_name'] ?? '';
 
-if ($schoolId <= 0 || empty($databaseName)) {
+if ($schoolId <= 0) {
     echo json_encode(['success' => false, 'message' => 'Invalid parameters']);
     exit;
 }
@@ -66,17 +64,18 @@ try {
     $db = Database::getPlatformConnection();
     
     // Get school details
-    $schoolStmt = $db->prepare("SELECT name, email FROM schools WHERE id = ?");
+    $schoolStmt = $db->prepare("SELECT name, email, database_name FROM schools WHERE id = ?");
     $schoolStmt->execute([$schoolId]);
     $school = $schoolStmt->fetch();
     
-    if (!$school) {
-        echo json_encode(['success' => false, 'message' => 'School not found']);
+    if (!$school || empty($school['database_name'])) {
+        echo json_encode(['success' => false, 'message' => 'School not found or database not created']);
         exit;
     }
     
     // Connect to school database
-    $schoolDb = Database::getSchoolConnection($databaseName);
+    $schoolDb = Database::getSchoolConnection($school['database_name']);
+    $userColumns = getTableColumns($schoolDb, 'users');
     
     // Generate new temporary password
     $temporaryPassword = bin2hex(random_bytes(8)); // 16 character password
@@ -84,38 +83,48 @@ try {
     // Hash the password
     $hashedPassword = password_hash($temporaryPassword, PASSWORD_DEFAULT);
     
-    // Update all user passwords
-    $updateStmt = $schoolDb->prepare("
-        UPDATE users 
-        SET password = ?,
-            password_reset_required = 1,
-            updated_at = NOW()
-        WHERE is_active = 1
-    ");
+    $setParts = ['password = ?'];
+    if (in_array('password_reset_required', $userColumns, true)) {
+        $setParts[] = 'password_reset_required = 1';
+    }
+    if (in_array('updated_at', $userColumns, true)) {
+        $setParts[] = 'updated_at = NOW()';
+    }
+    $where = in_array('is_active', $userColumns, true) ? 'WHERE is_active = 1' : '';
+    $updateStmt = $schoolDb->prepare("UPDATE users SET " . implode(', ', $setParts) . " $where");
     $updateStmt->execute([$hashedPassword]);
     $usersAffected = $updateStmt->rowCount();
     
     // Get admin emails for notification
-    $adminStmt = $schoolDb->prepare("
-        SELECT email, first_name, last_name 
-        FROM users 
-        WHERE user_type = 'admin' AND is_active = 1
-    ");
+    $nameSelect = in_array('name', $userColumns, true)
+        ? 'name'
+        : "TRIM(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, ''))) AS name";
+    $adminWhere = ["user_type = 'admin'"];
+    if (in_array('is_active', $userColumns, true)) {
+        $adminWhere[] = 'is_active = 1';
+    }
+    $adminStmt = $schoolDb->prepare("SELECT email, $nameSelect FROM users WHERE " . implode(' AND ', $adminWhere));
     $adminStmt->execute();
     $admins = $adminStmt->fetchAll();
     
     // Send notification to admins
     $notificationsSent = 0;
+    $emailService = new EmailService();
     foreach ($admins as $admin) {
+        if (empty($admin['email']) || !filter_var($admin['email'], FILTER_VALIDATE_EMAIL)) {
+            continue;
+        }
         // Prepare notification email
         $to = $admin['email'];
         $subject = "Password Reset - {$school['name']}";
+        $adminName = htmlspecialchars($admin['name'] ?: 'School Administrator', ENT_QUOTES, 'UTF-8');
+        $schoolName = htmlspecialchars($school['name'], ENT_QUOTES, 'UTF-8');
         
         $message = "
             <h2>Password Reset Notification</h2>
-            <p>Dear {$admin['first_name']} {$admin['last_name']},</p>
+            <p>Dear {$adminName},</p>
             
-            <p>All user passwords for <strong>{$school['name']}</strong> have been reset by the platform administrator.</p>
+            <p>All user passwords for <strong>{$schoolName}</strong> have been reset by the platform administrator.</p>
             
             <div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
                 <h3>Important Information</h3>
@@ -128,12 +137,10 @@ try {
             <p>Thank you,<br>Platform Administration</p>
         ";
         
-        // Send email (implement your email function)
-        // if (sendEmail($to, $subject, $message)) {
-        //     $notificationsSent++;
-        // }
-        
-        $notificationsSent++; // For testing
+        $result = $emailService->sendEmail($to, $subject, $message);
+        if (!empty($result['success'])) {
+            $notificationsSent++;
+        }
     }
     
     // Log the action
@@ -157,5 +164,10 @@ try {
 } catch (Exception $e) {
     error_log("Error resetting passwords: " . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Error resetting passwords: ' . $e->getMessage()]);
+}
+
+function getTableColumns(PDO $db, string $table): array {
+    $stmt = $db->query("SHOW COLUMNS FROM `$table`");
+    return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'Field');
 }
 ?>

@@ -1,0 +1,12 @@
+[06-Feb-2026 14:45:18 UTC] PHP Warning:  include_once(./style1.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/faq/index.php on line 166
+[06-Feb-2026 14:45:18 UTC] PHP Warning:  include_once(): Failed opening './style1.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/faq/index.php on line 166
+[06-Feb-2026 14:45:18 UTC] PHP Warning:  include_once(./style2.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/faq/index.php on line 204
+[06-Feb-2026 14:45:18 UTC] PHP Warning:  include_once(): Failed opening './style2.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/faq/index.php on line 204
+[06-Feb-2026 14:45:18 UTC] PHP Warning:  include_once(./style3.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/faq/index.php on line 293
+[06-Feb-2026 14:45:18 UTC] PHP Warning:  include_once(): Failed opening './style3.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/faq/index.php on line 293
+[06-Feb-2026 14:45:20 UTC] PHP Warning:  include_once(./style1.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/faq/index.php on line 166
+[06-Feb-2026 14:45:20 UTC] PHP Warning:  include_once(): Failed opening './style1.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/faq/index.php on line 166
+[06-Feb-2026 14:45:20 UTC] PHP Warning:  include_once(./style2.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/faq/index.php on line 204
+[06-Feb-2026 14:45:20 UTC] PHP Warning:  include_once(): Failed opening './style2.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/faq/index.php on line 204
+[06-Feb-2026 14:45:20 UTC] PHP Warning:  include_once(./style3.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/faq/index.php on line 293
+[06-Feb-2026 14:45:20 UTC] PHP Warning:  include_once(): Failed opening './style3.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/faq/index.php on line 293

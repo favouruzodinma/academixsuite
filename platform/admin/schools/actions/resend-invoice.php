@@ -45,7 +45,6 @@ if (!function_exists('validateCSRFToken')) {
             return false;
         }
         
-        unset($_SESSION['csrf_tokens'][$token]);
         return true;
     }
 }
@@ -76,38 +75,51 @@ try {
     $schoolStmt->execute([$schoolId]);
     $school = $schoolStmt->fetch();
     
-    if (!$school) {
-        echo json_encode(['success' => false, 'message' => 'School not found']);
+    if (!$school || empty($school['database_name'])) {
+        echo json_encode(['success' => false, 'message' => 'School not found or database not created']);
         exit;
     }
     
     // Get school admin emails
     $schoolDb = Database::getSchoolConnection($school['database_name'] ?? '');
-    $adminStmt = $schoolDb->prepare("
-        SELECT email, first_name, last_name 
-        FROM users 
-        WHERE user_type = 'admin' AND is_active = 1
-    ");
+    $userColumns = getTableColumns($schoolDb, 'users');
+    $nameSelect = in_array('name', $userColumns, true)
+        ? 'name'
+        : "TRIM(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, ''))) AS name";
+    $where = ["user_type = 'admin'"];
+    if (in_array('is_active', $userColumns, true)) {
+        $where[] = 'is_active = 1';
+    }
+    $adminStmt = $schoolDb->prepare("SELECT email, $nameSelect FROM users WHERE " . implode(' AND ', $where));
     $adminStmt->execute();
     $admins = $adminStmt->fetchAll();
     
     // Send invoice email to each admin
     $sentCount = 0;
+    $emailService = new EmailService();
     foreach ($admins as $admin) {
+        if (empty($admin['email']) || !filter_var($admin['email'], FILTER_VALIDATE_EMAIL)) {
+            continue;
+        }
+
         // Prepare email data
         $to = $admin['email'];
         $subject = "Invoice #{$school['invoice_number']} - {$school['name']}";
+        $adminName = htmlspecialchars($admin['name'] ?: 'School Administrator', ENT_QUOTES, 'UTF-8');
+        $schoolName = htmlspecialchars($school['name'], ENT_QUOTES, 'UTF-8');
+        $invoiceNumber = htmlspecialchars($school['invoice_number'] ?? '', ENT_QUOTES, 'UTF-8');
+        $amount = htmlspecialchars($school['amount'] ?? '', ENT_QUOTES, 'UTF-8');
         
         // Email template
         $message = "
-            <h2>Invoice #{$school['invoice_number']}</h2>
-            <p>Dear {$admin['first_name']} {$admin['last_name']},</p>
+            <h2>Invoice #{$invoiceNumber}</h2>
+            <p>Dear {$adminName},</p>
             <p>This is a reminder for your pending invoice.</p>
             
             <div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
                 <h3>Invoice Details</h3>
-                <p><strong>School:</strong> {$school['name']}</p>
-                <p><strong>Amount:</strong> {$school['amount']}</p>
+                <p><strong>School:</strong> {$schoolName}</p>
+                <p><strong>Amount:</strong> {$amount}</p>
                 <p><strong>Due Date:</strong> " . date('F j, Y', strtotime($school['due_date'])) . "</p>
                 <p><strong>Period:</strong> " . date('M j', strtotime($school['start_date'])) . " - " . date('M j, Y', strtotime($school['end_date'])) . "</p>
             </div>
@@ -115,12 +127,11 @@ try {
             <p>Please make payment by the due date to avoid service interruption.</p>
             <p>Thank you,<br>Platform Administration</p>
         ";
-        
-        // Here you would call your email sending function
-        // $sent = sendEmail($to, $subject, $message);
-        // if ($sent) $sentCount++;
-        
-        $sentCount++; // For testing
+
+        $result = $emailService->sendEmail($to, $subject, $message);
+        if (!empty($result['success'])) {
+            $sentCount++;
+        }
     }
     
     // Log the action
@@ -140,5 +151,10 @@ try {
 } catch (Exception $e) {
     error_log("Error resending invoice: " . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Error resending invoice: ' . $e->getMessage()]);
+}
+
+function getTableColumns(PDO $db, string $table): array {
+    $stmt = $db->query("SHOW COLUMNS FROM `$table`");
+    return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'Field');
 }
 ?>

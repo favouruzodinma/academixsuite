@@ -396,6 +396,7 @@ $campusTypes = [
                     <form id="provisionForm" action="process_provision.php" method="POST" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-lg p-6 lg:p-8">
                         <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                         <input type="hidden" name="provision_type" value="full">
+                        <input type="hidden" id="schoolSlugInput" name="school_slug" value="school-<?php echo time(); ?>">
 
                         <!-- Step 1: School Information -->
                         <div id="step1" class="step-content active">
@@ -1432,6 +1433,10 @@ $campusTypes = [
                 // Ensure slug is not too long
                 slug = slug.substring(0, 50);
                 document.getElementById('slugPreview').textContent = slug;
+                const slugInput = document.getElementById('schoolSlugInput');
+                if (slugInput) {
+                    slugInput.value = slug;
+                }
             }
         }
 
@@ -1886,8 +1891,9 @@ $campusTypes = [
             // Database name and URL
             const slug = document.getElementById('slugPreview').textContent;
             document.getElementById('reviewDatabaseName').textContent = `school_${Date.now()}`;
-            document.getElementById('reviewAccessURL').textContent = 
-                `/academixsuite/tenant/${slug}`;
+            const host = window.location.hostname.replace(/^www\./, '');
+            document.getElementById('reviewAccessURL').textContent =
+                `${window.location.protocol}//${slug}.${host}/login.php`;
         }
 
         // ========== FORM SUBMISSION ==========
@@ -1973,7 +1979,8 @@ $campusTypes = [
             
             if (modal && message && schoolURL && adminEmail) {
                 message.textContent = result.message || `"${formData.school?.name}" has been successfully provisioned and is ready to use.`;
-                schoolURL.textContent = result.school_url || window.location.origin + '/academixsuite/tenant/' + result.school_slug;
+                const host = window.location.hostname.replace(/^www\./, '');
+                schoolURL.textContent = result.school_url || window.location.protocol + '//' + result.school_slug + '.' + host + '/login.php';
                 adminEmail.textContent = result.admin_email || formData.admin?.email;
                 
                 modal.classList.remove('hidden');

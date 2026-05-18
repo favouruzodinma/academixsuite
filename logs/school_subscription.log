@@ -1,0 +1,245 @@
+[24-Feb-2026 01:00:20 Africa/Lagos] === SUBSCRIPTION PAGE START ===
+[24-Feb-2026 01:00:20 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/subscription-plan.php
+[24-Feb-2026 01:00:20 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 01:00:20 Africa/Lagos] School database connection successful
+[24-Feb-2026 01:00:20 Africa/Lagos] Error fetching subscription data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.role_id' in 'ON'
+[24-Feb-2026 01:00:20 Africa/Lagos] === SUBSCRIPTION PAGE END ===
+[24-Feb-2026 01:00:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 12:14:23 Africa/Lagos] === SUBSCRIPTION PAGE START ===
+[24-Feb-2026 12:14:23 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/subscription-plan.php
+[24-Feb-2026 12:14:23 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 12:14:23 Africa/Lagos] School database connection successful
+[24-Feb-2026 12:14:23 Africa/Lagos] Error fetching subscription data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.role_id' in 'ON'
+[24-Feb-2026 12:14:23 Africa/Lagos] === SUBSCRIPTION PAGE END ===
+[24-Feb-2026 12:14:23 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 12:45:59 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[24-Feb-2026 12:45:59 Africa/Lagos] Platform database connection successful
+[24-Feb-2026 12:45:59 Africa/Lagos] School database connection successful
+[24-Feb-2026 12:45:59 Africa/Lagos] Fetched 4 active plans from platform
+[24-Feb-2026 12:45:59 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'is_active' in 'WHERE'
+[24-Feb-2026 12:45:59 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[24-Feb-2026 12:45:59 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 12:49:24 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[24-Feb-2026 12:49:24 Africa/Lagos] Platform database connection successful
+[24-Feb-2026 12:49:24 Africa/Lagos] School database connection successful
+[24-Feb-2026 12:49:24 Africa/Lagos] Fetched 4 active plans from platform
+[24-Feb-2026 12:49:24 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'is_active' in 'WHERE'
+[24-Feb-2026 12:49:24 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[24-Feb-2026 12:49:24 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 12:51:34 Africa/Lagos] === SUBSCRIPTION PAGE START ===
+[24-Feb-2026 12:51:34 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/subscription-plan.php
+[24-Feb-2026 12:51:34 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 12:51:34 Africa/Lagos] School database connection successful
+[24-Feb-2026 12:51:34 Africa/Lagos] Error fetching subscription data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.role_id' in 'ON'
+[24-Feb-2026 12:51:34 Africa/Lagos] === SUBSCRIPTION PAGE END ===
+[24-Feb-2026 12:51:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 12:53:21 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[24-Feb-2026 12:53:21 Africa/Lagos] Platform database connection successful
+[24-Feb-2026 12:53:21 Africa/Lagos] School database connection successful
+[24-Feb-2026 12:53:21 Africa/Lagos] Fetched 4 active plans
+[24-Feb-2026 12:53:21 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[24-Feb-2026 12:53:21 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[24-Feb-2026 12:53:21 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 13:04:52 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[24-Feb-2026 13:04:52 Africa/Lagos] Platform database connection successful
+[24-Feb-2026 13:04:52 Africa/Lagos] School database connection successful
+[24-Feb-2026 13:04:52 Africa/Lagos] Fetched 4 active plans
+[24-Feb-2026 13:04:52 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[24-Feb-2026 13:04:52 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[24-Feb-2026 13:04:52 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 13:07:03 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[24-Feb-2026 13:07:03 Africa/Lagos] Platform database connection successful
+[24-Feb-2026 13:07:03 Africa/Lagos] School database connection successful
+[24-Feb-2026 13:07:03 Africa/Lagos] Fetched 4 active plans
+[24-Feb-2026 13:07:03 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[24-Feb-2026 13:07:03 Africa/Lagos] Plan change error: SQLSTATE[HY093]: Invalid parameter number
+[24-Feb-2026 13:07:03 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[24-Feb-2026 13:07:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 13:07:20 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[24-Feb-2026 13:07:20 Africa/Lagos] Platform database connection successful
+[24-Feb-2026 13:07:20 Africa/Lagos] School database connection successful
+[24-Feb-2026 13:07:20 Africa/Lagos] Fetched 4 active plans
+[24-Feb-2026 13:07:20 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[24-Feb-2026 13:07:20 Africa/Lagos] Plan change error: SQLSTATE[HY093]: Invalid parameter number
+[24-Feb-2026 13:07:20 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[24-Feb-2026 13:07:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 13:08:10 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[24-Feb-2026 13:08:10 Africa/Lagos] Platform database connection successful
+[24-Feb-2026 13:08:10 Africa/Lagos] School database connection successful
+[24-Feb-2026 13:08:10 Africa/Lagos] Fetched 4 active plans
+[24-Feb-2026 13:08:10 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[24-Feb-2026 13:08:10 Africa/Lagos] Plan change error: SQLSTATE[HY093]: Invalid parameter number
+[24-Feb-2026 13:08:10 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[24-Feb-2026 13:08:10 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 13:23:55 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[24-Feb-2026 13:23:55 Africa/Lagos] Platform database connection successful
+[24-Feb-2026 13:23:55 Africa/Lagos] School database connection successful
+[24-Feb-2026 13:23:55 Africa/Lagos] Fetched 4 active plans
+[24-Feb-2026 13:23:55 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[24-Feb-2026 13:23:55 Africa/Lagos] Plan change error: SQLSTATE[HY093]: Invalid parameter number
+[24-Feb-2026 13:23:55 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[24-Feb-2026 13:23:55 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 13:39:03 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[24-Feb-2026 13:39:03 Africa/Lagos] Platform database connection successful
+[24-Feb-2026 13:39:03 Africa/Lagos] School database connection successful
+[24-Feb-2026 13:39:03 Africa/Lagos] Fetched 4 active plans
+[24-Feb-2026 13:39:03 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[24-Feb-2026 13:39:03 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[24-Feb-2026 13:39:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Feb-2026 19:19:25 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[24-Feb-2026 19:19:25 Africa/Lagos] Platform database connection successful
+[24-Feb-2026 19:19:25 Africa/Lagos] School database connection successful
+[24-Feb-2026 19:19:25 Africa/Lagos] Fetched 4 active plans
+[24-Feb-2026 19:19:25 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[24-Feb-2026 19:19:25 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[24-Feb-2026 19:19:25 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[25-Feb-2026 22:04:01 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[25-Feb-2026 22:04:01 Africa/Lagos] Platform database connection successful
+[25-Feb-2026 22:04:01 Africa/Lagos] School database connection successful
+[25-Feb-2026 22:04:01 Africa/Lagos] Fetched 4 active plans
+[25-Feb-2026 22:04:01 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[25-Feb-2026 22:04:01 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[25-Feb-2026 22:04:01 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[25-Feb-2026 22:04:36 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[25-Feb-2026 22:04:36 Africa/Lagos] Platform database connection successful
+[25-Feb-2026 22:04:36 Africa/Lagos] School database connection successful
+[25-Feb-2026 22:04:36 Africa/Lagos] Fetched 4 active plans
+[25-Feb-2026 22:04:36 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[25-Feb-2026 22:04:36 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[25-Feb-2026 22:04:36 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[03-Mar-2026 20:49:21 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[03-Mar-2026 20:49:21 Africa/Lagos] Platform database connection successful
+[03-Mar-2026 20:49:21 Africa/Lagos] School database connection successful
+[03-Mar-2026 20:49:21 Africa/Lagos] Fetched 4 active plans
+[03-Mar-2026 20:49:21 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[03-Mar-2026 20:49:21 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[03-Mar-2026 20:49:21 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[03-Mar-2026 20:52:30 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[03-Mar-2026 20:52:30 Africa/Lagos] Platform database connection successful
+[03-Mar-2026 20:52:30 Africa/Lagos] School database connection successful
+[03-Mar-2026 20:52:30 Africa/Lagos] Fetched 4 active plans
+[03-Mar-2026 20:52:30 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[03-Mar-2026 20:52:30 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[03-Mar-2026 20:52:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[03-Mar-2026 20:52:40 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[03-Mar-2026 20:52:40 Africa/Lagos] Platform database connection successful
+[03-Mar-2026 20:52:40 Africa/Lagos] School database connection successful
+[03-Mar-2026 20:52:40 Africa/Lagos] Fetched 4 active plans
+[03-Mar-2026 20:52:40 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[03-Mar-2026 20:52:40 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[03-Mar-2026 20:52:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[03-Mar-2026 20:53:00 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[03-Mar-2026 20:53:00 Africa/Lagos] Platform database connection successful
+[03-Mar-2026 20:53:00 Africa/Lagos] School database connection successful
+[03-Mar-2026 20:53:00 Africa/Lagos] Fetched 4 active plans
+[03-Mar-2026 20:53:00 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[03-Mar-2026 20:53:00 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[03-Mar-2026 20:53:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[05-Mar-2026 17:10:55 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[05-Mar-2026 17:10:55 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 17:10:55 Africa/Lagos] School database connection successful
+[05-Mar-2026 17:10:55 Africa/Lagos] Fetched 4 active plans
+[05-Mar-2026 17:10:55 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[05-Mar-2026 17:10:55 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[05-Mar-2026 17:10:55 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[05-Mar-2026 17:14:12 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[05-Mar-2026 17:14:12 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 17:14:12 Africa/Lagos] School database connection successful
+[05-Mar-2026 17:14:12 Africa/Lagos] Fetched 4 active plans
+[05-Mar-2026 17:14:12 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[05-Mar-2026 17:14:12 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[05-Mar-2026 17:14:12 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[07-Mar-2026 03:47:09 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[07-Mar-2026 03:47:09 Africa/Lagos] Platform database connection successful
+[07-Mar-2026 03:47:09 Africa/Lagos] School database connection successful
+[07-Mar-2026 03:47:09 Africa/Lagos] Fetched 4 active plans
+[07-Mar-2026 03:47:09 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[07-Mar-2026 03:47:09 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[07-Mar-2026 03:47:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[07-Mar-2026 03:47:51 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[07-Mar-2026 03:47:51 Africa/Lagos] Platform database connection successful
+[07-Mar-2026 03:47:51 Africa/Lagos] School database connection successful
+[07-Mar-2026 03:47:51 Africa/Lagos] Fetched 4 active plans
+[07-Mar-2026 03:47:51 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[07-Mar-2026 03:47:51 Africa/Lagos] Plan change error: SQLSTATE[HY093]: Invalid parameter number
+[07-Mar-2026 03:47:51 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[07-Mar-2026 03:47:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[07-Mar-2026 14:02:32 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[07-Mar-2026 14:02:32 Africa/Lagos] Platform database connection successful
+[07-Mar-2026 14:02:32 Africa/Lagos] School database connection successful
+[07-Mar-2026 14:02:32 Africa/Lagos] Fetched 4 active plans
+[07-Mar-2026 14:02:32 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[07-Mar-2026 14:02:32 Africa/Lagos] Plan change error: SQLSTATE[HY093]: Invalid parameter number
+[07-Mar-2026 14:02:32 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[07-Mar-2026 14:02:32 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[10-Mar-2026 13:05:01 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[10-Mar-2026 13:05:01 Africa/Lagos] Platform database connection successful
+[10-Mar-2026 13:05:01 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:05:01 Africa/Lagos] Fetched 4 active plans
+[10-Mar-2026 13:05:01 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[10-Mar-2026 13:05:01 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[10-Mar-2026 13:05:01 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[10-Mar-2026 13:12:42 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[10-Mar-2026 13:12:42 Africa/Lagos] Platform database connection successful
+[10-Mar-2026 13:12:42 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:12:42 Africa/Lagos] Fetched 4 active plans
+[10-Mar-2026 13:12:42 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[10-Mar-2026 13:12:42 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[10-Mar-2026 13:12:42 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[11-Mar-2026 04:28:03 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[11-Mar-2026 04:28:03 Africa/Lagos] Platform database connection successful
+[11-Mar-2026 04:28:03 Africa/Lagos] School database connection successful
+[11-Mar-2026 04:28:03 Africa/Lagos] Fetched 4 active plans
+[11-Mar-2026 04:28:03 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[11-Mar-2026 04:28:03 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[11-Mar-2026 04:28:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[11-Mar-2026 09:41:11 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[11-Mar-2026 09:41:11 Africa/Lagos] Platform database connection successful
+[11-Mar-2026 09:41:11 Africa/Lagos] School database connection successful
+[11-Mar-2026 09:41:11 Africa/Lagos] Fetched 4 active plans
+[11-Mar-2026 09:41:11 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[11-Mar-2026 09:41:11 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[11-Mar-2026 09:41:11 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[11-Mar-2026 09:41:21 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[11-Mar-2026 09:41:21 Africa/Lagos] Platform database connection successful
+[11-Mar-2026 09:41:21 Africa/Lagos] School database connection successful
+[11-Mar-2026 09:41:21 Africa/Lagos] Fetched 4 active plans
+[11-Mar-2026 09:41:21 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[11-Mar-2026 09:41:21 Africa/Lagos] Plan change error: SQLSTATE[HY093]: Invalid parameter number
+[11-Mar-2026 09:41:21 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[11-Mar-2026 09:41:21 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[14-Mar-2026 05:12:35 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[14-Mar-2026 05:12:35 Africa/Lagos] Platform database connection successful
+[14-Mar-2026 05:12:35 Africa/Lagos] School database connection successful
+[14-Mar-2026 05:12:35 Africa/Lagos] Fetched 4 active plans
+[14-Mar-2026 05:12:35 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[14-Mar-2026 05:12:35 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[14-Mar-2026 05:12:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[14-Mar-2026 10:54:25 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[14-Mar-2026 10:54:25 Africa/Lagos] Platform database connection successful
+[14-Mar-2026 10:54:25 Africa/Lagos] School database connection successful
+[14-Mar-2026 10:54:25 Africa/Lagos] Fetched 4 active plans
+[14-Mar-2026 10:54:25 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[14-Mar-2026 10:54:25 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[14-Mar-2026 10:54:25 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[24-Mar-2026 09:39:04 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[24-Mar-2026 09:39:04 Africa/Lagos] Platform database connection successful
+[24-Mar-2026 09:39:04 Africa/Lagos] School database connection successful
+[24-Mar-2026 09:39:04 Africa/Lagos] Fetched 4 active plans
+[24-Mar-2026 09:39:04 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[24-Mar-2026 09:39:04 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[24-Mar-2026 09:39:04 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[26-Mar-2026 14:00:39 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[26-Mar-2026 14:00:39 Africa/Lagos] Platform database connection successful
+[26-Mar-2026 14:00:39 Africa/Lagos] School database connection successful
+[26-Mar-2026 14:00:39 Africa/Lagos] Fetched 4 active plans
+[26-Mar-2026 14:00:39 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[26-Mar-2026 14:00:39 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[26-Mar-2026 14:00:39 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php
+[11-Apr-2026 18:07:31 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE START ===
+[11-Apr-2026 18:07:31 Africa/Lagos] Platform database connection successful
+[11-Apr-2026 18:07:31 Africa/Lagos] School database connection successful
+[11-Apr-2026 18:07:31 Africa/Lagos] Fetched 4 active plans
+[11-Apr-2026 18:07:31 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[11-Apr-2026 18:07:31 Africa/Lagos] === SCHOOL SUBSCRIPTION PAGE END ===
+[11-Apr-2026 18:07:31 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/subscription-plan.php

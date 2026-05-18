@@ -1,0 +1,1080 @@
+[06-Mar-2026 12:10:04 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 12:10:04 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:10:04 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 12:10:04 Africa/Lagos] School ID: 6
+[06-Mar-2026 12:10:04 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 12:10:04 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 12:10:04 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 12:10:04 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 12:10:04 Africa/Lagos] Database class found
+[06-Mar-2026 12:10:04 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 12:10:04 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 12:10:04 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 12:10:04 Africa/Lagos] School database connection successful
+[06-Mar-2026 12:10:04 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 12:10:04 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 12:10:04 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 12:10:04 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 12:10:04 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 12:10:04 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 12:10:04 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:19:21 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 12:19:21 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:19:21 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 12:19:21 Africa/Lagos] School ID: 6
+[06-Mar-2026 12:19:21 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 12:19:21 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 12:19:21 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 12:19:21 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 12:19:21 Africa/Lagos] Database class found
+[06-Mar-2026 12:19:21 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 12:19:21 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 12:19:21 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 12:19:21 Africa/Lagos] School database connection successful
+[06-Mar-2026 12:19:21 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 12:19:21 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 12:19:21 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 12:19:21 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 12:19:21 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 12:19:21 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 12:19:21 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:20:05 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 12:20:05 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:20:05 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 12:20:05 Africa/Lagos] School ID: 6
+[06-Mar-2026 12:20:05 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 12:20:05 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 12:20:05 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 12:20:05 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 12:20:05 Africa/Lagos] Database class found
+[06-Mar-2026 12:20:05 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 12:20:05 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 12:20:05 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 12:20:05 Africa/Lagos] School database connection successful
+[06-Mar-2026 12:20:05 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 12:20:05 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 12:20:05 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 12:20:05 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 12:20:05 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 12:20:05 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 12:20:05 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:21:32 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 12:21:32 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:21:32 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 12:21:32 Africa/Lagos] School ID: 6
+[06-Mar-2026 12:21:32 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 12:21:32 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 12:21:32 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 12:21:32 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 12:21:32 Africa/Lagos] Database class found
+[06-Mar-2026 12:21:32 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 12:21:32 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 12:21:32 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 12:21:32 Africa/Lagos] School database connection successful
+[06-Mar-2026 12:21:32 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 12:21:32 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 12:21:32 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 12:21:32 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 12:21:32 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 12:21:32 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 12:21:32 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:26:26 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 12:26:26 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:26:26 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 12:26:26 Africa/Lagos] School ID: 6
+[06-Mar-2026 12:26:26 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 12:26:26 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 12:26:26 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 12:26:26 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 12:26:26 Africa/Lagos] Database class found
+[06-Mar-2026 12:26:26 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 12:26:26 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 12:26:26 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 12:26:26 Africa/Lagos] School database connection successful
+[06-Mar-2026 12:26:26 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 12:26:26 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 12:26:26 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 12:26:26 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 12:26:26 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 12:26:26 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 12:26:26 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:28:54 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 12:28:54 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:28:54 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 12:28:54 Africa/Lagos] School ID: 6
+[06-Mar-2026 12:28:54 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 12:28:54 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 12:28:54 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 12:28:54 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 12:28:54 Africa/Lagos] Database class found
+[06-Mar-2026 12:28:54 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 12:28:54 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 12:28:54 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 12:28:54 Africa/Lagos] School database connection successful
+[06-Mar-2026 12:28:54 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 12:28:54 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 12:28:54 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 12:28:54 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 12:28:54 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 12:28:54 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 12:28:54 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:29:36 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 12:29:36 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:29:36 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 12:29:36 Africa/Lagos] School ID: 6
+[06-Mar-2026 12:29:36 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 12:29:36 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 12:29:36 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 12:29:36 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 12:29:36 Africa/Lagos] Database class found
+[06-Mar-2026 12:29:36 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 12:29:36 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 12:29:36 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 12:29:36 Africa/Lagos] School database connection successful
+[06-Mar-2026 12:29:36 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 12:29:36 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 12:29:36 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 12:29:36 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 12:29:36 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 12:29:36 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 12:29:36 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:33:51 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 12:33:51 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 12:33:51 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 12:33:51 Africa/Lagos] School ID: 6
+[06-Mar-2026 12:33:51 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 12:33:51 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 12:33:51 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 12:33:51 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 12:33:51 Africa/Lagos] Database class found
+[06-Mar-2026 12:33:51 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 12:33:51 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 12:33:51 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 12:33:51 Africa/Lagos] School database connection successful
+[06-Mar-2026 12:33:51 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 12:33:51 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 12:33:51 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 12:33:51 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 12:33:51 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 12:33:51 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 12:33:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 13:09:26 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 13:09:26 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 13:09:26 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 13:09:26 Africa/Lagos] School ID: 6
+[06-Mar-2026 13:09:26 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 13:09:26 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 13:09:26 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 13:09:26 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 13:09:26 Africa/Lagos] Database class found
+[06-Mar-2026 13:09:26 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 13:09:26 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 13:09:26 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 13:09:26 Africa/Lagos] School database connection successful
+[06-Mar-2026 13:09:26 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 13:09:26 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 13:09:26 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 13:09:26 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 13:09:26 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 13:09:26 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 13:09:26 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 13:09:58 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 13:09:58 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 13:09:58 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 13:09:58 Africa/Lagos] School ID: 6
+[06-Mar-2026 13:09:58 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 13:09:58 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 13:09:58 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 13:09:58 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 13:09:58 Africa/Lagos] Database class found
+[06-Mar-2026 13:09:58 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 13:09:58 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 13:09:58 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 13:09:58 Africa/Lagos] School database connection successful
+[06-Mar-2026 13:09:58 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 13:09:58 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 13:09:58 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 13:09:58 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 13:09:58 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 13:09:58 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 13:09:58 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 13:15:12 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 13:15:12 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 13:15:12 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 13:15:12 Africa/Lagos] School ID: 6
+[06-Mar-2026 13:15:12 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 13:15:12 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 13:15:12 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 13:15:12 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 13:15:12 Africa/Lagos] Database class found
+[06-Mar-2026 13:15:12 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 13:15:12 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 13:15:12 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 13:15:12 Africa/Lagos] School database connection successful
+[06-Mar-2026 13:15:12 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 13:15:12 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 13:15:12 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 13:15:12 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 13:15:12 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 13:15:12 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 13:15:12 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 14:11:35 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 14:11:35 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 14:11:35 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 14:11:35 Africa/Lagos] School ID: 6
+[06-Mar-2026 14:11:35 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 14:11:35 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 14:11:35 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 14:11:35 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 14:11:35 Africa/Lagos] Database class found
+[06-Mar-2026 14:11:35 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 14:11:35 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 14:11:35 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 14:11:35 Africa/Lagos] School database connection successful
+[06-Mar-2026 14:11:35 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 14:11:35 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 14:11:35 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 14:11:35 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 14:11:35 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 14:11:35 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 14:11:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 14:12:34 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 14:12:34 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 14:12:34 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 14:12:34 Africa/Lagos] School ID: 6
+[06-Mar-2026 14:12:34 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 14:12:34 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 14:12:34 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 14:12:34 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 14:12:34 Africa/Lagos] Database class found
+[06-Mar-2026 14:12:34 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 14:12:34 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 14:12:34 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 14:12:34 Africa/Lagos] School database connection successful
+[06-Mar-2026 14:12:34 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 14:12:34 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 14:12:34 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 14:12:34 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 14:12:34 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 14:12:34 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 14:12:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 14:16:18 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 14:16:18 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 14:16:18 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 14:16:18 Africa/Lagos] School ID: 6
+[06-Mar-2026 14:16:18 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 14:16:18 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 14:16:18 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 14:16:18 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 14:16:18 Africa/Lagos] Database class found
+[06-Mar-2026 14:16:18 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 14:16:18 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 14:16:18 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 14:16:18 Africa/Lagos] School database connection successful
+[06-Mar-2026 14:16:18 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 14:16:18 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 14:16:18 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 14:16:18 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 14:16:18 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 14:16:18 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 14:16:18 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 18:50:10 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 18:50:10 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 18:50:10 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 18:50:10 Africa/Lagos] School ID: 6
+[06-Mar-2026 18:50:10 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 18:50:10 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 18:50:10 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 18:50:10 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 18:50:10 Africa/Lagos] Database class found
+[06-Mar-2026 18:50:10 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 18:50:10 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 18:50:10 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 18:50:10 Africa/Lagos] School database connection successful
+[06-Mar-2026 18:50:10 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 18:50:10 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 18:50:10 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 18:50:10 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 18:50:10 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 18:50:10 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 18:50:10 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 19:10:51 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 19:10:51 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 19:10:51 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 19:10:51 Africa/Lagos] School ID: 6
+[06-Mar-2026 19:10:51 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 19:10:51 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 19:10:51 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 19:10:51 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 19:10:51 Africa/Lagos] Database class found
+[06-Mar-2026 19:10:51 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 19:10:51 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 19:10:51 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 19:10:51 Africa/Lagos] School database connection successful
+[06-Mar-2026 19:10:51 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 19:10:51 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 19:10:51 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 19:10:51 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 19:10:51 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 19:10:51 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 19:10:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 19:48:15 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 19:48:15 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 19:48:15 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 19:48:15 Africa/Lagos] School ID: 6
+[06-Mar-2026 19:48:15 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 19:48:15 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 19:48:15 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 19:48:15 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 19:48:15 Africa/Lagos] Database class found
+[06-Mar-2026 19:48:15 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 19:48:15 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 19:48:15 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 19:48:15 Africa/Lagos] School database connection successful
+[06-Mar-2026 19:48:15 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 19:48:15 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 19:48:15 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 19:48:15 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 19:48:15 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 19:48:15 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 19:48:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 19:58:06 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 19:58:06 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 19:58:06 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 19:58:06 Africa/Lagos] School ID: 6
+[06-Mar-2026 19:58:06 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 19:58:06 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 19:58:06 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 19:58:06 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 19:58:06 Africa/Lagos] Database class found
+[06-Mar-2026 19:58:06 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 19:58:06 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 19:58:06 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 19:58:06 Africa/Lagos] School database connection successful
+[06-Mar-2026 19:58:06 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 19:58:06 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 19:58:06 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 19:58:06 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 19:58:06 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 19:58:06 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 19:58:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 19:58:45 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 19:58:45 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 19:58:45 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 19:58:45 Africa/Lagos] School ID: 6
+[06-Mar-2026 19:58:45 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 19:58:45 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 19:58:45 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 19:58:45 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 19:58:45 Africa/Lagos] Database class found
+[06-Mar-2026 19:58:45 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 19:58:45 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 19:58:45 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 19:58:45 Africa/Lagos] School database connection successful
+[06-Mar-2026 19:58:45 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 19:58:45 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 19:58:45 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 19:58:45 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 19:58:45 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 19:58:45 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 19:58:45 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 22:51:30 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[06-Mar-2026 22:51:30 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[06-Mar-2026 22:51:30 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 22:51:30 Africa/Lagos] School ID: 6
+[06-Mar-2026 22:51:30 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 22:51:30 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 22:51:30 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 22:51:30 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 22:51:30 Africa/Lagos] Database class found
+[06-Mar-2026 22:51:30 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 22:51:30 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 22:51:30 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 22:51:30 Africa/Lagos] School database connection successful
+[06-Mar-2026 22:51:30 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 22:51:30 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 22:51:30 Africa/Lagos] Found 4 guardians
+[06-Mar-2026 22:51:30 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[06-Mar-2026 22:51:30 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[06-Mar-2026 22:51:30 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[06-Mar-2026 22:51:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[07-Mar-2026 07:00:57 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[07-Mar-2026 07:00:57 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[07-Mar-2026 07:00:57 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[07-Mar-2026 07:00:57 Africa/Lagos] School ID: 6
+[07-Mar-2026 07:00:57 Africa/Lagos] School Name: bitflux wallet
+[07-Mar-2026 07:00:57 Africa/Lagos] Authenticated User ID: 1
+[07-Mar-2026 07:00:57 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[07-Mar-2026 07:00:57 Africa/Lagos] Autoload loaded successfully
+[07-Mar-2026 07:00:57 Africa/Lagos] Database class found
+[07-Mar-2026 07:00:57 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[07-Mar-2026 07:00:57 Africa/Lagos] GuardianManager loaded successfully
+[07-Mar-2026 07:00:57 Africa/Lagos] Attempting to connect to database: school_6
+[07-Mar-2026 07:00:57 Africa/Lagos] School database connection successful
+[07-Mar-2026 07:00:57 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 07:00:57 Africa/Lagos] GuardianManager initialized successfully
+[07-Mar-2026 07:00:57 Africa/Lagos] Found 4 guardians
+[07-Mar-2026 07:00:57 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[07-Mar-2026 07:00:57 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[07-Mar-2026 07:00:57 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[07-Mar-2026 07:00:57 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[07-Mar-2026 15:29:04 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[07-Mar-2026 15:29:04 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[07-Mar-2026 15:29:04 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[07-Mar-2026 15:29:04 Africa/Lagos] School ID: 6
+[07-Mar-2026 15:29:04 Africa/Lagos] School Name: bitflux wallet
+[07-Mar-2026 15:29:04 Africa/Lagos] Authenticated User ID: 1
+[07-Mar-2026 15:29:04 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[07-Mar-2026 15:29:04 Africa/Lagos] Autoload loaded successfully
+[07-Mar-2026 15:29:04 Africa/Lagos] Database class found
+[07-Mar-2026 15:29:04 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[07-Mar-2026 15:29:04 Africa/Lagos] GuardianManager loaded successfully
+[07-Mar-2026 15:29:04 Africa/Lagos] Attempting to connect to database: school_6
+[07-Mar-2026 15:29:04 Africa/Lagos] School database connection successful
+[07-Mar-2026 15:29:04 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 15:29:04 Africa/Lagos] GuardianManager initialized successfully
+[07-Mar-2026 15:29:04 Africa/Lagos] Found 4 guardians
+[07-Mar-2026 15:29:04 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[07-Mar-2026 15:29:04 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[07-Mar-2026 15:29:04 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[07-Mar-2026 15:29:04 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[08-Mar-2026 12:38:06 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[08-Mar-2026 12:38:06 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[08-Mar-2026 12:38:06 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[08-Mar-2026 12:38:06 Africa/Lagos] School ID: 6
+[08-Mar-2026 12:38:06 Africa/Lagos] School Name: bitflux wallet
+[08-Mar-2026 12:38:06 Africa/Lagos] Authenticated User ID: 1
+[08-Mar-2026 12:38:06 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[08-Mar-2026 12:38:06 Africa/Lagos] Autoload loaded successfully
+[08-Mar-2026 12:38:06 Africa/Lagos] Database class found
+[08-Mar-2026 12:38:06 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[08-Mar-2026 12:38:06 Africa/Lagos] GuardianManager loaded successfully
+[08-Mar-2026 12:38:06 Africa/Lagos] Attempting to connect to database: school_6
+[08-Mar-2026 12:38:06 Africa/Lagos] School database connection successful
+[08-Mar-2026 12:38:06 Africa/Lagos] GuardianManager initialized for school ID: 6
+[08-Mar-2026 12:38:06 Africa/Lagos] GuardianManager initialized successfully
+[08-Mar-2026 12:38:06 Africa/Lagos] Found 4 guardians
+[08-Mar-2026 12:38:06 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[08-Mar-2026 12:38:06 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[08-Mar-2026 12:38:06 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[08-Mar-2026 12:38:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[09-Mar-2026 12:18:46 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[09-Mar-2026 12:18:46 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[09-Mar-2026 12:18:46 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[09-Mar-2026 12:18:46 Africa/Lagos] School ID: 6
+[09-Mar-2026 12:18:46 Africa/Lagos] School Name: bitflux wallet
+[09-Mar-2026 12:18:46 Africa/Lagos] Authenticated User ID: 1
+[09-Mar-2026 12:18:46 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[09-Mar-2026 12:18:46 Africa/Lagos] Autoload loaded successfully
+[09-Mar-2026 12:18:46 Africa/Lagos] Database class found
+[09-Mar-2026 12:18:46 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[09-Mar-2026 12:18:46 Africa/Lagos] GuardianManager loaded successfully
+[09-Mar-2026 12:18:46 Africa/Lagos] Attempting to connect to database: school_6
+[09-Mar-2026 12:18:46 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:18:46 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 12:18:46 Africa/Lagos] GuardianManager initialized successfully
+[09-Mar-2026 12:18:46 Africa/Lagos] Found 5 guardians
+[09-Mar-2026 12:18:46 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[09-Mar-2026 12:18:46 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[09-Mar-2026 12:18:46 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[09-Mar-2026 12:18:46 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[09-Mar-2026 12:31:04 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[09-Mar-2026 12:31:04 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[09-Mar-2026 12:31:04 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[09-Mar-2026 12:31:04 Africa/Lagos] School ID: 6
+[09-Mar-2026 12:31:04 Africa/Lagos] School Name: bitflux wallet
+[09-Mar-2026 12:31:04 Africa/Lagos] Authenticated User ID: 1
+[09-Mar-2026 12:31:04 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[09-Mar-2026 12:31:04 Africa/Lagos] Autoload loaded successfully
+[09-Mar-2026 12:31:04 Africa/Lagos] Database class found
+[09-Mar-2026 12:31:04 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[09-Mar-2026 12:31:04 Africa/Lagos] GuardianManager loaded successfully
+[09-Mar-2026 12:31:04 Africa/Lagos] Attempting to connect to database: school_6
+[09-Mar-2026 12:31:04 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:31:04 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 12:31:04 Africa/Lagos] GuardianManager initialized successfully
+[09-Mar-2026 12:31:04 Africa/Lagos] Found 5 guardians
+[09-Mar-2026 12:31:04 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[09-Mar-2026 12:31:04 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[09-Mar-2026 12:31:04 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[09-Mar-2026 12:31:04 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[10-Mar-2026 12:48:21 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[10-Mar-2026 12:48:21 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[10-Mar-2026 12:48:21 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 12:48:21 Africa/Lagos] School ID: 6
+[10-Mar-2026 12:48:21 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 12:48:21 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 12:48:21 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 12:48:21 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 12:48:21 Africa/Lagos] Database class found
+[10-Mar-2026 12:48:21 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[10-Mar-2026 12:48:21 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 12:48:21 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 12:48:21 Africa/Lagos] School database connection successful
+[10-Mar-2026 12:48:21 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 12:48:21 Africa/Lagos] GuardianManager initialized successfully
+[10-Mar-2026 12:48:21 Africa/Lagos] Found 5 guardians
+[10-Mar-2026 12:48:21 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[10-Mar-2026 12:48:21 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[10-Mar-2026 12:48:21 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[10-Mar-2026 12:48:21 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[10-Mar-2026 16:11:41 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[10-Mar-2026 16:11:41 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[10-Mar-2026 16:11:41 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 16:11:41 Africa/Lagos] School ID: 6
+[10-Mar-2026 16:11:41 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 16:11:41 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 16:11:41 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 16:11:41 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 16:11:41 Africa/Lagos] Database class found
+[10-Mar-2026 16:11:41 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[10-Mar-2026 16:11:41 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 16:11:41 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 16:11:41 Africa/Lagos] School database connection successful
+[10-Mar-2026 16:11:41 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 16:11:41 Africa/Lagos] GuardianManager initialized successfully
+[10-Mar-2026 16:11:41 Africa/Lagos] Found 5 guardians
+[10-Mar-2026 16:11:41 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[10-Mar-2026 16:11:41 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[10-Mar-2026 16:11:41 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[10-Mar-2026 16:11:41 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[11-Mar-2026 04:30:22 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[11-Mar-2026 04:30:22 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[11-Mar-2026 04:30:22 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[11-Mar-2026 04:30:22 Africa/Lagos] School ID: 6
+[11-Mar-2026 04:30:22 Africa/Lagos] School Name: bitflux wallet
+[11-Mar-2026 04:30:22 Africa/Lagos] Authenticated User ID: 1
+[11-Mar-2026 04:30:22 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[11-Mar-2026 04:30:22 Africa/Lagos] Autoload loaded successfully
+[11-Mar-2026 04:30:22 Africa/Lagos] Database class found
+[11-Mar-2026 04:30:22 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[11-Mar-2026 04:30:22 Africa/Lagos] GuardianManager loaded successfully
+[11-Mar-2026 04:30:22 Africa/Lagos] Attempting to connect to database: school_6
+[11-Mar-2026 04:30:22 Africa/Lagos] School database connection successful
+[11-Mar-2026 04:30:22 Africa/Lagos] GuardianManager initialized for school ID: 6
+[11-Mar-2026 04:30:22 Africa/Lagos] GuardianManager initialized successfully
+[11-Mar-2026 04:30:22 Africa/Lagos] Found 5 guardians
+[11-Mar-2026 04:30:22 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[11-Mar-2026 04:30:22 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[11-Mar-2026 04:30:22 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[11-Mar-2026 04:30:22 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[11-Mar-2026 04:30:54 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[11-Mar-2026 04:30:54 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[11-Mar-2026 04:30:54 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[11-Mar-2026 04:30:54 Africa/Lagos] School ID: 6
+[11-Mar-2026 04:30:54 Africa/Lagos] School Name: bitflux wallet
+[11-Mar-2026 04:30:54 Africa/Lagos] Authenticated User ID: 1
+[11-Mar-2026 04:30:54 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[11-Mar-2026 04:30:54 Africa/Lagos] Autoload loaded successfully
+[11-Mar-2026 04:30:54 Africa/Lagos] Database class found
+[11-Mar-2026 04:30:54 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[11-Mar-2026 04:30:54 Africa/Lagos] GuardianManager loaded successfully
+[11-Mar-2026 04:30:54 Africa/Lagos] Attempting to connect to database: school_6
+[11-Mar-2026 04:30:54 Africa/Lagos] School database connection successful
+[11-Mar-2026 04:30:54 Africa/Lagos] GuardianManager initialized for school ID: 6
+[11-Mar-2026 04:30:54 Africa/Lagos] GuardianManager initialized successfully
+[11-Mar-2026 04:30:54 Africa/Lagos] Found 5 guardians
+[11-Mar-2026 04:30:54 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[11-Mar-2026 04:30:54 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[11-Mar-2026 04:30:54 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[11-Mar-2026 04:30:54 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[11-Mar-2026 08:22:11 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[11-Mar-2026 08:22:11 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[11-Mar-2026 08:22:11 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[11-Mar-2026 08:22:11 Africa/Lagos] School ID: 6
+[11-Mar-2026 08:22:11 Africa/Lagos] School Name: bitflux wallet
+[11-Mar-2026 08:22:11 Africa/Lagos] Authenticated User ID: 1
+[11-Mar-2026 08:22:11 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[11-Mar-2026 08:22:11 Africa/Lagos] Autoload loaded successfully
+[11-Mar-2026 08:22:11 Africa/Lagos] Database class found
+[11-Mar-2026 08:22:11 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[11-Mar-2026 08:22:11 Africa/Lagos] GuardianManager loaded successfully
+[11-Mar-2026 08:22:11 Africa/Lagos] Attempting to connect to database: school_6
+[11-Mar-2026 08:22:11 Africa/Lagos] School database connection successful
+[11-Mar-2026 08:22:11 Africa/Lagos] GuardianManager initialized for school ID: 6
+[11-Mar-2026 08:22:11 Africa/Lagos] GuardianManager initialized successfully
+[11-Mar-2026 08:22:11 Africa/Lagos] Found 6 guardians
+[11-Mar-2026 08:22:11 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[11-Mar-2026 08:22:11 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[11-Mar-2026 08:22:11 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[11-Mar-2026 08:22:11 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[11-Mar-2026 09:41:48 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[11-Mar-2026 09:41:48 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[11-Mar-2026 09:41:48 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[11-Mar-2026 09:41:48 Africa/Lagos] School ID: 6
+[11-Mar-2026 09:41:48 Africa/Lagos] School Name: bitflux wallet
+[11-Mar-2026 09:41:48 Africa/Lagos] Authenticated User ID: 1
+[11-Mar-2026 09:41:48 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[11-Mar-2026 09:41:48 Africa/Lagos] Autoload loaded successfully
+[11-Mar-2026 09:41:48 Africa/Lagos] Database class found
+[11-Mar-2026 09:41:48 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[11-Mar-2026 09:41:48 Africa/Lagos] GuardianManager loaded successfully
+[11-Mar-2026 09:41:48 Africa/Lagos] Attempting to connect to database: school_6
+[11-Mar-2026 09:41:48 Africa/Lagos] School database connection successful
+[11-Mar-2026 09:41:48 Africa/Lagos] GuardianManager initialized for school ID: 6
+[11-Mar-2026 09:41:48 Africa/Lagos] GuardianManager initialized successfully
+[11-Mar-2026 09:41:48 Africa/Lagos] Found 6 guardians
+[11-Mar-2026 09:41:48 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[11-Mar-2026 09:41:48 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[11-Mar-2026 09:41:48 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[11-Mar-2026 09:41:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[11-Mar-2026 09:43:41 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[11-Mar-2026 09:43:41 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[11-Mar-2026 09:43:41 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[11-Mar-2026 09:43:41 Africa/Lagos] School ID: 6
+[11-Mar-2026 09:43:41 Africa/Lagos] School Name: bitflux wallet
+[11-Mar-2026 09:43:41 Africa/Lagos] Authenticated User ID: 1
+[11-Mar-2026 09:43:41 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[11-Mar-2026 09:43:41 Africa/Lagos] Autoload loaded successfully
+[11-Mar-2026 09:43:41 Africa/Lagos] Database class found
+[11-Mar-2026 09:43:41 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[11-Mar-2026 09:43:41 Africa/Lagos] GuardianManager loaded successfully
+[11-Mar-2026 09:43:41 Africa/Lagos] Attempting to connect to database: school_6
+[11-Mar-2026 09:43:41 Africa/Lagos] School database connection successful
+[11-Mar-2026 09:43:41 Africa/Lagos] GuardianManager initialized for school ID: 6
+[11-Mar-2026 09:43:41 Africa/Lagos] GuardianManager initialized successfully
+[11-Mar-2026 09:43:41 Africa/Lagos] Found 6 guardians
+[11-Mar-2026 09:43:41 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[11-Mar-2026 09:43:41 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[11-Mar-2026 09:43:41 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[11-Mar-2026 09:43:41 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:19:08 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 10:19:08 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:19:08 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 10:19:08 Africa/Lagos] School ID: 6
+[12-Mar-2026 10:19:08 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 10:19:08 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 10:19:08 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 10:19:08 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 10:19:08 Africa/Lagos] Database class found
+[12-Mar-2026 10:19:08 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 10:19:08 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 10:19:08 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 10:19:08 Africa/Lagos] School database connection successful
+[12-Mar-2026 10:19:08 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 10:19:08 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 10:19:08 Africa/Lagos] Found 7 guardians
+[12-Mar-2026 10:19:08 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 10:19:08 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 10:19:08 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 10:19:08 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:23:53 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 10:23:53 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:23:53 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 10:23:53 Africa/Lagos] School ID: 6
+[12-Mar-2026 10:23:53 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 10:23:53 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 10:23:53 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 10:23:53 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 10:23:53 Africa/Lagos] Database class found
+[12-Mar-2026 10:23:53 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 10:23:53 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 10:23:53 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 10:23:53 Africa/Lagos] School database connection successful
+[12-Mar-2026 10:23:53 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 10:23:53 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 10:23:53 Africa/Lagos] Found 8 guardians
+[12-Mar-2026 10:23:53 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 10:23:53 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 10:23:53 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 10:23:53 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:27:55 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 10:27:55 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:27:55 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 10:27:55 Africa/Lagos] School ID: 6
+[12-Mar-2026 10:27:55 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 10:27:55 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 10:27:55 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 10:27:55 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 10:27:55 Africa/Lagos] Database class found
+[12-Mar-2026 10:27:55 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 10:27:55 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 10:27:55 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 10:27:55 Africa/Lagos] School database connection successful
+[12-Mar-2026 10:27:55 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 10:27:55 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 10:27:55 Africa/Lagos] Found 9 guardians
+[12-Mar-2026 10:27:55 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 10:27:55 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 10:27:55 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 10:27:55 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:31:23 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 10:31:23 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:31:23 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 10:31:23 Africa/Lagos] School ID: 6
+[12-Mar-2026 10:31:23 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 10:31:23 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 10:31:23 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 10:31:23 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 10:31:23 Africa/Lagos] Database class found
+[12-Mar-2026 10:31:23 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 10:31:23 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 10:31:23 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 10:31:23 Africa/Lagos] School database connection successful
+[12-Mar-2026 10:31:23 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 10:31:23 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 10:31:23 Africa/Lagos] Found 10 guardians
+[12-Mar-2026 10:31:23 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 10:31:23 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 10:31:23 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 10:31:23 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:36:59 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 10:36:59 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:36:59 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 10:36:59 Africa/Lagos] School ID: 6
+[12-Mar-2026 10:36:59 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 10:36:59 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 10:36:59 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 10:36:59 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 10:36:59 Africa/Lagos] Database class found
+[12-Mar-2026 10:36:59 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 10:36:59 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 10:36:59 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 10:36:59 Africa/Lagos] School database connection successful
+[12-Mar-2026 10:36:59 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 10:36:59 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 10:36:59 Africa/Lagos] Found 11 guardians
+[12-Mar-2026 10:36:59 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 10:36:59 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 10:36:59 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 10:36:59 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:42:24 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 10:42:24 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:42:24 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 10:42:24 Africa/Lagos] School ID: 6
+[12-Mar-2026 10:42:24 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 10:42:24 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 10:42:24 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 10:42:24 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 10:42:24 Africa/Lagos] Database class found
+[12-Mar-2026 10:42:24 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 10:42:24 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 10:42:24 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 10:42:24 Africa/Lagos] School database connection successful
+[12-Mar-2026 10:42:24 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 10:42:24 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 10:42:24 Africa/Lagos] Found 12 guardians
+[12-Mar-2026 10:42:24 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 10:42:24 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 10:42:24 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 10:42:24 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:47:16 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 10:47:16 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:47:16 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 10:47:16 Africa/Lagos] School ID: 6
+[12-Mar-2026 10:47:16 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 10:47:16 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 10:47:16 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 10:47:16 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 10:47:16 Africa/Lagos] Database class found
+[12-Mar-2026 10:47:16 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 10:47:16 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 10:47:16 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 10:47:16 Africa/Lagos] School database connection successful
+[12-Mar-2026 10:47:16 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 10:47:16 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 10:47:16 Africa/Lagos] Found 13 guardians
+[12-Mar-2026 10:47:16 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 10:47:16 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 10:47:16 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 10:47:16 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:53:58 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 10:53:58 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:53:58 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 10:53:58 Africa/Lagos] School ID: 6
+[12-Mar-2026 10:53:58 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 10:53:58 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 10:53:58 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 10:53:58 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 10:53:58 Africa/Lagos] Database class found
+[12-Mar-2026 10:53:58 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 10:53:58 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 10:53:58 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 10:53:58 Africa/Lagos] School database connection successful
+[12-Mar-2026 10:53:58 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 10:53:58 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 10:53:58 Africa/Lagos] Found 14 guardians
+[12-Mar-2026 10:53:58 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 10:53:58 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 10:53:58 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 10:53:58 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:58:00 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 10:58:00 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:58:00 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 10:58:00 Africa/Lagos] School ID: 6
+[12-Mar-2026 10:58:00 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 10:58:00 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 10:58:00 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 10:58:00 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 10:58:00 Africa/Lagos] Database class found
+[12-Mar-2026 10:58:00 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 10:58:00 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 10:58:00 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 10:58:00 Africa/Lagos] School database connection successful
+[12-Mar-2026 10:58:00 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 10:58:00 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 10:58:00 Africa/Lagos] Found 15 guardians
+[12-Mar-2026 10:58:00 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 10:58:00 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 10:58:00 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 10:58:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:58:30 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 10:58:30 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 10:58:30 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 10:58:30 Africa/Lagos] School ID: 6
+[12-Mar-2026 10:58:30 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 10:58:30 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 10:58:30 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 10:58:30 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 10:58:30 Africa/Lagos] Database class found
+[12-Mar-2026 10:58:30 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 10:58:30 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 10:58:30 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 10:58:30 Africa/Lagos] School database connection successful
+[12-Mar-2026 10:58:30 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 10:58:30 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 10:58:30 Africa/Lagos] Found 15 guardians
+[12-Mar-2026 10:58:30 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 10:58:30 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 10:58:30 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 10:58:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 11:04:57 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 11:04:57 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 11:04:57 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 11:04:57 Africa/Lagos] School ID: 6
+[12-Mar-2026 11:04:57 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 11:04:57 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 11:04:57 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 11:04:57 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 11:04:57 Africa/Lagos] Database class found
+[12-Mar-2026 11:04:57 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 11:04:57 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 11:04:57 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 11:04:57 Africa/Lagos] School database connection successful
+[12-Mar-2026 11:04:57 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 11:04:57 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 11:04:57 Africa/Lagos] Found 16 guardians
+[12-Mar-2026 11:04:57 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 11:04:57 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 11:04:57 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 11:04:57 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 11:14:40 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 11:14:40 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 11:14:40 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 11:14:40 Africa/Lagos] School ID: 6
+[12-Mar-2026 11:14:40 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 11:14:40 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 11:14:40 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 11:14:40 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 11:14:40 Africa/Lagos] Database class found
+[12-Mar-2026 11:14:40 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 11:14:40 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 11:14:40 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 11:14:40 Africa/Lagos] School database connection successful
+[12-Mar-2026 11:14:40 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 11:14:40 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 11:14:40 Africa/Lagos] Found 17 guardians
+[12-Mar-2026 11:14:40 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 11:14:40 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 11:14:40 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 11:14:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 11:17:04 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 11:17:04 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 11:17:04 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 11:17:04 Africa/Lagos] School ID: 6
+[12-Mar-2026 11:17:04 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 11:17:04 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 11:17:04 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 11:17:04 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 11:17:04 Africa/Lagos] Database class found
+[12-Mar-2026 11:17:04 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 11:17:04 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 11:17:04 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 11:17:04 Africa/Lagos] School database connection successful
+[12-Mar-2026 11:17:04 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 11:17:04 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 11:17:04 Africa/Lagos] Found 17 guardians
+[12-Mar-2026 11:17:04 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 11:17:04 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 11:17:04 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 11:17:04 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 11:17:20 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 11:17:20 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 11:17:20 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 11:17:20 Africa/Lagos] School ID: 6
+[12-Mar-2026 11:17:20 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 11:17:20 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 11:17:20 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 11:17:20 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 11:17:20 Africa/Lagos] Database class found
+[12-Mar-2026 11:17:20 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 11:17:20 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 11:17:20 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 11:17:20 Africa/Lagos] School database connection successful
+[12-Mar-2026 11:17:20 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 11:17:20 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 11:17:20 Africa/Lagos] Found 17 guardians
+[12-Mar-2026 11:17:20 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 11:17:20 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 11:17:20 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 11:17:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 11:19:19 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 11:19:19 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 11:19:19 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 11:19:19 Africa/Lagos] School ID: 6
+[12-Mar-2026 11:19:19 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 11:19:19 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 11:19:19 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 11:19:19 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 11:19:19 Africa/Lagos] Database class found
+[12-Mar-2026 11:19:19 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 11:19:19 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 11:19:19 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 11:19:19 Africa/Lagos] School database connection successful
+[12-Mar-2026 11:19:19 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 11:19:19 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 11:19:19 Africa/Lagos] Found 18 guardians
+[12-Mar-2026 11:19:19 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 11:19:19 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 11:19:19 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 11:19:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 14:13:27 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[12-Mar-2026 14:13:27 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[12-Mar-2026 14:13:27 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 14:13:27 Africa/Lagos] School ID: 6
+[12-Mar-2026 14:13:27 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 14:13:27 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 14:13:27 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 14:13:27 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 14:13:27 Africa/Lagos] Database class found
+[12-Mar-2026 14:13:27 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[12-Mar-2026 14:13:27 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 14:13:27 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 14:13:27 Africa/Lagos] School database connection successful
+[12-Mar-2026 14:13:27 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 14:13:27 Africa/Lagos] GuardianManager initialized successfully
+[12-Mar-2026 14:13:27 Africa/Lagos] Found 18 guardians
+[12-Mar-2026 14:13:27 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[12-Mar-2026 14:13:27 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[12-Mar-2026 14:13:27 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[12-Mar-2026 14:13:27 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[14-Mar-2026 17:35:57 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[14-Mar-2026 17:35:57 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[14-Mar-2026 17:35:57 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[14-Mar-2026 17:35:57 Africa/Lagos] School ID: 6
+[14-Mar-2026 17:35:57 Africa/Lagos] School Name: bitflux wallet
+[14-Mar-2026 17:35:57 Africa/Lagos] Authenticated User ID: 1
+[14-Mar-2026 17:35:57 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[14-Mar-2026 17:35:57 Africa/Lagos] Autoload loaded successfully
+[14-Mar-2026 17:35:57 Africa/Lagos] Database class found
+[14-Mar-2026 17:35:57 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[14-Mar-2026 17:35:57 Africa/Lagos] GuardianManager loaded successfully
+[14-Mar-2026 17:35:57 Africa/Lagos] Attempting to connect to database: school_6
+[14-Mar-2026 17:35:57 Africa/Lagos] School database connection successful
+[14-Mar-2026 17:35:57 Africa/Lagos] GuardianManager initialized for school ID: 6
+[14-Mar-2026 17:35:57 Africa/Lagos] GuardianManager initialized successfully
+[14-Mar-2026 17:35:57 Africa/Lagos] Found 19 guardians
+[14-Mar-2026 17:35:57 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[14-Mar-2026 17:35:57 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[14-Mar-2026 17:35:57 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[14-Mar-2026 17:35:57 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[24-Mar-2026 09:53:50 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[24-Mar-2026 09:53:50 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[24-Mar-2026 09:53:50 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[24-Mar-2026 09:53:50 Africa/Lagos] School ID: 6
+[24-Mar-2026 09:53:50 Africa/Lagos] School Name: bitflux wallet
+[24-Mar-2026 09:53:50 Africa/Lagos] Authenticated User ID: 1
+[24-Mar-2026 09:53:50 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[24-Mar-2026 09:53:50 Africa/Lagos] Autoload loaded successfully
+[24-Mar-2026 09:53:50 Africa/Lagos] Database class found
+[24-Mar-2026 09:53:50 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[24-Mar-2026 09:53:50 Africa/Lagos] GuardianManager loaded successfully
+[24-Mar-2026 09:53:50 Africa/Lagos] Attempting to connect to database: school_6
+[24-Mar-2026 09:53:50 Africa/Lagos] School database connection successful
+[24-Mar-2026 09:53:50 Africa/Lagos] GuardianManager initialized for school ID: 6
+[24-Mar-2026 09:53:50 Africa/Lagos] GuardianManager initialized successfully
+[24-Mar-2026 09:53:50 Africa/Lagos] Found 19 guardians
+[24-Mar-2026 09:53:50 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[24-Mar-2026 09:53:50 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[24-Mar-2026 09:53:50 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[24-Mar-2026 09:53:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[24-Mar-2026 09:54:18 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[24-Mar-2026 09:54:18 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[24-Mar-2026 09:54:18 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[24-Mar-2026 09:54:18 Africa/Lagos] School ID: 6
+[24-Mar-2026 09:54:18 Africa/Lagos] School Name: bitflux wallet
+[24-Mar-2026 09:54:18 Africa/Lagos] Authenticated User ID: 1
+[24-Mar-2026 09:54:18 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[24-Mar-2026 09:54:18 Africa/Lagos] Autoload loaded successfully
+[24-Mar-2026 09:54:18 Africa/Lagos] Database class found
+[24-Mar-2026 09:54:18 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[24-Mar-2026 09:54:18 Africa/Lagos] GuardianManager loaded successfully
+[24-Mar-2026 09:54:18 Africa/Lagos] Attempting to connect to database: school_6
+[24-Mar-2026 09:54:18 Africa/Lagos] School database connection successful
+[24-Mar-2026 09:54:18 Africa/Lagos] GuardianManager initialized for school ID: 6
+[24-Mar-2026 09:54:18 Africa/Lagos] GuardianManager initialized successfully
+[24-Mar-2026 09:54:18 Africa/Lagos] Found 19 guardians
+[24-Mar-2026 09:54:18 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[24-Mar-2026 09:54:18 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[24-Mar-2026 09:54:18 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[24-Mar-2026 09:54:18 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[30-Mar-2026 11:41:29 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[30-Mar-2026 11:41:29 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[30-Mar-2026 11:41:29 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[30-Mar-2026 11:41:29 Africa/Lagos] School ID: 6
+[30-Mar-2026 11:41:29 Africa/Lagos] School Name: bitflux wallet
+[30-Mar-2026 11:41:29 Africa/Lagos] Authenticated User ID: 1
+[30-Mar-2026 11:41:29 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[30-Mar-2026 11:41:29 Africa/Lagos] Autoload loaded successfully
+[30-Mar-2026 11:41:29 Africa/Lagos] Database class found
+[30-Mar-2026 11:41:29 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[30-Mar-2026 11:41:29 Africa/Lagos] GuardianManager loaded successfully
+[30-Mar-2026 11:41:29 Africa/Lagos] Attempting to connect to database: school_6
+[30-Mar-2026 11:41:29 Africa/Lagos] School database connection successful
+[30-Mar-2026 11:41:29 Africa/Lagos] GuardianManager initialized for school ID: 6
+[30-Mar-2026 11:41:29 Africa/Lagos] GuardianManager initialized successfully
+[30-Mar-2026 11:41:29 Africa/Lagos] Found 19 guardians
+[30-Mar-2026 11:41:29 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[30-Mar-2026 11:41:29 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[30-Mar-2026 11:41:29 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[30-Mar-2026 11:41:29 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[07-Apr-2026 04:34:54 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[07-Apr-2026 04:34:54 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[07-Apr-2026 04:34:54 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[07-Apr-2026 04:34:54 Africa/Lagos] School ID: 6
+[07-Apr-2026 04:34:54 Africa/Lagos] School Name: bitflux wallet
+[07-Apr-2026 04:34:54 Africa/Lagos] Authenticated User ID: 1
+[07-Apr-2026 04:34:54 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[07-Apr-2026 04:34:54 Africa/Lagos] Autoload loaded successfully
+[07-Apr-2026 04:34:54 Africa/Lagos] Database class found
+[07-Apr-2026 04:34:54 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[07-Apr-2026 04:34:54 Africa/Lagos] GuardianManager loaded successfully
+[07-Apr-2026 04:34:54 Africa/Lagos] Attempting to connect to database: school_6
+[07-Apr-2026 04:34:54 Africa/Lagos] School database connection successful
+[07-Apr-2026 04:34:54 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Apr-2026 04:34:54 Africa/Lagos] GuardianManager initialized successfully
+[07-Apr-2026 04:34:54 Africa/Lagos] Found 19 guardians
+[07-Apr-2026 04:34:54 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[07-Apr-2026 04:34:54 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[07-Apr-2026 04:34:54 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[07-Apr-2026 04:34:54 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[07-Apr-2026 04:38:58 Africa/Lagos] === GUARDIAN LIST PAGE START ===
+[07-Apr-2026 04:38:58 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php
+[07-Apr-2026 04:38:58 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[07-Apr-2026 04:38:58 Africa/Lagos] School ID: 6
+[07-Apr-2026 04:38:58 Africa/Lagos] School Name: bitflux wallet
+[07-Apr-2026 04:38:58 Africa/Lagos] Authenticated User ID: 1
+[07-Apr-2026 04:38:58 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[07-Apr-2026 04:38:58 Africa/Lagos] Autoload loaded successfully
+[07-Apr-2026 04:38:58 Africa/Lagos] Database class found
+[07-Apr-2026 04:38:58 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[07-Apr-2026 04:38:58 Africa/Lagos] GuardianManager loaded successfully
+[07-Apr-2026 04:38:58 Africa/Lagos] Attempting to connect to database: school_6
+[07-Apr-2026 04:38:58 Africa/Lagos] School database connection successful
+[07-Apr-2026 04:38:58 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Apr-2026 04:38:58 Africa/Lagos] GuardianManager initialized successfully
+[07-Apr-2026 04:38:58 Africa/Lagos] Found 19 guardians
+[07-Apr-2026 04:38:58 Africa/Lagos] === GUARDIAN LIST PAGE END ===
+[07-Apr-2026 04:38:58 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 661
+[07-Apr-2026 04:38:58 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php on line 672
+[07-Apr-2026 04:38:58 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/guardian-list.php

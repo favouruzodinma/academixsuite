@@ -1,6 +1,6 @@
 <?php
 // delete_plan.php
-require_once __DIR__ . '/../../includes/autoload.php';
+require_once __DIR__ . '/../../../includes/autoload.php';
 
 // Check if super admin is logged in
 $auth = new Auth();

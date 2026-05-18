@@ -3,6 +3,17 @@
  * Application Constants
  */
 
+// Self-defining IS_LOCAL so this file can be required in any order without
+// depending on config/database.php running first. Previously, including
+// constants.php before database.php caused "Undefined constant IS_LOCAL"
+// fatal errors in production (see error_log entries from Jan 2026).
+if (!defined('IS_LOCAL')) {
+    $__host = $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? '';
+    define('IS_LOCAL', in_array($__host, ['localhost', '127.0.0.1', '::1'], true)
+        || strpos($__host, '.local') !== false
+        || strpos($__host, '.test') !== false);
+    unset($__host);
+}
 
 // Application Information
 define('APP_NAME', 'AcademixSuite');
@@ -85,6 +96,7 @@ define('PAYMENT_CARD', 'card');
 define('PAYMENT_ONLINE', 'online');
 
 //support
+define('FROM_EMAIL', 'noreply@academixsuite.com');
 define('SUPPORT_EMAIL', 'support@academixsuite.com');
 define('SUPPORT_PHONE', '+234 123 456 7890');
 
@@ -129,6 +141,7 @@ if (IS_LOCAL) {
 } else {
     // Try to get from environment, fallback to empty
     define('SMS_API_KEY', getenv('SMS_API_KEY') ?: '');
+    define('RESEND_API_KEY', getenv('re_DL5srFvr_Hrqoh9vEMsErWWMSxbovaDQw') ? : '');
     define('EMAIL_API_KEY', getenv('EMAIL_API_KEY') ?: '');
     define('PAYMENT_PUBLIC_KEY', getenv('PAYMENT_PUBLIC_KEY') ?: '');
     define('PAYMENT_SECRET_KEY', getenv('PAYMENT_SECRET_KEY') ?: '');

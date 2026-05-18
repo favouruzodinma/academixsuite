@@ -1,0 +1,6 @@
+# Disable PHP execution in upload directories — defence in depth against
+# attackers who upload a renamed PHP payload.
+<FilesMatch "\.(ph(p[3457]?|t|ar|tml)|inc)$">
+    Require all denied
+</FilesMatch>
+php_flag engine off

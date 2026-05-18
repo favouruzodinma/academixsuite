@@ -35,9 +35,10 @@ class EnvHelper {
                 $key = trim($key);
                 $value = trim($value);
                 
-                // Remove quotes if present
-                if (($value[0] === '"' && substr($value, -1) === '"') || 
-                    ($value[0] === "'" && substr($value, -1) === "'")) {
+                // Remove quotes if present (guard against empty / single-char values)
+                if (strlen($value) >= 2 &&
+                    (($value[0] === '"' && substr($value, -1) === '"') ||
+                     ($value[0] === "'" && substr($value, -1) === "'"))) {
                     $value = substr($value, 1, -1);
                 }
                 
@@ -151,9 +152,9 @@ class EnvHelper {
             'port' => self::get('MAIL_PORT', 587),
             'username' => self::get('MAIL_USERNAME'),
             'password' => self::get('MAIL_PASSWORD'),
-            'encryption' => self::get('MAIL_ENCRYPTION', 'tls'),
+            'encryption' => self::get('MAIL_ENCRYPTION', 'ssl'),
             'from' => [
-                'address' => self::get('MAIL_FROM_ADDRESS', 'no-reply@academixsuite.com'),
+                'address' => self::get('MAIL_FROM_ADDRESS', 'noreply@academixsuite.com'),
                 'name' => self::get('MAIL_FROM_NAME', 'AcademixSuite'),
             ],
         ];
@@ -180,7 +181,7 @@ class EnvHelper {
     }
 }
 
-// Alias function for easy access
-function env(string $key, $default = null) {
-    return \AcademixSuite\Helpers\EnvHelper::get($key, $default);
-}
+// NOTE: the global `env()` helper lives in config/functions.php so it is
+// reachable from non-namespaced files like config/mail.php. Declaring it
+// here would put it in `\AcademixSuite\Helpers\env`, which the legacy code
+// can't see — that was the cause of the "undefined function env()" fatal.

@@ -404,17 +404,18 @@ class SchoolSession {
         
         switch ($userType) {
             case 'admin':
-                return "/tenant/$schoolSlug/admin/dashboard.php";
+                return function_exists('school_route_url') ? school_route_url($schoolSlug, 'admin', 'dashboard.php', false) : "/tenant/$schoolSlug/admin/dashboard.php";
             case 'teacher':
-                return "/tenant/$schoolSlug/teacher/dashboard.php";
+                return function_exists('school_route_url') ? school_route_url($schoolSlug, 'teacher', 'dashboard.php', false) : "/tenant/$schoolSlug/teacher/dashboard.php";
             case 'student':
-                return "/tenant/$schoolSlug/student/dashboard.php";
+                return function_exists('school_route_url') ? school_route_url($schoolSlug, 'student', 'dashboard.php', false) : "/tenant/$schoolSlug/student/dashboard.php";
             case 'parent':
-                return "/tenant/$schoolSlug/parent/dashboard.php";
+                return function_exists('school_route_url') ? school_route_url($schoolSlug, 'parent', 'dashboard.php', false) : "/tenant/$schoolSlug/parent/dashboard.php";
             case 'accountant':
-                return "/tenant/$schoolSlug/accountant/dashboard.php";
             case 'librarian':
-                return "/tenant/$schoolSlug/librarian/dashboard.php";
+            case 'receptionist':
+            case 'staff':
+                return function_exists('school_route_url') ? school_route_url($schoolSlug, 'staff', 'dashboard.php', false) : "/tenant/$schoolSlug/staff/dashboard.php";
             default:
                 return "/tenant/$schoolSlug/dashboard.php";
         }

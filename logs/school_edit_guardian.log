@@ -1,0 +1,166 @@
+[06-Mar-2026 12:41:46 Africa/Lagos] === EDIT GUARDIAN PAGE START ===
+[06-Mar-2026 12:41:46 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 12:41:46 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 12:41:46 Africa/Lagos] School ID: 6
+[06-Mar-2026 12:41:46 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 12:41:46 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 12:41:46 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 12:41:46 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 12:41:46 Africa/Lagos] Database class found
+[06-Mar-2026 12:41:46 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 12:41:46 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 12:41:46 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 12:41:46 Africa/Lagos] School database connection successful
+[06-Mar-2026 12:41:46 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 12:41:46 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 12:41:46 Africa/Lagos] Guardian ID to edit: 11
+[06-Mar-2026 12:41:46 Africa/Lagos] Guardian found: Emezie Ngozi
+[06-Mar-2026 12:41:46 Africa/Lagos] Error fetching guardian details: SQLSTATE[42S22]: Column not found: 1054 Unknown column 's.profile_photo' in 'SELECT'
+[06-Mar-2026 12:41:46 Africa/Lagos] === EDIT GUARDIAN PAGE END ===
+[06-Mar-2026 12:41:46 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php on line 834
+[06-Mar-2026 12:41:46 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php on line 845
+[06-Mar-2026 12:41:46 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 13:05:48 Africa/Lagos] === EDIT GUARDIAN PAGE START ===
+[06-Mar-2026 13:05:48 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 13:05:48 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 13:05:48 Africa/Lagos] School ID: 6
+[06-Mar-2026 13:05:48 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 13:05:48 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 13:05:48 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 13:05:48 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 13:05:48 Africa/Lagos] Database class found
+[06-Mar-2026 13:05:48 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 13:05:48 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 13:05:48 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 13:05:48 Africa/Lagos] School database connection successful
+[06-Mar-2026 13:05:48 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 13:05:48 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 13:05:48 Africa/Lagos] Guardian ID to edit: 13
+[06-Mar-2026 13:05:48 Africa/Lagos] Guardian found: Emezie IKe
+[06-Mar-2026 13:05:48 Africa/Lagos] Error fetching guardian details: SQLSTATE[42S22]: Column not found: 1054 Unknown column 's.profile_photo' in 'SELECT'
+[06-Mar-2026 13:05:48 Africa/Lagos] === EDIT GUARDIAN PAGE END ===
+[06-Mar-2026 13:05:48 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php on line 834
+[06-Mar-2026 13:05:48 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php on line 845
+[06-Mar-2026 13:05:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 14:16:11 Africa/Lagos] === EDIT GUARDIAN PAGE START ===
+[06-Mar-2026 14:16:11 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 14:16:11 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 14:16:11 Africa/Lagos] School ID: 6
+[06-Mar-2026 14:16:11 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 14:16:11 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 14:16:11 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 14:16:11 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 14:16:11 Africa/Lagos] Database class found
+[06-Mar-2026 14:16:11 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 14:16:11 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 14:16:11 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 14:16:11 Africa/Lagos] School database connection successful
+[06-Mar-2026 14:16:11 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 14:16:11 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 14:16:11 Africa/Lagos] Guardian ID to edit: 13
+[06-Mar-2026 14:16:11 Africa/Lagos] Guardian found: Emezie IKe
+[06-Mar-2026 14:16:11 Africa/Lagos] Error fetching guardian details: SQLSTATE[42S22]: Column not found: 1054 Unknown column 's.profile_photo' in 'SELECT'
+[06-Mar-2026 14:16:11 Africa/Lagos] === EDIT GUARDIAN PAGE END ===
+[06-Mar-2026 14:16:11 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php on line 834
+[06-Mar-2026 14:16:11 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php on line 845
+[06-Mar-2026 14:16:11 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 19:05:24 Africa/Lagos] === EDIT GUARDIAN PAGE START ===
+[06-Mar-2026 19:05:24 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 19:05:24 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 19:05:24 Africa/Lagos] School ID: 6
+[06-Mar-2026 19:05:24 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 19:05:24 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 19:05:24 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 19:05:24 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 19:05:24 Africa/Lagos] Database class found
+[06-Mar-2026 19:05:24 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 19:05:24 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 19:05:24 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 19:05:24 Africa/Lagos] School database connection successful
+[06-Mar-2026 19:05:24 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 19:05:24 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 19:05:24 Africa/Lagos] Guardian ID to edit: 13
+[06-Mar-2026 19:05:24 Africa/Lagos] Guardian found: Emezie IKe
+[06-Mar-2026 19:05:24 Africa/Lagos] Error fetching guardian details: SQLSTATE[42S22]: Column not found: 1054 Unknown column 's.profile_photo' in 'SELECT'
+[06-Mar-2026 19:05:24 Africa/Lagos] === EDIT GUARDIAN PAGE END ===
+[06-Mar-2026 19:05:24 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php on line 834
+[06-Mar-2026 19:05:24 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php on line 845
+[06-Mar-2026 19:05:24 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 19:11:00 Africa/Lagos] === EDIT GUARDIAN PAGE START ===
+[06-Mar-2026 19:11:00 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 19:11:00 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 19:11:00 Africa/Lagos] School ID: 6
+[06-Mar-2026 19:11:00 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 19:11:00 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 19:11:00 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 19:11:00 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 19:11:00 Africa/Lagos] Database class found
+[06-Mar-2026 19:11:00 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 19:11:00 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 19:11:00 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 19:11:00 Africa/Lagos] School database connection successful
+[06-Mar-2026 19:11:00 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 19:11:00 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 19:11:00 Africa/Lagos] Guardian ID to edit: 13
+[06-Mar-2026 19:11:00 Africa/Lagos] Guardian found: Emezie IKe
+[06-Mar-2026 19:11:00 Africa/Lagos] Error fetching guardian details: SQLSTATE[42S22]: Column not found: 1054 Unknown column 's.profile_photo' in 'SELECT'
+[06-Mar-2026 19:11:00 Africa/Lagos] === EDIT GUARDIAN PAGE END ===
+[06-Mar-2026 19:11:00 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php on line 834
+[06-Mar-2026 19:11:00 Africa/Lagos] PHP Warning:  Undefined variable $notificationCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php on line 845
+[06-Mar-2026 19:11:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 19:14:08 Africa/Lagos] === EDIT GUARDIAN PAGE START ===
+[06-Mar-2026 19:14:08 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 19:14:08 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 19:14:08 Africa/Lagos] School ID: 6
+[06-Mar-2026 19:14:08 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 19:14:08 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 19:14:08 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 19:14:08 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 19:14:08 Africa/Lagos] Database class found
+[06-Mar-2026 19:14:08 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 19:14:08 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 19:14:08 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 19:14:08 Africa/Lagos] School database connection successful
+[06-Mar-2026 19:14:08 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 19:14:08 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 19:14:08 Africa/Lagos] Guardian ID to edit: 13
+[06-Mar-2026 19:14:08 Africa/Lagos] Guardian found: Emezie IKe
+[06-Mar-2026 19:14:08 Africa/Lagos] === EDIT GUARDIAN PAGE END ===
+[06-Mar-2026 19:14:08 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 19:15:42 Africa/Lagos] === EDIT GUARDIAN PAGE START ===
+[06-Mar-2026 19:15:42 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[06-Mar-2026 19:15:42 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 19:15:42 Africa/Lagos] School ID: 6
+[06-Mar-2026 19:15:42 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 19:15:42 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 19:15:42 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 19:15:42 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 19:15:42 Africa/Lagos] Database class found
+[06-Mar-2026 19:15:42 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[06-Mar-2026 19:15:42 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 19:15:42 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 19:15:42 Africa/Lagos] School database connection successful
+[06-Mar-2026 19:15:42 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 19:15:42 Africa/Lagos] GuardianManager initialized successfully
+[06-Mar-2026 19:15:42 Africa/Lagos] Guardian ID to edit: 13
+[06-Mar-2026 19:15:42 Africa/Lagos] Guardian found: Emezie IKe
+[06-Mar-2026 19:15:42 Africa/Lagos] === PROCESSING FORM SUBMISSION ===
+[11-Mar-2026 09:44:16 Africa/Lagos] === EDIT GUARDIAN PAGE START ===
+[11-Mar-2026 09:44:16 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php
+[11-Mar-2026 09:44:16 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[11-Mar-2026 09:44:16 Africa/Lagos] School ID: 6
+[11-Mar-2026 09:44:16 Africa/Lagos] School Name: bitflux wallet
+[11-Mar-2026 09:44:16 Africa/Lagos] Authenticated User ID: 1
+[11-Mar-2026 09:44:16 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[11-Mar-2026 09:44:16 Africa/Lagos] Autoload loaded successfully
+[11-Mar-2026 09:44:16 Africa/Lagos] Database class found
+[11-Mar-2026 09:44:16 Africa/Lagos] Loading GuardianManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/GuardianManager.php
+[11-Mar-2026 09:44:16 Africa/Lagos] GuardianManager loaded successfully
+[11-Mar-2026 09:44:16 Africa/Lagos] Attempting to connect to database: school_6
+[11-Mar-2026 09:44:16 Africa/Lagos] School database connection successful
+[11-Mar-2026 09:44:16 Africa/Lagos] GuardianManager initialized for school ID: 6
+[11-Mar-2026 09:44:16 Africa/Lagos] GuardianManager initialized successfully
+[11-Mar-2026 09:44:16 Africa/Lagos] Guardian ID to edit: 4
+[11-Mar-2026 09:44:16 Africa/Lagos] Guardian found: hennry uzodima
+[11-Mar-2026 09:44:16 Africa/Lagos] === EDIT GUARDIAN PAGE END ===
+[11-Mar-2026 09:44:16 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-guardian.php

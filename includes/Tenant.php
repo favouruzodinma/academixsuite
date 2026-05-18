@@ -65,18 +65,11 @@ class Tenant
      */
     private static function detectFromSubdomain()
     {
-        $host = $_SERVER['HTTP_HOST'] ?? '';
-        $parts = explode('.', $host);
-
-        // Check for subdomain pattern: school.yoursaas.com
-        if (count($parts) >= 3) {
-            $subdomain = $parts[0];
-
-            // Skip common subdomains
-            if (in_array($subdomain, ['www', 'app', 'admin', 'platform'])) {
+        if (function_exists('school_subdomain_slug')) {
+            $subdomain = school_subdomain_slug();
+            if (!$subdomain) {
                 return null;
             }
-
             return self::getSchoolBySlug($subdomain);
         }
 
@@ -91,8 +84,8 @@ class Tenant
     {
         $requestUri = $_SERVER['REQUEST_URI'] ?? '';
 
-        // Pattern: /tenant/{slug}/...
-        if (preg_match('/^\/school\/([a-z0-9-]+)(\/|$)/i', $requestUri, $matches)) {
+        // Pattern: /tenant/{slug}/... or legacy /school/{slug}/...
+        if (preg_match('/^\/(?:tenant|school)\/([a-z0-9-]+)(\/|$)/i', $requestUri, $matches)) {
             return self::getSchoolBySlug($matches[1]);
         }
 
@@ -221,7 +214,8 @@ class Tenant
     /**
      * Create new school database with ALL tables including new features
      * @param array $schoolData Must contain: id, admin_name, admin_email, admin_phone, admin_password
-     * @return array [success, message, database_name]
+     *                          and optional address fields for campus
+     * @return array [success, message, database_name, admin_user_id]
      */
     public static function createSchoolDatabase($schoolData)
     {
@@ -251,7 +245,6 @@ class Tenant
 
             // Create database
             $result = Database::createSchoolDatabase($dbName);
-
             if (!$result) {
                 return [
                     'success' => false,
@@ -263,17 +256,28 @@ class Tenant
             $schoolDb = Database::getSchoolConnection($dbName);
             self::logInfo("School database connection established");
 
-            // Create ALL tables programmatically with enhanced features
-            self::createCompleteSchema($schoolDb, $schoolData['id']);
+            // Disable foreign key checks temporarily
+            $schoolDb->exec("SET FOREIGN_KEY_CHECKS = 0");
 
-            // Create initial admin user
-            $adminUserId = self::createInitialAdmin($schoolDb, $schoolData);
+            // Create ALL tables (no data yet)
+            self::createTablesOnly($schoolDb, $schoolData['id']);
 
+            // Re-enable foreign key checks
+            $schoolDb->exec("SET FOREIGN_KEY_CHECKS = 1");
+
+            // Insert default campus record (needed for roles and admin)
+            $campusId = self::insertDefaultCampus($schoolDb, $schoolData['id'], $schoolData);
+            if (!$campusId) {
+                throw new Exception("Failed to create default campus");
+            }
+
+            // Insert default data (roles, settings, etc.) – now with campus_id available
+            self::insertDefaultData($schoolDb, $schoolData['id'], $campusId);
+
+            // Create initial admin user (with campus_id)
+            $adminUserId = self::createInitialAdmin($schoolDb, $schoolData, $campusId);
             if (!$adminUserId) {
-                return [
-                    'success' => false,
-                    'message' => 'Failed to create admin user'
-                ];
+                throw new Exception("Failed to create admin user");
             }
 
             // Initialize subscription and billing data
@@ -298,6 +302,7 @@ class Tenant
                 'database_name' => $dbName,
                 'admin_user_id' => $adminUserId
             ];
+
         } catch (Exception $e) {
             self::logError("Failed to create school database", $e);
             return [
@@ -308,77 +313,61 @@ class Tenant
     }
 
     /**
-     * Create admin user in school database
+     * Insert default campus record for the new school
+     * @param PDO $db
+     * @param int $schoolId
+     * @param array $schoolData
+     * @return int|false Campus ID
      */
-    private static function createAdminUserInSchool($schoolId, $adminEmail, $adminPassword, $adminName)
+    private static function insertDefaultCampus($db, $schoolId, $schoolData)
     {
         try {
-            $db = Database::getPlatformConnection();
+            // Generate campus code if not provided
+            $campusCode = isset($schoolData['campus_code']) ? $schoolData['campus_code'] : 'MAIN001';
+            $campusName = "Main Campus";
 
-            // First, check if school exists in platform database
-            $stmt = $db->prepare("SELECT database_name FROM schools WHERE id = ?");
-            $stmt->execute([$schoolId]);
-            $school = $stmt->fetch();
-
-            if (!$school || empty($school['database_name'])) {
-                return 1; // Default ID
-            }
-
-            // Try to connect to school database and create user
-            try {
-                $schoolDb = Database::getSchoolConnection($school['database_name']);
-
-                // Check if users table exists
-                $tables = $schoolDb->query("SHOW TABLES LIKE 'users'")->rowCount();
-                if ($tables === 0) {
-                    return 1; // Default ID if users table doesn't exist
-                }
-
-                // Insert admin user
-                $hashedPassword = password_hash($adminPassword, PASSWORD_BCRYPT);
-
-                $stmt = $schoolDb->prepare("
-                INSERT INTO users 
-                (school_id, name, email, password, user_type, is_active, created_at) 
-                VALUES (?, ?, ?, ?, 'admin', 1, NOW())
+            $stmt = $db->prepare("
+                INSERT INTO campuses 
+                (school_id, name, code, address, city, state, country, phone, email, is_active, created_at, updated_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())
             ");
 
-                $stmt->execute([
-                    $schoolId,
-                    $adminName,
-                    $adminEmail,
-                    $hashedPassword
-                ]);
+            $stmt->execute([
+                $schoolId,
+                $campusName,
+                $campusCode,
+                $schoolData['address'] ?? '',
+                $schoolData['city'] ?? '',
+                $schoolData['state'] ?? '',
+                $schoolData['country'] ?? 'Nigeria',
+                $schoolData['phone'] ?? '',
+                $schoolData['email'] ?? ''
+            ]);
 
-                $adminUserId = $schoolDb->lastInsertId();
-                self::logInfo("Created admin user in school database with ID: " . $adminUserId);
-
-                return $adminUserId;
-            } catch (Exception $e) {
-                self::logWarning("Could not create admin user in school database: " . $e->getMessage());
-                return 1; // Return default ID
-            }
+            $campusId = $db->lastInsertId();
+            self::logInfo("Default campus inserted with ID: " . $campusId);
+            return $campusId;
         } catch (Exception $e) {
-            self::logError("Error creating admin user", $e);
-            return 1; // Default ID
+            self::logError("Failed to insert default campus", $e);
+            return false;
         }
     }
 
     /**
-     * Create COMPLETE schema with ALL tables including new features
+     * Create ALL tables without inserting default data
      * @param PDO $db
      * @param int $schoolId
      */
-    private static function createCompleteSchema($db, $schoolId)
+    private static function createTablesOnly($db, $schoolId)
     {
-        self::logInfo("Creating COMPLETE schema with ALL tables for school ID: " . $schoolId);
+        self::logInfo("Creating tables for school ID: " . $schoolId);
 
-        // Disable foreign key checks temporarily
-        $db->exec("SET FOREIGN_KEY_CHECKS = 0");
-
-        // Array of ALL table creation SQL
+        // Array of ALL table creation SQL (120 tables)
         $tables = [
-            // Core educational tables (from your original schema)
+            // Campuses must exist before tables with campus foreign keys.
+            self::getCampusesTableSql(),
+
+            // Core Educational Tables
             self::getAcademicTermsTableSql(),
             self::getAcademicYearsTableSql(),
             self::getAnnouncementsTableSql(),
@@ -405,44 +394,145 @@ class Tenant
             self::getUsersTableSql(),
             self::getUserRolesTableSql(),
 
-            // NEW TABLES FOR ENHANCED FEATURES
+            // Hostel Module
+            self::getHostelsTableSql(),
+            self::getHostelRoomsTableSql(),
+            self::getHostelBedsTableSql(),
+            self::getHostelAssignmentsTableSql(),
+            self::getHostelStaffTableSql(),
 
-            // 1. Subscription & Billing Management
+            // Transport Module
+            self::getTransportRoutesTableSql(),
+            self::getTransportStopsTableSql(),
+            self::getTransportVehiclesTableSql(),
+            self::getTransportAssignmentsTableSql(),
+            self::getStudentTransportTableSql(),
+
+            // Health Module
+            self::getStudentHealthRecordsTableSql(),
+            self::getSickVisitsTableSql(),
+            self::getVaccinationsTableSql(),
+
+            // Inventory Module
+            self::getInventoryCategoriesTableSql(),
+            self::getInventoryItemsTableSql(),
+            self::getInventoryMovementsTableSql(),
+
+            // Alumni Module
+            self::getAlumniTableSql(),
+            self::getAlumniDonationsTableSql(),
+            self::getAlumniEventsTableSql(),
+
+            // Admission Module
+            self::getAdmissionApplicationsTableSql(),
+            self::getAdmissionDocumentsTableSql(),
+
+            // Curriculum & Lesson Planning
+            self::getCurriculumOutlinesTableSql(),
+            self::getLessonPlansTableSql(),
+
+            // Assessments
+            self::getAssessmentTypesTableSql(),
+            self::getAssessmentsTableSql(),
+            self::getAssessmentScoresTableSql(),
+
+            // Discipline
+            self::getIncidentsTableSql(),
+            self::getIncidentStudentsTableSql(),
+            self::getDisciplineActionsTableSql(),
+
+            // Parent-Teacher Meetings
+            self::getMeetingSlotsTableSql(),
+            self::getMeetingBookingsTableSql(),
+
+            // CBT / Exam
+            self::getCbtTestsTableSql(),
+            self::getCbtQuestionsTableSql(),
+            self::getCbtOptionsTableSql(),
+            self::getCbtAttemptsTableSql(),
+            self::getCbtResponsesTableSql(),
+            self::getCbtResultsTableSql(),
+
+            // Voting
+            self::getVotingElectionsTableSql(),
+            self::getVotingPositionsTableSql(),
+            self::getVotingCandidatesTableSql(),
+            self::getVotingVotesTableSql(),
+            self::getVotingResultsTableSql(),
+
+            // Enhanced Feature Tables (System)
             self::getSubscriptionsTableSql(),
             self::getBillingHistoryTableSql(),
             self::getPaymentMethodsTableSql(),
             self::getInvoicesV2TableSql(),
-
-            // 2. Storage & Usage Tracking
             self::getStorageUsageTableSql(),
             self::getFileStorageTableSql(),
-
-            // 3. Performance & Monitoring
             self::getPerformanceMetricsTableSql(),
             self::getApiLogsTableSql(),
             self::getAuditLogsTableSql(),
-
-            // 4. Security & Rate Limiting
             self::getSecurityLogsTableSql(),
             self::getRateLimitsTableSql(),
             self::getLoginAttemptsTableSql(),
-
-            // 5. Backup & Recovery
             self::getBackupHistoryTableSql(),
             self::getRecoveryPointsTableSql(),
-
-            // 6. Communication & Notifications
             self::getNotificationsTableSql(),
             self::getEmailTemplatesTableSql(),
             self::getSmsLogsTableSql(),
-
-            // 7. API Management
             self::getApiKeysTableSql(),
             self::getApiUsageTableSql(),
-
-            // 8. System Maintenance
             self::getMaintenanceLogsTableSql(),
-            self::getSystemAlertsTableSql()
+            self::getSystemAlertsTableSql(),
+
+            // NEW MISSING TABLES (from original dump)
+            // Certificates
+            self::getCertificateTemplatesTableSql(),
+            self::getCertificatesIssuedTableSql(),
+
+            // Messaging
+            self::getConversationsTableSql(),
+            self::getConversationParticipantsTableSql(),
+            self::getMessagesTableSql(),
+            self::getMessageAttachmentsTableSql(),
+            self::getMessageBlocksTableSql(),
+            self::getMessageDraftsTableSql(),
+            self::getMessageReactionsTableSql(),
+            self::getMessageStatusTableSql(),
+
+            // Exams (additional)
+            self::getExamPapersTableSql(),
+            self::getExamQuestionsTableSql(),
+            self::getExamOptionsTableSql(),
+
+            // Geofence
+            self::getGeofenceLogsTableSql(),
+
+            // Leave
+            self::getLeaveTypesTableSql(),
+            self::getLeaveRequestsTableSql(),
+
+            // Library
+            self::getLibraryCategoriesTableSql(),
+            self::getLibraryBooksTableSql(),
+            self::getLibraryMembersTableSql(),
+            self::getLibraryIssuesTableSql(),
+            self::getLibraryReservationsTableSql(),
+            self::getLibraryFineSettingsTableSql(),
+
+            // Payroll
+            self::getPayrollSalaryGradesTableSql(),
+            self::getPayrollEmployeesTableSql(),
+            self::getPayrollAllowancesTableSql(),
+            self::getPayrollDeductionsTableSql(),
+            self::getPayrollPeriodsTableSql(),
+            self::getPayrollRunsTableSql(),
+            self::getPayrollSlipsTableSql(),
+
+            // Academics
+            self::getReportCardsTableSql(),
+            self::getStudentPromotionsTableSql(),
+
+            // Staff
+            self::getStaffAttendanceTableSql(),
         ];
 
         // Create each table
@@ -463,641 +553,98 @@ class Tenant
             }
         }
 
-        // Insert default data
-        self::insertDefaultData($db, $schoolId);
-
-        // Create indexes for performance
-        self::createPerformanceIndexes($db);
-
-        // Re-enable foreign key checks
-        $db->exec("SET FOREIGN_KEY_CHECKS = 1");
-
         self::logInfo("Created " . $createdCount . " tables successfully");
-
-        return $createdCount;
     }
-    public static function createSchoolConfig($schoolPortalDir, $school)
-    {
-        $configFile = $schoolPortalDir . 'config.php';
-        if (!file_exists($configFile)) {
-            $templateFile = __DIR__ . '/../../tenant/$slug/config.php';
-            if (!copy($templateFile, $configFile)) {
-                throw new Exception("Failed to create school config file: $configFile");
-            }
-        }
-
-        // Replace placeholders in config file
-        $configContent = file_get_contents($configFile);
-        $configContent = str_replace(array_keys($school), array_values($school), $configContent);
-        file_put_contents($configFile, $configContent);
-    }
-
-    public static function processTemplateFile($srcPath, $dstPath, $school)
-    {
-        $content = file_get_contents($srcPath);
-        $content = str_replace(array_keys($school), array_values($school), $content);
-        file_put_contents($dstPath, $content);
-    }
-
 
     /**
-     * Create admin user in shared database (single-database mode)
-     * @param array $adminData
-     * @param string $tablePrefix
-     * @return array
+     * Insert default data into new school database
+     * @param PDO $db
+     * @param int $schoolId
+     * @param int $campusId
      */
-    public static function createAdminInSharedDatabase($adminData, $tablePrefix = 'school_')
+    private static function insertDefaultData($db, $schoolId, $campusId)
     {
         try {
-            $db = Database::getPlatformConnection();
+            // Insert default roles (with campus_id)
+            $db->exec("INSERT IGNORE INTO `roles` (`school_id`, `campus_id`, `name`, `slug`, `description`, `permissions`, `is_system`, `created_at`) VALUES
+                ($schoolId, $campusId, 'Super Administrator', 'super_admin', 'Has full access to all features', '[\"*\"]', 1, NOW()),
+                ($schoolId, $campusId, 'School Administrator', 'school_admin', 'Manages school operations', '[\"dashboard.view\", \"students.*\", \"teachers.*\", \"classes.*\", \"attendance.*\", \"exams.*\", \"fees.*\", \"reports.*\", \"settings.*\"]', 1, NOW()),
+                ($schoolId, $campusId, 'Teacher', 'teacher', 'Can manage classes and students', '[\"dashboard.view\", \"attendance.mark\", \"grades.enter\", \"homework.*\", \"students.view\"]', 1, NOW()),
+                ($schoolId, $campusId, 'Student', 'student', 'Can view their own information', '[\"dashboard.view\", \"timetable.view\", \"grades.view\", \"homework.view\"]', 1, NOW()),
+                ($schoolId, $campusId, 'Parent', 'parent', 'Can view child information', '[\"dashboard.view\", \"children.view\", \"attendance.view\", \"fees.view\"]', 1, NOW()),
+                ($schoolId, $campusId, 'Accountant', 'accountant', 'Manages financial operations', '[\"dashboard.view\", \"fees.*\", \"payments.*\", \"invoices.*\", \"reports.financial\"]', 1, NOW()),
+                ($schoolId, $campusId, 'Librarian', 'librarian', 'Manages library operations', '[\"dashboard.view\", \"library.*\"]', 1, NOW())");
 
-            // In single-database mode, we use the platform database with table prefixes
-            // For now, just return a mock user ID
-            return [
-                'success' => true,
-                'admin_user_id' => 1,
-                'message' => 'Admin created in shared database'
-            ];
-        } catch (Exception $e) {
-            self::logError("Failed to create admin in shared database", $e);
-            return [
-                'success' => false,
-                'message' => 'Failed to create admin: ' . $e->getMessage()
-            ];
-        }
-    }
-    /**
-     * Create or update school portal structure
-     * @param array $school
-     * @return bool
-     */
-    public static function createOrUpdateSchoolPortal($school)
-    {
-        try {
-            $schoolId = $school['id'];
-            $schoolSlug = $school['slug'];
+            // Insert default settings (campus_id not needed)
+            $db->exec("INSERT IGNORE INTO `settings` (`school_id`, `key`, `value`, `type`, `category`, `created_at`, `updated_at`) VALUES
+                ($schoolId, 'school_name', 'New School', 'string', 'general', NOW(), NOW()),
+                ($schoolId, 'school_email', '', 'string', 'general', NOW(), NOW()),
+                ($schoolId, 'school_phone', '', 'string', 'general', NOW(), NOW()),
+                ($schoolId, 'school_address', '', 'string', 'general', NOW(), NOW()),
+                ($schoolId, 'currency', 'NGN', 'string', 'financial', NOW(), NOW()),
+                ($schoolId, 'currency_symbol', '₦', 'string', 'financial', NOW(), NOW()),
+                ($schoolId, 'attendance_method', 'daily', 'string', 'academic', NOW(), NOW()),
+                ($schoolId, 'grading_system', 'percentage', 'string', 'academic', NOW(), NOW()),
+                ($schoolId, 'result_publish', 'immediate', 'string', 'academic', NOW(), NOW()),
+                ($schoolId, 'fee_due_days', '30', 'number', 'financial', NOW(), NOW()),
+                ($schoolId, 'late_fee_percentage', '5', 'number', 'financial', NOW(), NOW())");
 
-            // Base paths
-            $tenantDir = __DIR__ . '/../../tenant/';
-            $templateDir = __DIR__ . '/../../templates/school-portal/';
-            $schoolPortalDir = $tenantDir . $schoolSlug . '/';
+            // Insert default subscription plan (Free tier)
+            $db->exec("INSERT IGNORE INTO `subscriptions` (`school_id`, `plan_id`, `plan_name`, `status`, `billing_cycle`, `amount`, `storage_limit`, `user_limit`, `student_limit`, `current_period_start`, `current_period_end`, `created_at`) VALUES
+                ($schoolId, 'free_tier', 'Free Plan', 'active', 'monthly', 0.00, 1073741824, 100, 500, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 1 MONTH), NOW())");
 
-            self::logInfo("Creating/updating portal for school: $schoolSlug at $schoolPortalDir");
+            // Insert default storage usage
+            $db->exec("INSERT IGNORE INTO `storage_usage` (`school_id`, `storage_type`, `used_bytes`, `limit_bytes`, `created_at`) VALUES
+                ($schoolId, 'database', 0, 1073741824, NOW()),
+                ($schoolId, 'files', 0, 1073741824, NOW()),
+                ($schoolId, 'backups', 0, 536870912, NOW()),
+                ($schoolId, 'attachments', 0, 536870912, NOW())");
 
-            // Check if template exists
-            if (!is_dir($templateDir)) {
-                throw new Exception("Template directory not found: $templateDir");
-            }
+            // Insert default leave types
+            $db->exec("INSERT IGNORE INTO `leave_types` (`school_id`, `campus_id`, `name`, `description`, `max_days_per_year`, `applicable_to`, `is_paid`, `is_active`, `created_at`) VALUES
+                ($schoolId, $campusId, 'Annual Leave', 'Paid annual leave', 21, 'all', 1, 1, NOW()),
+                ($schoolId, $campusId, 'Sick Leave', 'Paid sick leave', 14, 'all', 1, 1, NOW()),
+                ($schoolId, $campusId, 'Maternity Leave', 'Maternity leave', 90, 'teacher', 1, 1, NOW()),
+                ($schoolId, $campusId, 'Unpaid Leave', 'Leave without pay', NULL, 'all', 0, 1, NOW())");
 
-            // Create school portal directory if it doesn't exist
-            if (!is_dir($schoolPortalDir)) {
-                if (!mkdir($schoolPortalDir, 0755, true)) {
-                    throw new Exception("Failed to create school portal directory: $schoolPortalDir");
-                }
-                self::logInfo("Created school portal directory: $schoolPortalDir");
-            }
+            // Insert default library categories
+            $db->exec("INSERT IGNORE INTO `library_categories` (`school_id`, `campus_id`, `name`, `description`, `created_at`) VALUES
+                ($schoolId, $campusId, 'Fiction', 'Fictional books', NOW()),
+                ($schoolId, $campusId, 'Non-Fiction', 'Non-fictional books', NOW()),
+                ($schoolId, $campusId, 'Science', 'Science books', NOW()),
+                ($schoolId, $campusId, 'History', 'History books', NOW()),
+                ($schoolId, $campusId, 'Biography', 'Biographies', NOW())");
 
-            // Copy template files to school portal
-            self::copyTemplateFiles($templateDir, $schoolPortalDir, $school);
+            // Insert default library fine settings
+            $db->exec("INSERT IGNORE INTO `library_fine_settings` (`school_id`, `fine_per_day`, `max_fine`, `grace_days`, `created_at`, `updated_at`) VALUES
+                ($schoolId, 50.00, 2000.00, 3, NOW(), NOW())");
 
-            // Create school-specific config file
-            self::createSchoolConfig($schoolPortalDir, $school);
+            // Insert default payroll salary grades
+            $db->exec("INSERT IGNORE INTO `payroll_salary_grades` (`school_id`, `grade_name`, `basic_salary`, `house_allowance`, `transport_allowance`, `medical_allowance`, `other_allowances`, `description`, `is_active`, `created_at`) VALUES
+                ($schoolId, 'Entry Level', 50000.00, 0.00, 0.00, 0.00, 0.00, 'Entry level staff', 1, NOW()),
+                ($schoolId, 'Junior Staff', 80000.00, 0.00, 0.00, 0.00, 0.00, 'Junior staff', 1, NOW()),
+                ($schoolId, 'Senior Staff', 120000.00, 0.00, 0.00, 0.00, 0.00, 'Senior staff', 1, NOW()),
+                ($schoolId, 'Management', 200000.00, 0.00, 0.00, 0.00, 0.00, 'Management', 1, NOW())");
 
-            // Create school assets directory
-            self::createSchoolAssets($schoolPortalDir, $school);
-
-            self::logInfo("School portal created successfully for: $schoolSlug");
+            self::logInfo("Inserted default data for school ID: " . $schoolId);
             return true;
         } catch (Exception $e) {
-            self::logError("Failed to create school portal", $e);
+            self::logError("Error inserting default data", $e);
             return false;
         }
     }
 
-    /**
-     * Copy template files to school portal
-     * @param string $source
-     * @param string $destination
-     * @param array $school
-     */
-    private static function copyTemplateFiles($source, $destination, $school)
-    {
-        $dir = opendir($source);
+    // =================================================================
+    // TABLE DEFINITION METHODS (120 tables)
+    // =================================================================
 
-        while (($file = readdir($dir)) !== false) {
-            if ($file == '.' || $file == '..') {
-                continue;
-            }
-
-            $srcPath = $source . '/' . $file;
-            $dstPath = $destination . '/' . $file;
-
-            if (is_dir($srcPath)) {
-                // Create directory
-                if (!is_dir($dstPath)) {
-                    mkdir($dstPath, 0755, true);
-                }
-                // Recursively copy directory
-                self::copyTemplateFiles($srcPath, $dstPath, $school);
-            } else {
-                // Copy and process template file
-                self::processTemplateFile($srcPath, $dstPath, $school);
-            }
-        }
-
-        closedir($dir);
-    }
-// Add these methods to Tenant.php class
-// ====================================================
-
-    /**
-     * Ensure school portal exists, create if missing
-     * @param array $school
-     * @return bool
-     */
-    public static function ensureSchoolPortal($school)
-    {
-        try {
-            $schoolSlug = $school['slug'];
-            $tenantDir = __DIR__ . '/../../tenant/';
-            $portalDir = $tenantDir . $schoolSlug . '/';
-
-            self::logInfo("Ensuring portal for: $schoolSlug");
-
-            // Check if portal already exists
-            if (is_dir($portalDir) && file_exists($portalDir . 'config.php')) {
-                self::logInfo("Portal already exists: $portalDir");
-                return true;
-            }
-
-            // Create portal directory
-            if (!is_dir($portalDir)) {
-                if (!mkdir($portalDir, 0755, true)) {
-                    self::logError("Failed to create portal directory: $portalDir");
-                    return false;
-                }
-            }
-
-            // Create portal structure
-            return self::createPortalStructure($school, $portalDir);
-        } catch (Exception $e) {
-            self::logError("Failed to ensure school portal", $e);
-            return false;
-        }
-    }
-
-    /**
-     * Create portal structure for a school
-     * @param array $school
-     * @param string $portalDir
-     * @return bool
-     */
-    private static function createPortalStructure($school, $portalDir)
-    {
-        try {
-            // Create subdirectories
-            $subdirs = ['admin', 'teacher', 'student', 'parent', 'assets/css', 'assets/js', 'assets/images'];
-
-            foreach ($subdirs as $dir) {
-                $dirPath = $portalDir . $dir . '/';
-                if (!is_dir($dirPath)) {
-                    if (!mkdir($dirPath, 0755, true)) {
-                        self::logError("Failed to create directory: $dirPath");
-                        return false;
-                    }
-                }
-            }
-
-            // Create config.php
-            $configContent = self::generateSchoolConfig($school);
-            if (file_put_contents($portalDir . 'config.php', $configContent) === false) {
-                self::logError("Failed to create config.php");
-                return false;
-            }
-
-            // Create index.php (school homepage)
-            $indexContent = self::generateIndexPage($school);
-            if (file_put_contents($portalDir . 'index.php', $indexContent) === false) {
-                self::logError("Failed to create index.php");
-                return false;
-            }
-
-            // Create login.php (school-specific login)
-            $loginContent = self::generateLoginPage($school);
-            if (file_put_contents($portalDir . 'login.php', $loginContent) === false) {
-                self::logError("Failed to create login.php");
-                return false;
-            }
-
-            // Create basic dashboard files
-            self::createDashboardFiles($school, $portalDir);
-
-            // Create school assets
-            self::createSchoolAssets($school, $portalDir);
-
-            self::logInfo("School portal created successfully: $portalDir");
-            return true;
-        } catch (Exception $e) {
-            self::logError("Failed to create portal structure", $e);
-            return false;
-        }
-    }
-
-    /**
-     * Generate school config content
-     * @param array $school
-     * @return string
-     */
-    private static function generateSchoolConfig($school)
-    {
-        $content = "<?php\n";
-        $content .= "/**\n";
-        $content .= " * School Configuration: {$school['name']}\n";
-        $content .= " * Auto-generated on: " . date('Y-m-d H:i:s') . "\n";
-        $content .= " */\n\n";
-
-        $content .= "// Load core configuration\n";
-        $content .= "require_once __DIR__ . '/../../includes/autoload.php';\n\n";
-
-        $content .= "// School Information\n";
-        $content .= "\$school = [\n";
-        $content .= "    'id' => {$school['id']},\n";
-        $content .= "    'slug' => '{$school['slug']}',\n";
-        $content .= "    'name' => '" . addslashes($school['name']) . "',\n";
-        $content .= "    'database_name' => '{$school['database_name']}',\n";
-        $content .= "    'email' => '" . addslashes($school['email'] ?? '') . "',\n";
-        $content .= "    'phone' => '" . addslashes($school['phone'] ?? '') . "',\n";
-        $content .= "    'address' => '" . addslashes($school['address'] ?? '') . "',\n";
-        $content .= "    'logo_path' => '" . addslashes($school['logo_path'] ?? '') . "',\n";
-        $content .= "    'primary_color' => '" . addslashes($school['primary_color'] ?? '#3B82F6') . "',\n";
-        $content .= "    'secondary_color' => '" . addslashes($school['secondary_color'] ?? '#1E40AF') . "',\n";
-        $content .= "    'status' => '{$school['status']}',\n";
-        $content .= "    'plan_id' => " . ($school['plan_id'] ?? 'null') . ",\n";
-        $content .= "    'created_at' => '{$school['created_at']}',\n";
-        $content .= "    'trial_ends_at' => '" . ($school['trial_ends_at'] ?? '') . "'\n";
-        $content .= "];\n\n";
-
-        $content .= "// School Constants\n";
-        $content .= "define('SCHOOL_ID', {$school['id']});\n";
-        $content .= "define('SCHOOL_SLUG', '{$school['slug']}');\n";
-        $content .= "define('SCHOOL_NAME', '" . addslashes($school['name']) . "');\n";
-        $content .= "define('SCHOOL_DB_NAME', '{$school['database_name']}');\n";
-        $content .= "define('SCHOOL_UPLOAD_PATH', __DIR__ . '/../../assets/uploads/schools/{$school['id']}/');\n";
-        $content .= "define('SCHOOL_ASSETS_URL', '/assets/uploads/schools/{$school['id']}/');\n";
-        $content .= "define('SCHOOL_PORTAL_URL', APP_URL . '/tenant/{$school['slug']}');\n\n";
-
-        $content .= "// School-specific functions\n";
-        $content .= "function getSchoolDb() {\n";
-        $content .= "    try {\n";
-        $content .= "        return Database::getSchoolConnection(SCHOOL_DB_NAME);\n";
-        $content .= "    } catch (Exception \$e) {\n";
-        $content .= "        error_log('School DB Error: ' . \$e->getMessage());\n";
-        $content .= "        return null;\n";
-        $content .= "    }\n";
-        $content .= "}\n\n";
-
-        $content .= "function isSchoolUserAuthenticated() {\n";
-        $content .= "    if (!isset(\$_SESSION['school_auth'])) {\n";
-        $content .= "        return false;\n";
-        $content .= "    }\n";
-        $content .= "    \$sessionSchoolId = \$_SESSION['school_auth']['school_id'] ?? null;\n";
-        $content .= "    \$sessionSchoolSlug = \$_SESSION['school_auth']['school_slug'] ?? null;\n";
-        $content .= "    return (\$sessionSchoolId == SCHOOL_ID && \$sessionSchoolSlug == SCHOOL_SLUG);\n";
-        $content .= "}\n\n";
-
-        $content .= "function requireSchoolAuth() {\n";
-        $content .= "    if (!isSchoolUserAuthenticated()) {\n";
-        $content .= "        header('Location: /tenant/' . SCHOOL_SLUG . '/login');\n";
-        $content .= "        exit;\n";
-        $content .= "    }\n";
-        $content .= "}\n\n";
-
-        $content .= "function getCurrentSchoolUser() {\n";
-        $content .= "    if (isSchoolUserAuthenticated()) {\n";
-        $content .= "        return \$_SESSION['school_auth'];\n";
-        $content .= "    }\n";
-        $content .= "    return null;\n";
-        $content .= "}\n\n";
-
-        $content .= "function redirectToSchoolDashboard() {\n";
-        $content .= "    \$user = getCurrentSchoolUser();\n";
-        $content .= "    if (\$user) {\n";
-        $content .= "        \$userType = \$user['user_type'];\n";
-        $content .= "        header('Location: /tenant/' . SCHOOL_SLUG . '/' . \$userType . '/dashboard.php');\n";
-        $content .= "        exit;\n";
-        $content .= "    }\n";
-        $content .= "}\n";
-
-        $content .= "?>";
-
-        return $content;
-    }
-
-    /**
-     * Generate index.php content for school
-     * @param array $school
-     * @return string
-     */
-    private static function generateIndexPage($school)
-    {
-        $content = "<?php\n";
-        $content .= "/**\n";
-        $content .= " * School Homepage: {$school['name']}\n";
-        $content .= " * Redirects to tenant login page\n";
-        $content .= " */\n\n";
-        $content .= "// Redirect to tenant login with school slug\n";
-        $content .= "header('Location: /tenant/login.php?school_slug={$school['slug']}');\n";
-        $content .= "exit;\n";
-        $content .= "?>\n";
-
-        return $content;
-    }
-    /**
-     * Generate login.php content for school
-     * @param array $school
-     * @return string
-     */
-    private static function generateLoginPage($school)
-    {
-        $content = "<?php\n";
-        $content .= "/**\n";
-        $content .= " * School Login Page\n";
-        $content .= " * Redirects to main tenant login with school slug\n";
-        $content .= " */\n\n";
-        $content .= "// Redirect to main tenant login with school slug\n";
-        $content .= "header('Location: /tenant/login.php?school_slug={$school['slug']}');\n";
-        $content .= "exit;\n";
-        $content .= "?>\n";
-
-        return $content;
-    }
-
-    /**
-     * Create basic dashboard files
-     * @param array $school
-     * @param string $portalDir
-     */
-    private static function createDashboardFiles($school, $portalDir)
-    {
-        $dashboards = ['admin', 'teacher', 'student', 'parent'];
-
-        foreach ($dashboards as $type) {
-            // Use 'school-dashboard.php' as the filename
-            $dashboardFile = $portalDir . $type . '/school-dashboard.php';
-
-            $content = "<?php\n";
-            $content .= "/**\n";
-            $content .= " * {$type} Dashboard - {$school['name']}\n";
-            $content .= " * File: school-dashboard.php\n";
-            $content .= " * URL: /tenant/{$school['slug']}/{$type}/school-dashboard.php\n";
-            $content .= " */\n\n";
-            $content .= "// Start session\n";
-            $content .= "if (session_status() === PHP_SESSION_NONE) {\n";
-            $content .= "    session_start();\n";
-            $content .= "}\n\n";
-            $content .= "require_once __DIR__ . '/../config.php';\n";
-            $content .= "requireSchoolAuth();\n\n";
-            $content .= "// Check user type\n";
-            $content .= "\$user = getCurrentSchoolUser();\n";
-            $content .= "if (\$user['user_type'] !== '$type') {\n";
-            $content .= "    // Redirect to correct user type dashboard\n";
-            $content .= "    header('Location: /tenant/' . SCHOOL_SLUG . '/' . \$user['user_type'] . '/school-dashboard.php');\n";
-            $content .= "    exit;\n";
-            $content .= "}\n\n";
-            $content .= "// School database connection\n";
-            $content .= "\$db = getSchoolDb();\n";
-            $content .= "if (!\$db) {\n";
-            $content .= "    die('Unable to connect to school database');\n";
-            $content .= "}\n\n";
-            $content .= "// Get school statistics\n";
-            $content .= "\$stats = [];\n";
-            $content .= "try {\n";
-            $content .= "    // Add your statistics queries here\n";
-            $content .= "} catch (Exception \$e) {\n";
-            $content .= "    error_log('Stats error: ' . \$e->getMessage());\n";
-            $content .= "}\n";
-            $content .= "?>\n";
-
-            $content .= "<!DOCTYPE html>\n";
-            $content .= "<html lang=\"en\">\n";
-            $content .= "<head>\n";
-            $content .= "    <meta charset=\"UTF-8\">\n";
-            $content .= "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
-            $content .= "    <title><?php echo htmlspecialchars(SCHOOL_NAME); ?> - " . ucfirst($type) . " Dashboard</title>\n";
-            $content .= "    <script src=\"https://cdn.tailwindcss.com\"></script>\n";
-            $content .= "    <link href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\" rel=\"stylesheet\">\n";
-            $content .= "    <link rel=\"stylesheet\" href=\"../assets/css/school-style.css\">\n";
-            $content .= "</head>\n";
-            $content .= "<body class=\"bg-gray-50\">\n";
-            $content .= "    <div class=\"min-h-screen flex\">\n";
-            $content .= "        <!-- Sidebar -->\n";
-            $content .= "        <div class=\"w-64 bg-white shadow-lg\">\n";
-            $content .= "            <div class=\"p-6 border-b\">\n";
-            $content .= "                <h2 class=\"text-xl font-bold text-gray-800\"><?php echo htmlspecialchars(SCHOOL_NAME); ?></h2>\n";
-            $content .= "                <p class=\"text-gray-600 text-sm mt-1\">" . ucfirst($type) . " Portal</p>\n";
-            $content .= "                <div class=\"mt-4 p-3 bg-blue-50 rounded-lg\">\n";
-            $content .= "                    <p class=\"text-sm text-gray-700\">Logged in as:</p>\n";
-            $content .= "                    <p class=\"font-semibold text-blue-700\"><?php echo htmlspecialchars(\$user['user_name']); ?></p>\n";
-            $content .= "                    <p class=\"text-xs text-gray-600 mt-1\"><?php echo ucfirst(\$user['user_type']); ?></p>\n";
-            $content .= "                </div>\n";
-            $content .= "            </div>\n";
-            $content .= "            <nav class=\"mt-4\">\n";
-            $content .= "                <a href=\"school-dashboard.php\" class=\"block px-6 py-3 text-blue-600 bg-blue-50 border-r-4 border-blue-600\">\n";
-            $content .= "                    <i class=\"fas fa-tachometer-alt mr-3\"></i>Dashboard\n";
-            $content .= "                </a>\n";
-            $content .= "                <!-- Add more menu items based on user type -->\n";
-            $content .= "            </nav>\n";
-            $content .= "            <div class=\"absolute bottom-0 w-full p-4 border-t\">\n";
-            $content .= "                <a href=\"/tenant/login.php?logout=1\" class=\"flex items-center text-gray-600 hover:text-red-600\">\n";
-            $content .= "                    <i class=\"fas fa-sign-out-alt mr-3\"></i>\n";
-            $content .= "                    <span>Logout</span>\n";
-            $content .= "                </a>\n";
-            $content .= "            </div>\n";
-            $content .= "        </div>\n";
-            $content .= "        \n";
-            $content .= "        <!-- Main Content -->\n";
-            $content .= "        <div class=\"flex-1\">\n";
-            $content .= "            <!-- Header -->\n";
-            $content .= "            <header class=\"bg-white shadow\">\n";
-            $content .= "                <div class=\"px-6 py-4 flex items-center justify-between\">\n";
-            $content .= "                    <div>\n";
-            $content .= "                        <h1 class=\"text-2xl font-semibold text-gray-800\">Dashboard</h1>\n";
-            $content .= "                        <p class=\"text-gray-600\">Welcome to your school management portal</p>\n";
-            $content .= "                    </div>\n";
-            $content .= "                    <div class=\"text-sm text-gray-500\">\n";
-            $content .= "                        <?php echo date('l, F j, Y'); ?>\n";
-            $content .= "                    </div>\n";
-            $content .= "                </div>\n";
-            $content .= "            </header>\n";
-            $content .= "            \n";
-            $content .= "            <!-- Content -->\n";
-            $content .= "            <main class=\"p-6\">\n";
-            $content .= "                <div class=\"grid grid-cols-1 md:grid-cols-3 gap-6 mb-8\">\n";
-            $content .= "                    <div class=\"bg-white rounded-lg shadow p-6\">\n";
-            $content .= "                        <div class=\"flex items-center\">\n";
-            $content .= "                            <div class=\"w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4\">\n";
-            $content .= "                                <i class=\"fas fa-school text-blue-600\"></i>\n";
-            $content .= "                            </div>\n";
-            $content .= "                            <div>\n";
-            $content .= "                                <h3 class=\"text-lg font-semibold text-gray-800\">School Information</h3>\n";
-            $content .= "                                <p class=\"text-gray-600 text-sm\">View and manage school details</p>\n";
-            $content .= "                            </div>\n";
-            $content .= "                        </div>\n";
-            $content .= "                    </div>\n";
-            $content .= "                    \n";
-            $content .= "                    <div class=\"bg-white rounded-lg shadow p-6\">\n";
-            $content .= "                        <div class=\"flex items-center\">\n";
-            $content .= "                            <div class=\"w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4\">\n";
-            $content .= "                                <i class=\"fas fa-users text-green-600\"></i>\n";
-            $content .= "                            </div>\n";
-            $content .= "                            <div>\n";
-            $content .= "                                <h3 class=\"text-lg font-semibold text-gray-800\">Manage Users</h3>\n";
-            $content .= "                                <p class=\"text-gray-600 text-sm\">Add/edit students, teachers, parents</p>\n";
-            $content .= "                            </div>\n";
-            $content .= "                        </div>\n";
-            $content .= "                    </div>\n";
-            $content .= "                    \n";
-            $content .= "                    <div class=\"bg-white rounded-lg shadow p-6\">\n";
-            $content .= "                        <div class=\"flex items-center\">\n";
-            $content .= "                            <div class=\"w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4\">\n";
-            $content .= "                                <i class=\"fas fa-chart-line text-purple-600\"></i>\n";
-            $content .= "                            </div>\n";
-            $content .= "                            <div>\n";
-            $content .= "                                <h3 class=\"text-lg font-semibold text-gray-800\">Reports</h3>\n";
-            $content .= "                                <p class=\"text-gray-600 text-sm\">Generate and view reports</p>\n";
-            $content .= "                            </div>\n";
-            $content .= "                        </div>\n";
-            $content .= "                    </div>\n";
-            $content .= "                </div>\n";
-            $content .= "                \n";
-            $content .= "                <div class=\"bg-white rounded-lg shadow p-6\">\n";
-            $content .= "                    <h2 class=\"text-lg font-semibold text-gray-800 mb-4\">Quick Actions</h2>\n";
-            $content .= "                    <div class=\"grid grid-cols-1 md:grid-cols-4 gap-4\">\n";
-            $content .= "                        <a href=\"#\" class=\"text-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition\">\n";
-            $content .= "                            <i class=\"fas fa-user-plus text-blue-600 text-2xl mb-2\"></i>\n";
-            $content .= "                            <p class=\"font-medium text-gray-700\">Add Student</p>\n";
-            $content .= "                        </a>\n";
-            $content .= "                        <a href=\"#\" class=\"text-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition\">\n";
-            $content .= "                            <i class=\"fas fa-file-invoice-dollar text-green-600 text-2xl mb-2\"></i>\n";
-            $content .= "                            <p class=\"font-medium text-gray-700\">Collect Fees</p>\n";
-            $content .= "                        </a>\n";
-            $content .= "                        <a href=\"#\" class=\"text-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition\">\n";
-            $content .= "                            <i class=\"fas fa-calendar-check text-purple-600 text-2xl mb-2\"></i>\n";
-            $content .= "                            <p class=\"font-medium text-gray-700\">Mark Attendance</p>\n";
-            $content .= "                        </a>\n";
-            $content .= "                        <a href=\"#\" class=\"text-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition\">\n";
-            $content .= "                            <i class=\"fas fa-bullhorn text-yellow-600 text-2xl mb-2\"></i>\n";
-            $content .= "                            <p class=\"font-medium text-gray-700\">Send Announcement</p>\n";
-            $content .= "                        </a>\n";
-            $content .= "                    </div>\n";
-            $content .= "                </div>\n";
-            $content .= "            </main>\n";
-            $content .= "        </div>\n";
-            $content .= "    </div>\n";
-            $content .= "    \n";
-            $content .= "    <script src=\"../assets/js/school-scripts.js\"></script>\n";
-            $content .= "    <script>\n";
-            $content .= "        // Simple dashboard interactions\n";
-            $content .= "        document.addEventListener('DOMContentLoaded', function() {\n";
-            $content .= "            console.log('Dashboard loaded for <?php echo SCHOOL_NAME; ?>');\n";
-            $content .= "        });\n";
-            $content .= "    </script>\n";
-            $content .= "</body>\n";
-            $content .= "</html>\n";
-
-            file_put_contents($dashboardFile, $content);
-        }
-    }
-    /**
-     * Create school assets
-     * @param array $school
-     * @param string $portalDir
-     */
-    private static function createSchoolAssets($school, $portalDir)
-    {
-        // Create CSS file
-        $cssFile = $portalDir . 'assets/css/school-style.css';
-        $cssContent = "/* School-specific styles for {$school['name']} */\n\n";
-        $cssContent .= ":root {\n";
-        $cssContent .= "    --primary-color: {$school['primary_color']};\n";
-        $cssContent .= "    --secondary-color: {$school['secondary_color']};\n";
-        $cssContent .= "}\n\n";
-        $cssContent .= ".school-header {\n";
-        $cssContent .= "    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));\n";
-        $cssContent .= "}\n\n";
-        $cssContent .= ".btn-primary {\n";
-        $cssContent .= "    background-color: var(--primary-color);\n";
-        $cssContent .= "}\n\n";
-        $cssContent .= ".text-primary {\n";
-        $cssContent .= "    color: var(--primary-color);\n";
-        $cssContent .= "}\n";
-
-        file_put_contents($cssFile, $cssContent);
-
-        // Create JS file
-        $jsFile = $portalDir . 'assets/js/school-scripts.js';
-        $jsContent = "/* School-specific JavaScript for {$school['name']} */\n\n";
-        $jsContent .= "document.addEventListener('DOMContentLoaded', function() {\n";
-        $jsContent .= "    console.log('{$school['name']} Portal Loaded');\n";
-        $jsContent .= "});\n";
-
-        file_put_contents($jsFile, $jsContent);
-    }
-
-
-    /**
-     * Recreate school portal (force update)
-     * @param array $school
-     * @return bool
-     */
-    private static function recreateSchoolPortal($school)
-    {
-        $schoolSlug = $school['slug'];
-        $portalPath = __DIR__ . '/../../tenant/' . $schoolSlug . '/';
-
-        // Remove existing portal
-        if (is_dir($portalPath)) {
-            self::deleteDirectory($portalPath);
-        }
-
-        // Create new portal
-        return self::createOrUpdateSchoolPortal($school);
-    }
-
-    /**
-     * Delete directory recursively
-     * @param string $dir
-     */
-    private static function deleteDirectory($dir)
-    {
-        if (!is_dir($dir)) {
-            return;
-        }
-
-        $files = array_diff(scandir($dir), array('.', '..'));
-
-        foreach ($files as $file) {
-            $path = $dir . '/' . $file;
-            is_dir($path) ? self::deleteDirectory($path) : unlink($path);
-        }
-
-        rmdir($dir);
-    }
-    /**
-     * =================================================================
-     * TABLE DEFINITION METHODS
-     * =================================================================
-     */
-
-    /**
-     * 1. CORE EDUCATIONAL TABLES
-     */
-
+    // ----- Core Educational Tables -----
     private static function getAcademicTermsTableSql()
     {
         return "CREATE TABLE IF NOT EXISTS `academic_terms` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `academic_year_id` int(10) UNSIGNED NOT NULL,
             `name` varchar(100) NOT NULL,
             `start_date` date NOT NULL,
@@ -1107,7 +654,9 @@ class Tenant
             PRIMARY KEY (`id`),
             UNIQUE KEY `unique_term_school` (`school_id`,`academic_year_id`,`name`),
             KEY `idx_school` (`school_id`),
-            KEY `idx_year` (`academic_year_id`)
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_year` (`academic_year_id`),
+            CONSTRAINT `fk_academic_terms_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1116,6 +665,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `academic_years` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `name` varchar(100) NOT NULL,
             `start_date` date NOT NULL,
             `end_date` date NOT NULL,
@@ -1125,7 +675,9 @@ class Tenant
             PRIMARY KEY (`id`),
             UNIQUE KEY `unique_year_school` (`school_id`,`name`),
             KEY `idx_school` (`school_id`),
-            KEY `idx_status` (`status`)
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_status` (`status`),
+            CONSTRAINT `fk_academic_years_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1134,6 +686,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `announcements` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `title` varchar(255) NOT NULL,
             `description` text NOT NULL,
             `target` enum('all','students','teachers','parents','class','section') DEFAULT 'all',
@@ -1149,8 +702,10 @@ class Tenant
             KEY `section_id` (`section_id`),
             KEY `created_by` (`created_by`),
             KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
             KEY `idx_published` (`is_published`),
-            KEY `idx_dates` (`start_date`,`end_date`)
+            KEY `idx_dates` (`start_date`,`end_date`),
+            CONSTRAINT `fk_announcements_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1159,6 +714,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `attendance` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `student_id` int(10) UNSIGNED NOT NULL,
             `class_id` int(10) UNSIGNED NOT NULL,
             `date` date NOT NULL,
@@ -1171,10 +727,12 @@ class Tenant
             UNIQUE KEY `unique_attendance` (`student_id`,`date`,`session`),
             KEY `marked_by` (`marked_by`),
             KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
             KEY `idx_student` (`student_id`),
             KEY `idx_date` (`date`),
             KEY `idx_class` (`class_id`),
-            KEY `idx_attendance_student_date` (`student_id`,`date`)
+            KEY `idx_attendance_student_date` (`student_id`,`date`),
+            CONSTRAINT `fk_attendance_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1183,7 +741,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `classes` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
-            `campus_id` int(10) UNSIGNED DEFAULT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `name` varchar(100) NOT NULL,
             `code` varchar(50) NOT NULL,
             `description` text DEFAULT NULL,
@@ -1198,7 +756,9 @@ class Tenant
             UNIQUE KEY `unique_class_school` (`school_id`,`academic_year_id`,`code`),
             KEY `class_teacher_id` (`class_teacher_id`),
             KEY `idx_school` (`school_id`),
-            KEY `idx_year` (`academic_year_id`)
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_year` (`academic_year_id`),
+            CONSTRAINT `fk_classes_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1206,6 +766,8 @@ class Tenant
     {
         return "CREATE TABLE IF NOT EXISTS `class_subjects` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `class_id` int(10) UNSIGNED NOT NULL,
             `subject_id` int(10) UNSIGNED NOT NULL,
             `teacher_id` int(10) UNSIGNED DEFAULT NULL,
@@ -1214,7 +776,10 @@ class Tenant
             UNIQUE KEY `unique_class_subject` (`class_id`,`subject_id`),
             KEY `subject_id` (`subject_id`),
             KEY `idx_class` (`class_id`),
-            KEY `idx_teacher` (`teacher_id`)
+            KEY `idx_teacher` (`teacher_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_class_subjects_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1223,6 +788,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `events` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `title` varchar(255) NOT NULL,
             `description` text DEFAULT NULL,
             `type` enum('holiday','exam','meeting','celebration','sports','other') DEFAULT 'other',
@@ -1237,8 +803,10 @@ class Tenant
             PRIMARY KEY (`id`),
             KEY `created_by` (`created_by`),
             KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
             KEY `idx_dates` (`start_date`,`end_date`),
-            KEY `idx_type` (`type`)
+            KEY `idx_type` (`type`),
+            CONSTRAINT `fk_events_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1247,6 +815,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `exams` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `name` varchar(100) NOT NULL,
             `description` text DEFAULT NULL,
             `academic_year_id` int(10) UNSIGNED NOT NULL,
@@ -1259,7 +828,9 @@ class Tenant
             UNIQUE KEY `unique_exam_school` (`school_id`,`academic_year_id`,`academic_term_id`,`name`),
             KEY `academic_term_id` (`academic_term_id`),
             KEY `idx_school` (`school_id`),
-            KEY `idx_year` (`academic_year_id`)
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_year` (`academic_year_id`),
+            CONSTRAINT `fk_exams_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1268,6 +839,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `exam_grades` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `exam_id` int(10) UNSIGNED NOT NULL,
             `student_id` int(10) UNSIGNED NOT NULL,
             `subject_id` int(10) UNSIGNED NOT NULL,
@@ -1284,10 +856,12 @@ class Tenant
             KEY `class_id` (`class_id`),
             KEY `entered_by` (`entered_by`),
             KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
             KEY `idx_exam` (`exam_id`),
             KEY `idx_student` (`student_id`),
             KEY `idx_subject` (`subject_id`),
-            KEY `idx_exam_grades_exam_student` (`exam_id`,`student_id`)
+            KEY `idx_exam_grades_exam_student` (`exam_id`,`student_id`),
+            CONSTRAINT `fk_exam_grades_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1296,13 +870,16 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `fee_categories` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `name` varchar(100) NOT NULL,
             `description` text DEFAULT NULL,
             `is_active` tinyint(1) DEFAULT 1,
             `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
             PRIMARY KEY (`id`),
             UNIQUE KEY `unique_category_school` (`school_id`,`name`),
-            KEY `idx_school` (`school_id`)
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_fee_categories_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1311,6 +888,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `fee_structures` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `academic_year_id` int(10) UNSIGNED NOT NULL,
             `academic_term_id` int(10) UNSIGNED NOT NULL,
             `class_id` int(10) UNSIGNED NOT NULL,
@@ -1326,7 +904,9 @@ class Tenant
             KEY `class_id` (`class_id`),
             KEY `fee_category_id` (`fee_category_id`),
             KEY `idx_school` (`school_id`),
-            KEY `idx_year` (`academic_year_id`)
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_year` (`academic_year_id`),
+            CONSTRAINT `fk_fee_structures_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1335,6 +915,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `guardians` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `user_id` int(10) UNSIGNED NOT NULL,
             `student_id` int(10) UNSIGNED NOT NULL,
             `relationship` enum('father','mother','brother','sister','uncle','aunt','grandfather','grandmother','guardian','other') NOT NULL,
@@ -1345,8 +926,10 @@ class Tenant
             UNIQUE KEY `unique_guardian_student` (`student_id`,`user_id`),
             KEY `user_id` (`user_id`),
             KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
             KEY `idx_student` (`student_id`),
-            KEY `idx_primary` (`is_primary`)
+            KEY `idx_primary` (`is_primary`),
+            CONSTRAINT `fk_guardians_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1355,6 +938,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `homework` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `class_id` int(10) UNSIGNED NOT NULL,
             `section_id` int(10) UNSIGNED DEFAULT NULL,
             `subject_id` int(10) UNSIGNED NOT NULL,
@@ -1371,9 +955,11 @@ class Tenant
             KEY `section_id` (`section_id`),
             KEY `subject_id` (`subject_id`),
             KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
             KEY `idx_class` (`class_id`),
             KEY `idx_due_date` (`due_date`),
-            KEY `idx_teacher` (`teacher_id`)
+            KEY `idx_teacher` (`teacher_id`),
+            CONSTRAINT `fk_homework_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1382,6 +968,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `invoices` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `invoice_number` varchar(100) NOT NULL,
             `student_id` int(10) UNSIGNED NOT NULL,
             `academic_year_id` int(10) UNSIGNED NOT NULL,
@@ -1406,10 +993,12 @@ class Tenant
             KEY `academic_term_id` (`academic_term_id`),
             KEY `class_id` (`class_id`),
             KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
             KEY `idx_student` (`student_id`),
             KEY `idx_status` (`status`),
             KEY `idx_due_date` (`due_date`),
-            KEY `idx_invoices_student_status` (`student_id`,`status`)
+            KEY `idx_invoices_student_status` (`student_id`,`status`),
+            CONSTRAINT `fk_invoices_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1417,6 +1006,8 @@ class Tenant
     {
         return "CREATE TABLE IF NOT EXISTS `invoice_items` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `invoice_id` int(10) UNSIGNED NOT NULL,
             `fee_category_id` int(10) UNSIGNED NOT NULL,
             `description` varchar(255) DEFAULT NULL,
@@ -1424,7 +1015,10 @@ class Tenant
             `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
             PRIMARY KEY (`id`),
             KEY `fee_category_id` (`fee_category_id`),
-            KEY `idx_invoice` (`invoice_id`)
+            KEY `idx_invoice` (`invoice_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_invoice_items_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1433,6 +1027,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `payments` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `invoice_id` int(10) UNSIGNED NOT NULL,
             `payment_number` varchar(100) NOT NULL,
             `student_id` int(10) UNSIGNED NOT NULL,
@@ -1450,10 +1045,12 @@ class Tenant
             UNIQUE KEY `payment_number` (`payment_number`),
             KEY `collected_by` (`collected_by`),
             KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
             KEY `idx_invoice` (`invoice_id`),
             KEY `idx_student` (`student_id`),
             KEY `idx_payment_date` (`payment_date`),
-            KEY `idx_payments_invoice_date` (`invoice_id`,`payment_date`)
+            KEY `idx_payments_invoice_date` (`invoice_id`,`payment_date`),
+            CONSTRAINT `fk_payments_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1462,6 +1059,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `roles` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `name` varchar(100) NOT NULL,
             `slug` varchar(100) NOT NULL,
             `description` text DEFAULT NULL,
@@ -1470,7 +1068,9 @@ class Tenant
             `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
             PRIMARY KEY (`id`),
             UNIQUE KEY `unique_role_school` (`school_id`,`slug`),
-            KEY `idx_school` (`school_id`)
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_roles_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1479,6 +1079,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `sections` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `class_id` int(10) UNSIGNED NOT NULL,
             `name` varchar(100) NOT NULL,
             `code` varchar(50) NOT NULL,
@@ -1491,7 +1092,9 @@ class Tenant
             UNIQUE KEY `unique_section_class` (`class_id`,`code`),
             KEY `class_teacher_id` (`class_teacher_id`),
             KEY `idx_school` (`school_id`),
-            KEY `idx_class` (`class_id`)
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_class` (`class_id`),
+            CONSTRAINT `fk_sections_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1500,6 +1103,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `settings` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `key` varchar(100) NOT NULL,
             `value` text DEFAULT NULL,
             `type` varchar(50) DEFAULT 'string',
@@ -1509,7 +1113,9 @@ class Tenant
             PRIMARY KEY (`id`),
             UNIQUE KEY `unique_setting` (`school_id`,`key`),
             KEY `idx_school` (`school_id`),
-            KEY `idx_key` (`key`)
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_key` (`key`),
+            CONSTRAINT `fk_settings_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1518,7 +1124,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `students` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
-            `campus_id` int(10) UNSIGNED DEFAULT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `user_id` int(10) UNSIGNED NOT NULL,
             `admission_number` varchar(50) NOT NULL,
             `roll_number` varchar(50) DEFAULT NULL,
@@ -1551,10 +1157,12 @@ class Tenant
             KEY `user_id` (`user_id`),
             KEY `section_id` (`section_id`),
             KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
             KEY `idx_class` (`class_id`),
             KEY `idx_admission` (`admission_number`),
             KEY `idx_status` (`status`),
-            KEY `idx_students_class_status` (`class_id`,`status`)
+            KEY `idx_students_class_status` (`class_id`,`status`),
+            CONSTRAINT `fk_students_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1563,6 +1171,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `subjects` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `name` varchar(100) NOT NULL,
             `code` varchar(50) NOT NULL,
             `type` enum('core','elective','extra_curricular') DEFAULT 'core',
@@ -1572,7 +1181,9 @@ class Tenant
             `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
             PRIMARY KEY (`id`),
             UNIQUE KEY `unique_subject_school` (`school_id`,`code`),
-            KEY `idx_school` (`school_id`)
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_subjects_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1581,6 +1192,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `teachers` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `user_id` int(10) UNSIGNED NOT NULL,
             `employee_id` varchar(50) NOT NULL,
             `qualification` varchar(255) DEFAULT NULL,
@@ -1597,7 +1209,9 @@ class Tenant
             UNIQUE KEY `employee_id` (`employee_id`),
             KEY `user_id` (`user_id`),
             KEY `idx_school` (`school_id`),
-            KEY `idx_employee` (`employee_id`)
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_employee` (`employee_id`),
+            CONSTRAINT `fk_teachers_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1606,6 +1220,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `timetables` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `class_id` int(10) UNSIGNED NOT NULL,
             `section_id` int(10) UNSIGNED DEFAULT NULL,
             `academic_year_id` int(10) UNSIGNED NOT NULL,
@@ -1627,8 +1242,10 @@ class Tenant
             KEY `subject_id` (`subject_id`),
             KEY `teacher_id` (`teacher_id`),
             KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
             KEY `idx_class` (`class_id`),
-            KEY `idx_day` (`day`)
+            KEY `idx_day` (`day`),
+            CONSTRAINT `fk_timetables_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1637,6 +1254,7 @@ class Tenant
         return "CREATE TABLE IF NOT EXISTS `users` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
             `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `name` varchar(255) NOT NULL,
             `email` varchar(255) DEFAULT NULL,
             `phone` varchar(20) DEFAULT NULL,
@@ -1663,10 +1281,12 @@ class Tenant
             UNIQUE KEY `unique_email_school` (`school_id`,`email`),
             UNIQUE KEY `unique_phone_school` (`school_id`,`phone`),
             KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
             KEY `idx_user_type` (`user_type`),
             KEY `idx_email` (`email`),
             KEY `idx_phone` (`phone`),
-            KEY `idx_users_school_type` (`school_id`,`user_type`)
+            KEY `idx_users_school_type` (`school_id`,`user_type`),
+            CONSTRAINT `fk_users_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
@@ -1674,16 +1294,1160 @@ class Tenant
     {
         return "CREATE TABLE IF NOT EXISTS `user_roles` (
             `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
             `user_id` int(10) UNSIGNED NOT NULL,
             `role_id` int(10) UNSIGNED NOT NULL,
             `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
             PRIMARY KEY (`id`),
             UNIQUE KEY `unique_user_role` (`user_id`,`role_id`),
             KEY `role_id` (`role_id`),
-            KEY `idx_user` (`user_id`)
+            KEY `idx_user` (`user_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_user_roles_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
+    // ----- Campuses -----
+    private static function getCampusesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `campuses` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(100) NOT NULL,
+            `code` varchar(50) NOT NULL,
+            `address` text DEFAULT NULL,
+            `city` varchar(100) DEFAULT NULL,
+            `state` varchar(100) DEFAULT NULL,
+            `country` varchar(100) DEFAULT NULL,
+            `phone` varchar(20) DEFAULT NULL,
+            `email` varchar(255) DEFAULT NULL,
+            `latitude` decimal(10,8) DEFAULT NULL,
+            `longitude` decimal(11,8) DEFAULT NULL,
+            `radius` int(10) UNSIGNED DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_campus_code` (`school_id`,`code`),
+            KEY `idx_school` (`school_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Hostel Module -----
+    private static function getHostelsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `hostels` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(100) NOT NULL,
+            `code` varchar(50) NOT NULL,
+            `description` text DEFAULT NULL,
+            `capacity` int(10) UNSIGNED DEFAULT NULL,
+            `gender` enum('male','female','co-ed') DEFAULT 'co-ed',
+            `address` text DEFAULT NULL,
+            `facilities` text DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_hostel_code` (`school_id`,`campus_id`,`code`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_hostels_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getHostelRoomsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `hostel_rooms` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `hostel_id` int(10) UNSIGNED NOT NULL,
+            `room_number` varchar(20) NOT NULL,
+            `floor` varchar(10) DEFAULT NULL,
+            `capacity` int(10) UNSIGNED NOT NULL,
+            `gender` enum('male','female','co-ed') DEFAULT 'co-ed',
+            `class_id` int(10) UNSIGNED DEFAULT NULL,
+            `description` text DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_room` (`hostel_id`,`room_number`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_hostel` (`hostel_id`),
+            KEY `idx_class` (`class_id`),
+            CONSTRAINT `fk_hostel_rooms_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_hostel_rooms_hostel` FOREIGN KEY (`hostel_id`) REFERENCES `hostels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_hostel_rooms_class` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getHostelBedsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `hostel_beds` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `hostel_id` int(10) UNSIGNED NOT NULL,
+            `room_id` int(10) UNSIGNED NOT NULL,
+            `bed_number` varchar(20) NOT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_bed_in_room` (`room_id`,`bed_number`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_hostel` (`hostel_id`),
+            KEY `idx_room` (`room_id`),
+            CONSTRAINT `fk_hostel_beds_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_hostel_beds_hostel` FOREIGN KEY (`hostel_id`) REFERENCES `hostels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_hostel_beds_room` FOREIGN KEY (`room_id`) REFERENCES `hostel_rooms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getHostelAssignmentsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `hostel_assignments` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `hostel_id` int(10) UNSIGNED NOT NULL,
+            `bed_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `start_date` date NOT NULL,
+            `end_date` date DEFAULT NULL,
+            `status` enum('active','inactive','transferred') DEFAULT 'active',
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_active_bed` (`bed_id`,`start_date`),
+            UNIQUE KEY `unique_active_student` (`student_id`,`hostel_id`,`start_date`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_hostel` (`hostel_id`),
+            KEY `idx_bed` (`bed_id`),
+            KEY `idx_student` (`student_id`),
+            CONSTRAINT `fk_hostel_assignments_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_hostel_assignments_hostel` FOREIGN KEY (`hostel_id`) REFERENCES `hostels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_hostel_assignments_bed` FOREIGN KEY (`bed_id`) REFERENCES `hostel_beds` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_hostel_assignments_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getHostelStaffTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `hostel_staff` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `hostel_id` int(10) UNSIGNED NOT NULL,
+            `user_id` int(10) UNSIGNED NOT NULL,
+            `role` enum('master','mistress','assistant','other') NOT NULL,
+            `start_date` date NOT NULL,
+            `end_date` date DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_active_staff` (`hostel_id`,`user_id`,`start_date`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_hostel` (`hostel_id`),
+            KEY `idx_user` (`user_id`),
+            CONSTRAINT `fk_hostel_staff_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_hostel_staff_hostel` FOREIGN KEY (`hostel_id`) REFERENCES `hostels` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_hostel_staff_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Transport Module -----
+    private static function getTransportRoutesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `transport_routes` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `route_name` varchar(100) NOT NULL,
+            `description` text DEFAULT NULL,
+            `start_point` varchar(255) NOT NULL,
+            `end_point` varchar(255) NOT NULL,
+            `distance_km` decimal(5,2) DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_route` (`school_id`,`campus_id`,`route_name`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getTransportStopsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `transport_stops` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `route_id` int(10) UNSIGNED NOT NULL,
+            `stop_name` varchar(100) NOT NULL,
+            `address` text DEFAULT NULL,
+            `latitude` decimal(10,8) DEFAULT NULL,
+            `longitude` decimal(11,8) DEFAULT NULL,
+            `stop_order` int(10) UNSIGNED DEFAULT 0,
+            `pickup_time` time DEFAULT NULL,
+            `dropoff_time` time DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_route` (`route_id`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_transport_stops_route` FOREIGN KEY (`route_id`) REFERENCES `transport_routes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getTransportVehiclesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `transport_vehicles` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `vehicle_number` varchar(50) NOT NULL,
+            `registration_number` varchar(50) DEFAULT NULL,
+            `type` enum('bus','van','car') DEFAULT 'bus',
+            `capacity` int(10) UNSIGNED NOT NULL,
+            `driver_name` varchar(255) DEFAULT NULL,
+            `driver_phone` varchar(20) DEFAULT NULL,
+            `driver_license` varchar(100) DEFAULT NULL,
+            `assistant_name` varchar(255) DEFAULT NULL,
+            `assistant_phone` varchar(20) DEFAULT NULL,
+            `insurance_expiry` date DEFAULT NULL,
+            `fitness_expiry` date DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_vehicle` (`school_id`,`campus_id`,`vehicle_number`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getTransportAssignmentsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `transport_assignments` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `vehicle_id` int(10) UNSIGNED NOT NULL,
+            `route_id` int(10) UNSIGNED NOT NULL,
+            `academic_term_id` int(10) UNSIGNED NOT NULL,
+            `start_date` date NOT NULL,
+            `end_date` date DEFAULT NULL,
+            `morning_driver` varchar(255) DEFAULT NULL,
+            `evening_driver` varchar(255) DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_assignment` (`vehicle_id`,`route_id`,`academic_term_id`,`start_date`),
+            KEY `idx_route` (`route_id`),
+            KEY `idx_term` (`academic_term_id`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_transport_assignments_vehicle` FOREIGN KEY (`vehicle_id`) REFERENCES `transport_vehicles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_transport_assignments_route` FOREIGN KEY (`route_id`) REFERENCES `transport_routes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_transport_assignments_term` FOREIGN KEY (`academic_term_id`) REFERENCES `academic_terms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getStudentTransportTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `student_transport` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `assignment_id` int(10) UNSIGNED NOT NULL,
+            `stop_id` int(10) UNSIGNED NOT NULL,
+            `fee` decimal(10,2) DEFAULT NULL,
+            `start_date` date NOT NULL,
+            `end_date` date DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_student_transport` (`student_id`,`assignment_id`,`start_date`),
+            KEY `idx_assignment` (`assignment_id`),
+            KEY `idx_stop` (`stop_id`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_student_transport_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_student_transport_assignment` FOREIGN KEY (`assignment_id`) REFERENCES `transport_assignments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_student_transport_stop` FOREIGN KEY (`stop_id`) REFERENCES `transport_stops` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Health Module -----
+    private static function getStudentHealthRecordsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `student_health_records` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `blood_group` varchar(5) DEFAULT NULL,
+            `allergies` text DEFAULT NULL,
+            `chronic_conditions` text DEFAULT NULL,
+            `disabilities` text DEFAULT NULL,
+            `emergency_contact_name` varchar(255) DEFAULT NULL,
+            `emergency_contact_phone` varchar(20) DEFAULT NULL,
+            `emergency_contact_relation` varchar(50) DEFAULT NULL,
+            `doctor_name` varchar(255) DEFAULT NULL,
+            `doctor_phone` varchar(20) DEFAULT NULL,
+            `doctor_address` text DEFAULT NULL,
+            `insurance_provider` varchar(255) DEFAULT NULL,
+            `insurance_policy` varchar(100) DEFAULT NULL,
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_student` (`student_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_student_health_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_student_health_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getSickVisitsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `sick_visits` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `visit_date` date NOT NULL,
+            `visit_time` time DEFAULT NULL,
+            `symptoms` text NOT NULL,
+            `temperature` decimal(4,2) DEFAULT NULL,
+            `weight` decimal(5,2) DEFAULT NULL,
+            `diagnosis` text DEFAULT NULL,
+            `treatment` text DEFAULT NULL,
+            `medication_given` text DEFAULT NULL,
+            `referred_to` varchar(255) DEFAULT NULL,
+            `follow_up_date` date DEFAULT NULL,
+            `attended_by` int(10) UNSIGNED DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_student` (`student_id`),
+            KEY `idx_date` (`visit_date`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_sick_visits_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_sick_visits_attended_by` FOREIGN KEY (`attended_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_sick_visits_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getVaccinationsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `vaccinations` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `vaccine_name` varchar(100) NOT NULL,
+            `date_administered` date NOT NULL,
+            `next_due_date` date DEFAULT NULL,
+            `administered_by` varchar(255) DEFAULT NULL,
+            `remarks` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_student` (`student_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_vaccinations_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_vaccinations_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Inventory Module -----
+    private static function getInventoryCategoriesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `inventory_categories` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(100) NOT NULL,
+            `description` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_category` (`school_id`,`campus_id`,`name`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getInventoryItemsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `inventory_items` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `category_id` int(10) UNSIGNED DEFAULT NULL,
+            `item_code` varchar(50) NOT NULL,
+            `item_name` varchar(255) NOT NULL,
+            `description` text DEFAULT NULL,
+            `unit` varchar(50) DEFAULT NULL,
+            `unit_price` decimal(10,2) DEFAULT NULL,
+            `quantity_in_stock` decimal(10,2) DEFAULT 0.00,
+            `minimum_quantity` decimal(10,2) DEFAULT 0.00,
+            `maximum_quantity` decimal(10,2) DEFAULT NULL,
+            `reorder_level` decimal(10,2) DEFAULT NULL,
+            `location` varchar(100) DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_item` (`school_id`,`campus_id`,`item_code`),
+            KEY `idx_category` (`category_id`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_inventory_items_category` FOREIGN KEY (`category_id`) REFERENCES `inventory_categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_inventory_items_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getInventoryMovementsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `inventory_movements` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `item_id` int(10) UNSIGNED NOT NULL,
+            `movement_type` enum('receipt','issue','adjustment','return') NOT NULL,
+            `quantity` decimal(10,2) NOT NULL,
+            `unit_price` decimal(10,2) DEFAULT NULL,
+            `reference` varchar(255) DEFAULT NULL,
+            `description` text DEFAULT NULL,
+            `issued_to` varchar(255) DEFAULT NULL,
+            `issued_to_user_id` int(10) UNSIGNED DEFAULT NULL,
+            `movement_date` date NOT NULL,
+            `created_by` int(10) UNSIGNED NOT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_item` (`item_id`),
+            KEY `idx_movement_type` (`movement_type`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_inventory_movements_item` FOREIGN KEY (`item_id`) REFERENCES `inventory_items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_inventory_movements_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_inventory_movements_issued_to` FOREIGN KEY (`issued_to_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_inventory_movements_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Alumni Module -----
+    private static function getAlumniTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `alumni` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED DEFAULT NULL,
+            `first_name` varchar(100) NOT NULL,
+            `middle_name` varchar(100) DEFAULT NULL,
+            `last_name` varchar(100) NOT NULL,
+            `graduation_year` year(4) NOT NULL,
+            `email` varchar(255) DEFAULT NULL,
+            `phone` varchar(20) DEFAULT NULL,
+            `address` text DEFAULT NULL,
+            `occupation` varchar(255) DEFAULT NULL,
+            `company` varchar(255) DEFAULT NULL,
+            `profile_photo` varchar(500) DEFAULT NULL,
+            `is_visible` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_student` (`student_id`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_alumni_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_alumni_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getAlumniDonationsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `alumni_donations` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `alumni_id` int(10) UNSIGNED NOT NULL,
+            `amount` decimal(10,2) NOT NULL,
+            `currency` varchar(3) DEFAULT 'NGN',
+            `donation_date` date NOT NULL,
+            `purpose` varchar(255) DEFAULT NULL,
+            `payment_method` varchar(50) DEFAULT NULL,
+            `transaction_id` varchar(255) DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_alumni` (`alumni_id`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_alumni_donations_alumni` FOREIGN KEY (`alumni_id`) REFERENCES `alumni` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_alumni_donations_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getAlumniEventsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `alumni_events` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `event_name` varchar(255) NOT NULL,
+            `description` text DEFAULT NULL,
+            `event_date` date NOT NULL,
+            `venue` varchar(255) DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_alumni_events_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Admission Module -----
+    private static function getAdmissionApplicationsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `admission_applications` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `application_number` varchar(50) NOT NULL,
+            `first_name` varchar(100) NOT NULL,
+            `middle_name` varchar(100) DEFAULT NULL,
+            `last_name` varchar(100) NOT NULL,
+            `date_of_birth` date NOT NULL,
+            `gender` enum('male','female','other') NOT NULL,
+            `nationality` varchar(100) DEFAULT NULL,
+            `religion` varchar(50) DEFAULT NULL,
+            `address` text DEFAULT NULL,
+            `phone` varchar(20) DEFAULT NULL,
+            `email` varchar(255) DEFAULT NULL,
+            `applying_for_class_id` int(10) UNSIGNED NOT NULL,
+            `previous_school` varchar(255) DEFAULT NULL,
+            `previous_class` varchar(100) DEFAULT NULL,
+            `father_name` varchar(255) DEFAULT NULL,
+            `father_phone` varchar(20) DEFAULT NULL,
+            `mother_name` varchar(255) DEFAULT NULL,
+            `mother_phone` varchar(20) DEFAULT NULL,
+            `guardian_name` varchar(255) DEFAULT NULL,
+            `guardian_phone` varchar(20) DEFAULT NULL,
+            `status` enum('pending','reviewed','accepted','rejected','waitlisted') DEFAULT 'pending',
+            `reviewed_by` int(10) UNSIGNED DEFAULT NULL,
+            `reviewed_at` timestamp NULL DEFAULT NULL,
+            `remarks` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_application` (`school_id`,`application_number`),
+            KEY `idx_status` (`status`),
+            KEY `idx_class` (`applying_for_class_id`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_admission_applications_class` FOREIGN KEY (`applying_for_class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_admission_applications_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getAdmissionDocumentsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `admission_documents` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `application_id` int(10) UNSIGNED NOT NULL,
+            `document_type` varchar(100) NOT NULL,
+            `file_path` varchar(500) NOT NULL,
+            `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_application` (`application_id`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_admission_documents_application` FOREIGN KEY (`application_id`) REFERENCES `admission_applications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_admission_documents_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Curriculum & Lesson Planning -----
+    private static function getCurriculumOutlinesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `curriculum_outlines` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `class_id` int(10) UNSIGNED NOT NULL,
+            `subject_id` int(10) UNSIGNED NOT NULL,
+            `term_id` int(10) UNSIGNED NOT NULL,
+            `week` int(10) UNSIGNED DEFAULT NULL,
+            `topic` varchar(255) NOT NULL,
+            `objectives` text DEFAULT NULL,
+            `resources` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_class_subject` (`class_id`,`subject_id`),
+            KEY `idx_term` (`term_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_curriculum_class` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_curriculum_subject` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_curriculum_term` FOREIGN KEY (`term_id`) REFERENCES `academic_terms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_curriculum_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getLessonPlansTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `lesson_plans` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `class_id` int(10) UNSIGNED NOT NULL,
+            `section_id` int(10) UNSIGNED DEFAULT NULL,
+            `subject_id` int(10) UNSIGNED NOT NULL,
+            `teacher_id` int(10) UNSIGNED NOT NULL,
+            `term_id` int(10) UNSIGNED NOT NULL,
+            `week` int(10) UNSIGNED DEFAULT NULL,
+            `topic` varchar(255) NOT NULL,
+            `objectives` text DEFAULT NULL,
+            `materials` text DEFAULT NULL,
+            `procedure` text DEFAULT NULL,
+            `assessment` text DEFAULT NULL,
+            `homework` text DEFAULT NULL,
+            `attachment` varchar(500) DEFAULT NULL,
+            `is_approved` tinyint(1) DEFAULT 0,
+            `approved_by` int(10) UNSIGNED DEFAULT NULL,
+            `approved_at` timestamp NULL DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_class_subject` (`class_id`,`subject_id`),
+            KEY `idx_teacher` (`teacher_id`),
+            KEY `idx_term` (`term_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_lesson_plans_class` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_lesson_plans_section` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_lesson_plans_subject` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_lesson_plans_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_lesson_plans_term` FOREIGN KEY (`term_id`) REFERENCES `academic_terms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_lesson_plans_approved_by` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_lesson_plans_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Assessments -----
+    private static function getAssessmentTypesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `assessment_types` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(100) NOT NULL,
+            `weight` decimal(5,2) DEFAULT NULL,
+            `description` text DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_name` (`school_id`,`name`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_assessment_types_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getAssessmentsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `assessments` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `class_id` int(10) UNSIGNED NOT NULL,
+            `section_id` int(10) UNSIGNED DEFAULT NULL,
+            `subject_id` int(10) UNSIGNED NOT NULL,
+            `teacher_id` int(10) UNSIGNED NOT NULL,
+            `term_id` int(10) UNSIGNED NOT NULL,
+            `assessment_type_id` int(10) UNSIGNED NOT NULL,
+            `title` varchar(255) NOT NULL,
+            `description` text DEFAULT NULL,
+            `max_score` decimal(5,2) NOT NULL,
+            `date` date NOT NULL,
+            `is_published` tinyint(1) DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_class_subject` (`class_id`,`subject_id`),
+            KEY `idx_teacher` (`teacher_id`),
+            KEY `idx_term` (`term_id`),
+            KEY `idx_type` (`assessment_type_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_assessments_class` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_assessments_section` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_assessments_subject` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_assessments_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_assessments_term` FOREIGN KEY (`term_id`) REFERENCES `academic_terms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_assessments_type` FOREIGN KEY (`assessment_type_id`) REFERENCES `assessment_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_assessments_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getAssessmentScoresTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `assessment_scores` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `assessment_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `score` decimal(5,2) NOT NULL,
+            `remarks` varchar(255) DEFAULT NULL,
+            `entered_by` int(10) UNSIGNED NOT NULL,
+            `entered_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_score` (`assessment_id`,`student_id`),
+            KEY `idx_student` (`student_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_assessment_scores_assessment` FOREIGN KEY (`assessment_id`) REFERENCES `assessments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_assessment_scores_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_assessment_scores_entered_by` FOREIGN KEY (`entered_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_assessment_scores_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Discipline -----
+    private static function getIncidentsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `incidents` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `incident_date` date NOT NULL,
+            `incident_time` time DEFAULT NULL,
+            `location` varchar(255) DEFAULT NULL,
+            `description` text NOT NULL,
+            `reported_by` int(10) UNSIGNED NOT NULL,
+            `status` enum('open','investigating','resolved','closed') DEFAULT 'open',
+            `action_taken` text DEFAULT NULL,
+            `resolved_at` timestamp NULL DEFAULT NULL,
+            `resolved_by` int(10) UNSIGNED DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_reported_by` (`reported_by`),
+            KEY `idx_status` (`status`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_incidents_reported_by` FOREIGN KEY (`reported_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_incidents_resolved_by` FOREIGN KEY (`resolved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_incidents_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getIncidentStudentsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `incident_students` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `incident_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `role` enum('perpetrator','victim','witness') DEFAULT 'perpetrator',
+            `statement` text DEFAULT NULL,
+            `action_taken` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_incident_student` (`incident_id`,`student_id`),
+            KEY `idx_student` (`student_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_incident_students_incident` FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_incident_students_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_incident_students_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getDisciplineActionsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `discipline_actions` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `incident_id` int(10) UNSIGNED DEFAULT NULL,
+            `action_type` enum('detention','suspension','expulsion','community_service','warning') NOT NULL,
+            `start_date` date NOT NULL,
+            `end_date` date DEFAULT NULL,
+            `description` text DEFAULT NULL,
+            `issued_by` int(10) UNSIGNED NOT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_student` (`student_id`),
+            KEY `idx_incident` (`incident_id`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_discipline_actions_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_discipline_actions_incident` FOREIGN KEY (`incident_id`) REFERENCES `incidents` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_discipline_actions_issued_by` FOREIGN KEY (`issued_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_discipline_actions_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Parent-Teacher Meetings -----
+    private static function getMeetingSlotsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `meeting_slots` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `teacher_id` int(10) UNSIGNED NOT NULL,
+            `date` date NOT NULL,
+            `start_time` time NOT NULL,
+            `end_time` time NOT NULL,
+            `max_bookings` int(10) UNSIGNED DEFAULT 1,
+            `current_bookings` int(10) UNSIGNED DEFAULT 0,
+            `status` enum('available','full','cancelled') DEFAULT 'available',
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_slot` (`teacher_id`,`date`,`start_time`),
+            KEY `idx_teacher` (`teacher_id`),
+            KEY `idx_date` (`date`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_meeting_slots_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_meeting_slots_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getMeetingBookingsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `meeting_bookings` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `slot_id` int(10) UNSIGNED NOT NULL,
+            `parent_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `purpose` text DEFAULT NULL,
+            `status` enum('booked','attended','cancelled','no_show') DEFAULT 'booked',
+            `booked_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `cancelled_at` timestamp NULL DEFAULT NULL,
+            `attended_at` timestamp NULL DEFAULT NULL,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_booking` (`slot_id`,`parent_id`,`student_id`),
+            KEY `idx_parent` (`parent_id`),
+            KEY `idx_student` (`student_id`),
+            KEY `idx_school_campus` (`school_id`,`campus_id`),
+            CONSTRAINT `fk_meeting_bookings_slot` FOREIGN KEY (`slot_id`) REFERENCES `meeting_slots` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_meeting_bookings_parent` FOREIGN KEY (`parent_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_meeting_bookings_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_meeting_bookings_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- CBT -----
+    private static function getCbtTestsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `cbt_tests` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `paper_id` int(10) UNSIGNED NOT NULL,
+            `is_random_questions` tinyint(1) DEFAULT 0,
+            `is_random_options` tinyint(1) DEFAULT 0,
+            `allow_review` tinyint(1) DEFAULT 1,
+            `show_result_immediately` tinyint(1) DEFAULT 0,
+            `scheduled_start` datetime DEFAULT NULL,
+            `scheduled_end` datetime DEFAULT NULL,
+            `pass_marks` decimal(5,2) DEFAULT NULL,
+            `created_by` int(10) UNSIGNED NOT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `paper_id` (`paper_id`),
+            KEY `idx_created_by` (`created_by`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_cbt_tests_paper` FOREIGN KEY (`paper_id`) REFERENCES `exam_papers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_cbt_tests_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_cbt_tests_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getCbtQuestionsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `cbt_questions` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `test_id` int(10) UNSIGNED NOT NULL,
+            `question_text` text NOT NULL,
+            `question_type` enum('multiple_choice','true_false','essay') NOT NULL,
+            `marks` decimal(5,2) NOT NULL,
+            `difficulty_level` enum('easy','medium','hard') DEFAULT 'medium',
+            `attachment` varchar(500) DEFAULT NULL,
+            `order` int(10) UNSIGNED DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_test` (`test_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_cbt_questions_test` FOREIGN KEY (`test_id`) REFERENCES `cbt_tests` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_cbt_questions_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getCbtOptionsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `cbt_options` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `question_id` int(10) UNSIGNED NOT NULL,
+            `option_text` text NOT NULL,
+            `is_correct` tinyint(1) DEFAULT 0,
+            `order` int(10) UNSIGNED DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_question` (`question_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_cbt_options_question` FOREIGN KEY (`question_id`) REFERENCES `cbt_questions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_cbt_options_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getCbtAttemptsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `cbt_attempts` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `test_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `start_time` timestamp NOT NULL DEFAULT current_timestamp(),
+            `end_time` timestamp NULL DEFAULT NULL,
+            `status` enum('in_progress','completed','scored','expired') DEFAULT 'in_progress',
+            `total_score` decimal(5,2) DEFAULT NULL,
+            `percentage` decimal(5,2) DEFAULT NULL,
+            `graded_by` int(10) UNSIGNED DEFAULT NULL,
+            `graded_at` timestamp NULL DEFAULT NULL,
+            `ip_address` varchar(45) DEFAULT NULL,
+            `user_agent` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_test` (`test_id`),
+            KEY `idx_student` (`student_id`),
+            KEY `idx_graded_by` (`graded_by`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_cbt_attempts_test` FOREIGN KEY (`test_id`) REFERENCES `cbt_tests` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_cbt_attempts_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_cbt_attempts_graded_by` FOREIGN KEY (`graded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_cbt_attempts_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getCbtResponsesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `cbt_responses` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `attempt_id` int(10) UNSIGNED NOT NULL,
+            `question_id` int(10) UNSIGNED NOT NULL,
+            `selected_option_id` int(10) UNSIGNED DEFAULT NULL,
+            `answer_text` text DEFAULT NULL,
+            `is_correct` tinyint(1) DEFAULT NULL,
+            `marks_obtained` decimal(5,2) DEFAULT NULL,
+            `graded_by` int(10) UNSIGNED DEFAULT NULL,
+            `graded_at` timestamp NULL DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_attempt` (`attempt_id`),
+            KEY `idx_question` (`question_id`),
+            KEY `idx_option` (`selected_option_id`),
+            KEY `idx_graded_by` (`graded_by`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_cbt_responses_attempt` FOREIGN KEY (`attempt_id`) REFERENCES `cbt_attempts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_cbt_responses_question` FOREIGN KEY (`question_id`) REFERENCES `cbt_questions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_cbt_responses_option` FOREIGN KEY (`selected_option_id`) REFERENCES `cbt_options` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_cbt_responses_graded_by` FOREIGN KEY (`graded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_cbt_responses_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getCbtResultsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `cbt_results` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `attempt_id` int(10) UNSIGNED NOT NULL,
+            `rank` int(10) UNSIGNED DEFAULT NULL,
+            `grade` varchar(5) DEFAULT NULL,
+            `remarks` text DEFAULT NULL,
+            `published` tinyint(1) DEFAULT 0,
+            `published_at` timestamp NULL DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `attempt_id` (`attempt_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_cbt_results_attempt` FOREIGN KEY (`attempt_id`) REFERENCES `cbt_attempts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_cbt_results_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Voting -----
+    private static function getVotingElectionsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `voting_elections` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(255) NOT NULL,
+            `description` text DEFAULT NULL,
+            `start_date` datetime NOT NULL,
+            `end_date` datetime NOT NULL,
+            `status` enum('upcoming','active','closed','archived') DEFAULT 'upcoming',
+            `created_by` int(10) UNSIGNED NOT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_status` (`status`),
+            KEY `idx_dates` (`start_date`,`end_date`),
+            KEY `idx_created_by` (`created_by`),
+            CONSTRAINT `fk_voting_elections_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_elections_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getVotingPositionsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `voting_positions` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `election_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(100) NOT NULL,
+            `description` text DEFAULT NULL,
+            `eligibility_criteria` text DEFAULT NULL,
+            `max_candidates` int(10) UNSIGNED DEFAULT 1,
+            `max_votes_per_voter` int(10) UNSIGNED DEFAULT 1,
+            `is_active` tinyint(1) DEFAULT 1,
+            `order` int(10) UNSIGNED DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_election` (`election_id`),
+            CONSTRAINT `fk_voting_positions_election` FOREIGN KEY (`election_id`) REFERENCES `voting_elections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_positions_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getVotingCandidatesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `voting_candidates` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `election_id` int(10) UNSIGNED NOT NULL,
+            `position_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `manifesto` text DEFAULT NULL,
+            `photo` varchar(500) DEFAULT NULL,
+            `approved` tinyint(1) DEFAULT 0,
+            `approved_by` int(10) UNSIGNED DEFAULT NULL,
+            `approved_at` timestamp NULL DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_candidate` (`election_id`,`position_id`,`student_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_position` (`position_id`),
+            KEY `idx_student` (`student_id`),
+            KEY `idx_approved_by` (`approved_by`),
+            CONSTRAINT `fk_voting_candidates_election` FOREIGN KEY (`election_id`) REFERENCES `voting_elections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_candidates_position` FOREIGN KEY (`position_id`) REFERENCES `voting_positions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_candidates_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_candidates_approved_by` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_candidates_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getVotingVotesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `voting_votes` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `election_id` int(10) UNSIGNED NOT NULL,
+            `position_id` int(10) UNSIGNED NOT NULL,
+            `candidate_id` int(10) UNSIGNED NOT NULL,
+            `voter_id` int(10) UNSIGNED NOT NULL,
+            `vote_timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
+            `ip_address` varchar(45) DEFAULT NULL,
+            `user_agent` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_vote` (`election_id`,`position_id`,`voter_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_election` (`election_id`),
+            KEY `idx_position` (`position_id`),
+            KEY `idx_candidate` (`candidate_id`),
+            KEY `idx_voter` (`voter_id`),
+            CONSTRAINT `fk_voting_votes_election` FOREIGN KEY (`election_id`) REFERENCES `voting_elections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_votes_position` FOREIGN KEY (`position_id`) REFERENCES `voting_positions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_votes_candidate` FOREIGN KEY (`candidate_id`) REFERENCES `voting_candidates` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_votes_voter` FOREIGN KEY (`voter_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_votes_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getVotingResultsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `voting_results` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `election_id` int(10) UNSIGNED NOT NULL,
+            `position_id` int(10) UNSIGNED NOT NULL,
+            `candidate_id` int(10) UNSIGNED NOT NULL,
+            `vote_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
+            `percentage` decimal(5,2) DEFAULT NULL,
+            `is_winner` tinyint(1) DEFAULT 0,
+            `calculated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_result` (`election_id`,`position_id`,`candidate_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_election` (`election_id`),
+            KEY `idx_position` (`position_id`),
+            KEY `idx_candidate` (`candidate_id`),
+            CONSTRAINT `fk_voting_results_election` FOREIGN KEY (`election_id`) REFERENCES `voting_elections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_results_position` FOREIGN KEY (`position_id`) REFERENCES `voting_positions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_results_candidate` FOREIGN KEY (`candidate_id`) REFERENCES `voting_candidates` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_voting_results_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Enhanced Feature Tables (System) -----
     private static function getSubscriptionsTableSql()
     {
         return "CREATE TABLE IF NOT EXISTS `subscriptions` (
@@ -2243,62 +3007,806 @@ class Tenant
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 
-    /**
-     * =================================================================
-     * HELPER METHODS
-     * =================================================================
-     */
+    // ----- NEW MISSING TABLES (Certificates, Messaging, Exams, Geofence, Leave, Library, Payroll, Academics, Staff) -----
 
-    /**
-     * Insert default data into new school database
-     * @param PDO $db
-     * @param int $schoolId
-     */
-    private static function insertDefaultData($db, $schoolId)
+    private static function getCertificateTemplatesTableSql()
     {
-        try {
-            // Insert default roles
-            $db->exec("INSERT IGNORE INTO `roles` (`school_id`, `name`, `slug`, `description`, `permissions`, `is_system`, `created_at`) VALUES
-                ($schoolId, 'Super Administrator', 'super_admin', 'Has full access to all features', '[\"*\"]', 1, NOW()),
-                ($schoolId, 'School Administrator', 'school_admin', 'Manages school operations', '[\"dashboard.view\", \"students.*\", \"teachers.*\", \"classes.*\", \"attendance.*\", \"exams.*\", \"fees.*\", \"reports.*\", \"settings.*\"]', 1, NOW()),
-                ($schoolId, 'Teacher', 'teacher', 'Can manage classes and students', '[\"dashboard.view\", \"attendance.mark\", \"grades.enter\", \"homework.*\", \"students.view\"]', 1, NOW()),
-                ($schoolId, 'Student', 'student', 'Can view their own information', '[\"dashboard.view\", \"timetable.view\", \"grades.view\", \"homework.view\"]', 1, NOW()),
-                ($schoolId, 'Parent', 'parent', 'Can view child information', '[\"dashboard.view\", \"children.view\", \"attendance.view\", \"fees.view\"]', 1, NOW()),
-                ($schoolId, 'Accountant', 'accountant', 'Manages financial operations', '[\"dashboard.view\", \"fees.*\", \"payments.*\", \"invoices.*\", \"reports.financial\"]', 1, NOW()),
-                ($schoolId, 'Librarian', 'librarian', 'Manages library operations', '[\"dashboard.view\", \"library.*\"]', 1, NOW())");
-
-            // Insert default settings
-            $db->exec("INSERT IGNORE INTO `settings` (`school_id`, `key`, `value`, `type`, `category`, `created_at`, `updated_at`) VALUES
-                ($schoolId, 'school_name', 'New School', 'string', 'general', NOW(), NOW()),
-                ($schoolId, 'school_email', '', 'string', 'general', NOW(), NOW()),
-                ($schoolId, 'school_phone', '', 'string', 'general', NOW(), NOW()),
-                ($schoolId, 'school_address', '', 'string', 'general', NOW(), NOW()),
-                ($schoolId, 'currency', 'NGN', 'string', 'financial', NOW(), NOW()),
-                ($schoolId, 'currency_symbol', '₦', 'string', 'financial', NOW(), NOW()),
-                ($schoolId, 'attendance_method', 'daily', 'string', 'academic', NOW(), NOW()),
-                ($schoolId, 'grading_system', 'percentage', 'string', 'academic', NOW(), NOW()),
-                ($schoolId, 'result_publish', 'immediate', 'string', 'academic', NOW(), NOW()),
-                ($schoolId, 'fee_due_days', '30', 'number', 'financial', NOW(), NOW()),
-                ($schoolId, 'late_fee_percentage', '5', 'number', 'financial', NOW(), NOW())");
-
-            // Insert default subscription plan (Free tier)
-            $db->exec("INSERT IGNORE INTO `subscriptions` (`school_id`, `plan_id`, `plan_name`, `status`, `billing_cycle`, `amount`, `storage_limit`, `user_limit`, `student_limit`, `current_period_start`, `current_period_end`, `created_at`) VALUES
-                ($schoolId, 'free_tier', 'Free Plan', 'active', 'monthly', 0.00, 1073741824, 100, 500, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 1 MONTH), NOW())");
-
-            // Insert default storage usage
-            $db->exec("INSERT IGNORE INTO `storage_usage` (`school_id`, `storage_type`, `used_bytes`, `limit_bytes`, `created_at`) VALUES
-                ($schoolId, 'database', 0, 1073741824, NOW()),
-                ($schoolId, 'files', 0, 1073741824, NOW()),
-                ($schoolId, 'backups', 0, 536870912, NOW()),
-                ($schoolId, 'attachments', 0, 536870912, NOW())");
-
-            self::logInfo("Inserted default data for school ID: " . $schoolId);
-            return true;
-        } catch (Exception $e) {
-            self::logError("Error inserting default data", $e);
-            return false;
-        }
+        return "CREATE TABLE IF NOT EXISTS `certificate_templates` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(255) NOT NULL,
+            `type` enum('leaving','character','achievement','participation','other') DEFAULT 'other',
+            `template_html` text NOT NULL,
+            `orientation` enum('portrait','landscape') DEFAULT 'portrait',
+            `default_fields` text DEFAULT NULL COMMENT 'JSON of placeholder fields',
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_certificate_templates_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
+
+    private static function getCertificatesIssuedTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `certificates_issued` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `template_id` int(10) UNSIGNED DEFAULT NULL,
+            `certificate_number` varchar(100) NOT NULL,
+            `issue_date` date NOT NULL,
+            `reason` varchar(255) DEFAULT NULL,
+            `file_path` varchar(500) DEFAULT NULL,
+            `metadata` text DEFAULT NULL,
+            `issued_by` int(10) UNSIGNED NOT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `certificate_number` (`certificate_number`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_student` (`student_id`),
+            KEY `idx_template` (`template_id`),
+            KEY `idx_issued_by` (`issued_by`),
+            CONSTRAINT `fk_certificates_issued_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_certificates_issued_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_certificates_issued_template` FOREIGN KEY (`template_id`) REFERENCES `certificate_templates` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_certificates_issued_issued_by` FOREIGN KEY (`issued_by`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getConversationsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `conversations` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `conversation_type` enum('individual','group') DEFAULT 'individual',
+            `subject` varchar(255) DEFAULT NULL,
+            `created_by` int(10) UNSIGNED NOT NULL,
+            `last_message_id` int(10) UNSIGNED DEFAULT NULL,
+            `last_message_at` timestamp NULL DEFAULT NULL,
+            `is_archived` tinyint(1) DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_created_by` (`created_by`),
+            KEY `idx_last_message` (`last_message_id`),
+            KEY `idx_last_message_at` (`last_message_at`),
+            CONSTRAINT `fk_conversations_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getConversationParticipantsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `conversation_participants` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `conversation_id` int(10) UNSIGNED NOT NULL,
+            `user_id` int(10) UNSIGNED NOT NULL,
+            `user_type` enum('admin','teacher','student','parent','accountant','librarian','receptionist') NOT NULL,
+            `last_read_at` timestamp NULL DEFAULT NULL,
+            `is_muted` tinyint(1) DEFAULT 0,
+            `is_archived` tinyint(1) DEFAULT 0,
+            `is_deleted` tinyint(1) DEFAULT 0,
+            `joined_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `left_at` timestamp NULL DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_participant` (`conversation_id`,`user_id`),
+            KEY `idx_user` (`user_id`),
+            KEY `idx_conversation` (`conversation_id`),
+            KEY `idx_user_unread` (`user_id`,`last_read_at`),
+            KEY `idx_user_archived` (`user_id`,`is_archived`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getMessagesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `messages` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `conversation_id` int(10) UNSIGNED NOT NULL,
+            `sender_id` int(10) UNSIGNED NOT NULL,
+            `sender_type` enum('admin','teacher','student','parent','accountant','librarian','receptionist') NOT NULL,
+            `message_type` enum('text','image','file','audio','video','system') DEFAULT 'text',
+            `message` text NOT NULL,
+            `metadata` text DEFAULT NULL,
+            `is_delivered` tinyint(1) DEFAULT 0,
+            `delivered_at` timestamp NULL DEFAULT NULL,
+            `is_read` tinyint(1) DEFAULT 0,
+            `read_at` timestamp NULL DEFAULT NULL,
+            `is_starred` tinyint(1) DEFAULT 0,
+            `is_pinned` tinyint(1) DEFAULT 0,
+            `is_deleted` tinyint(1) DEFAULT 0,
+            `deleted_at` timestamp NULL DEFAULT NULL,
+            `reply_to_id` int(10) UNSIGNED DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_conversation` (`conversation_id`),
+            KEY `idx_sender` (`sender_id`),
+            KEY `idx_reply_to` (`reply_to_id`),
+            KEY `idx_conversation_created` (`conversation_id`,`created_at`),
+            KEY `idx_conversation_read` (`conversation_id`,`is_read`),
+            KEY `idx_sender_conversation` (`sender_id`,`conversation_id`,`created_at`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getMessageAttachmentsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `message_attachments` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `message_id` int(10) UNSIGNED NOT NULL,
+            `file_name` varchar(255) NOT NULL,
+            `file_path` varchar(500) NOT NULL,
+            `file_size` bigint(20) NOT NULL,
+            `mime_type` varchar(100) NOT NULL,
+            `file_extension` varchar(20) DEFAULT NULL,
+            `thumbnail_path` varchar(500) DEFAULT NULL,
+            `duration` int(10) DEFAULT NULL,
+            `dimensions` varchar(50) DEFAULT NULL,
+            `is_downloaded` tinyint(1) DEFAULT 0,
+            `download_count` int(10) DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_message` (`message_id`),
+            KEY `idx_file_type` (`mime_type`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getMessageBlocksTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `message_blocks` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `user_id` int(10) UNSIGNED NOT NULL,
+            `blocked_user_id` int(10) UNSIGNED NOT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_block` (`user_id`,`blocked_user_id`),
+            KEY `idx_user` (`user_id`),
+            KEY `idx_blocked` (`blocked_user_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_message_blocks_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getMessageDraftsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `message_drafts` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `user_id` int(10) UNSIGNED NOT NULL,
+            `conversation_id` int(10) UNSIGNED DEFAULT NULL,
+            `recipient_id` int(10) UNSIGNED DEFAULT NULL,
+            `recipient_type` enum('teacher','parent','student') DEFAULT NULL,
+            `message` text NOT NULL,
+            `attachments` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_user` (`user_id`),
+            KEY `idx_conversation` (`conversation_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_message_drafts_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getMessageReactionsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `message_reactions` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `message_id` int(10) UNSIGNED NOT NULL,
+            `user_id` int(10) UNSIGNED NOT NULL,
+            `reaction` varchar(50) NOT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_reaction` (`message_id`,`user_id`,`reaction`),
+            KEY `idx_message` (`message_id`),
+            KEY `idx_user` (`user_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getMessageStatusTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `message_status` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `message_id` int(10) UNSIGNED NOT NULL,
+            `user_id` int(10) UNSIGNED NOT NULL,
+            `status` enum('sent','delivered','read') DEFAULT 'sent',
+            `status_changed_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_message_user` (`message_id`,`user_id`),
+            KEY `idx_message` (`message_id`),
+            KEY `idx_user` (`user_id`),
+            KEY `idx_status` (`status`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getExamPapersTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `exam_papers` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `exam_id` int(10) UNSIGNED NOT NULL,
+            `subject_id` int(10) UNSIGNED NOT NULL,
+            `class_id` int(10) UNSIGNED NOT NULL,
+            `teacher_id` int(10) UNSIGNED NOT NULL,
+            `title` varchar(255) NOT NULL,
+            `total_marks` decimal(5,2) NOT NULL,
+            `duration_minutes` int(10) UNSIGNED DEFAULT NULL,
+            `paper_type` enum('cbt','printed') NOT NULL,
+            `status` enum('draft','submitted','approved','rejected') DEFAULT 'draft',
+            `remarks` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_exam` (`exam_id`),
+            KEY `idx_subject` (`subject_id`),
+            KEY `idx_class` (`class_id`),
+            KEY `idx_teacher` (`teacher_id`),
+            CONSTRAINT `fk_exam_papers_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getExamQuestionsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `exam_questions` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `paper_id` int(10) UNSIGNED NOT NULL,
+            `question_text` text NOT NULL,
+            `question_type` enum('multiple_choice','true_false','essay') NOT NULL,
+            `marks` decimal(5,2) NOT NULL,
+            `attachment` varchar(500) DEFAULT NULL,
+            `order` int(10) UNSIGNED DEFAULT 0,
+            PRIMARY KEY (`id`),
+            KEY `idx_paper` (`paper_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getExamOptionsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `exam_options` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `question_id` int(10) UNSIGNED NOT NULL,
+            `option_text` text NOT NULL,
+            `is_correct` tinyint(1) DEFAULT 0,
+            `order` int(10) UNSIGNED DEFAULT 0,
+            PRIMARY KEY (`id`),
+            KEY `idx_question` (`question_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getGeofenceLogsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `geofence_logs` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `user_id` int(10) UNSIGNED NOT NULL,
+            `action` enum('clock_in','clock_out') NOT NULL,
+            `latitude` decimal(10,8) NOT NULL,
+            `longitude` decimal(11,8) NOT NULL,
+            `ip_address` varchar(45) DEFAULT NULL,
+            `is_within_allowed` tinyint(1) NOT NULL DEFAULT 0,
+            `distance_meters` decimal(10,2) DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_user` (`user_id`),
+            KEY `idx_created_at` (`created_at`),
+            CONSTRAINT `fk_geofence_logs_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_geofence_logs_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getLeaveTypesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `leave_types` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(100) NOT NULL,
+            `description` text DEFAULT NULL,
+            `max_days_per_year` int(10) UNSIGNED DEFAULT NULL,
+            `applicable_to` enum('teacher','staff','student','all') DEFAULT 'all',
+            `is_paid` tinyint(1) DEFAULT 1,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_leave_type` (`school_id`,`name`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_leave_types_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getLeaveRequestsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `leave_requests` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `user_id` int(10) UNSIGNED NOT NULL,
+            `user_type` enum('teacher','staff','student') NOT NULL,
+            `leave_type_id` int(10) UNSIGNED NOT NULL,
+            `start_date` date NOT NULL,
+            `end_date` date NOT NULL,
+            `reason` text NOT NULL,
+            `status` enum('pending','approved','rejected','cancelled') DEFAULT 'pending',
+            `approved_by` int(10) UNSIGNED DEFAULT NULL,
+            `approved_at` timestamp NULL DEFAULT NULL,
+            `rejection_reason` text DEFAULT NULL,
+            `applied_on` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_user` (`user_id`),
+            KEY `idx_leave_type` (`leave_type_id`),
+            KEY `idx_status` (`status`),
+            KEY `idx_dates` (`start_date`,`end_date`),
+            KEY `idx_approved_by` (`approved_by`),
+            CONSTRAINT `fk_leave_requests_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_leave_requests_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_leave_requests_leave_type` FOREIGN KEY (`leave_type_id`) REFERENCES `leave_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getLibraryCategoriesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `library_categories` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(100) NOT NULL,
+            `description` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_category_school` (`school_id`,`name`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_library_categories_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getLibraryBooksTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `library_books` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `isbn` varchar(20) DEFAULT NULL,
+            `title` varchar(255) NOT NULL,
+            `author` varchar(255) NOT NULL,
+            `publisher` varchar(255) DEFAULT NULL,
+            `edition` varchar(50) DEFAULT NULL,
+            `category_id` int(10) UNSIGNED DEFAULT NULL,
+            `shelf_location` varchar(100) DEFAULT NULL,
+            `quantity` int(10) UNSIGNED NOT NULL DEFAULT 1,
+            `available_quantity` int(10) UNSIGNED NOT NULL DEFAULT 1,
+            `price` decimal(10,2) DEFAULT NULL,
+            `purchase_date` date DEFAULT NULL,
+            `description` text DEFAULT NULL,
+            `cover_image` varchar(500) DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_category` (`category_id`),
+            KEY `idx_isbn` (`isbn`),
+            KEY `idx_title` (`title`),
+            CONSTRAINT `fk_library_books_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_library_books_category` FOREIGN KEY (`category_id`) REFERENCES `library_categories` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getLibraryMembersTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `library_members` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `user_id` int(10) UNSIGNED NOT NULL,
+            `membership_number` varchar(50) NOT NULL,
+            `membership_type` enum('student','teacher','staff') NOT NULL,
+            `issued_date` date NOT NULL,
+            `expiry_date` date DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `membership_number` (`membership_number`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_user` (`user_id`),
+            CONSTRAINT `fk_library_members_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_library_members_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getLibraryIssuesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `library_issues` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `book_id` int(10) UNSIGNED NOT NULL,
+            `member_id` int(10) UNSIGNED NOT NULL,
+            `issue_date` date NOT NULL,
+            `due_date` date NOT NULL,
+            `return_date` date DEFAULT NULL,
+            `status` enum('issued','returned','overdue','lost') DEFAULT 'issued',
+            `fine_amount` decimal(10,2) DEFAULT 0.00,
+            `fine_paid` tinyint(1) DEFAULT 0,
+            `issued_by` int(10) UNSIGNED NOT NULL,
+            `returned_by` int(10) UNSIGNED DEFAULT NULL,
+            `remarks` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_book` (`book_id`),
+            KEY `idx_member` (`member_id`),
+            KEY `idx_issued_by` (`issued_by`),
+            KEY `idx_returned_by` (`returned_by`),
+            KEY `idx_status` (`status`),
+            KEY `idx_due_date` (`due_date`),
+            CONSTRAINT `fk_library_issues_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_library_issues_book` FOREIGN KEY (`book_id`) REFERENCES `library_books` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_library_issues_member` FOREIGN KEY (`member_id`) REFERENCES `library_members` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getLibraryReservationsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `library_reservations` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `book_id` int(10) UNSIGNED NOT NULL,
+            `member_id` int(10) UNSIGNED NOT NULL,
+            `reservation_date` date NOT NULL,
+            `expiry_date` date NOT NULL,
+            `status` enum('pending','fulfilled','cancelled','expired') DEFAULT 'pending',
+            `notified` tinyint(1) DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_book` (`book_id`),
+            KEY `idx_member` (`member_id`),
+            CONSTRAINT `fk_library_reservations_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_library_reservations_book` FOREIGN KEY (`book_id`) REFERENCES `library_books` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_library_reservations_member` FOREIGN KEY (`member_id`) REFERENCES `library_members` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getLibraryFineSettingsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `library_fine_settings` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `fine_per_day` decimal(10,2) NOT NULL DEFAULT 0.00,
+            `max_fine` decimal(10,2) DEFAULT NULL,
+            `grace_days` int(10) UNSIGNED DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `school_id` (`school_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_library_fine_settings_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getPayrollSalaryGradesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `payroll_salary_grades` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `grade_name` varchar(100) NOT NULL,
+            `basic_salary` decimal(10,2) NOT NULL,
+            `house_allowance` decimal(10,2) DEFAULT 0.00,
+            `transport_allowance` decimal(10,2) DEFAULT 0.00,
+            `medical_allowance` decimal(10,2) DEFAULT 0.00,
+            `other_allowances` decimal(10,2) DEFAULT 0.00,
+            `description` text DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_grade_school` (`school_id`,`grade_name`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_payroll_salary_grades_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getPayrollEmployeesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `payroll_employees` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `user_id` int(10) UNSIGNED NOT NULL,
+            `employee_number` varchar(50) NOT NULL,
+            `department` varchar(100) DEFAULT NULL,
+            `designation` varchar(100) DEFAULT NULL,
+            `joining_date` date DEFAULT NULL,
+            `salary_grade_id` int(10) UNSIGNED DEFAULT NULL,
+            `basic_salary` decimal(10,2) DEFAULT NULL,
+            `bank_name` varchar(255) DEFAULT NULL,
+            `bank_account` varchar(50) DEFAULT NULL,
+            `ifsc_code` varchar(20) DEFAULT NULL,
+            `tax_id` varchar(50) DEFAULT NULL,
+            `pan_number` varchar(20) DEFAULT NULL,
+            `pf_number` varchar(50) DEFAULT NULL,
+            `is_active` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `employee_number` (`employee_number`),
+            UNIQUE KEY `user_id` (`user_id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_salary_grade` (`salary_grade_id`),
+            CONSTRAINT `fk_payroll_employees_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_payroll_employees_salary_grade` FOREIGN KEY (`salary_grade_id`) REFERENCES `payroll_salary_grades` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_payroll_employees_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getPayrollAllowancesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `payroll_allowances` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `employee_id` int(10) UNSIGNED NOT NULL,
+            `allowance_type` varchar(100) NOT NULL,
+            `amount` decimal(10,2) NOT NULL,
+            `effective_from` date NOT NULL,
+            `effective_to` date DEFAULT NULL,
+            `is_recurring` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_employee` (`employee_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getPayrollDeductionsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `payroll_deductions` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `employee_id` int(10) UNSIGNED NOT NULL,
+            `deduction_type` varchar(100) NOT NULL,
+            `amount` decimal(10,2) NOT NULL,
+            `effective_from` date NOT NULL,
+            `effective_to` date DEFAULT NULL,
+            `is_recurring` tinyint(1) DEFAULT 1,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_employee` (`employee_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getPayrollPeriodsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `payroll_periods` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(100) NOT NULL,
+            `start_date` date NOT NULL,
+            `end_date` date NOT NULL,
+            `status` enum('open','processing','closed','archived') DEFAULT 'open',
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_payroll_periods_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getPayrollRunsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `payroll_runs` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `period_id` int(10) UNSIGNED NOT NULL,
+            `processed_by` int(10) UNSIGNED NOT NULL,
+            `processed_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `total_gross` decimal(12,2) DEFAULT 0.00,
+            `total_deductions` decimal(12,2) DEFAULT 0.00,
+            `total_net` decimal(12,2) DEFAULT 0.00,
+            `status` enum('draft','approved','paid','cancelled') DEFAULT 'draft',
+            `payment_date` date DEFAULT NULL,
+            `remarks` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_period` (`period_id`),
+            KEY `idx_processed_by` (`processed_by`),
+            CONSTRAINT `fk_payroll_runs_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_payroll_runs_period` FOREIGN KEY (`period_id`) REFERENCES `payroll_periods` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getPayrollSlipsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `payroll_slips` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `payroll_run_id` int(10) UNSIGNED NOT NULL,
+            `employee_id` int(10) UNSIGNED NOT NULL,
+            `gross_salary` decimal(10,2) NOT NULL,
+            `total_allowances` decimal(10,2) DEFAULT 0.00,
+            `total_deductions` decimal(10,2) DEFAULT 0.00,
+            `net_salary` decimal(10,2) NOT NULL,
+            `payment_method` enum('bank_transfer','cash','cheque') DEFAULT 'bank_transfer',
+            `payment_status` enum('pending','paid','failed') DEFAULT 'pending',
+            `payment_date` date DEFAULT NULL,
+            `transaction_id` varchar(255) DEFAULT NULL,
+            `remarks` text DEFAULT NULL,
+            `pdf_path` varchar(500) DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_payroll_run` (`payroll_run_id`),
+            KEY `idx_employee` (`employee_id`),
+            CONSTRAINT `fk_payroll_slips_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_payroll_slips_payroll_run` FOREIGN KEY (`payroll_run_id`) REFERENCES `payroll_runs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_payroll_slips_employee` FOREIGN KEY (`employee_id`) REFERENCES `payroll_employees` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getReportCardsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `report_cards` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `academic_year_id` int(10) UNSIGNED NOT NULL,
+            `academic_term_id` int(10) UNSIGNED DEFAULT NULL,
+            `class_id` int(10) UNSIGNED NOT NULL,
+            `generated_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `file_path` varchar(500) DEFAULT NULL,
+            `is_published` tinyint(1) DEFAULT 0,
+            `published_by` int(10) UNSIGNED DEFAULT NULL,
+            `published_at` timestamp NULL DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_student` (`student_id`),
+            KEY `idx_year` (`academic_year_id`),
+            KEY `idx_term` (`academic_term_id`),
+            KEY `idx_class` (`class_id`),
+            KEY `idx_published_by` (`published_by`),
+            CONSTRAINT `fk_report_cards_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_report_cards_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_report_cards_year` FOREIGN KEY (`academic_year_id`) REFERENCES `academic_years` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_report_cards_term` FOREIGN KEY (`academic_term_id`) REFERENCES `academic_terms` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_report_cards_class` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getStudentPromotionsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `student_promotions` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `from_academic_year_id` int(10) UNSIGNED NOT NULL,
+            `to_academic_year_id` int(10) UNSIGNED NOT NULL,
+            `from_class_id` int(10) UNSIGNED NOT NULL,
+            `to_class_id` int(10) UNSIGNED NOT NULL,
+            `from_section_id` int(10) UNSIGNED DEFAULT NULL,
+            `to_section_id` int(10) UNSIGNED DEFAULT NULL,
+            `from_campus_id` int(10) UNSIGNED DEFAULT NULL,
+            `to_campus_id` int(10) UNSIGNED DEFAULT NULL,
+            `promotion_date` date NOT NULL,
+            `remarks` text DEFAULT NULL,
+            `created_by` int(10) UNSIGNED NOT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_student` (`student_id`),
+            KEY `idx_from_academic_year` (`from_academic_year_id`),
+            KEY `idx_to_academic_year` (`to_academic_year_id`),
+            KEY `idx_from_class` (`from_class_id`),
+            KEY `idx_to_class` (`to_class_id`),
+            KEY `idx_from_section` (`from_section_id`),
+            KEY `idx_to_section` (`to_section_id`),
+            KEY `idx_from_campus` (`from_campus_id`),
+            KEY `idx_to_campus` (`to_campus_id`),
+            KEY `idx_created_by` (`created_by`),
+            CONSTRAINT `fk_student_promotions_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_student_promotions_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_student_promotions_from_academic_year` FOREIGN KEY (`from_academic_year_id`) REFERENCES `academic_years` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_student_promotions_to_academic_year` FOREIGN KEY (`to_academic_year_id`) REFERENCES `academic_years` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_student_promotions_from_class` FOREIGN KEY (`from_class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_student_promotions_to_class` FOREIGN KEY (`to_class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_student_promotions_from_section` FOREIGN KEY (`from_section_id`) REFERENCES `sections` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+            CONSTRAINT `fk_student_promotions_to_section` FOREIGN KEY (`to_section_id`) REFERENCES `sections` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getStaffAttendanceTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `staff_attendance` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `user_id` int(10) UNSIGNED NOT NULL,
+            `date` date NOT NULL,
+            `clock_in_time` timestamp NULL DEFAULT NULL,
+            `clock_out_time` timestamp NULL DEFAULT NULL,
+            `clock_in_lat` decimal(10,8) DEFAULT NULL,
+            `clock_in_lng` decimal(11,8) DEFAULT NULL,
+            `clock_out_lat` decimal(10,8) DEFAULT NULL,
+            `clock_out_lng` decimal(11,8) DEFAULT NULL,
+            `clock_in_ip` varchar(45) DEFAULT NULL,
+            `clock_out_ip` varchar(45) DEFAULT NULL,
+            `clock_in_method` enum('manual','biometric','location','mobile') DEFAULT 'manual',
+            `clock_out_method` enum('manual','biometric','location','mobile') DEFAULT 'manual',
+            `status` enum('present','absent','late','half_day','holiday') DEFAULT 'present',
+            `work_hours` decimal(5,2) GENERATED ALWAYS AS (timestampdiff(HOUR,`clock_in_time`,`clock_out_time`)) STORED,
+            `approved_by` int(10) UNSIGNED DEFAULT NULL,
+            `approved_at` timestamp NULL DEFAULT NULL,
+            `remarks` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `unique_staff_attendance` (`user_id`,`date`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_user` (`user_id`),
+            KEY `idx_date` (`date`),
+            KEY `idx_status` (`status`),
+            KEY `idx_approved_by` (`approved_by`),
+            CONSTRAINT `fk_staff_attendance_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT `fk_staff_attendance_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    // ----- Remaining Methods (unchanged from original) -----
+
+    // ... (all previously existing methods like createSchoolAdminUser, getSchoolStatistics, etc., remain exactly as they were) ...
+
+    // For brevity, we are not repeating all the unchanged methods here,
+    // but they should be kept in the final file exactly as in your original Tenant.php.
+    // The above includes all table definitions and the modified createSchoolDatabase / createTablesOnly / insertDefaultData.
+    // Ensure you merge this with your existing helper methods (logInfo, logError, etc.) and other functions.
+
 
     /**
      * Create performance indexes
@@ -2505,7 +4013,7 @@ class Tenant
      * @param array $schoolData
      * @return int|false Admin user ID
      */
-    private static function createInitialAdmin($db, $schoolData)
+    private static function createInitialAdmin($db, $schoolData, $campusId = null)
     {
         try {
             $hashedPassword = password_hash($schoolData['admin_password'], PASSWORD_BCRYPT);
@@ -2513,12 +4021,13 @@ class Tenant
             // Insert admin user
             $stmt = $db->prepare("
             INSERT INTO users 
-            (school_id, name, email, phone, password, user_type, is_active) 
-            VALUES (?, ?, ?, ?, ?, 'admin', 1)
+            (school_id, campus_id, name, email, phone, password, user_type, is_active, email_verified_at, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, 'admin', 1, NOW(), NOW(), NOW())
         ");
 
             $stmt->execute([
                 $schoolData['id'],
+                $campusId,
                 $schoolData['admin_name'],  // This should match the key in $adminData
                 $schoolData['admin_email'], // This should match the key in $adminData
                 $schoolData['admin_phone'], // This should match the key in $adminData
@@ -2537,8 +4046,8 @@ class Tenant
                 $roleId = $role['id'];
 
                 // Assign role to user
-                $userRoleStmt = $db->prepare("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)");
-                $userRoleStmt->execute([$adminUserId, $roleId]);
+                $userRoleStmt = $db->prepare("INSERT INTO user_roles (school_id, campus_id, user_id, role_id) VALUES (?, ?, ?, ?)");
+                $userRoleStmt->execute([$schoolData['id'], $campusId, $adminUserId, $roleId]);
                 self::logInfo("Assigned role ID " . $roleId . " to admin user");
             } else {
                 self::logWarning("school_admin role not found for school ID " . $schoolData['id']);
@@ -3101,6 +4610,49 @@ class Tenant
     }
 
     /**
+     * Ensure a school-specific tenant portal folder exists.
+     *
+     * @param array $school Must include a slug key.
+     * @return bool
+     */
+    public static function ensureSchoolPortal(array $school)
+    {
+        try {
+            $slug = $school['slug'] ?? '';
+            if (!preg_match('/^[a-z0-9-]+$/', $slug)) {
+                self::logWarning("Cannot create school portal with invalid slug: " . $slug);
+                return false;
+            }
+
+            $portalPath = dirname(__DIR__) . '/tenant/' . $slug;
+            if (is_dir($portalPath) && file_exists($portalPath . '/login.php')) {
+                self::logInfo("School portal already exists for slug: " . $slug);
+                return true;
+            }
+
+            $portalCreatorPath = __DIR__ . '/PortalCreator.php';
+            if (!class_exists('PortalCreator') && file_exists($portalCreatorPath)) {
+                require_once $portalCreatorPath;
+            }
+
+            if (!class_exists('PortalCreator')) {
+                self::logWarning("PortalCreator class not available while creating portal for slug: " . $slug);
+                return false;
+            }
+
+            $created = PortalCreator::createSchoolPortal($slug);
+            if ($created) {
+                self::logInfo("School portal created for slug: " . $slug);
+            }
+
+            return (bool)$created;
+        } catch (Exception $e) {
+            self::logError("Failed to ensure school portal", $e);
+            return false;
+        }
+    }
+
+    /**
      * Split SQL into individual queries
      * @param string $sql
      * @return array
@@ -3392,41 +4944,41 @@ class Tenant
         }
     }
     private static function validateDatabaseCreation()
-{
-    // Check if root access is allowed
-    if (!defined('ALLOW_ROOT_DB_CREATION') || !ALLOW_ROOT_DB_CREATION) {
-        throw new Exception("Database creation via root is disabled");
-    }
-    
-    // Validate credentials exist
-    if (!defined('ROOT_DB_USER') || empty(ROOT_DB_USER)) {
-        throw new Exception("Root database user not configured");
-    }
-    
-    // Rate limiting
-    $maxPerHour = 10; // Adjust based on your needs
-    $count = self::getRecentDatabaseCreations();
-    if ($count >= $maxPerHour) {
-        throw new Exception("Rate limit exceeded: Maximum $maxPerHour databases per hour");
-    }
-}
+    {
+        // Check if root access is allowed
+        if (!defined('ALLOW_ROOT_DB_CREATION') || !ALLOW_ROOT_DB_CREATION) {
+            throw new Exception("Database creation via root is disabled");
+        }
 
-private static function getRecentDatabaseCreations()
-{
-    try {
-        $db = Database::getPlatformConnection();
-        $stmt = $db->prepare("
+        // Validate credentials exist
+        if (!defined('ROOT_DB_USER') || empty(ROOT_DB_USER)) {
+            throw new Exception("Root database user not configured");
+        }
+
+        // Rate limiting
+        $maxPerHour = 10; // Adjust based on your needs
+        $count = self::getRecentDatabaseCreations();
+        if ($count >= $maxPerHour) {
+            throw new Exception("Rate limit exceeded: Maximum $maxPerHour databases per hour");
+        }
+    }
+
+    private static function getRecentDatabaseCreations()
+    {
+        try {
+            $db = Database::getPlatformConnection();
+            $stmt = $db->prepare("
             SELECT COUNT(*) as count 
             FROM school_database_credentials 
             WHERE created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
         ");
-        $stmt->execute();
-        $result = $stmt->fetch();
-        return (int)($result['count'] ?? 0);
-    } catch (Exception $e) {
-        return 0;
+            $stmt->execute();
+            $result = $stmt->fetch();
+            return (int)($result['count'] ?? 0);
+        } catch (Exception $e) {
+            return 0;
+        }
     }
-}
 
     /**
      * Restore school database from backup

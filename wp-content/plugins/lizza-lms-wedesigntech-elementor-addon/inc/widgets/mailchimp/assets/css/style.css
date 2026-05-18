@@ -1,0 +1,664 @@
+/***<<--- Mailchimp Transition --->>***/
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper,
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form > *,
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder button[type='submit'],
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form:after
+{
+    -webkit-transition: var(--wdt-elementor-base-transition);
+            transition: var(--wdt-elementor-base-transition);
+}
+
+/***<<--- Mailchimp Common --->>***/
+
+.wdt-mailchimp-holder
+{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    width: 100%;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper
+{
+    display: inline-flex;
+    flex-wrap: wrap;
+
+    width: 100%;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form
+{
+    display: inline-flex;
+    flex-wrap: wrap;
+
+    width: 100%;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form > *:not(:last-child)
+{
+    margin-bottom: 20px;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-title,
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subtitle,
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-description
+{
+    line-height: 1;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-title
+{
+    font-size: 2em;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subtitle
+{
+    font-size: 1.5em;
+
+    letter-spacing: .05em;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='text'],
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='email']
+{
+    font-size: 1em;
+    line-height: 1;
+
+    width: 100%;
+    padding: 1em;
+
+    border: 1px solid;
+    border-radius: var(--wdtRadius_2X);
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input,
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input:focus-visible
+{
+    outline: none;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder button[type='submit']
+{
+    font-size: 1.1em;
+    line-height: 1;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 0;
+    padding: .75em 1.5em;
+    text-align: center;
+    color: var(--wdt-elementor-color-white);
+    border: 1px solid transparent;
+    -webkit-border-radius: inherit;
+            border-radius: inherit;
+    outline: none;
+    background-color: var(--wdt-elementor-color-accent);
+
+    fill: var(--wdt-elementor-color-white);
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder button[type='submit'] > *:last-child
+{
+    margin: 0 0 0 10px;
+}
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder button[type='submit'] > *:only-child
+{
+    margin: 0;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon .wdt-mailchimp-subscription-button-holder button
+{
+    padding: 0;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder button[type='submit'] i
+{
+    font-size: var(--wdtFontSize_H5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input:not(:last-child)
+{
+    margin: 0 0 20px;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form button[type='submit']:before
+{
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    visibility: hidden;
+
+    width: 25px;
+    height: 25px;
+    margin: auto;
+
+    content: '';
+    -webkit-animation: jet-spinner .6s linear infinite;
+            animation: jet-spinner .6s linear infinite;
+
+    border: 3px solid #e1e1e1;
+    border-top-color: #000000;
+    -webkit-border-radius: 50%;
+            border-radius: 50%;
+}
+
+@-webkit-keyframes jet-spinner
+{
+    to
+    {
+        -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+    }
+}
+@keyframes jet-spinner
+{
+    to
+    {
+        -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+    }
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form button[type='submit'].loading:before
+{
+    visibility: visible;
+}
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form button[type='submit'].loading > *
+{
+    visibility: hidden;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscription-msg
+{
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    margin: 20px 0 0;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-title:empty,
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subtitle:empty,
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-description:empty,
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscription-msg:empty
+{
+    display: none;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscription-msg .wdt-mailchimp-subscription-msg-inner
+{
+    line-height: var(--wdtLineHeight_Alt);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    padding: 15px 20px;
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscription-msg .success
+{
+    color: #5cb85c;
+    background-color: #d9efd9;
+}
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscription-msg .error
+{
+    color: #d9534f;
+    background-color: #ffcac9;
+}
+
+/* Type 2 */
+
+.wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper
+{
+    display: flex;
+    -webkit-box-align: start;
+    align-items: center;
+    -ms-flex-align: start;
+    -ms-flex-flow: row wrap;
+        flex-flow: row wrap;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    flex-wrap: wrap;
+    -webkit-box-pack: start;
+    -ms-flex-pack: start;
+    justify-content: flex-start;
+
+    width: 100%;
+}
+
+.wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form
+{
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    flex-wrap: nowrap;
+
+    width: 100%;
+    margin: 0;
+    padding: 15px 35px;
+
+    border-radius: 50px;
+}
+
+.wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form:before
+{
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    margin: auto;
+
+    content: '';
+
+    opacity: .25;
+    border-radius: inherit;
+}
+
+.wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input
+{
+    line-height: 1;
+
+    margin: 0;
+    padding: 0;
+
+    border: none;
+    outline: none;
+    background: transparent;
+    -webkit-box-shadow: none;
+            box-shadow: none;
+}
+
+.wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='email']
+{
+    padding-right: 25px;
+}
+
+.wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder
+{
+    width: auto;
+}
+
+.wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder button[type='submit']
+{
+    flex-wrap: nowrap;
+
+    padding: 15px 0 15px 25px;
+
+    letter-spacing: .9px;
+    text-transform: uppercase;
+
+    border-left-width: 1px;
+    border-left-style: solid;
+    border-radius: 0;
+}
+
+.wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder button[type='submit']
+{
+    color: inherit;
+    border-left-color: #e1e1e1;
+    background: transparent;
+}
+
+.wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder button[type='submit']:hover
+{
+    color: var(--wdt-elementor-color-primary);
+    background-color: transparent;
+}
+
+/* Type 3 */
+
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper
+{
+    display: flex;
+    -webkit-box-align: start;
+    align-items: center;
+    -ms-flex-align: start;
+    -ms-flex-flow: row wrap;
+        flex-flow: row wrap;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    flex-wrap: wrap;
+    -webkit-box-pack: start;
+    -ms-flex-pack: start;
+    justify-content: flex-start;
+}
+
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form
+{
+    position: relative;
+    display: flex;
+    width: 100%;
+    margin: 0;
+}
+
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form:hover:before
+{
+    width: 100%;
+}
+
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input
+{
+    margin: 0;
+    outline: none;
+    -webkit-box-shadow: none;
+            box-shadow: none;
+}
+
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-text input
+{
+    padding-right: 3em;
+}
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon input
+{
+    padding-right: 3em;
+}
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input
+{
+    padding-right: 8em;
+}
+
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder
+{
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    display: inline-flex;
+    align-items: center;
+    margin: 7px;
+}
+
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon .wdt-mailchimp-subscription-button-holder button
+{
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 48px;
+    padding: 0;
+}
+
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form div:last-child { display: flex; align-items: center; gap: 5px; }
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form div .wdt-terms-and-conditions { width: 15px; height: 15px; padding: 0; margin-top: 10px; }
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form div .wdt-terms-condition-lbl { color: var(--wdtAccentTxtColor); line-height: var(--wdtLineHeight_Alt); margin-top: 10px; }
+
+/* Type 4 */
+
+.wdt-mailchimp-holder.wdt-template-type4 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='text'],
+.wdt-mailchimp-holder.wdt-template-type4 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='email']
+{
+    padding-right: 0;
+    padding-left: 0;
+
+    border-width: 0 0 1px;
+    border-style: solid;
+}
+
+/* Type 5 */
+
+.wdt-mailchimp-holder.wdt-template-type5 .wdt-mailchimp-wrapper
+{
+    display: flex;
+    -webkit-box-align: start;
+    align-items: center;
+    -ms-flex-align: start;
+    -ms-flex-flow: row wrap;
+        flex-flow: row wrap;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    flex-wrap: wrap;
+    -webkit-box-pack: start;
+    -ms-flex-pack: start;
+    justify-content: flex-start;
+}
+
+.wdt-mailchimp-holder.wdt-template-type5 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form
+{
+    position: relative;
+
+    display: flex;
+
+    width: 100%;
+    margin: 0;
+
+    border-radius: 50px;
+}
+
+.wdt-mailchimp-holder.wdt-template-type5 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form:hover:before
+{
+    width: 100%;
+}
+
+.wdt-mailchimp-holder.wdt-template-type5 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input
+{
+    margin: 0;
+
+    outline: none;
+    background: transparent;
+    -webkit-box-shadow: none;
+            box-shadow: none;
+}
+
+.wdt-mailchimp-holder.wdt-template-type5 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-text input
+{
+    padding-right: 8em;
+}
+.wdt-mailchimp-holder.wdt-template-type5 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon input
+{
+    padding-right: 4em;
+}
+.wdt-mailchimp-holder.wdt-template-type5 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input
+{
+    padding-right: 10em;
+}
+
+.wdt-mailchimp-holder.wdt-template-type5 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder
+{
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+
+    align-items: center;
+
+    margin: 5px;
+
+    border-radius: 50px;
+}
+
+.wdt-mailchimp-holder.wdt-template-type5 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon .wdt-mailchimp-subscription-button-holder button
+{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 50px;
+    height: 50px;
+    padding: 0;
+}
+
+/* Type 6 */
+
+.wdt-mailchimp-holder.wdt-template-type6 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form
+{
+    flex-wrap: nowrap;
+}
+.wdt-mailchimp-holder.wdt-template-type6 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input
+{
+    margin: 0 10px 0 0;
+}
+
+.wdt-mailchimp-holder.wdt-template-type6 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder button[type='submit']
+{
+    flex-wrap: nowrap;
+}
+
+/* Default Colors */
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='text'],
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='email']
+{
+    border-color: rgba(var(--wdtHeadAltColorRgb), 0.25);
+    background-color: var(--wdtAccentTxtColor);
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input:focus
+{
+    border-color: var(--wdtPrimaryColor);
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder button[type='submit']:hover
+{
+    background-color: var(--wdt-elementor-color-primary);
+}
+
+.wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form:before
+{
+    background-color: #e1e1e1;
+}
+
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form button[type='submit'] {
+    background-color: var(--wdtPrimaryColor);
+    -webkit-border-radius: var(--wdtRadius_2X);
+    border-radius: var(--wdtRadius_2X);
+    padding: var(--wdtPadding_Btn);
+    -webkit-transition: all .3s ease;
+    transition: all .3s ease;
+}
+
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form button[type='submit']:hover { 
+    background-color: var(--wdtSecondaryColor);
+}
+
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form button[type='submit']
+{
+    color: inherit;
+}
+.wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form button[type='submit']:hover
+{
+    color: var(--wdt-elementor-color-primary);
+}
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='text']::placeholder,
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='email']::placeholder,
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='text']::-webkit-placeholder,
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='email']::-webkit-placeholder { color: var(--wdtBodyTxtColor); }
+
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='text'],
+.wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='email'] { color: var(--wdtBodyTxtColor); }
+
+/*--------------------------------------------------------------
+    Custom Styles
+--------------------------------------------------------------*/
+
+/* Style 1 */
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text { position: relative; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input { padding-right: clamp(4rem, 3.5673rem + 1.9231vw, 5.875rem); }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input { font-size: clamp(1rem, 0.9555rem + 0.2454vw, 1.25rem); background: transparent; border-width: 0 0 1px 0; border-color: var(--wdtBorderColor); padding: 0; padding-top: 15px; padding-bottom: 15px; margin-right: 10px; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text .wdt-mailchimp-subscription-button-holder { overflow: hidden; display: flex; align-items: center; justify-content: center; color: var(--wdtAccentTxtColor); -webkit-border-radius: var(--wdtRadius_2X); border-radius: var(--wdtRadius_2X); margin-top: 5px; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text .wdt-mailchimp-subscription-button-holder button { position: relative; align-items: center; justify-content: center; padding: 6px 55px; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text .wdt-mailchimp-subscription-button-holder button[type="submit"] { display: grid; place-items: center; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text button[type='submit']:after { content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: var(--wdtPrimaryColor); z-index: 0; -webkit-border-radius: var(--wdtRadius_2X); border-radius: var(--wdtRadius_2X); }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input ~ .wdt-mailchimp-subscription-button-holder button[type="submit"] i, .wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input ~ .wdt-mailchimp-subscription-button-holder button[type="submit"] span, .wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input ~ .wdt-mailchimp-subscription-button-holder button[type='submit']:after { -webkit-transition: 375ms cubic-bezier(0.7, 0, 0.3, 1), color 0.3s ease; transition: 375ms cubic-bezier(0.7, 0, 0.3, 1), color 0.3s ease; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input ~ .wdt-mailchimp-subscription-button-holder button[type='submit']:after { transition-delay: 25ms; -webkit-transform: scale(1); transform: scale(1); opacity: 1; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text button[type='submit'] > span { text-decoration: none; text-decoration-skip-ink: none; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text .wdt-mailchimp-subscription-button-holder button[type="submit"] > * { grid-area: 1/-1; margin: auto; position: relative; z-index: 1; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input ~ .wdt-mailchimp-subscription-button-holder button[type="submit"] span { font-size: clamp(0.875rem, 0.825rem + 0.25vw, 1.125rem); font-weight: calc(var(--wdtFontWeight_Base) + 100); color: var(--wdtAccentTxtColor); -webkit-transform: scale(1); transform: scale(1); opacity: 1; transition-delay: 50ms; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text .wdt-mailchimp-subscription-button-holder button[type="submit"] i { font-size: clamp(1.625rem, 1.5385rem + 0.3846vw, 2rem); color: var(--wdtPrimaryColor); -webkit-transition: all .5s ease; transition: all .5s ease; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text .wdt-mailchimp-subscription-button-holder button[type="submit"] i:hover { color: var(--wdtSecondaryColor); }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input ~ .wdt-mailchimp-subscription-button-holder button[type="submit"] i { transition-delay: 0ms; -webkit-transform: scale(0); transform: scale(0); opacity: 0; -webkit-transition: all .5s ease; transition: all .5s ease; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input:focus { border-color: var(--wdtPrimaryColor); }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input:focus ~ .wdt-mailchimp-subscription-button-holder button[type="submit"] span { transition-delay: 100ms; -webkit-transform: scale(0); transform: scale(0); opacity: 0; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input:focus ~ .wdt-mailchimp-subscription-button-holder button[type="submit"] i { transition-delay: 300ms; -webkit-transform: scale(1); transform: scale(1); opacity: 1; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input:focus ~ .wdt-mailchimp-subscription-button-holder button[type='submit']:after { transition-delay: 250ms; -webkit-transform: scale(0); transform: scale(0); opacity: 0; }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input ~ .wdt-mailchimp-subscription-button-holder button:hover span { color: var(--wdtAccentTxtColor); }
+
+.wdt-mailchimp-style-2 .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-icon-and-text input ~ .wdt-mailchimp-subscription-button-holder button:hover::after { background: var(--wdtLinkColor); }
+
+/* Style 2 */
+
+.wdt-mailchimp-style-v .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form div .wdt-terms-condition-lbl{
+    color: var(--wdtBodyTxtColor); margin: 0; }
+.wdt-mailchimp-style-v .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder{ top: -40px; }
+.wdt-mailchimp-style-v .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form>div:last-child { margin-top: 20px; }
+.wdt-mailchimp-style-v .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form>div:last-child input { 
+    margin: 0 10px 0 0; }
+.wdt-mailchimp-style-v .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-text input[type="checkbox"] { opacity: 1; -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border: 1px solid var(--wdtBorderColor); transform: translateY(-0.075em); background: transparent; border-radius: calc(var(--wdtRadius_1X) + 1px); padding: 0 0; margin-right: 10px; }
+.wdt-mailchimp-style-v .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-text input[type="checkbox"]:after { content: ""; position: absolute; top: 8px; left: 2px; width: 0px; height: 0px; border: solid var(--wdtPrimaryColor); border-width: 2px 2px 0 0; opacity: 0; transform-origin: left top; transform: scaleX(-1) rotate(135deg); -webkit-transform: scaleX(-1) rotate(135deg); transition: width 0.08s ease 0.1s, height 0.1s ease, border-color 0.3s ease, opacity 0.1s ease 0.2s, border-width 0.1s ease; -webkit-transition: width 0.08s ease 0.1s, height 0.1s ease, border-color 0.3s ease, opacity 0.1s ease 0.2s, border-width 0.1s ease; }
+.wdt-mailchimp-style-v .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form.with-btn-text input[type="checkbox"]:checked:after { opacity: 1; width: 6px; height: 10px; border-color: var(--wdtPrimaryColor); transition: width 0.1s ease, height 0.08s ease 0.1s, border-color 0.3s ease, border-width 0.1s ease; -webkit-transition: width 0.1s ease, height 0.08s ease 0.1s, border-color 0.3s ease, border-width 0.1s ease; }
+.wdt-mailchimp-style-v .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form div:last-child{ align-items: start; }
+
+/*--------------------------------------------------------------
+    Responsive
+--------------------------------------------------------------*/
+
+/*----*****---- << Mobile (Landscape) >> ----*****----*/
+
+/* Common Styles for the devices below 767px width */
+@media only screen and (max-width: 767px)
+{
+    .wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form
+    {
+        padding: 10px 25px;
+    }
+    .wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input[type='email']
+    {
+        padding-right: 10px;
+    }
+    .wdt-mailchimp-holder.wdt-template-type2 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form button[type='submit']
+    {
+        padding: 10px 0 10px 15px;
+    }
+
+    .wdt-mailchimp-holder.wdt-template-type6 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form
+    {
+        flex-wrap: wrap;
+    }
+    .wdt-mailchimp-holder.wdt-template-type6 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form input
+    {
+        margin: 0 0 10px 0;
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    .wdt-mailchimp-style-v .wdt-mailchimp-holder.wdt-template-type3 .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder{ position: unset; margin: 20px 0 0 0; width: 100%; }
+    .wdt-mailchimp-style-v .wdt-mailchimp-holder .wdt-mailchimp-wrapper .wdt-mailchimp-subscribe-form .wdt-mailchimp-subscription-button-holder button[type='submit']{ width: 100%; justify-content: center; }
+}

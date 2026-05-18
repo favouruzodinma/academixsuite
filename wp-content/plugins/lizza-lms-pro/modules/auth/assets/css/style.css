@@ -1,0 +1,356 @@
+/* Registration Form */
+.wdt-registration-form{
+    padding: clamp(2.5rem, 2.0552rem + 2.454vw, 5rem);
+    background-color: var(--wdtTertiaryColor);
+    width: 100%;
+    max-width: 650px;
+    margin: auto;
+    border-radius: var(--wdtRadius_2X);
+    box-shadow: none;
+    margin-bottom: clamp(2.5rem, 1.6104rem + 4.908vw, 7.5rem);
+}
+.wdt-registration-form form{
+    margin-top: clamp(0.9375rem, 0.7707rem + 0.9202vw, 1.875rem);
+}
+.wdt-registration-form .lizza-custom-auth-sc-border-title h2 {
+    text-align: center; margin-top: 0; margin-bottom: 15px; }
+.wdt-registration-form p{
+    text-align: center;
+    font-weight: var(--wdtFontWeight_Ext);
+}
+.wdt-registration-form p strong{
+    font-weight: var(--wdtFontWeight_Ext);
+}
+.wdt-registration-form form p{
+    text-align: left;
+    color: var(--wdtAccentTxtColor);
+}
+.wdt-registration-form form p:last-child{
+    text-align: center;
+}
+.wdt-registration-form form p a.lizza-pro-login-link{
+    color: var(--wdtLinkHoverColor);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+}
+.wdt-registration-form form p a.lizza-pro-login-link:hover{
+    text-decoration-color: currentColor;
+}
+.wdt-registration-form form#loginform{
+    display: block;
+}
+.wdt-registration-form input[type="text"],
+.wdt-registration-form input[type="password"],
+.wdt-registration-form input[type="email"],
+.wdt-registration-form input[type="url"],
+.wdt-registration-form input[type="tel"],
+.wdt-registration-form input[type="number"], 
+.wdt-registration-form input[type="range"], 
+.wdt-registration-form input[type="date"], 
+.wdt-registration-form textarea, 
+.wdt-registration-form input.text, 
+.wdt-registration-form input[type="search"], 
+.wdt-registration-form .select2-container--default .select2-search .select2-search__field, 
+.wdt-registration-form .select2-container--default .select2-search--dropdown .select2-search__field, 
+.wdt-registration-form .select2-container--default .select2-search--inline .select2-search__field{
+    background-color: transparent;
+    box-shadow: 0 0;
+    -webkit-box-shadow: 0 0;
+    border: 1px solid var(--wdtBodyBGColor);
+}
+.wdt-registration-form input[type="text"]:focus,
+.wdt-registration-form input[type="password"]:focus,
+.wdt-registration-form input[type="email"]:focus,
+.wdt-registration-form input[type="url"]:focus,
+.wdt-registration-form input[type="tel"]:focus,
+.wdt-registration-form input[type="number"]:focus, 
+.wdt-registration-form input[type="range"]:focus, 
+.wdt-registration-form input[type="date"]:focus, 
+.wdt-registration-form textarea:focus, 
+.wdt-registration-form input.text:focus, 
+.wdt-registration-form input[type="search"]:focus, 
+.wdt-registration-form .select2-container--default .select2-search .select2-search__field:focus, 
+.wdt-registration-form .select2-container--default .select2-search--dropdown .select2-search__field:focus, 
+.wdt-registration-form .select2-container--default .select2-search--inline .select2-search__field:focus{
+    border-color: var(--wdtPrimaryColor);
+}
+.wdt-registration-form input[type="submit"]{
+    width: 100%; padding: var(--wdtPadding_Btn); padding-top: 15px; padding-bottom: 15px; margin-top: 20px; }
+.wdt-registration-form input[type="submit"]:hover{
+    background-color: var(--wdtSecondaryColor);
+}
+.wdt-registration-form form p{
+    margin-bottom: 20px;
+}
+.wdt-registration-form p.submit{
+    margin-bottom: 50px;
+}
+
+@media screen and (max-width:767px){
+    .wdt-registration-form{
+        padding: 30px;
+    }
+    .wdt-registration-form .lizza-custom-auth-sc-border-title h2{
+        font-size: var(--wdtFontSize_H3);
+    }
+    
+}
+@media screen and (max-width: 479px){
+    .wdt-registration-form .lizza-custom-auth-sc-border-title h2{
+        font-size: var(--wdtFontSize_H4);
+    }
+}
+
+
+/* Login form */
+
+.lizza-pro-login-form-container{
+    display: block;
+    height: 100% !important;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+    width: 100%;
+    z-index: 10000;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+}
+.lizza-pro-login-form-overlay{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,.8);
+}
+.lizza-pro-login-form-container .lizza-pro-login-form{
+    display: block;
+    padding: 0;
+    pointer-events: auto;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+    padding: clamp(2.5rem, 2.0552rem + 2.454vw, 5rem);
+    background-color: var(--wdtTertiaryColor);
+    width: 100%;
+    max-width: 650px;
+    margin: auto;
+    border-radius: var(--wdtRadius_2X);
+}
+.lizza-pro-login-form-container .lizza-pro-login-form .lizza-pro-title.lizza-pro-login-title{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+#loginform .login-username, #loginform .login-password{
+    width: 100%;
+}
+#loginform p{
+    font-weight: var(--wdtFontWeight_Ext); color: var(--wdtBodyTxtColor); margin-bottom: 20px; }
+#loginform .login-remember{
+    text-align: left;
+}
+#loginform p.login-remember input[type="checkbox"]{
+    opacity: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1em;
+    height: 1em;
+    border: 1px solid rgba(var(--wdtHeadAltColorRgb), 0.5);
+    transform: translateY(-0.075em);
+    display: inline-grid;
+    place-content: center;
+	box-shadow: 0 0 40px #00000080;
+    -webkit-box-shadow: 0 0 40px #00000080;
+    background: rgba(var(--wdtTertiaryColorRgb),.5);
+    border-radius: 2px;
+    padding: 0 0;
+}
+#loginform p.login-remember input[type="checkbox"]:after{
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    transform: scale(0);
+    transform-origin: bottom left;
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em var(--wdtPrimaryColor);
+}
+#loginform p.login-remember input[type="checkbox"]:checked:after {
+	transform: scale(1);
+}
+
+#loginform p.login-remember{
+    margin: 0 0 20px;
+}
+#loginform input[type="text"]::placeholder, #loginform input[type="password"]::placeholder, .wdt-registration-form input[type="email"]::placeholder { 
+    opacity: 1; }
+#loginform input[type="text"], 
+#loginform input[type="password"], 
+.wdt-registration-form input[type="email"],
+.wdt-registration-form #loginform .select2-container.select2-container--default .select2-selection--single {
+    color: var(--wdtHeadAltColor); border-width: 0 0 1px 0; border-color: rgba(var(--wdtHeadAltColorRgb), 0.15); border-radius: var(--wdtRadius_Zero); }
+.wdt-registration-form #loginform .select2-container.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: var(--wdtBodyTxtColor); font-size: var(--wdtFontSize_Base); font-weight: var(--wdtFontWeight_Base); padding-left: 0; 
+    padding-right: 0; padding: 16px 5px; line-height: var(--wdtLineHeight_Alt); }
+#loginform input[type="text"]:focus,
+#loginform input[type="password"]:focus { border-color: var(--wdtPrimaryColor); }
+#loginform .login-submit { margin-bottom: 20px; }
+#loginform .login-submit input[type="submit"]{
+    width: 100%;
+    background-color: var(--wdtPrimaryColor) !important;
+    color: var(--wdtAccentTxtColor) !important;
+    padding-top: 14px;
+    padding-bottom: 14px;
+}
+#loginform .login-submit input[type="submit"]:hover{
+    background-color: var(--wdtSecondaryColor) !important;
+    color: var(--wdtPrimaryColor) !important;
+}
+.lizza-pro-social-logins-divider{
+    margin-bottom: 40px;
+    text-align: center;
+    color: var(--wdtAccentTxtColor);
+}
+.lizza-pro-title.lizza-pro-login-title h2{
+    text-align: center; margin-top: 0; margin-bottom: 15px;
+}
+.lizza-pro-login-form #loginform{
+    margin-top: clamp(0.9375rem, 0.7707rem + 0.9202vw, 1.875rem);
+}
+.lizza-pro-login-form-container .lizza-pro-login-form .lizza-pro-login-form-holder p.tpl-forget-pwd{
+    margin-bottom: 0;
+}
+.lizza-pro-login-form-container .lizza-pro-login-form .lizza-pro-login-form-holder p.tpl-forget-pwd a{
+    color: var(--wdtLinkHoverColor);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: all 0.3s linear;
+}
+.lizza-pro-login-form-container .lizza-pro-login-form .lizza-pro-login-form-holder p.tpl-forget-pwd a:hover{
+    text-decoration-color: var(--wdtLinkHoverColor);
+}
+
+a.lizza-pro-social-facebook-connect,
+a.lizza-pro-social-google-connect{
+    width: 45%;
+    padding: var(--wdtPadding_MiniBtn);
+    display: inline-block;
+    text-align: center;
+    background: var(--wdtAccentTxtColor);
+    color: var(--wdt-elementor-color-black);
+    border-radius: var(--wdtRadius_3X);
+    box-shadow: rgba(var(--wdtLinkHoverColorRgb),.35) 0 0 15px;
+    margin: 10px;
+    font-size: var(--wdtFontSize_Ext);
+    font-weight: var(--wdtFontWeight_Ext);
+}
+a.lizza-pro-social-facebook-connect i,
+a.lizza-pro-social-google-connect i{
+    margin-right: 10px;
+}
+.lizza-pro-login-form-container{
+    max-width: 1640px;
+    margin: auto;
+}
+@media screen and (min-width:1281px) and (max-width: 1540px){
+    .lizza-pro-login-form-container{
+        max-width: 1080px;
+        margin: auto;
+    }    
+}
+@media screen and (min-width:1025px) and (max-width: 1280px){
+    .lizza-pro-login-form-container{
+        max-width: 900px;
+        margin: auto;
+    }    
+}
+@media screen and (min-width:768px) and (max-width: 1024px){
+    .lizza-pro-login-form-container{
+        max-width: 710px;
+        margin: auto;
+    }    
+}
+@media screen and (max-width: 767px){
+    #loginform .login-username, 
+    #loginform .login-password{
+        margin-bottom: 20px;
+    }
+    .lizza-pro-login-form-container {overflow: scroll;}
+    .lizza-pro-login-form-container .lizza-pro-login-form{
+        padding: 30px;
+        max-width: 420px;
+        
+    }
+    .lizza-pro-title.lizza-pro-login-title h2{
+        font-size: var(--wdtFontSize_H3);
+    }
+    a.lizza-pro-social-facebook-connect, a.lizza-pro-social-google-connect{
+        width: 44%;
+    }
+}
+@media screen and (min-width:480px) and (max-width: 767px){
+    .lizza-pro-login-form-container{
+        max-width: 420px;
+        margin: auto;
+    }    
+}
+@media screen and (max-width: 479px){
+    .lizza-pro-login-form-container{
+        max-width: 290px;
+        margin: auto;
+    }    
+    .lizza-pro-title.lizza-pro-login-title h2{
+        font-size: var(--wdtFontSize_H4);
+    }
+    a.lizza-pro-social-facebook-connect, a.lizza-pro-social-google-connect{
+        width: 100%;
+    }
+}
+
+/* After Registration */
+.mu_register{
+    width: 100%;
+    margin: 0 auto;
+    max-width: 600px;
+    padding: 50px;
+    background: var(--wdtSecondaryColor);
+    box-shadow: rgba(0,0,0,.8) 0 0 40px;
+    border-radius: var(--wdtRadius_3X);
+}
+.mu_register h2{
+    font-size: var(--wdtFontSize_H4);
+    text-align: center;
+}
+.mu_register form input{
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    border: 1px solid transparent;
+}
+.mu_register form input:focus{
+    border-color: var(--wdtPrimaryColor);
+}
+.mu_register form .wp-signup-username-description,
+.mu_register form .wp-signup-email-description{
+    margin-bottom: 15px;
+}
+.mu_register p.submit{
+
+    margin-top: 20px;
+}
+.mu_register form p.submit input[type="submit"]{
+    font-size: var(--wdtFontSize_Base);
+}
+@media screen and (max-width: 479px){
+    .mu_register{
+        padding: 30px;
+    }
+}

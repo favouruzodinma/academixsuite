@@ -1,0 +1,25 @@
+[22-Jan-2026 11:09:39 UTC] PHP Fatal error:  Uncaught Error: Undefined constant "IS_LOCAL" in /home/academixsuite/public_html/config/constants.php:10
+Stack trace:
+#0 /home/academixsuite/public_html/public/index.php(3): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/config/constants.php on line 10
+[22-Jan-2026 11:09:47 UTC] PHP Fatal error:  Uncaught Error: Undefined constant "IS_LOCAL" in /home/academixsuite/public_html/config/constants.php:10
+Stack trace:
+#0 /home/academixsuite/public_html/public/index.php(3): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/config/constants.php on line 10
+[04-Feb-2026 12:45:24 UTC] PHP Fatal error:  Uncaught Error: Undefined constant "IS_LOCAL" in /home/academixsuite/public_html/config/constants.php:10
+Stack trace:
+#0 /home/academixsuite/public_html/public/index.php(3): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/config/constants.php on line 10
+[04-Feb-2026 12:45:35 UTC] PHP Fatal error:  Uncaught Error: Undefined constant "IS_LOCAL" in /home/academixsuite/public_html/config/constants.php:10
+Stack trace:
+#0 /home/academixsuite/public_html/public/index.php(3): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/config/constants.php on line 10
+[03-Mar-2026 04:13:27 UTC] PHP Fatal error:  Uncaught Error: Undefined constant "IS_LOCAL" in /home/academixsuite/public_html/config/constants.php:10
+Stack trace:
+#0 /home/academixsuite/public_html/public/index.php(3): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/config/constants.php on line 10

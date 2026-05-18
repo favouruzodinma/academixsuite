@@ -1,0 +1,122 @@
+[2026-01-31 18:08:35] Script started: edit-invoice.php
+[2026-01-31 18:08:35] User authenticated successfully
+[2026-01-31 18:08:35] Processing edit for invoice ID: 12
+[2026-01-31 18:08:35] Database connection established
+[2026-01-31 18:08:35] Fetching invoice details for ID: 12
+[2026-01-31 18:08:35] Invoice found: INV-20260128-0014
+[2026-01-31 18:08:35] Fetching schools list
+[2026-01-31 18:08:35] Found 4 active schools
+[2026-01-31 18:08:35] Fetching payment gateways
+[2026-01-31 18:08:35] Found 1 active payment gateways
+[2026-01-31 18:08:35] Rendering edit form for invoice 12
+[2026-01-31 18:08:35] Sidebar included successfully
+[2026-01-31 18:08:35] Script completed for invoice 12
+[2026-01-31 18:10:08] Script started: edit-invoice.php
+[2026-01-31 18:10:08] User authenticated successfully
+[2026-01-31 18:10:08] Processing edit for invoice ID: 12
+[2026-01-31 18:10:08] Database connection established
+[2026-01-31 18:10:08] Fetching invoice details for ID: 12
+[2026-01-31 18:10:08] Invoice found: INV-20260128-0014
+[2026-01-31 18:10:08] Fetching schools list
+[2026-01-31 18:10:08] Found 4 active schools
+[2026-01-31 18:10:08] Fetching payment gateways
+[2026-01-31 18:10:08] Found 1 active payment gateways
+[2026-01-31 18:10:08] Processing POST request for invoice 12
+[2026-01-31 18:10:08] DEPRECATED: Constant FILTER_SANITIZE_STRING is deprecated in /home/academixsuite/public_html/platform/admin/billings/edit-invoice.php on line 224
+IP: 102.90.80.202
+URL: /platform/admin/billings/edit-invoice.php?id=12
+User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
+
+[2026-01-31 18:10:08] DEPRECATED: Constant FILTER_SANITIZE_STRING is deprecated in /home/academixsuite/public_html/platform/admin/billings/edit-invoice.php on line 225
+IP: 102.90.80.202
+URL: /platform/admin/billings/edit-invoice.php?id=12
+User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
+
+[2026-01-31 18:10:08] DEPRECATED: Constant FILTER_SANITIZE_STRING is deprecated in /home/academixsuite/public_html/platform/admin/billings/edit-invoice.php on line 226
+IP: 102.90.80.202
+URL: /platform/admin/billings/edit-invoice.php?id=12
+User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
+
+[2026-01-31 18:10:08] DEPRECATED: Constant FILTER_SANITIZE_STRING is deprecated in /home/academixsuite/public_html/platform/admin/billings/edit-invoice.php on line 227
+IP: 102.90.80.202
+URL: /platform/admin/billings/edit-invoice.php?id=12
+User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
+
+[2026-01-31 18:10:08] DEPRECATED: Constant FILTER_SANITIZE_STRING is deprecated in /home/academixsuite/public_html/platform/admin/billings/edit-invoice.php on line 228
+IP: 102.90.80.202
+URL: /platform/admin/billings/edit-invoice.php?id=12
+User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
+
+[2026-01-31 18:10:08] DEPRECATED: Constant FILTER_SANITIZE_STRING is deprecated in /home/academixsuite/public_html/platform/admin/billings/edit-invoice.php on line 229
+IP: 102.90.80.202
+URL: /platform/admin/billings/edit-invoice.php?id=12
+User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
+
+[2026-01-31 18:10:08] DEPRECATED: Constant FILTER_SANITIZE_STRING is deprecated in /home/academixsuite/public_html/platform/admin/billings/edit-invoice.php on line 230
+IP: 102.90.80.202
+URL: /platform/admin/billings/edit-invoice.php?id=12
+User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
+
+[2026-01-31 18:10:08] Form data received:
+Array
+(
+    [school_id] => 14
+    [amount] => 199.99
+    [tax] => 0
+    [due_date] => 2026-02-27
+    [description] => Trial subscription for Enterprise plan (monthly) - Free 7-day trial
+    [status] => draft
+    [payment_status] => pending
+    [paid_at] => 
+    [payment_method] => 
+    [payment_gateway_id] => 
+    [transaction_id] => 
+    [notes] => 
+)
+
+[2026-01-31 18:10:08] Starting database transaction
+[2026-01-31 18:10:08] Transaction rolled back due to error
+[2026-01-31 18:10:08] Database error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'updated_at' in 'SET'
+[2026-01-31 18:10:08] Rendering edit form for invoice 12
+[2026-01-31 18:10:08] Sidebar included successfully
+[2026-01-31 18:10:08] Script completed for invoice 12
+[2026-01-31 18:46:53] Script started: edit-invoice.php
+[2026-01-31 18:46:53] User authenticated successfully
+[2026-01-31 18:46:53] Processing edit for invoice ID: 12
+[2026-01-31 18:46:53] Database connection established
+[2026-01-31 18:46:53] Fetching invoice details for ID: 12
+[2026-01-31 18:46:53] Invoice found: INV-20260128-0014
+[2026-01-31 18:46:53] Fetching schools list
+[2026-01-31 18:46:53] Found 4 active schools
+[2026-01-31 18:46:53] Fetching payment gateways
+[2026-01-31 18:46:53] Found 1 active payment gateways
+[2026-01-31 18:46:53] Rendering edit form for invoice 12
+[2026-01-31 18:46:53] Sidebar included successfully
+[2026-01-31 18:46:53] Script completed for invoice 12
+[2026-01-31 19:09:17] Script started: edit-invoice.php
+[2026-02-01 03:48:25] Script started: edit-invoice.php
+[2026-02-01 03:48:25] User authenticated successfully
+[2026-02-01 03:48:25] Processing edit for invoice ID: 12
+[2026-02-01 03:48:25] Database connection established
+[2026-02-01 03:48:25] Fetching invoice details for ID: 12
+[2026-02-01 03:48:25] Invoice found: INV-20260128-0014
+[2026-02-01 03:48:25] Fetching schools list
+[2026-02-01 03:48:25] Found 4 active schools
+[2026-02-01 03:48:25] Fetching payment gateways
+[2026-02-01 03:48:25] Found 1 active payment gateways
+[2026-02-01 03:48:25] Rendering edit form for invoice 12
+[2026-02-01 03:48:25] Sidebar included successfully
+[2026-02-01 03:48:25] Script completed for invoice 12
+[2026-02-01 03:49:21] Script started: edit-invoice.php
+[2026-02-01 03:49:21] User authenticated successfully
+[2026-02-01 03:49:21] Processing edit for invoice ID: 12
+[2026-02-01 03:49:21] Database connection established
+[2026-02-01 03:49:21] Fetching invoice details for ID: 12
+[2026-02-01 03:49:21] Invoice found: INV-20260128-0014
+[2026-02-01 03:49:21] Fetching schools list
+[2026-02-01 03:49:21] Found 4 active schools
+[2026-02-01 03:49:21] Fetching payment gateways
+[2026-02-01 03:49:21] Found 1 active payment gateways
+[2026-02-01 03:49:21] Rendering edit form for invoice 12
+[2026-02-01 03:49:21] Sidebar included successfully
+[2026-02-01 03:49:21] Script completed for invoice 12

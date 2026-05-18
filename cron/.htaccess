@@ -1,0 +1,35 @@
+# ============================================================
+# CRON DIRECTORY SECURITY
+# ============================================================
+# This .htaccess file prevents web access to the cron directory
+# Cron jobs should ONLY be executed via CLI (command line)
+# ============================================================
+
+# Deny all web access
+<IfModule mod_authz_core.c>
+    # Apache 2.4+
+    Require all denied
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    # Apache 2.2
+    Order deny,allow
+    Deny from all
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes
+
+# Disable script execution via web
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Custom error message
+ErrorDocument 403 "Access Denied: Cron jobs can only be executed via command line."

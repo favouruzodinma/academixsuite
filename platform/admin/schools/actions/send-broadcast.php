@@ -54,14 +54,21 @@ if (!validateCSRFToken($data['csrf_token'])) {
     echo json_encode(['success' => false, 'message' => 'Invalid or expired CSRF token']);
     exit;
 }
-$schoolId = $data['school_id'] ?? 0;
+$schoolId = (int) ($data['school_id'] ?? 0);
 $databaseName = $data['database_name'] ?? '';
 $message = $data['message'] ?? '';
 $subject = $data['subject'] ?? 'Platform Announcement';
 $userTypes = $data['user_types'] ?? ['admin', 'teacher', 'student', 'parent'];
 
-if ($schoolId <= 0 || empty($databaseName) || empty($message)) {
+if ($schoolId <= 0 || empty($message)) {
     echo json_encode(['success' => false, 'message' => 'Missing required parameters']);
+    exit;
+}
+
+$allowedUserTypes = ['admin', 'teacher', 'student', 'parent', 'accountant', 'librarian'];
+$userTypes = array_values(array_intersect((array) $userTypes, $allowedUserTypes));
+if (!$userTypes) {
+    echo json_encode(['success' => false, 'message' => 'Select at least one valid user type']);
     exit;
 }
 
@@ -69,30 +76,37 @@ try {
     $db = Database::getPlatformConnection();
     
     // Get school details
-    $schoolStmt = $db->prepare("SELECT name FROM schools WHERE id = ?");
+    $schoolStmt = $db->prepare("SELECT name, database_name FROM schools WHERE id = ?");
     $schoolStmt->execute([$schoolId]);
     $school = $schoolStmt->fetch();
     
-    if (!$school) {
-        echo json_encode(['success' => false, 'message' => 'School not found']);
+    if (!$school || empty($school['database_name'])) {
+        echo json_encode(['success' => false, 'message' => 'School not found or database missing']);
         exit;
     }
+
+    $databaseName = $school['database_name'];
     
     // Connect to school database
     $schoolDb = Database::getSchoolConnection($databaseName);
+    $columns = $schoolDb->query("SHOW COLUMNS FROM users")->fetchAll(PDO::FETCH_COLUMN);
     
     // Build user type condition
     $userTypePlaceholders = implode(',', array_fill(0, count($userTypes), '?'));
     
     // Get active users based on selected user types
     $userStmt = $schoolDb->prepare("
-        SELECT email, first_name, last_name, user_type 
+        SELECT id, email, name, user_type 
         FROM users 
         WHERE is_active = 1 
         AND user_type IN ($userTypePlaceholders)
+        AND email IS NOT NULL
+        AND email != ''
     ");
     $userStmt->execute($userTypes);
-    $users = $userStmt->fetchAll();
+    $users = array_values(array_filter($userStmt->fetchAll(), function ($user) {
+        return filter_var($user['email'] ?? '', FILTER_VALIDATE_EMAIL);
+    }));
     
     $totalUsers = count($users);
     $emailsSent = 0;
@@ -106,31 +120,44 @@ try {
         $usersByType[$user['user_type']]++;
     }
     
+    $emailService = new EmailService();
+    $failed = 0;
+    $errors = [];
+
     // Send broadcast to each user
     foreach ($users as $user) {
+        $recipientName = trim($user['name'] ?? '') ?: ucfirst($user['user_type']);
+        $safeSubject = htmlspecialchars($subject, ENT_QUOTES, 'UTF-8');
+        $safeName = htmlspecialchars($recipientName, ENT_QUOTES, 'UTF-8');
+        $safeSchool = htmlspecialchars($school['name'], ENT_QUOTES, 'UTF-8');
+        $safeUserType = htmlspecialchars(ucfirst($user['user_type']), ENT_QUOTES, 'UTF-8');
+
         // Prepare personalized message
         $personalizedMessage = "
-            <h2>$subject</h2>
-            <p>Dear {$user['first_name']} {$user['last_name']},</p>
+            <h2>{$safeSubject}</h2>
+            <p>Dear {$safeName},</p>
             
             <div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>
                 " . nl2br(htmlspecialchars($message)) . "
             </div>
             
-            <p><strong>School:</strong> {$school['name']}</p>
-            <p><strong>User Type:</strong> " . ucfirst($user['user_type']) . "</p>
+            <p><strong>School:</strong> {$safeSchool}</p>
+            <p><strong>User Type:</strong> {$safeUserType}</p>
             
             <p>This is an automated message from the platform administration.</p>
             <p>Please do not reply to this email.</p>
             <p>Thank you,<br>Platform Administration</p>
         ";
         
-        // Send email (implement your email function)
-        // if (sendEmail($user['email'], $subject, $personalizedMessage)) {
-        //     $emailsSent++;
-        // }
-        
-        $emailsSent++; // For testing
+        $result = $emailService->sendEmail($user['email'], $subject, $personalizedMessage);
+        if (!empty($result['success'])) {
+            $emailsSent++;
+        } else {
+            $failed++;
+            if (count($errors) < 5) {
+                $errors[] = $user['email'] . ': ' . ($result['error'] ?? 'send failed');
+            }
+        }
     }
     
     // Store broadcast in database for record
@@ -163,8 +190,10 @@ try {
         'statistics' => [
             'total_recipients' => $totalUsers,
             'emails_sent' => $emailsSent,
+            'failed' => $failed,
             'success_rate' => $totalUsers > 0 ? round(($emailsSent / $totalUsers) * 100, 2) : 0,
-            'users_by_type' => $usersByType
+            'users_by_type' => $usersByType,
+            'sample_errors' => $errors
         ]
     ]);
     

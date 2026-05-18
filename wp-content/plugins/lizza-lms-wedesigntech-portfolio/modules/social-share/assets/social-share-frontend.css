@@ -1,0 +1,247 @@
+    /*----*****---- << Social Share >> ----*****----*/
+
+    .wdt-listings-social-share-container,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container
+    {
+        position: relative;
+
+        display: inline-block;
+        float: none;
+
+        padding: 0;
+
+        cursor: pointer;
+        vertical-align: middle;
+    }
+
+    .wdt-listings-social-share-container .wdt-listings-social-share-item-icon,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-item-icon,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-utils-favourite .wdt-listings-utils-favourite-author
+    {
+        position: relative;
+
+        display: block;
+
+        margin: 0;
+    }
+
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-item-icon,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-utils-favourite .wdt-listings-utils-favourite-author
+    {
+        float: left;
+
+        cursor: pointer;
+    }
+
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-utils-favourite
+    {
+        position: relative;
+    }
+
+    .wdt-listings-social-share-container .wdt-listings-social-share-item-icon span,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-item-icon span,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-utils-favourite .wdt-listings-utils-favourite-author span
+    {
+        font-size: 16px;
+        line-height: 40px;
+
+        float: left;
+
+        width: 40px;
+        height: 40px;
+        margin-right: 0;
+
+        text-align: center;
+    }
+
+    .wdt-listings-social-share-container .wdt-listings-social-share-list,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list
+    {
+        position: absolute;
+        z-index: 1;
+        left: 0;
+        bottom: calc(100% + 10px);
+
+        display: flex;
+        visibility: hidden;
+
+        min-width: auto;
+        margin-left: -5px;
+        margin-bottom: 0;
+        padding: 10px;
+
+        text-align: center;
+
+        opacity: 0;
+        -webkit-border-radius: 5px;
+           -moz-border-radius: 5px;
+                border-radius: 5px;
+
+        filter: alpha(opacity=0);
+    }
+
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list
+    {
+        right: -10px;
+    }
+
+    .wdt-listings-social-share-container .wdt-listings-social-share-list:before,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list:before
+    {
+        position: absolute;
+        bottom: 0;
+        left: auto;
+
+        margin: auto;
+
+        content: '';
+        -webkit-transform: translateX(0) translateY(100%);
+            -ms-transform: translateX(0) translateY(100%);
+             -o-transform: translateX(0) translateY(100%);
+                transform: translateX(0) translateY(100%);
+
+        border-width: 7px;
+        border-style: solid;
+        border-color: currentColor transparent transparent transparent;
+    }
+
+    .wdt-listings-social-share-container .wdt-listings-social-share-list li,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list li
+    {
+        position: relative;
+
+        display: inline-block;
+
+        margin: 0;
+        padding: 0;
+    }
+
+    .wdt-listings-social-share-container .wdt-listings-social-share-list li:not(:last-child),
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list li:not(:last-child)
+    {
+        margin: 0 5px 0 0;
+    }
+
+    .wdt-listings-social-share-container .wdt-listings-social-share-list li a,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list li a
+    {
+        font-size: 14px;
+        line-height: normal;
+
+        float: left;
+
+        width: auto;
+        height: auto;
+        margin: 0 10px 0 0;
+
+        text-align: center;
+
+        border-radius: 50%;
+        background: none;
+    }
+
+    .wdt-listings-social-share-container .wdt-listings-social-share-list li:last-child a,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list li:last-child a
+    {
+        margin-right: 0;
+    }
+
+    .wdt-listings-social-share-container.active .wdt-listings-social-share-list,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container.active .wdt-listings-social-share-list
+    {
+        visibility: visible;
+
+        margin-left: 0;
+
+        opacity: 1;
+    }
+
+    .wdt-listings-social-share-container.type2.active .wdt-listings-social-share-item-icon > span,
+    .wdt-listings-social-share-container.type2:hover .wdt-listings-social-share-item-icon > span
+    {
+        color: #ffffff;
+    }
+
+    .wdt-listings-social-share-container.type2 .wdt-listings-social-share-item-icon > span,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-item-icon > span,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-utils-favourite .wdt-listings-utils-favourite-author > span
+    {
+        line-height: 40px;
+
+        width: 40px;
+        height: 40px;
+
+        border-radius: 50%;
+        background-color: #f2f2f2;
+    }
+
+    .wdt-listings-social-share-container .wdt-listings-social-share-list li a,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list li a,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-item-icon > span,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-utils-favourite .wdt-listings-utils-favourite-author > span
+    {
+        color: #2a2a2a;
+    }
+
+    .wdt-listings-social-share-container .wdt-listings-social-share-list,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list
+    {
+        background-color: #f2f2f2;
+    }
+
+    .wdt-listings-social-share-container .wdt-listings-social-share-list:before,
+    .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list:before
+    {
+        color: #f2f2f2;
+    }
+
+    /*----type2------*/
+    
+    .wdt-listings-social-share-container.type2 .wdt-listings-social-share-list {
+        left: calc(100% + 10px);
+        bottom: 0;
+    }
+
+    .wdt-listings-social-share-container.type2 .wdt-listings-social-share-list:before {
+        bottom: auto;
+        top: 0;
+        left: 0;
+        transform: translateX(-100%) translateY(100%) rotate(90deg);
+        -webkit-transform: translateX(-100%) translateY(100%) rotate(90deg);
+    }
+
+    /*----*****---- << Mobile (Landscape) >> ----*****----*/
+    /* Note: Design for a width of 767px */
+
+    @media only screen and (max-width: 767px)
+    {
+        .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list
+        {
+            bottom: calc(100% + 15px);
+        }
+        .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list,
+        .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list:before
+        {
+            right: auto;
+            left: 50%;
+
+            -webkit-transform: translateX(-50%);
+                    transform: translateX(-50%);
+        }
+        .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list:before
+        {
+            bottom: -14px;
+        }
+        .wdt-user-list-item.type3 .wdt-user-item-meta-data .wdt-listings-social-share-container .wdt-listings-social-share-list li a
+        {
+            font-size: 13px;
+            line-height: 20px;
+
+            float: left;
+
+            width: 20px;
+            height: 20px;
+
+            text-align: center;
+        }
+    }

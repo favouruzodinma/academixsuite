@@ -1,0 +1,273 @@
+[11-Mar-2026 18:24:11 Africa/Lagos] === ADD TEACHER PAGE START ===
+[11-Mar-2026 18:24:11 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[11-Mar-2026 18:24:11 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[11-Mar-2026 18:24:11 Africa/Lagos] School database connection successful
+[11-Mar-2026 18:24:11 Africa/Lagos] TeacherManager initialized for school ID: 6
+[11-Mar-2026 18:24:11 Africa/Lagos] TeacherManager initialized successfully
+[11-Mar-2026 18:24:11 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to undefined method TeacherManager::generateEmployeeId() in /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php:369
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(365): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php on line 369
+[11-Mar-2026 18:35:47 Africa/Lagos] === ADD TEACHER PAGE START ===
+[11-Mar-2026 18:35:47 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[11-Mar-2026 18:35:47 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[11-Mar-2026 18:35:47 Africa/Lagos] School database connection successful
+[11-Mar-2026 18:35:47 Africa/Lagos] TeacherManager initialized for school ID: 6
+[11-Mar-2026 18:35:47 Africa/Lagos] TeacherManager initialized successfully
+[11-Mar-2026 18:35:47 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to private method TeacherManager::generateEmployeeId() from global scope in /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php:369
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(365): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php on line 369
+[11-Mar-2026 18:45:02 Africa/Lagos] === ADD TEACHER PAGE START ===
+[11-Mar-2026 18:45:02 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[11-Mar-2026 18:45:02 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[11-Mar-2026 18:45:02 Africa/Lagos] School database connection successful
+[11-Mar-2026 18:45:02 Africa/Lagos] TeacherManager initialized for school ID: 6
+[11-Mar-2026 18:45:02 Africa/Lagos] TeacherManager initialized successfully
+[11-Mar-2026 18:45:02 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to private method TeacherManager::generateEmployeeId() from global scope in /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php:369
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(365): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php on line 369
+[11-Mar-2026 18:57:01 Africa/Lagos] === ADD TEACHER PAGE START ===
+[11-Mar-2026 18:57:01 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[11-Mar-2026 18:57:01 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[11-Mar-2026 18:57:01 Africa/Lagos] School database connection successful
+[11-Mar-2026 18:57:01 Africa/Lagos] TeacherManager initialized for school ID: 6
+[11-Mar-2026 18:57:01 Africa/Lagos] TeacherManager initialized successfully
+[11-Mar-2026 18:57:01 Africa/Lagos] === ADD TEACHER PAGE END ===
+[11-Mar-2026 18:57:01 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[11-Mar-2026 19:05:09 Africa/Lagos] === ADD TEACHER PAGE START ===
+[11-Mar-2026 19:05:09 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[11-Mar-2026 19:05:09 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[11-Mar-2026 19:05:09 Africa/Lagos] School database connection successful
+[11-Mar-2026 19:05:09 Africa/Lagos] TeacherManager initialized for school ID: 6
+[11-Mar-2026 19:05:09 Africa/Lagos] TeacherManager initialized successfully
+[11-Mar-2026 19:05:09 Africa/Lagos] === ADD TEACHER PAGE END ===
+[11-Mar-2026 19:05:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[11-Mar-2026 19:09:55 Africa/Lagos] === ADD TEACHER PAGE START ===
+[11-Mar-2026 19:09:55 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[11-Mar-2026 19:09:55 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[11-Mar-2026 19:09:55 Africa/Lagos] School database connection successful
+[11-Mar-2026 19:09:55 Africa/Lagos] TeacherManager initialized for school ID: 6
+[11-Mar-2026 19:09:55 Africa/Lagos] TeacherManager initialized successfully
+[11-Mar-2026 19:09:55 Africa/Lagos] === PROCESSING TEACHER FORM SUBMISSION ===
+[11-Mar-2026 19:09:55 Africa/Lagos] Teacher data prepared: ["employee_id","name","email","phone","gender","date_of_birth","fathers_name","mothers_name","marital_status","contract_type","shift","work_location","joining_date","qualification","experience_years","blood_group","height","weight","bank_name","bank_account","ifsc_code","national_id","current_address","permanent_address","previous_school","previous_school_address","facebook_link","linkedin_link","instagram_link","youtube_link","details","password","profile_photo","assigned_classes","assigned_subjects"]
+[11-Mar-2026 19:09:55 Africa/Lagos] Assigned subjects count: 1
+[11-Mar-2026 19:09:55 Africa/Lagos] Assigned classes count: 1
+[11-Mar-2026 19:09:55 Africa/Lagos] === ADD TEACHER TRANSACTION STARTED ===
+[11-Mar-2026 19:09:55 Africa/Lagos] Generated employee ID: TCH-2026-8372
+[11-Mar-2026 19:09:55 Africa/Lagos] Teacher user created with ID: 39
+[11-Mar-2026 19:09:55 Africa/Lagos] Teacher record created with ID: 9
+[11-Mar-2026 19:09:55 Africa/Lagos] Payroll employee record created for user ID: 39
+[11-Mar-2026 19:09:55 Africa/Lagos] Teacher assigned as class teacher for class ID: 15
+[11-Mar-2026 19:09:55 Africa/Lagos] Created new class-subject assignment for subject ID: 10
+[11-Mar-2026 19:09:55 Africa/Lagos] Teacher assigned to 1 subjects
+[11-Mar-2026 19:09:55 Africa/Lagos] === TEACHER ADDED SUCCESSFULLY === ID: 9
+[11-Mar-2026 19:09:55 Africa/Lagos] Teacher added successfully: Teacher added successfully! Employee ID: TCH-2026-8372
+[11-Mar-2026 19:44:41 Africa/Lagos] === ADD TEACHER PAGE START ===
+[11-Mar-2026 19:44:41 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[11-Mar-2026 19:44:41 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[11-Mar-2026 19:44:41 Africa/Lagos] School database connection successful
+[11-Mar-2026 19:44:41 Africa/Lagos] TeacherManager initialized for school ID: 6
+[11-Mar-2026 19:44:41 Africa/Lagos] TeacherManager initialized successfully
+[11-Mar-2026 19:44:41 Africa/Lagos] === ADD TEACHER PAGE END ===
+[11-Mar-2026 19:44:41 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 11:55:38 Africa/Lagos] === ADD TEACHER PAGE START ===
+[12-Mar-2026 11:55:38 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[12-Mar-2026 11:55:38 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 11:55:38 Africa/Lagos] School database connection successful
+[12-Mar-2026 11:55:38 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 11:55:38 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 11:55:38 Africa/Lagos] === ADD TEACHER PAGE END ===
+[12-Mar-2026 11:55:38 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:29:14 Africa/Lagos] === ADD TEACHER PAGE START ===
+[12-Mar-2026 13:29:14 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[12-Mar-2026 13:29:14 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:29:14 Africa/Lagos] School database connection successful
+[12-Mar-2026 13:29:14 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 13:29:14 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 13:29:14 Africa/Lagos] === ADD TEACHER PAGE END ===
+[12-Mar-2026 13:29:14 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:33:17 Africa/Lagos] === ADD TEACHER PAGE START ===
+[12-Mar-2026 13:33:17 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[12-Mar-2026 13:33:17 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:33:17 Africa/Lagos] School database connection successful
+[12-Mar-2026 13:33:17 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 13:33:17 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 13:33:17 Africa/Lagos] === ADD TEACHER PAGE END ===
+[12-Mar-2026 13:33:17 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:44:02 Africa/Lagos] === ADD TEACHER PAGE START ===
+[12-Mar-2026 13:44:02 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[12-Mar-2026 13:44:02 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:44:02 Africa/Lagos] School database connection successful
+[12-Mar-2026 13:44:02 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 13:44:02 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 13:44:02 Africa/Lagos] === PROCESSING TEACHER FORM SUBMISSION ===
+[12-Mar-2026 13:44:02 Africa/Lagos] Teacher data prepared: ["employee_id","name","email","phone","gender","date_of_birth","fathers_name","mothers_name","marital_status","contract_type","shift","work_location","joining_date","qualification","experience_years","blood_group","height","weight","bank_name","bank_account","ifsc_code","national_id","current_address","permanent_address","previous_school","previous_school_address","facebook_link","linkedin_link","instagram_link","youtube_link","details","password","profile_photo","assigned_classes","assigned_subjects"]
+[12-Mar-2026 13:44:02 Africa/Lagos] Assigned subjects count: 2
+[12-Mar-2026 13:44:02 Africa/Lagos] Assigned classes count: 0
+[12-Mar-2026 13:44:02 Africa/Lagos] === ADD TEACHER TRANSACTION STARTED ===
+[12-Mar-2026 13:44:02 Africa/Lagos] Generated employee ID: TCH-2026-8373
+[12-Mar-2026 13:44:02 Africa/Lagos] Transaction rolled back
+[12-Mar-2026 13:44:02 Africa/Lagos] Error adding teacher: Email already exists in the system
+[12-Mar-2026 13:44:02 Africa/Lagos] Stack trace: #0 /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php(332): TeacherManager->addTeacher(Array)
+#1 /home/academixsuite/public_html/tenant/router.php(365): require_once('/home/academixs...')
+#2 {main}
+[12-Mar-2026 13:44:02 Africa/Lagos] Failed to add teacher: Error adding teacher: Email already exists in the system
+[12-Mar-2026 13:44:15 Africa/Lagos] === ADD TEACHER PAGE START ===
+[12-Mar-2026 13:44:15 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[12-Mar-2026 13:44:15 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:44:15 Africa/Lagos] School database connection successful
+[12-Mar-2026 13:44:15 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 13:44:15 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 13:44:15 Africa/Lagos] === ADD TEACHER PAGE END ===
+[12-Mar-2026 13:44:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:44:40 Africa/Lagos] === ADD TEACHER PAGE START ===
+[12-Mar-2026 13:44:40 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[12-Mar-2026 13:44:40 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:44:40 Africa/Lagos] School database connection successful
+[12-Mar-2026 13:44:40 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 13:44:40 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 13:44:40 Africa/Lagos] === PROCESSING TEACHER FORM SUBMISSION ===
+[12-Mar-2026 13:44:40 Africa/Lagos] Teacher data prepared: ["employee_id","name","email","phone","gender","date_of_birth","fathers_name","mothers_name","marital_status","contract_type","shift","work_location","joining_date","qualification","experience_years","blood_group","height","weight","bank_name","bank_account","ifsc_code","national_id","current_address","permanent_address","previous_school","previous_school_address","facebook_link","linkedin_link","instagram_link","youtube_link","details","password","profile_photo","assigned_classes","assigned_subjects"]
+[12-Mar-2026 13:44:40 Africa/Lagos] Assigned subjects count: 2
+[12-Mar-2026 13:44:40 Africa/Lagos] Assigned classes count: 0
+[12-Mar-2026 13:44:40 Africa/Lagos] === ADD TEACHER TRANSACTION STARTED ===
+[12-Mar-2026 13:44:40 Africa/Lagos] Generated employee ID: TCH-2026-8373
+[12-Mar-2026 13:44:40 Africa/Lagos] Transaction rolled back
+[12-Mar-2026 13:44:40 Africa/Lagos] Error adding teacher: Phone number already exists in the system
+[12-Mar-2026 13:44:40 Africa/Lagos] Stack trace: #0 /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php(332): TeacherManager->addTeacher(Array)
+#1 /home/academixsuite/public_html/tenant/router.php(365): require_once('/home/academixs...')
+#2 {main}
+[12-Mar-2026 13:44:40 Africa/Lagos] Failed to add teacher: Error adding teacher: Phone number already exists in the system
+[12-Mar-2026 13:45:34 Africa/Lagos] === ADD TEACHER PAGE START ===
+[12-Mar-2026 13:45:34 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[12-Mar-2026 13:45:34 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:45:34 Africa/Lagos] School database connection successful
+[12-Mar-2026 13:45:34 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 13:45:34 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 13:45:34 Africa/Lagos] === ADD TEACHER PAGE END ===
+[12-Mar-2026 13:45:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:45:51 Africa/Lagos] === ADD TEACHER PAGE START ===
+[12-Mar-2026 13:45:51 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[12-Mar-2026 13:45:51 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:45:51 Africa/Lagos] School database connection successful
+[12-Mar-2026 13:45:51 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 13:45:51 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 13:45:51 Africa/Lagos] === PROCESSING TEACHER FORM SUBMISSION ===
+[12-Mar-2026 13:45:51 Africa/Lagos] Teacher data prepared: ["employee_id","name","email","phone","gender","date_of_birth","fathers_name","mothers_name","marital_status","contract_type","shift","work_location","joining_date","qualification","experience_years","blood_group","height","weight","bank_name","bank_account","ifsc_code","national_id","current_address","permanent_address","previous_school","previous_school_address","facebook_link","linkedin_link","instagram_link","youtube_link","details","password","profile_photo","assigned_classes","assigned_subjects"]
+[12-Mar-2026 13:45:51 Africa/Lagos] Assigned subjects count: 2
+[12-Mar-2026 13:45:51 Africa/Lagos] Assigned classes count: 0
+[12-Mar-2026 13:45:51 Africa/Lagos] === ADD TEACHER TRANSACTION STARTED ===
+[12-Mar-2026 13:45:51 Africa/Lagos] Generated employee ID: TCH-2026-8373
+[12-Mar-2026 13:45:51 Africa/Lagos] Teacher user created with ID: 78
+[12-Mar-2026 13:45:51 Africa/Lagos] Teacher record created with ID: 10
+[12-Mar-2026 13:45:51 Africa/Lagos] Payroll employee record created for user ID: 78
+[12-Mar-2026 13:45:51 Africa/Lagos] Teacher assigned to 2 subjects
+[12-Mar-2026 13:45:51 Africa/Lagos] === TEACHER ADDED SUCCESSFULLY === ID: 10
+[12-Mar-2026 13:45:51 Africa/Lagos] Teacher added successfully: Teacher added successfully! Employee ID: TCH-2026-8373
+[12-Mar-2026 13:48:20 Africa/Lagos] === ADD TEACHER PAGE START ===
+[12-Mar-2026 13:48:20 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[12-Mar-2026 13:48:20 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:48:20 Africa/Lagos] School database connection successful
+[12-Mar-2026 13:48:20 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 13:48:20 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 13:48:20 Africa/Lagos] === ADD TEACHER PAGE END ===
+[12-Mar-2026 13:48:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:55:40 Africa/Lagos] === ADD TEACHER PAGE START ===
+[12-Mar-2026 13:55:40 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[12-Mar-2026 13:55:40 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:55:40 Africa/Lagos] School database connection successful
+[12-Mar-2026 13:55:40 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 13:55:40 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 13:55:40 Africa/Lagos] === PROCESSING TEACHER FORM SUBMISSION ===
+[12-Mar-2026 13:55:40 Africa/Lagos] Teacher data prepared: ["employee_id","name","email","phone","gender","date_of_birth","fathers_name","mothers_name","marital_status","contract_type","shift","work_location","joining_date","qualification","experience_years","blood_group","height","weight","bank_name","bank_account","ifsc_code","national_id","current_address","permanent_address","previous_school","previous_school_address","facebook_link","linkedin_link","instagram_link","youtube_link","details","password","profile_photo","assigned_classes","assigned_subjects"]
+[12-Mar-2026 13:55:40 Africa/Lagos] Assigned subjects count: 3
+[12-Mar-2026 13:55:40 Africa/Lagos] Assigned classes count: 0
+[12-Mar-2026 13:55:40 Africa/Lagos] === ADD TEACHER TRANSACTION STARTED ===
+[12-Mar-2026 13:55:40 Africa/Lagos] Generated employee ID: TCH-2026-8374
+[12-Mar-2026 13:55:41 Africa/Lagos] Teacher user created with ID: 79
+[12-Mar-2026 13:55:41 Africa/Lagos] Teacher record created with ID: 11
+[12-Mar-2026 13:55:41 Africa/Lagos] Payroll employee record created for user ID: 79
+[12-Mar-2026 13:55:41 Africa/Lagos] Teacher assigned to 3 subjects
+[12-Mar-2026 13:55:41 Africa/Lagos] === TEACHER ADDED SUCCESSFULLY === ID: 11
+[12-Mar-2026 13:55:41 Africa/Lagos] Teacher added successfully: Teacher added successfully! Employee ID: TCH-2026-8374
+[12-Mar-2026 13:55:51 Africa/Lagos] === ADD TEACHER PAGE START ===
+[12-Mar-2026 13:55:51 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[12-Mar-2026 13:55:51 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 13:55:51 Africa/Lagos] School database connection successful
+[12-Mar-2026 13:55:51 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 13:55:51 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 13:55:51 Africa/Lagos] === ADD TEACHER PAGE END ===
+[12-Mar-2026 13:55:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 14:11:43 Africa/Lagos] === ADD TEACHER PAGE START ===
+[12-Mar-2026 14:11:43 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[12-Mar-2026 14:11:43 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[12-Mar-2026 14:11:43 Africa/Lagos] School database connection successful
+[12-Mar-2026 14:11:43 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 14:11:43 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 14:11:43 Africa/Lagos] === PROCESSING TEACHER FORM SUBMISSION ===
+[12-Mar-2026 14:11:43 Africa/Lagos] Teacher data prepared: ["employee_id","name","email","phone","gender","date_of_birth","fathers_name","mothers_name","marital_status","contract_type","shift","work_location","joining_date","qualification","experience_years","blood_group","height","weight","bank_name","bank_account","ifsc_code","national_id","current_address","permanent_address","previous_school","previous_school_address","facebook_link","linkedin_link","instagram_link","youtube_link","details","password","profile_photo","assigned_classes","assigned_subjects"]
+[12-Mar-2026 14:11:43 Africa/Lagos] Assigned subjects count: 3
+[12-Mar-2026 14:11:43 Africa/Lagos] Assigned classes count: 0
+[12-Mar-2026 14:11:43 Africa/Lagos] === ADD TEACHER TRANSACTION STARTED ===
+[12-Mar-2026 14:11:43 Africa/Lagos] Generated employee ID: TCH-2026-8375
+[12-Mar-2026 14:11:43 Africa/Lagos] Teacher user created with ID: 80
+[12-Mar-2026 14:11:43 Africa/Lagos] Teacher record created with ID: 12
+[12-Mar-2026 14:11:43 Africa/Lagos] Payroll employee record created for user ID: 80
+[12-Mar-2026 14:11:43 Africa/Lagos] Teacher assigned to 3 subjects
+[12-Mar-2026 14:11:43 Africa/Lagos] === TEACHER ADDED SUCCESSFULLY === ID: 12
+[12-Mar-2026 14:11:43 Africa/Lagos] Teacher added successfully: Teacher added successfully! Employee ID: TCH-2026-8375
+[14-Mar-2026 17:34:06 Africa/Lagos] === ADD TEACHER PAGE START ===
+[14-Mar-2026 17:34:06 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[14-Mar-2026 17:34:06 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[14-Mar-2026 17:34:06 Africa/Lagos] School database connection successful
+[14-Mar-2026 17:34:06 Africa/Lagos] TeacherManager initialized for school ID: 6
+[14-Mar-2026 17:34:06 Africa/Lagos] TeacherManager initialized successfully
+[14-Mar-2026 17:34:06 Africa/Lagos] === ADD TEACHER PAGE END ===
+[14-Mar-2026 17:34:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[14-Mar-2026 17:40:45 Africa/Lagos] === ADD TEACHER PAGE START ===
+[14-Mar-2026 17:40:45 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[14-Mar-2026 17:40:45 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[14-Mar-2026 17:40:45 Africa/Lagos] School database connection successful
+[14-Mar-2026 17:40:45 Africa/Lagos] TeacherManager initialized for school ID: 6
+[14-Mar-2026 17:40:45 Africa/Lagos] TeacherManager initialized successfully
+[14-Mar-2026 17:40:45 Africa/Lagos] === ADD TEACHER PAGE END ===
+[14-Mar-2026 17:40:45 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[16-Mar-2026 13:10:30 Africa/Lagos] === ADD TEACHER PAGE START ===
+[16-Mar-2026 13:10:30 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[16-Mar-2026 13:10:30 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[16-Mar-2026 13:10:30 Africa/Lagos] School database connection successful
+[16-Mar-2026 13:10:30 Africa/Lagos] TeacherManager initialized for school ID: 6
+[16-Mar-2026 13:10:30 Africa/Lagos] TeacherManager initialized successfully
+[16-Mar-2026 13:10:30 Africa/Lagos] === ADD TEACHER PAGE END ===
+[16-Mar-2026 13:10:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[29-Mar-2026 09:48:51 Africa/Lagos] === ADD TEACHER PAGE START ===
+[29-Mar-2026 09:48:51 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[29-Mar-2026 09:48:51 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[29-Mar-2026 09:48:51 Africa/Lagos] School database connection successful
+[29-Mar-2026 09:48:51 Africa/Lagos] TeacherManager initialized for school ID: 6
+[29-Mar-2026 09:48:51 Africa/Lagos] TeacherManager initialized successfully
+[29-Mar-2026 09:48:51 Africa/Lagos] === ADD TEACHER PAGE END ===
+[29-Mar-2026 09:48:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[29-Mar-2026 09:52:34 Africa/Lagos] === ADD TEACHER PAGE START ===
+[29-Mar-2026 09:52:34 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-new-teacher.php
+[29-Mar-2026 09:52:34 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-new-teacher.php
+[29-Mar-2026 09:52:34 Africa/Lagos] School database connection successful
+[29-Mar-2026 09:52:34 Africa/Lagos] TeacherManager initialized for school ID: 6
+[29-Mar-2026 09:52:34 Africa/Lagos] TeacherManager initialized successfully
+[29-Mar-2026 09:52:34 Africa/Lagos] === PROCESSING TEACHER FORM SUBMISSION ===
+[29-Mar-2026 09:52:34 Africa/Lagos] Teacher data prepared: ["employee_id","name","email","phone","gender","date_of_birth","fathers_name","mothers_name","marital_status","contract_type","shift","work_location","joining_date","qualification","experience_years","blood_group","height","weight","bank_name","bank_account","ifsc_code","national_id","current_address","permanent_address","previous_school","previous_school_address","facebook_link","linkedin_link","instagram_link","youtube_link","details","password","profile_photo","assigned_classes","assigned_subjects"]
+[29-Mar-2026 09:52:34 Africa/Lagos] Assigned subjects count: 2
+[29-Mar-2026 09:52:34 Africa/Lagos] Assigned classes count: 0
+[29-Mar-2026 09:52:34 Africa/Lagos] === ADD TEACHER TRANSACTION STARTED ===
+[29-Mar-2026 09:52:34 Africa/Lagos] Generated employee ID: TCH-2026-8376
+[29-Mar-2026 09:52:35 Africa/Lagos] Teacher user created with ID: 83
+[29-Mar-2026 09:52:35 Africa/Lagos] Teacher record created with ID: 13
+[29-Mar-2026 09:52:35 Africa/Lagos] Payroll employee record created for user ID: 83
+[29-Mar-2026 09:52:35 Africa/Lagos] Teacher assigned to 2 subjects
+[29-Mar-2026 09:52:35 Africa/Lagos] === TEACHER ADDED SUCCESSFULLY === ID: 13
+[29-Mar-2026 09:52:35 Africa/Lagos] Teacher added successfully: Teacher added successfully! Employee ID: TCH-2026-8376

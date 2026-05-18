@@ -92,6 +92,9 @@ try {
     
     // Generate invoice number
     $invoiceNumber = 'INV-' . date('Ymd') . '-' . str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+    $invoiceAccessToken = function_exists('generate_invoice_access_token') ? generate_invoice_access_token() : bin2hex(random_bytes(32));
+    $invoiceColumns = $db->query("SHOW COLUMNS FROM invoices")->fetchAll(PDO::FETCH_COLUMN, 0);
+    $hasAccessToken = in_array('access_token', $invoiceColumns, true);
     
     // Calculate amount based on billing cycle
     $amount = $school['price_monthly'];
@@ -106,18 +109,23 @@ try {
     // Create invoice
     $invoiceStmt = $db->prepare("
         INSERT INTO invoices 
-        (school_id, invoice_number, amount, status, due_date, start_date, end_date, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+        (school_id, invoice_number" . ($hasAccessToken ? ", access_token" : "") . ", amount, status, due_date, start_date, end_date, created_at)
+        VALUES (?, ?" . ($hasAccessToken ? ", ?" : "") . ", ?, ?, ?, ?, ?, NOW())
     ");
-    $invoiceStmt->execute([
+    $params = [
         $schoolId,
-        $invoiceNumber,
+        $invoiceNumber
+    ];
+    if ($hasAccessToken) {
+        $params[] = $invoiceAccessToken;
+    }
+    $invoiceStmt->execute(array_merge($params, [
         $amount,
         $status = 'draft',
         $dueDate,
         $startDate,
         $endDate
-    ]);
+    ]));
     
     $invoiceId = $db->lastInsertId();
     

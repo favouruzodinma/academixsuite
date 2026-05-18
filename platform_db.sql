@@ -574,7 +574,7 @@ CREATE TABLE `platform_users` (
 --
 
 INSERT INTO `platform_users` (`id`, `name`, `email`, `email_verified_at`, `password`, `role`, `phone`, `avatar`, `two_factor_secret`, `two_factor_recovery_codes`, `remember_token`, `last_login_at`, `last_login_ip`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'Super Admin', 'admin@schoolsaas.com', NULL, '$2y$10$d2Kj0wgJjhgplYqhdUFXRemEC17IAy/ik61X1J0iJMOoWjW8OkE96', 'super_admin', NULL, NULL, NULL, NULL, NULL, '2026-01-15 01:19:42', '102.90.81.44', 1, '2026-01-15 00:48:26', '2026-01-15 01:19:42'),
+(1, 'Super Admin', 'admin@academixsuite.com', NULL, '$2y$10$d2Kj0wgJjhgplYqhdUFXRemEC17IAy/ik61X1J0iJMOoWjW8OkE96', 'super_admin', NULL, NULL, NULL, NULL, NULL, '2026-01-15 01:19:42', '102.90.81.44', 1, '2026-01-15 00:48:26', '2026-01-15 01:19:42'),
 (2, 'Support Agent', 'support@schoolsaas.com', NULL, '$2y$10$AnotherHashHereForSupport', 'support', '+2348001234567', NULL, NULL, NULL, NULL, NULL, NULL, 1, '2026-01-15 01:01:45', '2026-01-15 01:01:45'),
 (3, 'Sales Executive', 'sales@schoolsaas.com', NULL, '$2y$10$AnotherHashHereForSales', 'sales', '+2348007654321', NULL, NULL, NULL, NULL, NULL, NULL, 1, '2026-01-15 01:01:45', '2026-01-15 01:01:45');
 

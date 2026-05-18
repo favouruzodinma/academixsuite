@@ -81,6 +81,7 @@ $schoolTypes = [
     'international' => 'International School',
     'montessori' => 'Montessori School',
     'boarding' => 'Boarding School',
+    'day_and_boarding' => 'Day and Boarding School',
     'day' => 'Day School'
 ];
 
@@ -608,6 +609,7 @@ $curriculums = [
                     <form id="provisionForm" action="process_provision.php" method="POST" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-lg p-6 lg:p-8">
                         <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                         <input type="hidden" name="provision_type" value="full">
+                        <input type="hidden" id="schoolSlugInput" name="school_slug" value="school-<?php echo time(); ?>">
 
                         <!-- Step 1: School Information -->
                         <div id="step1" class="step-content active">
@@ -1010,7 +1012,7 @@ $curriculums = [
                                         <select id="adminRole" name="admin_role" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition" required>
                                             <option value="">Select role</option>
                                             <option value="owner" selected>Owner (Full Access)</option>
-                                            <option value="administrator">Administrator</option>
+                                            <option value="admin">Administrator</option>   <!-- CHANGED from 'administrator' to 'admin' -->
                                             <option value="principal">Principal</option>
                                             <option value="accountant">Accountant</option>
                                         </select>
@@ -1969,6 +1971,10 @@ $curriculums = [
                 // Add timestamp to ensure uniqueness
                 slug = slug.substring(0, 30);
                 document.getElementById('slugPreview').textContent = slug;
+                const slugInput = document.getElementById('schoolSlugInput');
+                if (slugInput) {
+                    slugInput.value = slug;
+                }
             }
         }
 
@@ -2221,8 +2227,9 @@ $curriculums = [
             // Database name and URL
             const slug = document.getElementById('slugPreview').textContent;
             document.getElementById('reviewDatabaseName').textContent = `school_${Date.now()}`;
-            document.getElementById('reviewAccessURL').textContent = 
-                `/academixsuite/tenant/${slug}`;
+            const host = window.location.hostname.replace(/^www\./, '');
+            document.getElementById('reviewAccessURL').textContent =
+                `${window.location.protocol}//${slug}.${host}/login.php`;
         }
 
         // Form submission
@@ -2306,7 +2313,8 @@ $curriculums = [
             
             if (modal && message && schoolURL && adminEmail) {
                 message.textContent = result.message || `"${formData.school?.name}" has been successfully provisioned and is ready to use.`;
-                schoolURL.textContent = result.school_url || window.location.origin + '/academixsuite/tenant/' + result.school_slug;
+                const host = window.location.hostname.replace(/^www\./, '');
+                schoolURL.textContent = result.school_url || window.location.protocol + '//' + result.school_slug + '.' + host + '/login.php';
                 adminEmail.textContent = result.admin_email || formData.admin?.email;
                 
                 modal.classList.remove('hidden');

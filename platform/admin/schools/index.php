@@ -17,16 +17,8 @@ $exchangeRate = 1500; // You can make this dynamic by fetching from an API or da
 // Example dynamic approach:
 // $exchangeRate = $db->query("SELECT rate FROM exchange_rates WHERE currency_from = 'USD' AND currency_to = 'NGN' ORDER BY created_at DESC LIMIT 1")->fetch()['rate'] ?? 1500;
 
-// NEW: Auto-suspend schools whose trial has ended but haven't subscribed
-$currentDate = date('Y-m-d H:i:s');
-$autoSuspendQuery = "UPDATE schools s 
-                     LEFT JOIN subscriptions sub ON s.id = sub.school_id 
-                     SET s.status = 'suspended' 
-                     WHERE s.status = 'trial' 
-                     AND s.trial_ends_at IS NOT NULL 
-                     AND s.trial_ends_at < ? 
-                     AND (sub.id IS NULL OR sub.status != 'active')";
-$db->prepare($autoSuspendQuery)->execute([$currentDate]);
+// Trial expiry is handled by cron/tasks/process_school_trials.php so that
+// suspension and email notification happen together in one auditable flow.
 
 // Get filter parameters
 $status = $_GET['status'] ?? null;
@@ -203,7 +195,7 @@ function getRenewalStatus($school) {
     
     // Check if trial has ended but not subscribed
     if ($schoolStatus === 'trial' && $trialEndsAt && strtotime($trialEndsAt) < time()) {
-        return ['class' => 'bg-red-100 text-red-600', 'text' => 'Trial Ended - Suspended'];
+        return ['class' => 'bg-red-100 text-red-600', 'text' => 'Trial Ended'];
     }
     
     if ($schoolStatus !== 'active' && $schoolStatus !== 'trial') {

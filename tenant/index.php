@@ -2,6 +2,7 @@
 
 /**
  * School Discovery Portal - Find Schools to Enroll Your Child
+ * Colour palette: #f3f6f0 (background), #13452f (primary), #22281f (dark)
  */
 
 // Enable error reporting
@@ -12,10 +13,8 @@ ini_set('error_log', __DIR__ . '/../logs/school_discovery.log');
 // Start session
 if (session_status() === PHP_SESSION_NONE) {
     session_name('academix_tenant');
-    session_start([
-        'cookie_httponly' => true,
-        'cookie_secure'   => false,
-    ]);
+    require_once __DIR__ . '/../includes/session_config.php';
+    session_start(academix_session_options());
 }
 
 // Load configuration
@@ -207,1156 +206,852 @@ try {
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Schools | AcademixSuite - Nigeria's Premier School Discovery Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Find Schools | AcademixSuite - Nigerian School Discovery</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <!-- Custom fonts: more grounded, less "corporate AI" -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
+        /* Custom palette: #f3f6f0 (background soft), #13452f (forest), #22281f (charcoal) */
         :root {
-            --primary: #4f46e5;
-            --secondary: #7c3aed;
-            --accent: #f43f5e;
-            --surface: #ffffff;
-            --bg: #f8fafc;
+            --bg-soft: #f3f6f0;
+            --primary-deep: #13452f;
+            --primary-light: #2d6a4f;
+            --dark-charcoal: #22281f;
+            --accent-warm: #7DFF76;
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg);
-            color: #0f172a;
-            overflow-x: hidden;
+            background-color: var(--bg-soft);
+            color: var(--dark-charcoal);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
         h1,
         h2,
         h3,
-        .font-heading {
-            font-family: 'Space Grotesk', sans-serif;
+        .font-mono-head {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
+        /* Custom utility for primary deep */
+        .bg-primary-deep {
+            background-color: var(--primary-deep);
         }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
+        .text-primary-deep {
+            color: var(--primary-deep);
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
+        .border-primary-deep {
+            border-color: var(--primary-deep);
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary);
+        .bg-primary-light {
+            background-color: var(--primary-light);
         }
 
-        /* Glassmorphism Navigation */
-        .glass-nav {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 1rem;
-            margin: 1rem auto;
-            width: 95%;
-            max-width: 1200px;
+        .text-primary-light {
+            color: var(--primary-light);
         }
 
-        /* School Card Styling */
+        .bg-dark-charcoal {
+            background-color: var(--dark-charcoal);
+        }
+
+        .text-dark-charcoal {
+            color: var(--dark-charcoal);
+        }
+
+        .bg-soft-bg {
+            background-color: var(--bg-soft);
+        }
+
+        .accent-gold {
+            color: var(--accent-warm);
+        }
+
+        .bg-accent-gold {
+            background-color: var(--accent-warm);
+        }
+
+        /* Navigation: solid, not glassy — feels more robust */
+        .solid-nav {
+            background-color: #ffffffd9;
+            backdrop-filter: blur(8px);
+            border-bottom: 2px solid #13452f20;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        }
+
+        /* School card: textured border */
         .school-card {
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-            position: relative;
-            z-index: 1;
+            background-color: #ffffff;
+            border: 1px solid #dde3d8;
+            border-radius: 28px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.08);
         }
 
         .school-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            z-index: 10;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-6px);
+            border-color: var(--primary-deep);
+            box-shadow: 0 24px 38px -14px rgba(19, 69, 47, 0.18);
         }
 
-        /* Animated Blobs */
-        .blob {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(124, 58, 237, 0.2));
-            filter: blur(80px);
-            border-radius: 50%;
-            z-index: -1;
-            animation: move 20s infinite alternate;
+        /* filter sidebar card */
+        .filter-card {
+            background-color: #ffffff;
+            border-radius: 28px;
+            border: 1px solid #dde3d8;
+            padding: 1.5rem 1.2rem;
         }
 
-        @keyframes move {
-            from {
-                transform: translate(-10%, -10%);
+        /* mobile-first spacing */
+        @media (max-width: 640px) {
+            .school-card {
+                border-radius: 24px;
             }
 
-            to {
-                transform: translate(20%, 20%);
+            .filter-card {
+                padding: 1.2rem 1rem;
+                border-radius: 24px;
+            }
+
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+                line-height: 1.2;
             }
         }
 
-        /* Fee Range Slider */
+        /* range slider style */
         .range-slider {
             -webkit-appearance: none;
             width: 100%;
             height: 6px;
-            border-radius: 5px;
-            background: #e2e8f0;
+            background: #dde3d8;
+            border-radius: 10px;
             outline: none;
         }
 
         .range-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
+            background: var(--primary-deep);
             border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
             border: 3px solid white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
         }
 
         .range-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
+            background: var(--primary-deep);
             border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
             border: 3px solid white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
         }
 
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .glass-nav {
-                padding: 0.75rem 1rem;
-            }
-
-            .hero-mesh {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-
-            .map-container {
-                height: 250px;
-            }
-
-            .school-card {
-                margin-bottom: 1rem;
-            }
+        /* custom badge styles */
+        .badge-premium {
+            background-color: #22281f;
+            color: white;
+            font-weight: 600;
+            padding: 0.3rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            letter-spacing: 0.02em;
         }
 
-        /* Loading Animation */
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
+        .badge-new {
+            background-color: #c79b5e;
+            color: #22281f;
+            font-weight: 600;
+            padding: 0.3rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
         }
 
-        .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .badge-popular {
+            background-color: #13452f;
+            color: white;
+            font-weight: 600;
+            padding: 0.3rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
         }
 
-        /* Rating Stars */
-        .rating-stars {
+        .fee-badge {
+            background: #22281f;
+            color: white;
+            font-weight: 600;
+            padding: 0.3rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
             display: inline-flex;
             align-items: center;
+            gap: 0.2rem;
         }
 
+        /* rating stars */
         .rating-stars i {
-            color: #fbbf24;
+            color: #c79b5e;
+            margin-right: 1px;
         }
 
         .rating-stars i:last-child {
-            color: #e5e7eb;
+            color: #d4d9d0;
         }
 
-        /* Fee Badge */
-        .fee-badge {
-            background: linear-gradient(135deg, #10b981, #34d399);
-            color: white;
-            font-weight: bold;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
+        /* faq */
+        .faq-item {
+            border-bottom: 1px solid #dde3d8;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: var(--dark-charcoal);
+        }
+
+        /* map placeholder style */
+        .map-placeholder {
+            background-color: #e2e8dd;
+            background-image: radial-gradient(circle at 20px 20px, #c0cbbc 2px, transparent 2px), radial-gradient(circle at 60px 80px, #c0cbbc 2px, transparent 2px);
+            background-size: 60px 60px, 120px 120px;
+            min-height: 200px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #13452f;
+            font-weight: 600;
+        }
+
+        /* active filter tag */
+        .filter-tag {
+            background-color: #e2eee5;
+            color: #13452f;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 500;
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.3rem;
+        }
+
+        /* custom scroll */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #e0e6db;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #13452f;
+            border-radius: 10px;
+        }
+
+        /* Newsletter form styling */
+        .newsletter-input {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .newsletter-input:focus {
+            border-color: var(--accent-warm);
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-link {
+            transition: color 0.2s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--accent-warm);
+        }
+        
+        .footer-heading {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .footer-heading:after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--accent-warm);
         }
     </style>
 </head>
 
-<body>
+<body class="antialiased">
 
-    <div class="blob" style="top: 10%; left: -5%;"></div>
-    <div class="blob" style="bottom: 10%; right: -5%; background: rgba(244, 63, 94, 0.1);"></div>
-
-    <nav class="glass-nav sticky top-2 md:top-4 flex items-center justify-between px-4 md:px-8 py-3 md:py-4 z-[1000]">
-        <div class="flex items-center space-x-2">
-            <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg md:rounded-xl flex items-center justify-center text-white shadow-lg">
-                <i class="fas fa-school text-sm md:text-base"></i>
-            </div>
-            <span class="text-lg md:text-xl font-bold tracking-tight">Academix<span class="text-indigo-600">Suite</span></span>
+    <!-- navigation: solid, functional, mobile-optimized -->
+    <nav class="solid-nav sticky top-0 z-30 w-full py-3 px-4 md:px-6 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <img src="./assets/images/logo.png" alt="AcademixSuite" class="h-10 w-auto">
         </div>
 
-        <div class="hidden lg:flex items-center space-x-6 font-medium text-slate-600">
-            <a href="#search" class="hover:text-indigo-600 transition">Find Schools</a>
-            <a href="#why-choose" class="hover:text-indigo-600 transition">Why Choose</a>
-            <a href="#how-it-works" class="hover:text-indigo-600 transition">How It Works</a>
-            <a href="#faq" class="hover:text-indigo-600 transition">FAQ</a>
+        <!-- mobile: hide nav links, keep essential -->
+        <div class="hidden md:flex items-center space-x-8 text-sm font-semibold text-dark-charcoal/80">
+            <a href="#search" class="hover:text-primary-deep transition">Find</a>
+            <a href="#why-choose" class="hover:text-primary-deep transition">Why</a>
+            <a href="#how-it-works" class="hover:text-primary-deep transition">How</a>
+            <a href="#faq" class="hover:text-primary-deep transition">FAQ</a>
         </div>
 
-        <div class="flex items-center space-x-4">
-            <a href="/academixsuite/tenant/login.php" class="text-sm font-bold text-slate-700 hover:text-indigo-600 transition">School Login</a>
-            <a href="/academixsuite/public/register.php" class="bg-slate-900 text-white px-4 md:px-6 py-2 md:py-2.5 rounded-full text-sm font-bold hover:bg-indigo-600 transition shadow-xl">
+        <div class="flex items-center gap-3">
+            <a href="./login.php" class="hidden sm:inline-block text-sm font-bold text-dark-charcoal/80 hover:text-primary-deep transition">Login</a>
+            <a href="../public/register.php" class="bg-dark-charcoal text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-primary-deep transition shadow-md whitespace-nowrap">
                 Register School
             </a>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header class="hero-mesh relative px-4 md:px-6 pt-12 md:pt-16 pb-12 md:pb-24 overflow-hidden">
-        <div class="container mx-auto text-center relative z-10">
-            <div data-aos="fade-down" class="mb-6">
-                <span class="bg-indigo-100 text-indigo-600 px-3 md:px-4 py-1 md:py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-200">
-                    <?php echo number_format($totalCount); ?>+ Verified Schools
+    <!-- HERO: robust, earthy -->
+    <section class="relative pt-10 pb-16 md:pt-16 md:pb-24 px-4 overflow-hidden">
+        <!-- subtle organic pattern -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 60 60%22 width=%2260%22 height=%2260%22><path d=%22M30 5 L55 20 L55 40 L30 55 L5 40 L5 20 Z%22 fill=%22%2313452f%22 opacity=%220.3%22/></svg>'); background-size: 40px;"></div>
+
+        <div class="container max-w-6xl mx-auto text-center relative z-10">
+            <div data-aos="fade-down" class="mb-5">
+                <span class="bg-primary-deep/10 text-primary-deep px-4 py-1.5 rounded-full text-xs font-mono-head uppercase tracking-wide border border-primary-deep/20">
+                    <?php echo number_format($totalCount); ?>+ verified schools
                 </span>
             </div>
-            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 leading-[1.1] md:leading-[1.05] mb-6 md:mb-8" data-aos="fade-up">
-                Find the Perfect <br class="hidden md:block">
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-rose-500">School for Your Child</span>
+            <h1 class="text-4xl sm:text-5xl md:text-7xl font-mono-head text-dark-charcoal leading-[1.1] mb-6" data-aos="fade-up">
+                find the school<br>that <span class="text-primary-deep underline decoration-accent-gold decoration-4">fits</span>
             </h1>
-            <p class="text-base md:text-xl lg:text-2xl text-slate-500 max-w-3xl mx-auto mb-8 md:mb-12 font-light leading-relaxed" data-aos="fade-up" data-aos-delay="100">
-                Discover Nigeria's best educational institutions with verified reviews, detailed profiles, and smart location-based recommendations.
+            <p class="text-base md:text-xl text-dark-charcoal/70 max-w-2xl mx-auto mb-10 font-light" data-aos="fade-up" data-aos-delay="80">
+                Real parent reviews. Honest fee details. No generic listings.
             </p>
 
-            <!-- Quick Stats -->
-            <div class="flex flex-wrap justify-center items-center gap-6 md:gap-10 mb-8 md:mb-12" data-aos="fade-up" data-aos-delay="150">
-                <div class="text-center">
-                    <p class="text-2xl md:text-4xl font-black text-indigo-600 stat-counter" data-count="<?php echo $totalCount; ?>">0</p>
-                    <p class="text-xs md:text-sm text-slate-500">Active Schools</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-2xl md:text-4xl font-black text-purple-600">36</p>
-                    <p class="text-xs md:text-sm text-slate-500">States Covered</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-2xl md:text-4xl font-black text-rose-600">4.8</p>
-                    <p class="text-xs md:text-sm text-slate-500">Avg. Parent Rating</p>
-                </div>
-            </div>
-
-            <!-- Search Bar -->
-            <div class="max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="200">
-                <form method="GET" action="" id="searchForm" class="relative">
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-6 top-1/2 transform -translate-y-1/2 text-slate-400 text-lg"></i>
-                        <input type="text"
-                            name="search"
-                            placeholder="Search schools by name, location, or curriculum..."
-                            value="<?php echo htmlspecialchars($searchQuery); ?>"
-                            class="w-full pl-16 pr-6 py-4 md:py-6 bg-white border border-slate-200 rounded-xl md:rounded-2xl text-base md:text-lg outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all shadow-lg">
-                        <button type="submit" class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-indigo-600 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
-                            Search
-                        </button>
+            <!-- compact search bar for mobile -->
+            <div class="max-w-xl mx-auto" data-aos="fade-up" data-aos-delay="120">
+                <form method="GET" action="" id="searchForm">
+                    <div class="flex items-center bg-white rounded-full border border-primary-deep/20 pl-5 pr-2 py-1 shadow-sm">
+                        <i class="fas fa-search text-primary-deep/60 mr-2"></i>
+                        <input type="text" name="search" value="<?php echo htmlspecialchars($searchQuery); ?>" placeholder="school name, location, curriculum..." class="w-full py-3 bg-transparent text-sm focus:outline-none">
+                        <button type="submit" class="bg-primary-deep text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-dark-charcoal transition whitespace-nowrap">Go</button>
                     </div>
                 </form>
             </div>
-        </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 md:px-6 py-8 md:py-12">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- Filters Sidebar -->
+            <!-- quick stat row, mobile friendly -->
+            <div class="flex flex-wrap justify-center gap-6 md:gap-12 mt-10 text-sm">
+                <div><span class="font-mono-head text-2xl text-primary-deep"><?php echo number_format($totalCount); ?></span> <span class="text-dark-charcoal/60">schools</span></div>
+                <div><span class="font-mono-head text-2xl text-primary-deep">36</span> <span class="text-dark-charcoal/60">states</span></div>
+                <div><span class="font-mono-head text-2xl text-primary-deep">4.8</span> <span class="text-dark-charcoal/60">parent rating</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN: filter + schools grid, mobile-first stacked -->
+    <main class="container max-w-6xl mx-auto px-4 pb-16">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 md:gap-8">
+            <!-- FILTER SIDEBAR - collapsible on mobile? We'll keep it as is but scrollable -->
             <aside class="lg:col-span-1">
-                <div class="bg-white rounded-xl md:rounded-2xl p-6 border border-slate-200 shadow-sm sticky top-24">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="font-bold text-slate-900 text-lg">Filter Schools</h3>
-                        <button type="button" onclick="clearFilters()" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
-                            Clear All
-                        </button>
+                <div class="filter-card sticky top-24 max-h-[calc(100vh-100px)] overflow-y-auto p-5">
+                    <div class="flex justify-between items-center mb-5">
+                        <h3 class="font-mono-head text-dark-charcoal text-lg">filter</h3>
+                        <button type="button" onclick="clearFilters()" class="text-xs text-primary-deep underline">clear all</button>
                     </div>
 
                     <form method="GET" action="" id="filterForm" class="space-y-6">
-                        <!-- Location Filter -->
+                        <!-- location -->
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-3">
-                                <i class="fas fa-map-marker-alt text-indigo-600 mr-2"></i>Location
-                            </label>
-                            <div class="space-y-3">
-                                <select name="state" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 transition" onchange="updateCityOptions(this.value)">
-                                    <option value="">All States</option>
-                                    <?php foreach ($states as $stateOption): ?>
-                                        <option value="<?php echo htmlspecialchars($stateOption); ?>" <?php echo $state === $stateOption ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($stateOption); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-
-                                <select name="city" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 transition" onchange="this.form.submit()">
-                                    <option value="">All Cities</option>
-                                    <?php if ($state): ?>
-                                        <?php foreach ($cities as $cityOption): ?>
-                                            <option value="<?php echo htmlspecialchars($cityOption); ?>" <?php echo $city === $cityOption ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($cityOption); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                            </div>
+                            <label class="block text-xs font-bold text-dark-charcoal/70 mb-2 tracking-wide"><i class="fas fa-location-dot text-primary-deep mr-1"></i>state</label>
+                            <select name="state" onchange="updateCityOptions(this.value); this.form.submit()" class="w-full px-4 py-3 bg-soft-bg border border-primary-deep/20 rounded-xl text-dark-charcoal text-sm focus:ring-1 focus:ring-primary-deep">
+                                <option value="">all states</option>
+                                <?php foreach ($states as $stateOption): ?>
+                                    <option value="<?php echo htmlspecialchars($stateOption); ?>" <?php echo $state === $stateOption ? 'selected' : ''; ?>><?php echo htmlspecialchars($stateOption); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-dark-charcoal/70 mb-2 tracking-wide">city</label>
+                            <select name="city" onchange="this.form.submit()" class="w-full px-4 py-3 bg-soft-bg border border-primary-deep/20 rounded-xl text-dark-charcoal text-sm">
+                                <option value="">all cities</option>
+                                <?php foreach ($cities as $cityOption): ?>
+                                    <option value="<?php echo htmlspecialchars($cityOption); ?>" <?php echo $city === $cityOption ? 'selected' : ''; ?>><?php echo htmlspecialchars($cityOption); ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
 
-                        <!-- Fee Range Filter -->
+                        <!-- fee range min/max (simpler on mobile) -->
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-3">
-                                <i class="fas fa-money-bill-wave text-indigo-600 mr-2"></i>Annual Fee Range
-                            </label>
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between text-sm text-slate-600">
-                                    <span>₦<?php echo number_format($globalMinFee); ?></span>
-                                    <span>₦<?php echo number_format($globalMaxFee); ?></span>
-                                </div>
-                                <div class="grid grid-cols-2 gap-2 mb-2">
-                                    <div>
-                                        <label class="text-xs text-slate-500">Min (₦)</label>
-                                        <input type="number"
-                                            name="min_fee"
-                                            value="<?php echo $minFee !== null ? $minFee : ''; ?>"
-                                            placeholder="Min"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition text-sm">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs text-slate-500">Max (₦)</label>
-                                        <input type="number"
-                                            name="max_fee"
-                                            value="<?php echo $maxFee !== null ? $maxFee : ''; ?>"
-                                            placeholder="Max"
-                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition text-sm">
-                                    </div>
-                                </div>
-                                <button type="button" onclick="applyFeeFilter()" class="w-full bg-indigo-100 text-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-200 transition">
-                                    Apply Fee Filter
-                                </button>
+                            <label class="block text-xs font-bold text-dark-charcoal/70 mb-2"><i class="fas fa-naira-sign text-primary-deep mr-1"></i>annual fee (₦)</label>
+                            <div class="flex gap-2">
+                                <input type="number" name="min_fee" value="<?php echo $minFee !== null ? $minFee : ''; ?>" placeholder="min" class="w-1/2 px-3 py-2 bg-soft-bg border border-primary-deep/20 rounded-xl text-sm">
+                                <input type="number" name="max_fee" value="<?php echo $maxFee !== null ? $maxFee : ''; ?>" placeholder="max" class="w-1/2 px-3 py-2 bg-soft-bg border border-primary-deep/20 rounded-xl text-sm">
                             </div>
+                            <button type="button" onclick="applyFeeFilter()" class="w-full mt-2 bg-primary-deep/10 text-primary-deep px-3 py-2 rounded-xl text-sm font-semibold">apply fee</button>
                         </div>
 
-                        <!-- Curriculum Filter -->
+                        <!-- curriculum radio list, scrollable but compact -->
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-3">
-                                <i class="fas fa-book-open text-indigo-600 mr-2"></i>Curriculum
-                            </label>
-                            <div class="space-y-2 max-h-48 overflow-y-auto pr-2">
-                                <?php foreach ($curriculums as $curriculumOption): ?>
-                                    <label class="flex items-center cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition">
-                                        <input type="radio"
-                                            name="curriculum"
-                                            value="<?php echo htmlspecialchars($curriculumOption); ?>"
-                                            class="hidden peer"
-                                            onchange="this.form.submit()"
-                                            <?php echo $curriculum === $curriculumOption ? 'checked' : ''; ?>>
-                                        <div class="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center mr-3 peer-checked:bg-indigo-500 peer-checked:border-indigo-500">
-                                            <i class="fas fa-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
-                                        </div>
-                                        <span class="text-slate-700 peer-checked:text-indigo-600 peer-checked:font-medium text-sm">
-                                            <?php echo htmlspecialchars($curriculumOption); ?>
-                                        </span>
+                            <label class="block text-xs font-bold text-dark-charcoal/70 mb-2">curriculum</label>
+                            <div class="space-y-2 max-h-36 overflow-y-auto pr-1">
+                                <?php foreach ($curriculums as $curr): ?>
+                                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                        <input type="radio" name="curriculum" value="<?php echo htmlspecialchars($curr); ?>" <?php echo $curriculum === $curr ? 'checked' : ''; ?> onchange="this.form.submit()" class="accent-primary-deep">
+                                        <span><?php echo htmlspecialchars($curr); ?></span>
                                     </label>
                                 <?php endforeach; ?>
                             </div>
                         </div>
 
-                        <!-- School Type Filter -->
+                        <!-- school type radio -->
                         <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-3">
-                                <i class="fas fa-building text-indigo-600 mr-2"></i>School Type
-                            </label>
-                            <div class="space-y-2 max-h-48 overflow-y-auto pr-2">
-                                <?php foreach ($schoolTypes as $typeOption): ?>
-                                    <label class="flex items-center cursor-pointer hover:bg-slate-50 p-2 rounded-lg transition">
-                                        <input type="radio"
-                                            name="type"
-                                            value="<?php echo htmlspecialchars($typeOption); ?>"
-                                            class="hidden peer"
-                                            onchange="this.form.submit()"
-                                            <?php echo $schoolType === $typeOption ? 'checked' : ''; ?>>
-                                        <div class="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center mr-3 peer-checked:bg-indigo-500 peer-checked:border-indigo-500">
-                                            <i class="fas fa-check text-white text-xs opacity-0 peer-checked:opacity-100"></i>
-                                        </div>
-                                        <span class="text-slate-700 peer-checked:text-indigo-600 peer-checked:font-medium text-sm">
-                                            <?php echo htmlspecialchars(ucwords(str_replace('_', ' ', $typeOption))); ?>
-                                        </span>
+                            <label class="block text-xs font-bold text-dark-charcoal/70 mb-2">type</label>
+                            <div class="space-y-2 max-h-36 overflow-y-auto pr-1">
+                                <?php foreach ($schoolTypes as $type): ?>
+                                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                        <input type="radio" name="type" value="<?php echo htmlspecialchars($type); ?>" <?php echo $schoolType === $type ? 'checked' : ''; ?> onchange="this.form.submit()" class="accent-primary-deep">
+                                        <span><?php echo htmlspecialchars(ucwords(str_replace('_', ' ', $type))); ?></span>
                                     </label>
                                 <?php endforeach; ?>
                             </div>
                         </div>
 
-                        <!-- Hidden inputs -->
-                        <input type="hidden" name="page" value="1">
+                        <!-- hidden sort/page -->
                         <input type="hidden" name="sort" value="<?php echo htmlspecialchars($sortBy); ?>">
+                        <input type="hidden" name="page" value="1">
 
-                        <!-- Active Filters Display -->
-                        <?php if ($searchQuery || $state || $city || $curriculum || $schoolType || $minFee !== null || $maxFee !== null): ?>
-                            <div class="pt-4 border-t border-slate-200">
-                                <p class="text-sm font-semibold text-slate-700 mb-2">Active Filters:</p>
-                                <div class="flex flex-wrap gap-2">
-                                    <?php if ($searchQuery): ?>
-                                        <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-medium">
-                                            Search: <?php echo htmlspecialchars($searchQuery); ?>
-                                            <button type="button" onclick="removeFilter('search')" class="ml-1 hover:text-red-600">×</button>
-                                        </span>
-                                    <?php endif; ?>
-
-                                    <?php if ($state): ?>
-                                        <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-medium">
-                                            State: <?php echo htmlspecialchars($state); ?>
-                                            <button type="button" onclick="removeFilter('state')" class="ml-1 hover:text-red-600">×</button>
-                                        </span>
-                                    <?php endif; ?>
-
-                                    <?php if ($city): ?>
-                                        <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-medium">
-                                            City: <?php echo htmlspecialchars($city); ?>
-                                            <button type="button" onclick="removeFilter('city')" class="ml-1 hover:text-red-600">×</button>
-                                        </span>
-                                    <?php endif; ?>
-
-                                    <?php if ($curriculum): ?>
-                                        <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-medium">
-                                            Curriculum: <?php echo htmlspecialchars($curriculum); ?>
-                                            <button type="button" onclick="removeFilter('curriculum')" class="ml-1 hover:text-red-600">×</button>
-                                        </span>
-                                    <?php endif; ?>
-
-                                    <?php if ($schoolType): ?>
-                                        <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-medium">
-                                            Type: <?php echo htmlspecialchars(ucwords(str_replace('_', ' ', $schoolType))); ?>
-                                            <button type="button" onclick="removeFilter('type')" class="ml-1 hover:text-red-600">×</button>
-                                        </span>
-                                    <?php endif; ?>
-
-                                    <?php if ($minFee !== null): ?>
-                                        <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-medium">
-                                            Min Fee: ₦<?php echo number_format($minFee); ?>
-                                            <button type="button" onclick="removeFilter('min_fee')" class="ml-1 hover:text-red-600">×</button>
-                                        </span>
-                                    <?php endif; ?>
-
-                                    <?php if ($maxFee !== null): ?>
-                                        <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-medium">
-                                            Max Fee: ₦<?php echo number_format($maxFee); ?>
-                                            <button type="button" onclick="removeFilter('max_fee')" class="ml-1 hover:text-red-600">×</button>
-                                        </span>
-                                    <?php endif; ?>
-                                </div>
+                        <!-- active filter tags (mobile friendly) -->
+                        <?php if (!empty($searchQuery) || !empty($state) || !empty($city) || !empty($curriculum) || !empty($schoolType) || $minFee || $maxFee): ?>
+                            <div class="pt-3 flex flex-wrap gap-2 border-t border-primary-deep/10">
+                                <?php if ($searchQuery): ?><span class="filter-tag"><i class="fas fa-magnifying-glass"></i> <?php echo htmlspecialchars($searchQuery); ?> <button type="button" onclick="removeFilter('search')" class="ml-1">✕</button></span><?php endif; ?>
+                                <?php if ($state): ?><span class="filter-tag"><i class="fas fa-location-dot"></i> <?php echo htmlspecialchars($state); ?> <button type="button" onclick="removeFilter('state')" class="ml-1">✕</button></span><?php endif; ?>
+                                <?php if ($city): ?><span class="filter-tag"><?php echo htmlspecialchars($city); ?> <button type="button" onclick="removeFilter('city')" class="ml-1">✕</button></span><?php endif; ?>
+                                <?php if ($curriculum): ?><span class="filter-tag"><?php echo htmlspecialchars($curriculum); ?> <button type="button" onclick="removeFilter('curriculum')" class="ml-1">✕</button></span><?php endif; ?>
+                                <?php if ($schoolType): ?><span class="filter-tag"><?php echo htmlspecialchars(ucwords(str_replace('_', ' ', $schoolType))); ?> <button type="button" onclick="removeFilter('type')" class="ml-1">✕</button></span><?php endif; ?>
+                                <?php if ($minFee): ?><span class="filter-tag">min ₦<?php echo number_format($minFee); ?> <button type="button" onclick="removeFilter('min_fee')" class="ml-1">✕</button></span><?php endif; ?>
+                                <?php if ($maxFee): ?><span class="filter-tag">max ₦<?php echo number_format($maxFee); ?> <button type="button" onclick="removeFilter('max_fee')" class="ml-1">✕</button></span><?php endif; ?>
                             </div>
                         <?php endif; ?>
 
-                        <button type="submit" class="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition shadow-md mt-6">
-                            Apply Filters
-                        </button>
+                        <button type="submit" class="w-full bg-primary-deep text-white py-3 rounded-xl font-bold text-sm hover:bg-dark-charcoal transition">update results</button>
                     </form>
-                </div>
 
-                <!-- Map Section -->
-                <div class="mt-6 bg-white rounded-xl md:rounded-2xl p-6 border border-slate-200 shadow-sm">
-                    <h3 class="font-bold text-slate-900 text-lg mb-4">
-                        <i class="fas fa-map text-indigo-600 mr-2"></i>Schools Map
-                    </h3>
-                    <div class="map-container bg-gradient-to-br from-slate-100 to-slate-200">
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <div class="text-center">
-                                <i class="fas fa-map-marked-alt text-4xl text-slate-400 mb-3"></i>
-                                <p class="text-slate-600 font-medium">Interactive Map</p>
-                                <p class="text-slate-500 text-sm mt-1">School locations visualized</p>
-                            </div>
-                        </div>
-                        <div class="map-overlay"></div>
+                    <!-- map placeholder: simple pattern, non-distracting -->
+                    <div class="mt-6 map-placeholder text-sm flex-col gap-1 p-4">
+                        <i class="fas fa-map-location-dot text-2xl opacity-60"></i>
+                        <span>schools map view</span>
+                        <span class="text-[10px] opacity-60">based on your filters</span>
                     </div>
-                    <p class="text-slate-500 text-sm mt-4">
-                        <i class="fas fa-info-circle text-indigo-500 mr-1"></i>
-                        Map shows school locations based on your filters
-                    </p>
                 </div>
             </aside>
 
-            <!-- Schools List -->
+            <!-- SCHOOL LIST SECTION -->
             <section class="lg:col-span-3">
-                <!-- Results Header -->
-                <div class="bg-white rounded-xl md:rounded-2xl p-6 border border-slate-200 shadow-sm mb-6">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div>
-                            <h2 class="text-xl md:text-2xl font-bold text-slate-900">
-                                <?php echo number_format($totalCount); ?> Schools Found
-                            </h2>
-                            <p class="text-slate-500 text-sm mt-1">
-                                <?php if ($searchQuery): ?>Showing results for "<?php echo htmlspecialchars($searchQuery); ?>"<?php endif; ?>
-                                <?php if ($state): ?> in <?php echo htmlspecialchars($state); ?><?php endif; ?>
-                                    <?php if ($minFee !== null || $maxFee !== null): ?>
-                                        with fees
-                                        <?php if ($minFee !== null): ?>from ₦<?php echo number_format($minFee); ?><?php endif; ?>
-                                        <?php if ($maxFee !== null): ?>to ₦<?php echo number_format($maxFee); ?><?php endif; ?>
-                                    <?php endif; ?>
-                            </p>
-                        </div>
-
-                        <div class="flex items-center gap-4">
-                            <select name="sort"
-                                onchange="updateSort(this.value)"
-                                class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 transition text-sm">
-                                <option value="name" <?php echo $sortBy === 'name' ? 'selected' : ''; ?>>Sort by: Name A-Z</option>
-                                <option value="name_desc" <?php echo $sortBy === 'name_desc' ? 'selected' : ''; ?>>Sort by: Name Z-A</option>
-                                <option value="rating" <?php echo $sortBy === 'rating' ? 'selected' : ''; ?>>Sort by: Highest Rated</option>
-                                <option value="fee_low" <?php echo $sortBy === 'fee_low' ? 'selected' : ''; ?>>Sort by: Fee Low to High</option>
-                                <option value="fee_high" <?php echo $sortBy === 'fee_high' ? 'selected' : ''; ?>>Sort by: Fee High to Low</option>
-                                <option value="newest" <?php echo $sortBy === 'newest' ? 'selected' : ''; ?>>Sort by: Newest</option>
-                                <option value="oldest" <?php echo $sortBy === 'oldest' ? 'selected' : ''; ?>>Sort by: Oldest</option>
-                                <option value="popular" <?php echo $sortBy === 'popular' ? 'selected' : ''; ?>>Sort by: Most Popular</option>
-                            </select>
-                        </div>
+                <!-- results header + sort (mobile row) -->
+                <div class="bg-white rounded-2xl p-5 mb-6 border border-primary-deep/10 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 class="font-mono-head text-xl text-dark-charcoal"><?php echo number_format($totalCount); ?> schools</h2>
+                        <p class="text-xs text-dark-charcoal/60">
+                            <?php if ($searchQuery): ?> for "<?php echo htmlspecialchars($searchQuery); ?>"<?php endif; ?>
+                            <?php if ($state): ?> in <?php echo htmlspecialchars($state); ?><?php endif; ?>
+                        </p>
                     </div>
+                    <select name="sort" onchange="updateSort(this.value)" class="px-3 py-2 bg-soft-bg border border-primary-deep/20 rounded-xl text-sm">
+                        <option value="name" <?php echo $sortBy === 'name' ? 'selected' : ''; ?>>name A-Z</option>
+                        <option value="name_desc" <?php echo $sortBy === 'name_desc' ? 'selected' : ''; ?>>name Z-A</option>
+                        <option value="rating" <?php echo $sortBy === 'rating' ? 'selected' : ''; ?>>highest rated</option>
+                        <option value="fee_low" <?php echo $sortBy === 'fee_low' ? 'selected' : ''; ?>>fee low-high</option>
+                        <option value="fee_high" <?php echo $sortBy === 'fee_high' ? 'selected' : ''; ?>>fee high-low</option>
+                        <option value="newest" <?php echo $sortBy === 'newest' ? 'selected' : ''; ?>>newest</option>
+                    </select>
                 </div>
 
-                <!-- Schools Grid -->
+                <!-- grid: 1 column on mobile, 2 on medium, 3 on large -->
                 <?php if (count($schools) > 0): ?>
-                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                         <?php foreach ($schools as $school):
-                            // Determine badge type
                             $badgeClass = '';
                             $badgeText = '';
                             if ($school['plan_name'] === 'Enterprise' || $school['plan_name'] === 'Premium') {
                                 $badgeClass = 'badge-premium';
-                                $badgeText = 'Premium';
+                                $badgeText = 'premium';
                             } elseif (strtotime($school['created_at']) > strtotime('-30 days')) {
                                 $badgeClass = 'badge-new';
-                                $badgeText = 'New';
-                            } elseif ($school['total_reviews'] > 50) {
+                                $badgeText = 'new';
+                            } elseif (($school['total_reviews'] ?? 0) > 50) {
                                 $badgeClass = 'badge-popular';
-                                $badgeText = 'Popular';
+                                $badgeText = 'popular';
                             }
 
-                            // Calculate rating
                             $rating = $school['avg_rating'] ?? 0;
                             $fullStars = floor($rating);
-                            $hasHalfStar = ($rating - $fullStars) >= 0.5;
+                            $hasHalf = ($rating - $fullStars) >= 0.5;
 
-                            // Parse facilities if they exist
-                            $facilities = [];
-                            if (!empty($school['facilities'])) {
-                                $facilities = json_decode($school['facilities'], true) ?: [];
-                            }
-
-                            // Calculate fee range
                             $feeFrom = $school['fee_range_from'] ?? 0;
                             $feeTo = $school['fee_range_to'] ?? 0;
                             $avgFee = ($feeFrom + $feeTo) / 2;
                         ?>
-                            <div class="school-card bg-white rounded-xl md:rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300" data-aos="fade-up">
-                                <!-- School Image -->
-                                <div class="relative h-48 overflow-hidden">
+                            <div class="school-card p-5 flex flex-col">
+                                <!-- top row: badge + icons -->
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <?php if ($badgeText): ?>
+                                            <span class="<?php echo $badgeClass; ?>"><?php echo $badgeText; ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="w-8 h-8 bg-soft-bg rounded-full text-dark-charcoal/70"><i class="far fa-heart"></i></button>
+                                    </div>
+                                </div>
+                                <!-- logo / placeholder -->
+                                <div class="w-full h-32 rounded-xl bg-primary-deep/5 mb-4 flex items-center justify-center text-primary-deep/40 text-3xl">
                                     <?php if ($school['logo_path']): ?>
-                                        <img src="<?php echo htmlspecialchars($school['logo_path']); ?>"
-                                            alt="<?php echo htmlspecialchars($school['name']); ?>"
-                                            class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300">
+                                        <img src="<?php echo htmlspecialchars($school['logo_path']); ?>" class="h-full w-full object-cover rounded-xl">
                                     <?php else: ?>
-                                        <div class="w-full h-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                                            <i class="fas fa-school text-4xl text-indigo-300"></i>
-                                        </div>
+                                        <i class="fas fa-tree"></i>
                                     <?php endif; ?>
-
-                                    <!-- Badge -->
-                                    <?php if ($badgeClass && $badgeText): ?>
-                                        <div class="absolute top-4 left-4">
-                                            <span class="<?php echo $badgeClass; ?> school-badge shadow-md">
-                                                <i class="fas fa-star text-xs"></i>
-                                                <?php echo $badgeText; ?>
-                                            </span>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <!-- Fee Badge -->
-                                    <?php if ($avgFee > 0): ?>
-                                        <div class="absolute bottom-4 right-4">
-                                            <span class="fee-badge shadow-md">
-                                                <i class="fas fa-money-bill-wave text-xs"></i>
-                                                ₦<?php echo number_format($avgFee); ?>/yr
-                                            </span>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <!-- Quick Actions -->
-                                    <div class="absolute top-4 right-4 flex gap-2">
-                                        <button class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-700 hover:text-indigo-600 transition shadow-md">
-                                            <i class="fas fa-heart text-sm"></i>
-                                        </button>
-                                        <button class="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-700 hover:text-indigo-600 transition shadow-md">
-                                            <i class="fas fa-share-alt text-sm"></i>
-                                        </button>
-                                    </div>
                                 </div>
-
-                                <!-- School Info -->
-                                <div class="p-6">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <div class="flex-1">
-                                            <h3 class="font-bold text-slate-900 text-lg mb-1 truncate">
-                                                <?php echo htmlspecialchars($school['name']); ?>
-                                            </h3>
-                                            <div class="flex items-center text-slate-500 text-sm mb-3">
-                                                <i class="fas fa-map-marker-alt text-xs mr-1"></i>
-                                                <span class="truncate">
-                                                    <?php
-                                                    $locationParts = array_filter([$school['city'], $school['state']]);
-                                                    echo htmlspecialchars(implode(', ', $locationParts));
-                                                    ?>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="text-right">
-                                            <?php if ($rating > 0): ?>
-                                                <div class="rating-stars text-sm">
-                                                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                                                        <?php if ($i <= $fullStars): ?>
-                                                            <i class="fas fa-star"></i>
-                                                        <?php elseif ($i === $fullStars + 1 && $hasHalfStar): ?>
-                                                            <i class="fas fa-star-half-alt"></i>
-                                                        <?php else: ?>
-                                                            <i class="far fa-star"></i>
-                                                        <?php endif; ?>
-                                                    <?php endfor; ?>
-                                                </div>
-                                                <p class="text-xs text-slate-500 mt-1"><?php echo number_format($rating, 1); ?> (<?php echo $school['total_reviews'] ?? 0; ?>)</p>
-                                            <?php else: ?>
-                                                <p class="text-xs text-slate-500">No ratings yet</p>
+                                <!-- school name + location -->
+                                <h3 class="font-mono-head text-dark-charcoal text-lg mb-1"><?php echo htmlspecialchars($school['name']); ?></h3>
+                                <div class="flex items-center gap-1 text-xs text-dark-charcoal/60 mb-2">
+                                    <i class="fas fa-map-pin text-primary-deep/70"></i>
+                                    <span><?php echo htmlspecialchars($school['city'] . ', ' . $school['state']); ?></span>
+                                </div>
+                                <!-- rating -->
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="rating-stars">
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <?php if ($i <= $fullStars): ?><i class="fas fa-star"></i>
+                                            <?php elseif ($i == $fullStars + 1 && $hasHalf): ?><i class="fas fa-star-half-alt"></i>
+                                            <?php else: ?><i class="far fa-star"></i>
                                             <?php endif; ?>
-                                        </div>
-                                    </div>
-
-                                    <p class="text-slate-600 text-sm mb-4 line-clamp-2">
-                                        <?php echo htmlspecialchars($school['description'] ?? 'A reputable educational institution providing quality education.'); ?>
-                                    </p>
-
-                                    <!-- Quick Facts -->
-                                    <div class="grid grid-cols-2 gap-3 mb-4">
-                                        <div class="flex items-center text-slate-600 text-sm">
-                                            <i class="fas fa-graduation-cap text-indigo-500 mr-2 text-xs"></i>
-                                            <span><?php echo htmlspecialchars($school['school_type'] ?? 'Secondary'); ?></span>
-                                        </div>
-                                        <div class="flex items-center text-slate-600 text-sm">
-                                            <i class="fas fa-book text-purple-500 mr-2 text-xs"></i>
-                                            <span><?php echo htmlspecialchars($school['curriculum'] ?? 'Nigerian'); ?></span>
-                                        </div>
-                                        <?php if ($school['establishment_year']): ?>
-                                            <div class="flex items-center text-slate-600 text-sm">
-                                                <i class="fas fa-calendar-alt text-rose-500 mr-2 text-xs"></i>
-                                                <span>Est. <?php echo $school['establishment_year']; ?></span>
-                                            </div>
-                                        <?php endif; ?>
-                                        <?php if (!empty($facilities)): ?>
-                                            <div class="flex items-center text-slate-600 text-sm">
-                                                <i class="fas fa-wifi text-emerald-500 mr-2 text-xs"></i>
-                                                <span><?php echo count($facilities); ?> facilities</span>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-
-                                    <!-- Fee Range -->
-                                    <?php if ($feeFrom > 0 || $feeTo > 0): ?>
-                                        <div class="mb-4">
-                                            <div class="flex justify-between text-xs text-slate-500 mb-1">
-                                                <span>Annual Fee Range:</span>
-                                                <span class="font-semibold text-slate-700">
-                                                    ₦<?php echo number_format($feeFrom); ?> - ₦<?php echo number_format($feeTo); ?>
-                                                </span>
-                                            </div>
-                                            <div class="w-full bg-slate-100 rounded-full h-2">
-                                                <?php
-                                                $percentage = $globalMaxFee > 0 ? min(100, ($avgFee / $globalMaxFee) * 100) : 0;
-                                                ?>
-                                                <div class="bg-gradient-to-r from-emerald-400 to-emerald-600 h-2 rounded-full" style="width: <?php echo $percentage; ?>%"></div>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                                        <div>
-                                            <span class="text-sm font-semibold text-slate-900">
-                                                Admission:
-                                            </span>
-                                            <span class="text-sm <?php echo ($school['admission_status'] ?? 'open') === 'open' ? 'text-emerald-600' : 'text-rose-600'; ?> ml-1">
-                                                <?php echo ucfirst($school['admission_status'] ?? 'open'); ?>
-                                            </span>
-                                        </div>
-                                        <a href="./school_profile.php?slug=<?php echo urlencode($school['slug']); ?>"
-                                            class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition shadow-md shadow-indigo-200">
-                                            View Details
-                                        </a>
-                                    </div>
+                                        <?php endfor; ?>
+                                    </span>
+                                    <span class="text-xs text-dark-charcoal/50">(<?php echo $school['total_reviews'] ?? 0; ?>)</span>
                                 </div>
+                                <!-- fee indicator -->
+                                <?php if ($avgFee > 0): ?>
+                                    <div class="flex items-center justify-between text-sm mb-2">
+                                        <span class="text-dark-charcoal/60">fee</span>
+                                        <span class="font-mono-head text-primary-deep">₦<?php echo number_format($avgFee); ?>/yr</span>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- quick type/curriculum chips -->
+                                <div class="flex flex-wrap gap-2 mt-1 mb-4">
+                                    <span class="bg-soft-bg px-3 py-1 rounded-full text-xs"><?php echo htmlspecialchars($school['school_type'] ?? 'secondary'); ?></span>
+                                    <span class="bg-soft-bg px-3 py-1 rounded-full text-xs"><?php echo htmlspecialchars($school['curriculum'] ?? 'nigeria'); ?></span>
+                                </div>
+                                <!-- view details button -->
+                                <a href="<?php echo htmlspecialchars(function_exists('school_portal_url') ? school_portal_url($school['slug'], '', true) : './school_profile.php?slug=' . urlencode($school['slug']), ENT_QUOTES, 'UTF-8'); ?>" class="mt-auto w-full bg-dark-charcoal text-white text-center py-3 rounded-xl text-sm font-bold hover:bg-primary-deep transition">view details</a>
                             </div>
                         <?php endforeach; ?>
                     </div>
 
-                    <!-- Pagination -->
+                    <!-- pagination, mobile optimized -->
                     <?php if ($totalPages > 1): ?>
-                        <div class="mt-8 flex justify-center">
-                            <nav class="flex items-center space-x-2">
+                        <div class="mt-12 flex justify-center">
+                            <nav class="flex flex-wrap gap-2">
                                 <?php if ($page > 1): ?>
-                                    <a href="?<?php echo buildQueryString(['page' => $page - 1]); ?>"
-                                        class="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 transition">
-                                        <i class="fas fa-chevron-left mr-2"></i> Previous
-                                    </a>
+                                    <a href="?<?php echo buildQueryString(['page' => $page - 1]); ?>" class="px-4 py-2 border border-primary-deep/20 rounded-xl text-dark-charcoal hover:bg-primary-deep/5 transition"><i class="fas fa-chevron-left"></i></a>
                                 <?php endif; ?>
-
-                                <?php
-                                $startPage = max(1, $page - 2);
-                                $endPage = min($totalPages, $page + 2);
-
-                                if ($startPage > 1): ?>
-                                    <a href="?<?php echo buildQueryString(['page' => 1]); ?>"
-                                        class="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 transition">
-                                        1
-                                    </a>
-                                    <?php if ($startPage > 2): ?>
-                                        <span class="px-2 py-2 text-slate-500">...</span>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-
-                                <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
-                                    <a href="?<?php echo buildQueryString(['page' => $i]); ?>"
-                                        class="px-4 py-2 border rounded-lg transition <?php echo $i === $page ? 'bg-indigo-600 text-white border-indigo-600' : 'border-slate-200 text-slate-700 hover:bg-slate-50'; ?>">
-                                        <?php echo $i; ?>
-                                    </a>
+                                <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
+                                    <a href="?<?php echo buildQueryString(['page' => $i]); ?>" class="px-4 py-2 border rounded-xl transition <?php echo $i == $page ? 'bg-primary-deep text-white border-primary-deep' : 'border-primary-deep/20 text-dark-charcoal hover:bg-primary-deep/5'; ?>"><?php echo $i; ?></a>
                                 <?php endfor; ?>
-
-                                <?php if ($endPage < $totalPages): ?>
-                                    <?php if ($endPage < $totalPages - 1): ?>
-                                        <span class="px-2 py-2 text-slate-500">...</span>
-                                    <?php endif; ?>
-                                    <a href="?<?php echo buildQueryString(['page' => $totalPages]); ?>"
-                                        class="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 transition">
-                                        <?php echo $totalPages; ?>
-                                    </a>
-                                <?php endif; ?>
-
                                 <?php if ($page < $totalPages): ?>
-                                    <a href="?<?php echo buildQueryString(['page' => $page + 1]); ?>"
-                                        class="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 transition">
-                                        Next <i class="fas fa-chevron-right ml-2"></i>
-                                    </a>
+                                    <a href="?<?php echo buildQueryString(['page' => $page + 1]); ?>" class="px-4 py-2 border border-primary-deep/20 rounded-xl text-dark-charcoal hover:bg-primary-deep/5"><i class="fas fa-chevron-right"></i></a>
                                 <?php endif; ?>
                             </nav>
                         </div>
                     <?php endif; ?>
 
                 <?php else: ?>
-                    <!-- No Results -->
-                    <div class="bg-white rounded-xl md:rounded-2xl p-12 border border-slate-200 shadow-sm text-center">
-                        <div class="w-24 h-24 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-6">
-                            <i class="fas fa-school text-3xl text-indigo-600"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 mb-3">No Schools Found</h3>
-                        <p class="text-slate-500 mb-6 max-w-md mx-auto">
-                            We couldn't find any schools matching your criteria. Try adjusting your filters or search terms.
-                        </p>
-                        <button onclick="clearFilters()" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition shadow-md">
-                            Clear All Filters
-                        </button>
+                    <!-- no results, warm message -->
+                    <div class="bg-white rounded-2xl p-12 text-center border border-primary-deep/10">
+                        <i class="fas fa-tree text-5xl text-primary-deep/30 mb-4"></i>
+                        <p class="font-mono-head text-xl text-dark-charcoal">no schools match</p>
+                        <p class="text-dark-charcoal/60 text-sm max-w-sm mx-auto mt-2">try adjusting filters or search terms.</p>
+                        <button onclick="clearFilters()" class="mt-5 bg-primary-deep text-white px-6 py-3 rounded-xl text-sm font-semibold">clear filters</button>
                     </div>
                 <?php endif; ?>
             </section>
         </div>
     </main>
 
-    <!-- Why Choose Section -->
-    <section id="why-choose" class="py-16 md:py-24 bg-slate-50 px-4 md:px-6 mt-12">
-        <div class="container mx-auto">
-            <div class="text-center max-w-3xl mx-auto mb-12 md:mb-20">
-                <h2 class="text-indigo-600 font-black uppercase tracking-[0.4em] text-xs mb-4">Why Trust Us</h2>
-                <h3 class="text-2xl md:text-4xl lg:text-6xl font-black mb-6 md:mb-8">Find the Best Fit for Your Child</h3>
-                <p class="text-slate-500 text-base md:text-lg">We help you make informed decisions with verified information and parent reviews.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-                <div class="text-center" data-aos="fade-up">
-                    <div class="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-shield-alt text-2xl text-indigo-600"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-slate-900 mb-3">Verified Information</h4>
-                    <p class="text-slate-600">All schools are thoroughly vetted and verified for authenticity and compliance.</p>
-                </div>
-
-                <div class="text-center" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-star text-2xl text-purple-600"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-slate-900 mb-3">Parent Reviews</h4>
-                    <p class="text-slate-600">Read genuine reviews from other parents to make better decisions.</p>
-                </div>
-
-                <div class="text-center" data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-16 h-16 rounded-2xl bg-rose-100 flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-map-marked-alt text-2xl text-rose-600"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-slate-900 mb-3">Smart Location</h4>
-                    <p class="text-slate-600">Find schools near you with detailed location information and directions.</p>
-                </div>
+    <!-- WHY CHOOSE (earthy, human) -->
+    <section id="why-choose" class="bg-primary-deep/5 py-16 px-4">
+        <div class="container max-w-5xl mx-auto text-center">
+            <h2 class="font-mono-head text-primary-deep text-sm tracking-widest mb-3">why parents trust us</h2>
+            <p class="text-2xl md:text-4xl font-mono-head text-dark-charcoal max-w-2xl mx-auto mb-12">no fluff. just real schools & honest feedback.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div><i class="fas fa-check-circle text-3xl text-primary-deep mb-3"></i><h4 class="font-bold">verified data</h4><p class="text-sm text-dark-charcoal/70">every school is manually checked</p></div>
+                <div><i class="fas fa-star text-3xl text-primary-deep mb-3"></i><h4 class="font-bold">parent reviews</h4><p class="text-sm text-dark-charcoal/70">no bots, just parents</p></div>
+                <div><i class="fas fa-location-dot text-3xl text-primary-deep mb-3"></i><h4 class="font-bold">local & accurate</h4><p class="text-sm text-dark-charcoal/70">fees, contacts, facilities</p></div>
             </div>
         </div>
     </section>
 
-    <!-- How It Works Section -->
-    <section id="how-it-works" class="py-16 md:py-24 bg-white px-4 md:px-6">
-        <div class="container mx-auto">
-            <div class="text-center max-w-3xl mx-auto mb-12 md:mb-20">
-                <h2 class="text-indigo-600 font-black uppercase tracking-[0.4em] text-xs mb-4">Simple Process</h2>
-                <h3 class="text-2xl md:text-4xl lg:text-6xl font-black mb-6 md:mb-8">How It Works</h3>
-                <p class="text-slate-500 text-base md:text-lg">Find and connect with schools in just a few simple steps.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="text-center" data-aos="fade-up">
-                    <div class="relative mb-6">
-                        <div class="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl font-bold mx-auto relative z-10">
-                            1
-                        </div>
-                        <div class="absolute top-6 left-1/2 w-full h-0.5 bg-slate-200 hidden md:block"></div>
-                    </div>
-                    <h4 class="text-lg font-bold text-slate-900 mb-2">Search Schools</h4>
-                    <p class="text-slate-600 text-sm">Use filters to find schools matching your preferences</p>
-                </div>
-
-                <div class="text-center" data-aos="fade-up" data-aos-delay="100">
-                    <div class="relative mb-6">
-                        <div class="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl font-bold mx-auto relative z-10">
-                            2
-                        </div>
-                        <div class="absolute top-6 left-1/2 w-full h-0.5 bg-slate-200 hidden md:block"></div>
-                    </div>
-                    <h4 class="text-lg font-bold text-slate-900 mb-2">Compare Options</h4>
-                    <p class="text-slate-600 text-sm">View detailed profiles, reviews, and facilities</p>
-                </div>
-
-                <div class="text-center" data-aos="fade-up" data-aos-delay="200">
-                    <div class="relative mb-6">
-                        <div class="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl font-bold mx-auto relative z-10">
-                            3
-                        </div>
-                        <div class="absolute top-6 left-1/2 w-full h-0.5 bg-slate-200 hidden md:block"></div>
-                    </div>
-                    <h4 class="text-lg font-bold text-slate-900 mb-2">Contact Schools</h4>
-                    <p class="text-slate-600 text-sm">Directly connect with school administration</p>
-                </div>
-
-                <div class="text-center" data-aos="fade-up" data-aos-delay="300">
-                    <div class="relative mb-6">
-                        <div class="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl font-bold mx-auto">
-                            4
-                        </div>
-                    </div>
-                    <h4 class="text-lg font-bold text-slate-900 mb-2">Begin Enrollment</h4>
-                    <p class="text-slate-600 text-sm">Start the admission process with your chosen school</p>
-                </div>
-            </div>
+    <!-- CTA: simple -->
+    <section class="py-16 px-4 bg-dark-charcoal text-white">
+        <div class="container max-w-3xl mx-auto text-center">
+            <p class="font-mono-head text-2xl md:text-4xl mb-6">ready to find the right school?</p>
+            <a href="#search" class="inline-block bg-accent-gold text-dark-charcoal px-8 py-4 rounded-full font-bold text-sm hover:bg-primary-deep hover:text-white transition">start searching</a>
         </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section id="faq" class="py-16 md:py-24 bg-slate-50 px-4 md:px-6">
-        <div class="container mx-auto max-w-4xl">
-            <div class="text-center mb-12 md:mb-20">
-                <h2 class="text-indigo-600 font-black uppercase tracking-[0.4em] text-xs mb-4">Need Help?</h2>
-                <h3 class="text-2xl md:text-4xl lg:text-6xl font-black mb-6 md:mb-8">Frequently Asked Questions</h3>
-                <p class="text-slate-500 text-base md:text-lg">Find answers to common questions about finding schools.</p>
+    <!-- PROFESSIONAL FOOTER - REDESIGNED -->
+    <footer class="bg-[#13452f] text-gray-300 pt-16 pb-8 border-t border-[#7DFF76]/20">
+        <div class="container max-w-7xl mx-auto px-4">
+            <!-- Top Section: Quick Links -->
+            <div class="flex flex-wrap justify-center gap-6 md:gap-12 mb-12 pb-8 border-b border-gray-700/30">
+                <a href="../volunteer/" class="text-sm hover:text-[#7DFF76] transition flex items-center gap-2"><i class="fas fa-hands-helping text-[#7DFF76] text-xs"></i>Be a Volunteer</a>
+                <a href="../success-stories/" class="text-sm hover:text-[#7DFF76] transition flex items-center gap-2"><i class="fas fa-star text-[#7DFF76] text-xs"></i>Success Stories</a>
+                <a href="../support/" class="text-sm hover:text-[#7DFF76] transition flex items-center gap-2"><i class="fas fa-comments text-[#7DFF76] text-xs"></i>Support Forum</a>
+                <a href="../internships/" class="text-sm hover:text-[#7DFF76] transition flex items-center gap-2"><i class="fas fa-briefcase text-[#7DFF76] text-xs"></i>Internships</a>
+                <a href="../help/" class="text-sm hover:text-[#7DFF76] transition flex items-center gap-2"><i class="fas fa-question-circle text-[#7DFF76] text-xs"></i>Help Center</a>
             </div>
 
-            <div class="space-y-4 md:space-y-6">
-                <?php
-                $faqs = [
-                    [
-                        'question' => 'How do I know if a school is verified?',
-                        'answer' => 'All schools displayed on our platform undergo a rigorous verification process. Look for the verification badge next to the school name.'
-                    ],
-                    [
-                        'question' => 'Can I contact schools directly?',
-                        'answer' => 'Yes! Each school profile has contact information and a direct link to their portal for inquiries and applications.'
-                    ],
-                    [
-                        'question' => 'Are the school fees accurate?',
-                        'answer' => 'We work with schools to maintain up-to-date fee information. However, we recommend contacting the school directly for the most current fee structure.'
-                    ],
-                    [
-                        'question' => 'How do I filter schools by location?',
-                        'answer' => 'Use the location filter in the sidebar to select state and city. You can also use the search bar to find schools in specific areas.'
-                    ],
-                    [
-                        'question' => 'Can I save schools to compare later?',
-                        'answer' => 'Yes! Click the heart icon on any school card to save it to your favorites list for later comparison.'
-                    ]
-                ];
+            <!-- Main Footer Content -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-12">
+                <!-- Column 1: Transform Your School Management -->
+                <div class="lg:col-span-3">
+                    <h3 class="footer-heading text-white font-mono-head text-lg mb-6 pb-2">Transform Your School Management</h3>
+                    <p class="text-sm text-gray-400 leading-relaxed mb-6">
+                        Experience the future of education administration with our comprehensive, cloud-based platform. Streamline operations, enhance communication, and boost academic performance.
+                    </p>
+                    <a href="../demo-request/" class="inline-flex items-center gap-2 bg-[#7DFF76] text-[#1a1f18] px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#13452f] hover:text-white transition group">
+                        <span>Request Demo</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 25 25" fill="currentColor" class="group-hover:translate-x-1 transition">
+                            <path d="M11.9,22.5c-0.7-0.7-0.7-1.8,0-2.5c0,0,0,0,0,0l5.7-5.7H2.8c-1,0-1.8-0.8-1.8-1.8s0.8-1.8,1.8-1.8h14.9L11.9,5 c-0.3-0.3-0.5-0.8-0.5-1.3c0-1,0.8-1.8,1.8-1.8c0.5,0,0.9,0.2,1.3,0.5l8.7,8.7c0.1,0.1,0.2,0.2,0.2,0.3c0,0,0,0.1,0.1,0.1 c0,0,0,0,0,0l0,0c0,0.1,0.1,0.1,0.1,0.2c0,0,0,0.1,0.1,0.2l0,0c0,0,0,0,0,0c0,0,0,0.1,0,0.1c0,0.2,0,0.5,0,0.7c0,0,0,0.1,0,0.1 c0,0,0,0,0,0l0,0c0,0,0,0.1,0,0.2c0,0.1-0.1,0.1-0.1,0.2l0,0c0,0,0,0,0,0c0,0,0,0.1-0.1,0.1c-0.1,0.1-0.1,0.2-0.2,0.3l-8.7,8.7 C13.8,23.2,12.6,23.2,11.9,22.5C11.9,22.5,11.9,22.5,11.9,22.5z"></path>
+                        </svg>
+                    </a>
+                </div>
 
-                foreach ($faqs as $index => $faq):
-                ?>
-                    <div class="bg-white rounded-xl md:rounded-2xl overflow-hidden border border-slate-200">
-                        <button class="faq-question w-full text-left p-6 flex justify-between items-center hover:bg-slate-50 transition"
-                            onclick="toggleFAQ(<?php echo $index; ?>)">
-                            <span class="font-semibold text-slate-900 text-base md:text-lg"><?php echo $faq['question']; ?></span>
-                            <i class="fas fa-chevron-down text-slate-400 transition-transform" id="faq-icon-<?php echo $index; ?>"></i>
+                <!-- Column 2: Platform Features (Accordion-style on mobile) -->
+                <div class="lg:col-span-2">
+                    <div class="border-b lg:border-0 border-gray-700/30 pb-4 lg:pb-0">
+                        <button class="lg:hidden w-full flex justify-between items-center text-white font-mono-head text-base" onclick="toggleSection('features')">
+                            Platform Features
+                            <i class="fas fa-plus text-[#7DFF76] text-sm transition-transform" id="features-icon"></i>
                         </button>
-                        <div class="faq-answer px-6 pb-6 hidden" id="faq-answer-<?php echo $index; ?>">
-                            <p class="text-slate-600"><?php echo $faq['answer']; ?></p>
+                        <h3 class="hidden lg:block footer-heading text-white font-mono-head text-lg mb-6">Platform Features</h3>
+                        <div id="features-content" class="mt-4 lg:mt-0 hidden lg:block">
+                            <ul class="space-y-3 text-sm">
+                                <li><a href="../features/student-management/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Student Management</a></li>
+                                <li><a href="../features/attendance-tracking/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Attendance Tracking</a></li>
+                                <li><a href="../features/fee-management/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Fee & Billing System</a></li>
+                                <li><a href="../features/gradebook/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Digital Gradebook</a></li>
+                                <li><a href="../features/timetable/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Timetable Management</a></li>
+                            </ul>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="py-16 md:py-24 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 md:px-6">
-        <div class="container mx-auto text-center">
-            <h2 class="text-2xl md:text-4xl lg:text-6xl font-black mb-6 md:mb-8">Ready to Find the Perfect School?</h2>
-            <p class="text-lg md:text-xl text-indigo-100 mb-8 md:mb-12 max-w-2xl mx-auto">
-                Start your search today and discover Nigeria's best educational institutions for your child.
-            </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4 md:gap-6">
-                <a href="#search"
-                    class="bg-white text-indigo-600 px-6 md:px-10 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-lg hover:scale-105 transition shadow-xl">
-                    Search Schools Now
-                </a>
-                <a href="/academixsuite/tenant/login.php"
-                    class="bg-transparent border-2 border-white text-white px-6 md:px-10 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-lg hover:bg-white/10 transition">
-                    School Administrator Login
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <footer class="bg-slate-900 text-white pt-12 md:pt-20 pb-8 md:pb-12 px-4 md:px-6">
-        <div class="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-10 md:mb-16">
-            <div class="col-span-1 md:col-span-2">
-                <div class="flex items-center space-x-2 mb-6 md:mb-8">
-                    <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg md:rounded-xl flex items-center justify-center text-white shadow-lg">
-                        <i class="fas fa-school text-sm md:text-base"></i>
-                    </div>
-                    <span class="text-lg md:text-2xl font-bold tracking-tight text-white">Academix<span class="text-indigo-400">Suite</span></span>
                 </div>
-                <p class="text-slate-400 text-sm md:text-base max-w-sm">
-                    Nigeria's premier school discovery and management platform connecting parents with quality educational institutions.
-                </p>
+
+                <!-- Column 3: Support & Resources -->
+                <div class="lg:col-span-2">
+                    <div class="border-b lg:border-0 border-gray-700/30 pb-4 lg:pb-0">
+                        <button class="lg:hidden w-full flex justify-between items-center text-white font-mono-head text-base" onclick="toggleSection('support')">
+                            Support & Resources
+                            <i class="fas fa-plus text-[#7DFF76] text-sm transition-transform" id="support-icon"></i>
+                        </button>
+                        <h3 class="hidden lg:block footer-heading text-white font-mono-head text-lg mb-6">Support & Resources</h3>
+                        <div id="support-content" class="mt-4 lg:mt-0 hidden lg:block">
+                            <ul class="space-y-3 text-sm">
+                                <li><a href="../documentation/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Documentation</a></li>
+                                <li><a href="../help-center/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Help Center</a></li>
+                                <li><a href="../tutorials/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Video Tutorials</a></li>
+                                <li><a href="../faq/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>FAQ</a></li>
+                                <li><a href="../contact/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Contact Support</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 4: Company -->
+                <div class="lg:col-span-2">
+                    <div class="border-b lg:border-0 border-gray-700/30 pb-4 lg:pb-0">
+                        <button class="lg:hidden w-full flex justify-between items-center text-white font-mono-head text-base" onclick="toggleSection('company')">
+                            Company
+                            <i class="fas fa-plus text-[#7DFF76] text-sm transition-transform" id="company-icon"></i>
+                        </button>
+                        <h3 class="hidden lg:block footer-heading text-white font-mono-head text-lg mb-6">Company</h3>
+                        <div id="company-content" class="mt-4 lg:mt-0 hidden lg:block">
+                            <ul class="space-y-3 text-sm">
+                                <li><a href="../about/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>About AcademixSuite</a></li>
+                                <li><a href="../pricing/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Pricing Plans</a></li>
+                                <li><a href="../careers/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Careers</a></li>
+                                <li><a href="../blog/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Blog & Insights</a></li>
+                                <li><a href="../affiliate/" class="hover:text-[#7DFF76] transition flex items-center gap-2"><span class="w-1 h-1 bg-[#7DFF76] rounded-full"></span>Affiliate Program</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 5: Newsletter -->
+                <div class="lg:col-span-3">
+                    <h3 class="footer-heading text-white font-mono-head text-lg mb-6">Stay Updated</h3>
+                    <p class="text-sm text-gray-400 mb-4">
+                        Get the latest updates on school management trends, platform features, and educational technology insights delivered to your inbox.
+                    </p>
+                    <form class="mb-6">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="email" placeholder="Enter your email address" class="newsletter-input flex-1 px-4 py-3 bg-[#2a3028] border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:border-[#c79b5e] focus:outline-none">
+                            <button type="submit" class="bg-[#7DFF76] text-[#1a1f18] px-6 py-3 rounded-lg font-bold text-sm hover:bg-[#13452f] hover:text-white transition whitespace-nowrap">
+                                Subscribe
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            By subscribing, you agree to our <a href="../privacy/" class="text-[#c79b5e] hover:underline">Privacy Policy</a>.
+                        </p>
+                    </form>
+                    <div class="text-sm text-gray-400">
+                        <p><strong>Contact:</strong> <a href="mailto:support@academixsuite.com" class="hover:text-[#c79b5e]">support@academixsuite.com</a></p>
+                        <p><strong>Sales:</strong> <a href="mailto:sales@academixsuite.com" class="hover:text-[#c79b5e]">sales@academixsuite.com</a></p>
+                    </div>
+                </div>
             </div>
-            <div>
-                <h5 class="font-bold text-white uppercase text-sm tracking-widest mb-6 md:mb-8">For Parents</h5>
-                <ul class="space-y-3 md:space-y-4 text-slate-400 font-medium text-sm">
-                    <li><a href="#search" class="hover:text-white transition">Find Schools</a></li>
-                    <li><a href="#why-choose" class="hover:text-white transition">Why Choose</a></li>
-                    <li><a href="#how-it-works" class="hover:text-white transition">How It Works</a></li>
-                    <li><a href="#faq" class="hover:text-white transition">FAQ</a></li>
-                </ul>
+
+            <!-- Bottom Section: Logo, Legal, Copyright -->
+            <div class="border-t border-gray-700/30 pt-8">
+                <div class="flex flex-col lg:flex-row justify-between items-center gap-6">
+                    <!-- Logo and Copyright -->
+                    <div class="flex flex-col items-center lg:items-start gap-4">
+                        <div class="flex items-center gap-3">
+                            <img src="./assets/images/logo.png" alt="AcademixSuite" class="h-10 w-auto">
+                        </div>
+                        <div class="flex flex-wrap justify-center lg:justify-start gap-4 text-xs text-gray-500">
+                            <a href="../terms/" class="hover:text-[#c79b5e] transition">Terms of Service</a>
+                            <span>•</span>
+                            <a href="../privacy/" class="hover:text-[#c79b5e] transition">Privacy Policy</a>
+                            <span>•</span>
+                            <a href="../data-security/" class="hover:text-[#c79b5e] transition">Data Security</a>
+                            <span>•</span>
+                            <a href="../cookies/" class="hover:text-[#c79b5e] transition">Cookie Policy</a>
+                        </div>
+                        <div class="text-xs text-gray-500 text-center lg:text-left">
+                            <span>© <?php echo date('Y'); ?> AcademixSuite. All rights reserved.</span>
+                            <p class="mt-2 max-w-md">A comprehensive school management platform for educational institutions worldwide.</p>
+                        </div>
+                    </div>
+
+                    <!-- Social Links -->
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 bg-[#2a3028] rounded-full flex items-center justify-center hover:bg-[#c79b5e] hover:text-[#1a1f18] transition"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="w-10 h-10 bg-[#2a3028] rounded-full flex items-center justify-center hover:bg-[#c79b5e] hover:text-[#1a1f18] transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="w-10 h-10 bg-[#2a3028] rounded-full flex items-center justify-center hover:bg-[#c79b5e] hover:text-[#1a1f18] transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="w-10 h-10 bg-[#2a3028] rounded-full flex items-center justify-center hover:bg-[#c79b5e] hover:text-[#1a1f18] transition"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
             </div>
-            <div>
-                <h5 class="font-bold text-white uppercase text-sm tracking-widest mb-6 md:mb-8">For Schools</h5>
-                <ul class="space-y-3 md:space-y-4 text-slate-400 font-medium text-sm">
-                    <li><a href="/academixsuite/tenant/login.php" class="hover:text-white transition">School Login</a></li>
-                    <li><a href="/academixsuite/public/register.php" class="hover:text-white transition">Register School</a></li>
-                    <li><a href="/academixsuite/public/pricing.php" class="hover:text-white transition">Pricing</a></li>
-                    <li><a href="/academixsuite/public/contact.php" class="hover:text-white transition">Contact Support</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="text-center pt-8 border-t border-slate-800">
-            <p class="text-slate-400 font-bold text-xs uppercase tracking-[0.3em]">
-                © <?php echo date('Y'); ?> AcademixSuite. Empowering Nigerian Education.
-            </p>
         </div>
     </footer>
 
+    <!-- scripts -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // Initialize AOS animations
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 100
-        });
+        AOS.init({ duration: 600, once: true });
 
-        // Helper function to build query strings
-        function buildQueryString(params = {}) {
-            const currentParams = new URLSearchParams(window.location.search);
-
-            // Update with new params
-            Object.keys(params).forEach(key => {
-                if (params[key] !== undefined && params[key] !== '') {
-                    currentParams.set(key, params[key]);
-                } else {
-                    currentParams.delete(key);
-                }
-            });
-
-            return currentParams.toString();
+        function buildQueryString(params) {
+            const url = new URLSearchParams(window.location.search);
+            Object.keys(params).forEach(k => params[k] ? url.set(k, params[k]) : url.delete(k));
+            return url.toString();
         }
 
-        // Update sort function
-        function updateSort(sortValue) {
-            const params = new URLSearchParams(window.location.search);
-            params.set('sort', sortValue);
-            params.set('page', 1);
-            window.location.search = params.toString();
+        function updateSort(val) {
+            const url = new URLSearchParams(window.location.search);
+            url.set('sort', val);
+            url.set('page', '1');
+            window.location.search = url.toString();
         }
 
-        // Clear all filters
         function clearFilters() {
             window.location.href = window.location.pathname;
         }
 
-        // Remove specific filter
-        function removeFilter(filterName) {
-            const params = new URLSearchParams(window.location.search);
-            params.delete(filterName);
-            params.set('page', 1);
-            window.location.search = params.toString();
+        function removeFilter(name) {
+            const url = new URLSearchParams(window.location.search);
+            url.delete(name);
+            url.set('page', '1');
+            window.location.search = url.toString();
         }
 
-        // Apply fee filter
         function applyFeeFilter() {
-            const minFee = document.querySelector('input[name="min_fee"]').value;
-            const maxFee = document.querySelector('input[name="max_fee"]').value;
-            const params = new URLSearchParams(window.location.search);
-
-            if (minFee) params.set('min_fee', minFee);
-            else params.delete('min_fee');
-
-            if (maxFee) params.set('max_fee', maxFee);
-            else params.delete('max_fee');
-
-            params.set('page', 1);
-            window.location.search = params.toString();
+            const min = document.querySelector('input[name="min_fee"]').value;
+            const max = document.querySelector('input[name="max_fee"]').value;
+            const url = new URLSearchParams(window.location.search);
+            if (min) url.set('min_fee', min); else url.delete('min_fee');
+            if (max) url.set('max_fee', max); else url.delete('max_fee');
+            url.set('page', '1');
+            window.location.search = url.toString();
         }
 
-        // FAQ toggle function
-        function toggleFAQ(index) {
-            const answer = document.getElementById('faq-answer-' + index);
-            const icon = document.getElementById('faq-icon-' + index);
+        function updateCityOptions(state) {
+            if (!state) return;
+            // In a real scenario, you'd fetch via AJAX; we use simple refresh now (form auto-submit)
+        }
 
-            if (answer.classList.contains('hidden')) {
-                answer.classList.remove('hidden');
-                icon.classList.remove('fa-chevron-down');
-                icon.classList.add('fa-chevron-up');
+        // Mobile accordion functionality for footer
+        function toggleSection(section) {
+            const content = document.getElementById(section + '-content');
+            const icon = document.getElementById(section + '-icon');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.classList.remove('fa-plus');
+                icon.classList.add('fa-minus');
             } else {
-                answer.classList.add('hidden');
-                icon.classList.remove('fa-chevron-up');
-                icon.classList.add('fa-chevron-down');
+                content.classList.add('hidden');
+                icon.classList.remove('fa-minus');
+                icon.classList.add('fa-plus');
             }
         }
 
-        // Animate counter
-        function animateCounter(element) {
-            const target = parseInt(element.getAttribute('data-count'));
-            const duration = 2000;
-            const steps = 60;
-            const increment = target / steps;
-            let current = 0;
-
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= target) {
-                    element.textContent = target.toLocaleString();
-                    clearInterval(timer);
-                } else {
-                    element.textContent = Math.floor(current).toLocaleString();
-                }
-            }, duration / steps);
-        }
-
-        // Initialize counter animation
-        document.addEventListener('DOMContentLoaded', function() {
-            const counter = document.querySelector('.stat-counter');
-            if (counter) {
-                setTimeout(() => {
-                    animateCounter(counter);
-                }, 500);
-            }
-        });
-
-        // Scroll to top function
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-
-        // Add scroll to top button
-        window.addEventListener('scroll', function() {
-            const scrollTopBtn = document.getElementById('scrollTopBtn');
-            if (!scrollTopBtn) return;
-
-            if (window.scrollY > 500) {
-                scrollTopBtn.classList.remove('hidden');
-            } else {
-                scrollTopBtn.classList.add('hidden');
-            }
-        });
-
-        // AJAX function to load cities based on state
-        async function updateCityOptions(state) {
-            if (!state) {
-                // Reset to all cities
-                const citySelect = document.querySelector('select[name="city"]');
-                citySelect.innerHTML = '<option value="">All Cities</option>';
-                return;
-            }
-
-            try {
-                const response = await fetch(`../api/get-cities.php?state=${encodeURIComponent(state)}`);
-                const cities = await response.json();
-
-                const citySelect = document.querySelector('select[name="city"]');
-                citySelect.innerHTML = '<option value="">All Cities</option>';
-
-                cities.forEach(city => {
-                    const option = document.createElement('option');
-                    option.value = city;
-                    option.textContent = city;
-                    citySelect.appendChild(option);
+        // Close all mobile accordions on resize above lg
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 1024) {
+                ['features', 'support', 'company'].forEach(section => {
+                    const content = document.getElementById(section + '-content');
+                    const icon = document.getElementById(section + '-icon');
+                    if (content) {
+                        content.classList.remove('hidden');
+                        if (icon) {
+                            icon.classList.remove('fa-plus', 'fa-minus');
+                            icon.classList.add('fa-plus');
+                        }
+                    }
                 });
-            } catch (error) {
-                console.error('Error loading cities:', error);
             }
-        }
+        });
     </script>
-
-    <!-- Scroll to Top Button -->
-    <button onclick="scrollToTop()" id="scrollTopBtn"
-        class="fixed bottom-6 right-6 w-12 h-12 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 transition z-50 hidden">
-        <i class="fas fa-chevron-up"></i>
-    </button>
-
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 </body>
-
 </html>
-
 <?php
-// Helper function to build query strings
 function buildQueryString($newParams = [])
 {
     $params = $_GET;
-    foreach ($newParams as $key => $value) {
-        $params[$key] = $value;
-    }
+    foreach ($newParams as $k => $v) $params[$k] = $v;
     return http_build_query($params);
 }
 ?>

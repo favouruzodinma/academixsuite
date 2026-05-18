@@ -40,24 +40,8 @@ if (strpos($requestUri, '/platform/') === 0) {
     }
     exit;
 } else {
-    // Default to public
-    $publicPath = __DIR__ . '/public' . $requestUri;
-    
-    if (file_exists($publicPath) && is_file($publicPath)) {
-        $ext = pathinfo($publicPath, PATHINFO_EXTENSION);
-        if (in_array($ext, ['php', 'html', 'htm'])) {
-            require_once $publicPath;
-        } else {    
-            header('Content-Type: ' . mime_content_type($publicPath));
-            readfile($publicPath);
-        }
-    } elseif (file_exists($publicPath . '.php')) {
-        require_once $publicPath . '.php';
-    } elseif (file_exists($publicPath . '/index.php')) {
-        require_once $publicPath . '/index.php';
-    } else {
-        require_once __DIR__ . '/public/index.php';
-    }
+  
+     require_once __DIR__ . '/home.php';
     exit;
 }
 ?>

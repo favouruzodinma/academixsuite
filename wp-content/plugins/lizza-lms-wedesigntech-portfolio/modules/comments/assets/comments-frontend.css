@@ -1,0 +1,1031 @@
+/* Comments List Holder */
+
+.wdt-listings-comment-list-holder
+{
+    float: left;
+    width: 100%;
+}
+
+.wdt-listings-comment-list-holder .comment-body
+{
+    padding-left: 0;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+.wdt-listings-comment-list-holder ul.children li .comment-body
+{
+    padding-left: 0;
+}
+
+.wdt-listings-comment-list-holder .comment-body .comment-author .avatar
+{
+    position: static;
+    left: 0;
+}
+
+.wdt-listings-comment-list-holder .commentlist li.comment .wdt-comment-content > *
+{
+    margin-bottom: 15px;
+}
+
+.wdt-listings-comment-list-holder .commentlist li.comment .wdt-comment-content h2
+{
+    font-size: 20px;
+    font-weight: bold;
+
+    margin: 0 0 5px;
+}
+
+.wdt-listings-comment-list-holder .commentlist li.comment .wdt-comment-content .wdt-comment-gallery
+{
+    display: flex;
+    float: left;
+    flex-wrap: wrap;
+
+    width: 100%;
+    margin-top: 10px;
+}
+
+.wdt-listings-comment-list-holder .commentlist li.comment .wdt-comment-content
+{
+    float: left;
+
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.wdt-listings-comment-list-holder .commentlist li.comment .wdt-comment-content .wdt-comment-gallery li
+{
+    width: 65px;
+    margin: 0 2px 0 0;
+}
+
+.wdt-listings-comment-list-holder .comment-body .comment-meta > .comment-author .avatar
+{
+    padding: 0;
+
+    border: none;
+}
+
+.wdt-listings-comment-list-holder .comment-body .comment-meta .comment-author img
+{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.wdt-listings-comment-list-holder .comment-body .comment-meta .comment-author b.fn
+{
+    font-size: 18px;
+    font-weight: bold;
+}
+
+
+.wdt-listings-comment-list-holder .comment-body .comment-meta .comment-author .comment-metadata span.edit-link .comment-edit-link
+{
+    margin-left: 5px;
+}
+
+.wdt-listings-comment-list-holder .comment-body .comment-meta .comment-author .comment-metadata span.edit-link .comment-edit-link:before
+{
+    position: relative;
+    left: 0;
+    display: inline;
+    margin-right: 2px;
+    content: '(';
+}
+
+.wdt-listings-comment-list-holder .comment-body .comment-meta .comment-author .comment-metadata span.edit-link .comment-edit-link:after
+{
+    position: relative;
+    left: 0;
+    display: inline;
+    margin-left: 2px;
+    content: ')';
+}
+
+.wdt-listings-comment-list-holder .comment-body .comment-meta .comment-author
+{
+    display: block;
+}
+.wdt-listings-comment-list-holder .comment-body .comment-meta .comment-author img
+{
+    float: left;
+    margin-right: 15px;
+    margin-top: 6px;
+}
+
+.wdt-listings-comment-list-holder .wdt-comment-content .wdt-comment-rating
+{
+    display: flex;
+    align-items: center;
+}
+
+.wdt-listings-comment-list-holder .wdt-comment-content .wdt-comment-rating > span
+{
+    font-size: 0;
+
+    margin-right: 3px;
+
+    color: #ffd23c;
+}
+
+.wdt-listings-comment-list-holder .wdt-comment-content .wdt-comment-rating > span:before
+{
+    font-size: 18px;
+}
+
+.wdt-comment-rating-overall
+{
+    margin-left: 10px;
+}
+
+
+
+.wdt-listings-comment-list-holder .commentlist li.comment .comment-body .reply a.comment-reply-link
+{
+    font-weight: 500;
+    line-height: normal;
+    padding-right: 0;
+    border: none;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.wdt-listings-comment-list-holder .commentlist li.comment .comment-body .reply a.comment-reply-link:after
+{
+    font-family: 'Font Awesome 5 Free';
+    font-size: 12px;
+    font-weight: 900;
+    position: relative;
+    float: right;
+    margin-top: 2px;
+    margin-left: 6px;
+    content: '\f01e';
+    -webkit-transform: scaleX(-1);
+            transform: scaleX(-1);
+}
+.comment-reply-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+div#respond {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 10px;
+}
+.comment-form>p textarea~span
+{height: 100%;}
+
+/* Comment Form */
+
+.wdt-comment-form-fields-holder > p
+{
+    line-height: 1em;
+
+    position: relative;
+
+    float: left;
+
+    width: 100%;
+}
+
+.comment-form .wdt-comment-form-fields-holder,
+.wdt-listings-contactform,
+.logged-in .wdt-listings-comment-list-holder .comment-form
+{
+    float: left;
+
+    width: 100%;
+    margin-top: 10px;
+    padding: 50px 40px 55px;
+
+    background-color: #ffffff;
+}
+
+.comment-form .wdt-comment-form-fields-holder > p:not(.form-submit),
+.comment-form .wdt-comment-form-fields-holder .wdt-comment-form-fields-item > p,
+.wdt-listings-contactform-container .wdt-listings-contactform input,
+.wdt-listings-contactform-container .wdt-listings-contactform textarea
+{
+    margin-bottom: 20px;
+}
+
+.wdt-comment-form-fields-holder .comment-form-media span
+{
+    position: relative;
+
+    float: left;
+
+    width: 100%;
+}
+
+.wdt-comment-form-fields-holder input#wdt_media
+{
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    overflow: hidden;
+
+    width: 100%;
+    height: 100%;
+
+    cursor: pointer;
+}
+
+.wdt-comment-form-fields-holder input#wdt_media + label
+{
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    margin: 0;
+    padding: 15px 20px;
+
+    cursor: pointer;
+    -webkit-transition: all .3s;
+            transition: all .3s;
+    text-align: center;
+    pointer-events: none;
+}
+
+.wdt-comment-form-fields-holder input#wdt_media + label:before
+{
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+
+    position: relative;
+
+    display: block;
+
+    margin-right: 10px;
+
+    content: '\f574';
+}
+
+.wdt-comment-form-fields-holder span:not(:hover) input#wdt_media + label:before
+{
+    -webkit-animation: toLeftFromRight .3s forwards;
+       -moz-animation: toLeftFromRight .3s forwards;
+            animation: toLeftFromRight .3s forwards;
+}
+
+@-webkit-keyframes toLeftFromRight
+{
+    49%
+    {
+        -webkit-transform: translate(-100%);
+    }
+    50%
+    {
+        -webkit-transform: translate(100%);
+
+        opacity: 0;
+    }
+    51%
+    {
+        opacity: 1;
+    }
+}
+
+@-moz-keyframes toLeftFromRight
+{
+    49%
+    {
+        -moz-transform: translate(-100%);
+    }
+    50%
+    {
+        -moz-transform: translate(100%);
+
+        opacity: 0;
+    }
+    51%
+    {
+        opacity: 1;
+    }
+}
+
+@keyframes toLeftFromRight
+{
+    49%
+    {
+        transform: translate(-100%);
+    }
+    50%
+    {
+        transform: translate(100%);
+
+        opacity: 0;
+    }
+    51%
+    {
+        opacity: 1;
+    }
+}
+
+.wdt-comment-form-fields-holder span:hover input#wdt_media + label:before
+{
+    -webkit-animation: toRightFromLeft .3s forwards;
+       -moz-animation: toRightFromLeft .3s forwards;
+            animation: toRightFromLeft .3s forwards;
+}
+
+@-webkit-keyframes toRightFromLeft
+{
+    49%
+    {
+        -webkit-transform: translate(100%);
+    }
+    50%
+    {
+        -webkit-transform: translate(-100%);
+
+        opacity: 0;
+    }
+    51%
+    {
+        opacity: 1;
+    }
+}
+
+@-moz-keyframes toRightFromLeft
+{
+    49%
+    {
+        -moz-transform: translate(100%);
+    }
+    50%
+    {
+        -moz-transform: translate(-100%);
+
+        opacity: 0;
+    }
+    51%
+    {
+        opacity: 1;
+    }
+}
+
+@keyframes toRightFromLeft
+{
+    49%
+    {
+        transform: translate(100%);
+    }
+    50%
+    {
+        transform: translate(-100%);
+
+        opacity: 0;
+    }
+    51%
+    {
+        opacity: 1;
+    }
+}
+
+.logged-in .wdt-listings-comment-list-holder .comment-form > p
+{
+    margin-bottom: 30px;
+}
+
+.logged-in .wdt-listings-comment-list-holder .comment-form > p input[type='text'],
+.logged-in .wdt-listings-comment-list-holder .comment-form > p input[type='password'],
+.logged-in .wdt-listings-comment-list-holder .comment-form > p input[type='email'],
+.logged-in .wdt-listings-comment-list-holder .comment-form > p input[type='url'],
+.logged-in .wdt-listings-comment-list-holder .comment-form > p input[type='tel'],
+.logged-in .wdt-listings-comment-list-holder .comment-form > p input[type='number'],
+.logged-in .wdt-listings-comment-list-holder .comment-form > p input[type='range'],
+.logged-in .wdt-listings-comment-list-holder .comment-form > p input[type='date'],
+.logged-in .wdt-listings-comment-list-holder .comment-form > p textarea,
+.logged-in .wdt-listings-comment-list-holder .comment-form > p input.text,
+.logged-in .wdt-listings-comment-list-holder .comment-form > p input[type='search']
+{
+    margin-bottom: 0;
+}
+
+.logged-in .wdt-listings-comment-list-holder .comment-form > p.wdt-ratings-holder
+{
+    margin-bottom: 20px;
+}
+
+.logged-in .wdt-listings-comment-list-holder .comment-form > p.wdt-ratings-holder > label
+{
+    margin-bottom: 6px;
+}
+
+.wdt-comment-form-fields-holder input:not(#wdt_media),
+.wdt-listings-contactform input,
+.wdt-listings-contactform textarea,
+.logged-in .wdt-listings-comment-list-holder p > input:not(#wdt_media),
+.logged-in .wdt-listings-comment-list-holder .comment-form p > textarea
+{
+    padding: var(--wdtInputPadding);
+}
+
+.comment-form .wdt-comment-form-fields-holder > p label,
+.comment-form .wdt-comment-form-fields-holder .wdt-comment-form-fields-item > p label,
+.wdt-listings-contactform > div label,
+.logged-in .wdt-listings-comment-list-holder .comment-form p > label
+{
+    line-height: 1;
+
+    float: left;
+
+    margin-bottom: 12px;
+}
+
+.comment-form .wdt-comment-form-fields-holder > p label,
+.wdt-listings-contactform > div label,
+.logged-in .wdt-listings-comment-list-holder .comment-form p > label
+{
+    width: 100%;
+}
+
+.comment-form .wdt-comment-form-fields-holder .wdt-ratings-holder
+{
+    font-size: 18px;
+    font-weight: 700;
+
+    display: flex;
+    align-items: center;
+
+    margin-bottom: 35px;
+    padding-bottom: 25px;
+
+    border-bottom: 1px solid;
+}
+
+.comment-form .wdt-comment-form-fields-holder .wdt-ratings-holder label
+{
+    display: flex;
+
+    width: auto;
+    margin-right: 15px;
+    margin-bottom: 0;
+}
+
+.comment-form .wdt-comment-form-fields-holder .wdt-ratings-holder label:after
+{
+    position: relative;
+    right: 0;
+
+    display: block;
+
+    content: ':';
+}
+
+.comment-form .wdt-comment-form-fields-holder .wdt-ratings-holder > span,
+.logged-in .comment-form p.wdt-ratings-holder > span
+{
+    font-size: 0;
+
+    margin-right: 3px;
+
+    cursor: pointer;
+
+    color: #ffd23c;
+}
+
+.comment-form .wdt-comment-form-fields-holder .wdt-ratings-holder > span:before,
+.logged-in .comment-form p.wdt-ratings-holder > span:before
+{
+    font-size: var(--wdtFontSize_Base);
+}
+
+.comment-form .wdt-comment-form-fields-holder .wdt-comment-form-fields-item,
+.wdt-listings-contactform .wdt-listings-contactform-item
+{
+    display: grid;
+    float: left;
+    justify-content: space-between;
+
+    width: 100%;
+
+    grid-template-columns: repeat(2, 49%);
+}
+
+.comment-form .wdt-comment-form-fields-holder > p.comment-form-cookies-consent input[type='checkbox']
+{
+    position: absolute;
+    top: 5px;
+    left: 0;
+
+    margin: 0;
+
+    opacity: 0;
+}
+
+.comment-form .wdt-comment-form-fields-holder > p.comment-form-cookies-consent input[type='checkbox'] ~ label
+{
+    font-size: calc(var(--wdtFontSize_Base) - 3px);
+
+    position: relative;
+
+    display: inline;
+    float: none;
+
+    margin: 0;
+    padding-left: 30px;
+}
+
+.comment-form .wdt-comment-form-fields-holder > p.comment-form-cookies-consent input[type='checkbox'] ~ label:before
+{
+    position: absolute;
+    z-index: 0;
+    top: 3px;
+    left: 0;
+
+    width: 15px;
+    height: 15px;
+    margin-top: 0;
+
+    content: '';
+    -webkit-transition: .2s;
+            transition: .2s;
+
+    border: 1px solid currentcolor;
+    border-radius: 1px;
+}
+
+.comment-form .wdt-comment-form-fields-holder > p.comment-form-cookies-consent input[type='checkbox'] ~ label:before
+{
+    color: var(--wdtBorderColor);
+}
+
+.comment-form .wdt-comment-form-fields-holder > p.comment-form-cookies-consent input[type='checkbox']:checked ~ label:before
+{
+    top: 0;
+    left: 0;
+
+    width: 8px;
+    height: 16px;
+
+    -webkit-transform: rotate(40deg);
+            transform: rotate(40deg);
+    -webkit-transform-origin: 100% 100%;
+            transform-origin: 100% 100%;
+
+    border-top: 1px solid transparent;
+    border-right: 1px solid currentcolor;
+    border-bottom: 1px solid currentcolor;
+    border-left: 1px solid transparent;
+    background: none;
+
+            backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.comment-form .wdt-comment-form-fields-holder > p.form-submit,
+.logged-in .wdt-listings-comment-list-holder .comment-form > p.form-submit
+{
+    margin-bottom: 0;
+}
+
+.comment-form .wdt-comment-form-fields-holder > p.form-submit input[type='submit']:not(#wdt_media),
+.wdt-listings-contactform input[type='submit'],
+.logged-in .wdt-listings-comment-list-holder p.form-submit input[type='submit']:not(#wdt_media)
+{
+    font-size: var(--wdtFontSize_Ext);
+
+    width: auto;
+    margin-top: 0;
+    padding: var(--wdtPadding_Btn);
+
+    letter-spacing: inherit;
+
+    outline: none;
+}
+
+.logged-in .comment-form.wdt-comment-form-fields-holder
+{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.logged-in .comment-form.wdt-comment-form-fields-holder > p
+{
+    width: 100%;
+}
+
+.logged-in .comment-form.wdt-comment-form-fields-holder > p.comment-form-rating
+{
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.logged-in .comment-form.wdt-comment-form-fields-holder > p.wdt-ratings-holder > label
+{
+    width: auto;
+    margin: 0 15px 0 0;
+}
+
+.logged-in .comment-form.wdt-comment-form-fields-holder > p.comment-form-title,
+.logged-in .comment-form.wdt-comment-form-fields-holder > p.comment-form-media
+{
+    width: calc(50% - 15px);
+}
+
+.logged-in .comment-form.wdt-comment-form-fields-holder > p.comment-form-rating
+{
+    order: 2;
+}
+
+.logged-in .comment-form.wdt-comment-form-fields-holder > p.comment-form-title
+{
+    order: 3;
+}
+
+.logged-in .comment-form.wdt-comment-form-fields-holder > p.comment-form-media
+{
+    order: 4;
+}
+
+.logged-in .comment-form.wdt-comment-form-fields-holder > p.comment-form-comment
+{
+    order: 5;
+}
+
+.logged-in .comment-form.wdt-comment-form-fields-holder > p.form-submit
+{
+    order: 6;
+}
+
+.comment-form .wdt-comment-form-fields-holder .wdt-ratings-holder>span:before, .logged-in .comment-form p.wdt-ratings-holder>span:before{font-size: 26px;}
+
+/* Contact Form */
+
+.wdt-listings-contactform > div
+{
+    float: left;
+
+    width: 100%;
+}
+
+.wdt-listings-contactform a.wdt-contactform-submit-button
+{
+    font-size: var(--wdtFontSize_Ext);
+    line-height: normal;
+
+    float: left;
+
+    width: auto;
+    padding: var(--wdtPadding_Btn);
+
+    text-align: center;
+    text-transform: capitalize;
+
+    color: var(--wdtAccentTxtColor);
+    border-width: 0;
+    -webkit-border-radius: var(--wdtRadius_2X);
+            border-radius: var(--wdtRadius_2X);
+}
+
+.wdt-listings-contactform a.wdt-contactform-submit-button:hover
+{
+    color: var(--wdtHeadAltColor);
+}
+
+.wdt-listings-contactform .wdt-contactform-notification-box:not(:empty)
+{
+    margin-bottom: 22px;
+}
+
+.wdt-listings-contactform a.wdt-contactform-submit-button span
+{
+    margin-right: 5px;
+}
+
+.wdt-listings-contactform > div.wdt-failure .wdt-contactform-errorlist
+{
+    text-align: center;
+
+    color: red;
+}
+
+.wdt-listings-contactform > div.wdt-failure .wdt-contactform-errorlist > span
+{
+    display: block;
+
+    width: 100%;
+}
+
+.wdt-listings-contactform > div.wdt-failure .wdt-contactform-errorlist li:not(:last-child)
+{
+    margin-right: 20px;
+    padding-right: 20px;
+
+    border-right: 1px solid;
+}
+
+.wdt-listings-contactform > div.wdt-failure .wdt-contactform-errorlist li
+{
+    display: inline-block;
+    float: none;
+
+    width: auto;
+}
+
+
+/*----*****---- << Average Rating >> ----*****----*/
+
+.wdt-listings-average-rating-container
+{
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    width: 100%;
+}
+
+.wdt-listings-average-rating-container > div:not(:last-child)
+{
+    margin-right: 10px;
+}
+
+.wdt-listings-average-rating-container .wdt-listings-average-rating-holder,
+.wdt-listings-average-rating-container .wdt-listings-average-rating-overall
+{
+    line-height: normal;
+
+    float: left;
+}
+
+.wdt-listings-average-rating-container .wdt-listings-average-rating-holder
+{
+    width: auto;
+    margin-bottom: 0;
+}
+
+.wdt-listings-average-rating-container .wdt-listings-average-rating-overall
+{
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.wdt-listings-average-rating-container .wdt-listings-average-rating-holder span
+{
+    font-size: 0;
+}
+
+.wdt-listings-average-rating-container .wdt-listings-average-rating-holder span:before
+{
+    font-size: initial;
+}
+
+.wdt-listings-average-rating-container .wdt-listings-average-rating-holder span:not(:last-child):before
+{
+    margin: 0 5px 0 0;
+}
+
+.wdt-listings-average-rating-container .wdt-listings-average-rating-overall
+{
+    line-height: normal;
+
+    float: left;
+
+    width: auto;
+    margin-bottom: 0;
+}
+
+.wdt-listings-average-rating-container .wdt-listings-average-rating-overall > *
+{
+    display: inline-block;
+}
+
+.wdt-listings-average-rating-container .wdt-listings-average-rating-reviews-count
+{
+    line-height: normal;
+
+    position: relative;
+
+    float: left;
+
+    width: auto;
+}
+
+
+/* Type 2 */
+
+
+.wdt-listings-average-rating-container.type2 .wdt-listings-average-rating-overall
+{
+    padding: 10px 20px;
+
+    -webkit-border-radius: 5px;
+       -moz-border-radius: 5px;
+            border-radius: 5px;
+}
+
+.wdt-listings-average-rating-container.type2 .wdt-listings-average-rating-holder
+{
+    float: left;
+
+    width: auto;
+    margin: 0 20px 0 0;
+}
+
+.wdt-listings-average-rating-container.type2 .wdt-listings-average-rating-holder,
+.wdt-listings-average-rating-container.type2 .wdt-listings-average-rating-reviews-count,
+.wdt-listings-average-rating-container.type2 .wdt-listings-average-rating-overall
+{
+    line-height: normal;
+
+    margin: 0 5px 5px 0;
+    padding: 10px 20px;
+
+    -webkit-border-radius: 20px;
+       -moz-border-radius: 20px;
+            border-radius: 20px;
+}
+
+.wdt-listings-average-rating-container.type2 .wdt-listings-average-rating-holder span,
+.wdt-listings-average-rating-container.type2 .wdt-listings-average-rating-overall,
+.wdt-listings-average-rating-container.type2 .wdt-listings-average-rating-reviews-count
+{
+    color: #ffffff;
+}
+
+
+/* Type 3 */
+
+.wdt-listings-average-rating-container.type3
+{
+    font-size: 15px;
+    font-weight: 500;
+    line-height: normal;
+
+    display: flex;
+    align-items: center;
+
+    padding: 20px 35px;
+
+    color: #000000;
+    border-radius: 30px;
+}
+
+.wdt-listings-average-rating-container.type3 .wdt-listings-average-rating-overall
+{
+    min-width: 49px;
+    min-height: 49px;
+    margin: -15px 10px -15px -30px;
+    padding: var(--wdtInputPadding);
+
+    text-align: center;
+
+    color: #ffffff;
+    border-radius: 50%;
+}
+
+.wdt-listings-average-rating-container.type3 .wdt-listings-average-rating-overall > span
+{
+    margin: 0;
+}
+
+.wdt-listings-average-rating-container.type3 .wdt-listings-average-rating-holder span
+{
+    color: #000000;
+}
+
+
+/*----*****---- << Small Monitor >> ----*****----*/
+
+
+/* Note: Design for a width of 1440px */
+
+@media only screen and (min-width:1025px) and (max-width:1440px)
+{
+    .wdt-listings-average-rating-container.type3
+    {
+        padding: 20px;
+    }
+    .wdt-listings-average-rating-container.type3 .wdt-listings-average-rating-overall
+    {
+        margin: -15px 10px -15px -15px;
+    }
+}
+
+
+/*----*****---- << Tablet (Portrait) >> ----*****----*/
+
+
+/* Note: Design for a width of 768px */
+
+@media only screen and (min-width:768px) and (max-width:1024px)
+{
+    /* .wdt-listings-average-rating-container, */
+    .wdt-listings-average-rating-container.type3
+    {
+        font-size: 13px;
+
+        padding: 15px;
+    }
+    .wdt-listings-average-rating-container.type3 .wdt-listings-average-rating-holder span::before
+    {
+        font-size: 14px;
+    }
+    .wdt-listings-average-rating-container.type3 .wdt-listings-average-rating-holder:nth-child(2) + .wdt-listings-average-rating-reviews-count
+    {
+        position: absolute;
+        top: calc(100% + 10px);
+        left: 0;
+
+        width: 100%;
+
+        text-align: center;
+
+        color: initial;
+    }
+    .wdt-listings-average-rating-container.type3 .wdt-listings-average-rating-overall
+    {
+        margin: -10px 10px -10px -10px;
+    }
+}
+
+
+/*----*****---- << Mobile (Landscape) >> ----*****----*/
+
+
+/* Note: Design for a width of 767px */
+
+@media only screen and (max-width: 767px)
+{
+    .comment-form .wdt-comment-form-fields-holder .wdt-comment-form-fields-item,
+    .wdt-listings-contactform .wdt-listings-contactform-item
+    {
+        grid-template-columns: 100%;
+    }
+}
+
+
+/*----*****---- << Mobile (Portrait) >> ----*****----*/
+
+
+/* Note: Design for a width of 480px */
+
+@media only screen and (max-width: 479px)
+{
+    .comment-form .wdt-comment-form-fields-holder,
+    .wdt-listings-contactform,
+    .logged-in .wdt-listings-comment-list-holder .comment-form
+    {
+        padding: 30px 30px 35px;
+    }
+    .comment-form .wdt-comment-form-fields-holder .wdt-ratings-holder
+    {
+        flex-wrap: wrap;
+    }
+    .comment-form .wdt-comment-form-fields-holder .wdt-ratings-holder label,
+    .logged-in .comment-form.wdt-comment-form-fields-holder > p.comment-form-title,
+    .logged-in .comment-form.wdt-comment-form-fields-holder > p.comment-form-media
+    {
+        width: 100%;
+    }
+    .wdt-comment-form-fields-holder input#wdt_media + label
+    {
+        font-size: .85em;
+    }
+    .wdt-listings-average-rating-container.type3
+    {
+        font-size: 13px;
+
+        padding: 15px;
+    }
+    .wdt-listings-average-rating-container.type3 .wdt-listings-average-rating-holder span::before
+    {
+        font-size: 14px;
+    }
+    .wdt-listings-average-rating-container.type3 .wdt-listings-average-rating-holder:nth-child(2) + .wdt-listings-average-rating-reviews-count
+    {
+        position: absolute;
+        top: calc(100% + 10px);
+        left: 0;
+
+        width: 100%;
+
+        text-align: center;
+
+        color: initial;
+    }
+    .wdt-listings-average-rating-container.type3 .wdt-listings-average-rating-overall
+    {
+        margin: -10px 10px -10px -10px;
+    }
+}

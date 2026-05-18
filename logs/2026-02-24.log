@@ -1,0 +1,1 @@
+[2026-02-24 00:20:54] [ERROR] Error caching columns for attendances: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'school_6.attendances' doesn't exist

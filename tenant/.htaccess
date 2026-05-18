@@ -1,7 +1,25 @@
 RewriteEngine On
 RewriteBase /tenant/
 
-# 1. Allow direct access to existing files (css, js, images, etc.)
+Options -Indexes
+
+<FilesMatch "\.(env|ini|log|sql|sqlite|bak|backup|old|orig|swp|zip|gz)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteRule (^|/)\. - [F,L]
+</IfModule>
+
+# Route school portal application URLs before direct-file passthrough.
+# This keeps generated school folders on the centralized, secured router.
+RewriteRule ^([a-zA-Z0-9_-]+)/(admin|admin2|teacher|student|parent|staff)/assets/(.*)$ assets/$3 [L,QSA]
+RewriteRule ^([a-zA-Z0-9_-]+)/(admin|admin2|teacher|student|parent|staff)/([a-zA-Z0-9_\-/]+\.(php|html|htm))$ router.php?school_slug=$1&user_type=$2&page=$3 [L,QSA]
+RewriteRule ^([a-zA-Z0-9_-]+)/(admin|admin2|teacher|student|parent|staff)/([a-zA-Z0-9_\-/]+)$ router.php?school_slug=$1&user_type=$2&page=$3.php [L,QSA]
+RewriteRule ^([a-zA-Z0-9_-]+)/(login|logout)(\.php)?/?$ router.php?school_slug=$1&page=$2.php [L,QSA]
+RewriteRule ^([a-zA-Z0-9_-]+)/?$ router.php?school_slug=$1&page=login.php [L,QSA]
+
+# 1. Allow direct access to existing files (css, js, images, etc.) - This needs to be FIRST
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
@@ -9,21 +27,30 @@ RewriteRule ^ - [L]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# 3. Route ALL tenant URLs through router.php
-# Pattern: /tenant/{school-slug}/{user-type}/{page}.php
-RewriteRule ^([a-zA-Z0-9_-]+)/(admin|teacher|student|parent)/([a-zA-Z0-9_\-/]+\.php)$ router.php?school_slug=$1&user_type=$2&page=$3 [L,QSA]
+# 3. Special rule for assets folder - allow direct access
+RewriteRule ^assets/ - [L]
 
-# 4. Pattern: /tenant/{school-slug}/{user-type}/{page} (without .php)
-RewriteRule ^([a-zA-Z0-9_-]+)/(admin|teacher|student|parent)/([a-zA-Z0-9_\-/]+)$ router.php?school_slug=$1&user_type=$2&page=$3.php [L,QSA]
+# 4. Route school-scoped asset requests to the shared tenant asset bundle
+RewriteRule ^([a-zA-Z0-9_-]+)/(admin|admin2|teacher|student|parent|staff)/assets/(.*)$ assets/$3 [L,QSA]
 
-# 5. Route school homepage to login
+# 5. Special rule for common asset extensions - skip routing for these
+RewriteRule \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ - [L]
+
+# 6. Route ALL tenant URLs through router.php
+# Pattern: /tenant/{school-slug}/{user-type}/{page}.php|html|htm
+RewriteRule ^([a-zA-Z0-9_-]+)/(admin|admin2|teacher|student|parent|staff)/([a-zA-Z0-9_\-/]+\.(php|html|htm))$ router.php?school_slug=$1&user_type=$2&page=$3 [L,QSA]
+
+# 7. Pattern: /tenant/{school-slug}/{user-type}/{page} (without extension)
+RewriteRule ^([a-zA-Z0-9_-]+)/(admin|admin2|teacher|student|parent|staff)/([a-zA-Z0-9_\-/]+)$ router.php?school_slug=$1&user_type=$2&page=$3.php [L,QSA]
+
+# 8. Route school homepage to login
 RewriteRule ^([a-zA-Z0-9_-]+)/?$ router.php?school_slug=$1&page=login.php [L,QSA]
 
-# 6. Route school-specific login/logout
+# 9. Route school-specific login/logout
 RewriteRule ^([a-zA-Z0-9_-]+)/(login|logout)/?$ router.php?school_slug=$1&page=$2.php [L,QSA]
 
-# 7. Route subdirectory files
-RewriteRule ^([a-zA-Z0-9_-]+)/(admin|teacher|student|parent)/([a-zA-Z0-9_\-/]+)/([a-zA-Z0-9_\-/]+\.php)$ router.php?school_slug=$1&user_type=$2&page=$3/$4 [L,QSA]
+# 10. Route subdirectory files
+RewriteRule ^([a-zA-Z0-9_-]+)/(admin|admin2|teacher|student|parent|staff)/([a-zA-Z0-9_\-/]+)/([a-zA-Z0-9_\-/]+\.(php|html|htm))$ router.php?school_slug=$1&user_type=$2&page=$3/$4 [L,QSA]
 
 # DirectoryIndex
 DirectoryIndex index.php router.php

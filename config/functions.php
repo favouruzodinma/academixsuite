@@ -8,6 +8,38 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/constants.php';
 
 /**
+ * Read an environment variable. Thin global-namespace wrapper around the
+ * namespaced helper class. config/mail.php, config/payment.php, and other
+ * non-namespaced files call env(...) directly — they would otherwise fatal
+ * with "Call to undefined function env()" because the EnvHelper file itself
+ * lives under `namespace AcademixSuite\Helpers;` and its env() shim is not
+ * visible from the global namespace.
+ *
+ * Order of resolution:
+ *   1. AcademixSuite\Helpers\EnvHelper (once loaded — populated from .env)
+ *   2. getenv()
+ *   3. $_ENV / $_SERVER
+ *   4. $default
+ */
+if (!function_exists('env')) {
+    function env(string $key, $default = null) {
+        if (class_exists('\\AcademixSuite\\Helpers\\EnvHelper')) {
+            $value = \AcademixSuite\Helpers\EnvHelper::get($key, null);
+            if ($value !== null) {
+                return $value;
+            }
+        }
+        $value = getenv($key);
+        if ($value !== false) {
+            return $value;
+        }
+        if (array_key_exists($key, $_ENV))    return $_ENV[$key];
+        if (array_key_exists($key, $_SERVER)) return $_SERVER[$key];
+        return $default;
+    }
+}
+
+/**
  * Sanitize input data
  * @param mixed $data
  * @return mixed
@@ -77,6 +109,221 @@ function redirect($url, $type = null, $message = null) {
     
     header("Location: $url");
     exit;
+}
+
+/**
+ * Get the configured platform URL without a trailing slash.
+ */
+function app_url() {
+    if (defined('APP_URL') && APP_URL) {
+        return rtrim(APP_URL, '/');
+    }
+
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    return $scheme . '://' . $host;
+}
+
+/**
+ * Get the base host used for wildcard school subdomains.
+ */
+function app_base_host() {
+    $host = parse_url(app_url(), PHP_URL_HOST) ?: ($_SERVER['HTTP_HOST'] ?? 'localhost');
+    $host = strtolower(preg_replace('/:\d+$/', '', $host));
+
+    if (strpos($host, 'www.') === 0) {
+        $host = substr($host, 4);
+    }
+
+    return $host;
+}
+
+/**
+ * Reserved subdomains that must never be interpreted as school slugs.
+ */
+function reserved_school_subdomains() {
+    return [
+        'www',
+        'app',
+        'admin',
+        'platform',
+        'api',
+        'mail',
+        'webmail',
+        'cpanel',
+        'whm',
+        'ftp',
+        'autodiscover',
+        'localhost'
+    ];
+}
+
+/**
+ * Detect the current school slug from a wildcard subdomain request.
+ */
+function school_subdomain_slug() {
+    $host = strtolower($_SERVER['HTTP_HOST'] ?? '');
+    $host = preg_replace('/:\d+$/', '', $host);
+    $baseHost = app_base_host();
+
+    if ($host === '' || $baseHost === '' || $host === $baseHost || $host === 'www.' . $baseHost) {
+        return null;
+    }
+
+    $suffix = '.' . $baseHost;
+    if (substr($host, -strlen($suffix)) !== $suffix) {
+        return null;
+    }
+
+    $subdomain = substr($host, 0, -strlen($suffix));
+
+    if ($subdomain === '' || strpos($subdomain, '.') !== false || in_array($subdomain, reserved_school_subdomains(), true)) {
+        return null;
+    }
+
+    return preg_match('/^[a-z0-9-]+$/', $subdomain) ? $subdomain : null;
+}
+
+/**
+ * Check whether this request is already on the school's wildcard subdomain.
+ */
+function is_school_subdomain_request($schoolSlug = null) {
+    $subdomain = school_subdomain_slug();
+
+    if (!$subdomain) {
+        return false;
+    }
+
+    return $schoolSlug === null || strtolower((string)$schoolSlug) === $subdomain;
+}
+
+/**
+ * Generate a public school portal URL.
+ *
+ * Production domains use: https://demo.academixsuite.com/admin/dashboard.php
+ * Local/IP environments fall back to: /tenant/demo/admin/dashboard.php
+ */
+function school_portal_url($schoolSlug, $path = '', $absolute = true) {
+    $schoolSlug = trim((string)$schoolSlug, " \t\n\r\0\x0B/");
+    $path = ltrim((string)$path, '/');
+
+    if ($schoolSlug === '') {
+        return $absolute ? app_url() : '/';
+    }
+
+    $baseHost = app_base_host();
+    $isLocalHost = in_array($baseHost, ['localhost', '127.0.0.1'], true) || filter_var($baseHost, FILTER_VALIDATE_IP);
+
+    if (!$isLocalHost && preg_match('/^[a-z0-9-]+$/i', $schoolSlug)) {
+        $scheme = parse_url(app_url(), PHP_URL_SCHEME) ?: 'https';
+        $url = $scheme . '://' . strtolower($schoolSlug) . '.' . $baseHost;
+        return $path !== '' ? $url . '/' . $path : $url . '/';
+    }
+
+    $tenantPath = '/tenant/' . rawurlencode($schoolSlug) . '/';
+    if ($path !== '') {
+        $tenantPath .= $path;
+    }
+
+    return $absolute ? app_url() . $tenantPath : $tenantPath;
+}
+
+/**
+ * Determine whether this installation can use wildcard school subdomains.
+ */
+function school_subdomain_urls_enabled($schoolSlug = '') {
+    $schoolSlug = trim((string)$schoolSlug, " \t\n\r\0\x0B/");
+    if ($schoolSlug === '' || !preg_match('/^[a-z0-9-]+$/i', $schoolSlug)) {
+        return false;
+    }
+
+    $baseHost = app_base_host();
+    return !in_array($baseHost, ['localhost', '127.0.0.1'], true)
+        && !filter_var($baseHost, FILTER_VALIDATE_IP);
+}
+
+/**
+ * Redirect old tenant URLs to the canonical wildcard subdomain URL.
+ *
+ * Example:
+ * /tenant/login.php?school_slug=demo -> https://demo.academixsuite.com/login.php
+ * /tenant/school_profile.php?slug=demo -> https://demo.academixsuite.com/
+ */
+function redirect_legacy_school_url_to_subdomain($schoolSlug, $path = 'login.php', array $query = []) {
+    $schoolSlug = trim((string)$schoolSlug, " \t\n\r\0\x0B/");
+    if (!school_subdomain_urls_enabled($schoolSlug) || is_school_subdomain_request($schoolSlug)) {
+        return;
+    }
+
+    $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+    if (!in_array($method, ['GET', 'HEAD'], true)) {
+        return;
+    }
+
+    $host = strtolower($_SERVER['HTTP_HOST'] ?? '');
+    $host = preg_replace('/:\d+$/', '', $host);
+    $baseHost = app_base_host();
+    $isPlatformHost = $host === $baseHost || $host === 'www.' . $baseHost;
+    if (!$isPlatformHost) {
+        return;
+    }
+
+    unset($query['school_slug'], $query['slug']);
+    $target = school_portal_url($schoolSlug, $path, true);
+    if (!empty($query)) {
+        $target .= (strpos($target, '?') === false ? '?' : '&') . http_build_query($query);
+    }
+
+    header('Location: ' . $target, true, 301);
+    exit;
+}
+
+/**
+ * Generate a URL for the current request context, keeping subdomain URLs clean.
+ */
+function school_route_url($schoolSlug, $userType = '', $page = '', $absolute = false) {
+    $pathParts = array_filter([trim((string)$userType, '/'), ltrim((string)$page, '/')], static function ($part) {
+        return $part !== '';
+    });
+    $path = implode('/', $pathParts);
+
+    if (is_school_subdomain_request($schoolSlug)) {
+        $relative = '/' . $path;
+        if ($relative === '/') {
+            return $absolute ? school_portal_url($schoolSlug, '', true) : '/';
+        }
+
+        return $absolute ? school_portal_url($schoolSlug, $path, true) : $relative;
+    }
+
+    return school_portal_url($schoolSlug, $path, $absolute);
+}
+
+/**
+ * Generate a school login URL for the current context.
+ */
+function school_login_url($schoolSlug = '', $absolute = false) {
+    if ($schoolSlug !== '' && is_school_subdomain_request($schoolSlug)) {
+        return $absolute ? school_portal_url($schoolSlug, 'login.php', true) : '/login.php';
+    }
+
+    if ($schoolSlug !== '') {
+        if (school_subdomain_urls_enabled($schoolSlug)) {
+            return school_portal_url($schoolSlug, 'login.php', true);
+        }
+
+        $url = $absolute ? app_url() . '/tenant/login.php' : '/tenant/login.php';
+        return $url . '?school_slug=' . rawurlencode($schoolSlug);
+    }
+
+    return $absolute ? app_url() . '/tenant/login.php' : '/tenant/login.php';
+}
+
+/**
+ * Generate an opaque token for public invoice payment links.
+ */
+function generate_invoice_access_token($bytes = 32) {
+    return bin2hex(random_bytes((int)$bytes));
 }
 
 /**

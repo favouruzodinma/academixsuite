@@ -100,3 +100,99 @@
     [school_slug] => spring-blooms
 )
 
+[31-Jan-2026 19:03:24 UTC] === TIMETABLE API REQUEST ===
+[31-Jan-2026 19:03:24 UTC] Session ID: d5110e9a96da7f0610f60adc149abecb
+[31-Jan-2026 19:03:24 UTC] Session Data: Array
+(
+    [csrf_tokens] => Array
+        (
+            [52658b0fcae123593e9c5e5f4cec0428bea9d9a2b94c65ba0dcacd3770f77e1a] => 1769886753
+        )
+
+    [super_admin] => Array
+        (
+            [id] => 1
+            [name] => Super Admin
+            [email] => admin@academixsuite.com
+            [role] => super_admin
+            [login_time] => 1769883015
+            [last_activity] => 1769883266
+        )
+
+)
+
+[31-Jan-2026 19:03:24 UTC] Request URI: /tenant/api/timetable_api.php
+[31-Jan-2026 19:03:24 UTC] GET Params: Array
+(
+)
+
+[31-Jan-2026 19:03:24 UTC] POST Params: Array
+(
+    [action] => get_teachers
+    [school_slug] => spring-blooms
+)
+
+[31-Jan-2026 19:03:24 UTC] === TIMETABLE API REQUEST ===
+[31-Jan-2026 19:03:24 UTC] Session ID: d5110e9a96da7f0610f60adc149abecb
+[31-Jan-2026 19:03:24 UTC] Session Data: Array
+(
+    [csrf_tokens] => Array
+        (
+            [52658b0fcae123593e9c5e5f4cec0428bea9d9a2b94c65ba0dcacd3770f77e1a] => 1769886753
+        )
+
+    [super_admin] => Array
+        (
+            [id] => 1
+            [name] => Super Admin
+            [email] => admin@academixsuite.com
+            [role] => super_admin
+            [login_time] => 1769883015
+            [last_activity] => 1769883266
+        )
+
+)
+
+[31-Jan-2026 19:03:24 UTC] Request URI: /tenant/api/timetable_api.php
+[31-Jan-2026 19:03:24 UTC] GET Params: Array
+(
+)
+
+[31-Jan-2026 19:03:24 UTC] POST Params: Array
+(
+    [action] => get_subjects
+    [school_slug] => spring-blooms
+)
+
+[31-Jan-2026 19:03:24 UTC] === TIMETABLE API REQUEST ===
+[31-Jan-2026 19:03:24 UTC] Session ID: d5110e9a96da7f0610f60adc149abecb
+[31-Jan-2026 19:03:24 UTC] Session Data: Array
+(
+    [csrf_tokens] => Array
+        (
+            [52658b0fcae123593e9c5e5f4cec0428bea9d9a2b94c65ba0dcacd3770f77e1a] => 1769886753
+        )
+
+    [super_admin] => Array
+        (
+            [id] => 1
+            [name] => Super Admin
+            [email] => admin@academixsuite.com
+            [role] => super_admin
+            [login_time] => 1769883015
+            [last_activity] => 1769883266
+        )
+
+)
+
+[31-Jan-2026 19:03:24 UTC] Request URI: /tenant/api/timetable_api.php
+[31-Jan-2026 19:03:24 UTC] GET Params: Array
+(
+)
+
+[31-Jan-2026 19:03:24 UTC] POST Params: Array
+(
+    [action] => get_classes
+    [school_slug] => spring-blooms
+)
+

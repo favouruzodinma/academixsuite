@@ -1,13 +1,13 @@
 <?php
 return [
     'driver' => env('MAIL_DRIVER', 'smtp'),
-    'host' => env('MAIL_HOST', 'smtp.gmail.com'),
-    'port' => env('MAIL_PORT', 587),
+    'host' => env('MAIL_HOST', 'academixsuite.com'),
+    'port' => env('MAIL_PORT', 465),
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'no-reply@academixsuite.com'),
+        'address' => env('MAIL_FROM_ADDRESS', 'noreply@academixsuite.com'),
         'name' => env('MAIL_FROM_NAME', 'AcademixSuite'),
     ],
-    'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+    'encryption' => env('MAIL_ENCRYPTION', 'ssl'),
     'username' => env('MAIL_USERNAME'),
     'password' => env('MAIL_PASSWORD'),
     'sendmail' => '/usr/sbin/sendmail -bs',

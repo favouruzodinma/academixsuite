@@ -1,0 +1,39 @@
+[06-Mar-2026 12:33:51 Africa/Lagos] === LOGIN AS PARENT PAGE START ===
+[06-Mar-2026 12:33:51 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/login-as-parent.php
+[06-Mar-2026 12:33:51 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 12:33:51 Africa/Lagos] School ID: 6
+[06-Mar-2026 12:33:51 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 12:33:51 Africa/Lagos] Current Admin User ID: 1
+[06-Mar-2026 12:33:51 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 12:33:51 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 12:33:51 Africa/Lagos] Database class found
+[06-Mar-2026 12:33:51 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 12:33:51 Africa/Lagos] School database connection successful
+[06-Mar-2026 12:33:51 Africa/Lagos] Guardian ID to impersonate: 13
+[06-Mar-2026 12:33:51 Africa/Lagos] Error verifying guardian: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.last_login' in 'SELECT'
+[06-Mar-2026 13:09:58 Africa/Lagos] === LOGIN AS PARENT PAGE START ===
+[06-Mar-2026 13:09:58 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/login-as-parent.php
+[06-Mar-2026 13:09:58 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 13:09:58 Africa/Lagos] School ID: 6
+[06-Mar-2026 13:09:58 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 13:09:58 Africa/Lagos] Current Admin User ID: 1
+[06-Mar-2026 13:09:58 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 13:09:58 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 13:09:58 Africa/Lagos] Database class found
+[06-Mar-2026 13:09:58 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 13:09:58 Africa/Lagos] School database connection successful
+[06-Mar-2026 13:09:58 Africa/Lagos] Guardian ID to impersonate: 4
+[06-Mar-2026 13:09:58 Africa/Lagos] Error verifying guardian: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.last_login' in 'SELECT'
+[11-Mar-2026 04:30:54 Africa/Lagos] === LOGIN AS PARENT PAGE START ===
+[11-Mar-2026 04:30:54 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/login-as-parent.php
+[11-Mar-2026 04:30:54 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[11-Mar-2026 04:30:54 Africa/Lagos] School ID: 6
+[11-Mar-2026 04:30:54 Africa/Lagos] School Name: bitflux wallet
+[11-Mar-2026 04:30:54 Africa/Lagos] Current Admin User ID: 1
+[11-Mar-2026 04:30:54 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[11-Mar-2026 04:30:54 Africa/Lagos] Autoload loaded successfully
+[11-Mar-2026 04:30:54 Africa/Lagos] Database class found
+[11-Mar-2026 04:30:54 Africa/Lagos] Attempting to connect to database: school_6
+[11-Mar-2026 04:30:54 Africa/Lagos] School database connection successful
+[11-Mar-2026 04:30:54 Africa/Lagos] Guardian ID to impersonate: 4
+[11-Mar-2026 04:30:54 Africa/Lagos] Error verifying guardian: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.last_login' in 'SELECT'

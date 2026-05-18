@@ -3665,7 +3665,7 @@ $defaultTab = isset($_GET['tab']) ? $_GET['tab'] : 'overview';
         }
 
         function viewBilling(schoolId) {
-            window.open(`billing.php?school_id=${schoolId}`, '_blank');
+            window.open(`../billings/view-invoice?school_id=${schoolId}`, '_blank');
         }
 
         async function saveSettings(schoolId) {

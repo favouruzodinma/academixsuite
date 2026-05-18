@@ -8,3 +8,13 @@
 [30-Jan-2026 02:18:57 Africa/Lagos] School Slug from Router: spring-blooms
 [30-Jan-2026 02:18:57 Africa/Lagos] ERROR fetching data from database: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
 [30-Jan-2026 02:18:57 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/fees.php
+[31-Jan-2026 20:03:09 Africa/Lagos] === FEE MANAGEMENT START ===
+[31-Jan-2026 20:03:09 Africa/Lagos] Request URI: /tenant/spring-blooms/admin/fees.php
+[31-Jan-2026 20:03:09 Africa/Lagos] School Slug from Router: spring-blooms
+[31-Jan-2026 20:03:09 Africa/Lagos] ERROR fetching data from database: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'WHERE'
+[31-Jan-2026 20:03:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/fees.php
+[03-Feb-2026 03:49:48 Africa/Lagos] === FEE MANAGEMENT START ===
+[03-Feb-2026 03:49:48 Africa/Lagos] Request URI: /tenant/nobsams/admin/fees.php
+[03-Feb-2026 03:49:48 Africa/Lagos] School Slug from Router: nobsams
+[03-Feb-2026 03:49:48 Africa/Lagos] ERROR fetching data from database: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'school_15.payment_transactions' doesn't exist
+[03-Feb-2026 03:49:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/fees.php

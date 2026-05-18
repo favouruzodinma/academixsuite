@@ -32,3 +32,67 @@ Stack trace:
 #0 /home/academixsuite/public_html/tenant/router.php(308): require_once()
 #1 {main}
   thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php on line 136
+[31-Jan-2026 20:03:23 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[31-Jan-2026 20:03:23 Africa/Lagos] Request URI: /tenant/spring-blooms/admin/schedule.php
+[31-Jan-2026 20:03:23 Africa/Lagos] School Slug from Router: spring-blooms
+[31-Jan-2026 20:03:23 Africa/Lagos] Error loading initial data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'section' in 'SELECT'
+[31-Jan-2026 20:03:23 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/schedule.php
+[01-Feb-2026 08:08:17 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[01-Feb-2026 08:08:17 Africa/Lagos] Request URI: /tenant/spring-blooms/admin/students.php
+[01-Feb-2026 08:08:17 Africa/Lagos] School Slug from Router: spring-blooms
+[01-Feb-2026 08:08:17 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php:136
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(308): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php on line 136
+[03-Feb-2026 03:49:15 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[03-Feb-2026 03:49:15 Africa/Lagos] Request URI: /tenant/nobsams/admin/students.php
+[03-Feb-2026 03:49:15 Africa/Lagos] School Slug from Router: nobsams
+[03-Feb-2026 03:49:15 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php:136
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(308): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php on line 136
+[07-Feb-2026 05:10:09 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[07-Feb-2026 05:10:09 Africa/Lagos] Request URI: /tenant/spring-blooms/admin/students.php
+[07-Feb-2026 05:10:09 Africa/Lagos] School Slug from Router: spring-blooms
+[07-Feb-2026 05:10:09 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php:136
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(308): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php on line 136
+[07-Feb-2026 05:35:09 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[07-Feb-2026 05:35:09 Africa/Lagos] Request URI: /tenant/nobsams/admin/students.php
+[07-Feb-2026 05:35:09 Africa/Lagos] School Slug from Router: nobsams
+[07-Feb-2026 05:35:09 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to a member function prepare() on null in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php:136
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(308): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php on line 136
+[07-Feb-2026 05:39:28 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[07-Feb-2026 05:39:28 Africa/Lagos] Request URI: /tenant/nobsams/admin/students.php
+[07-Feb-2026 05:39:28 Africa/Lagos] School Slug from Router: nobsams
+[07-Feb-2026 05:39:28 Africa/Lagos] ERROR connecting to school database: School database connection failed: SQLSTATE[HY000] [1049] Unknown database '15'
+[07-Feb-2026 05:39:28 Africa/Lagos] Skipping database queries - no database connection available
+[07-Feb-2026 05:39:28 Africa/Lagos] Loaded initial data: {"total_students":0,"new_admissions":0,"avg_gpa":0}
+[07-Feb-2026 05:39:28 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php
+[07-Feb-2026 05:55:50 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[07-Feb-2026 05:55:50 Africa/Lagos] Request URI: /tenant/nobsams/admin/students.php
+[07-Feb-2026 05:55:50 Africa/Lagos] School Slug from Router: nobsams
+[07-Feb-2026 05:55:50 Africa/Lagos] Database connection established for school: Nobsams
+[07-Feb-2026 05:55:50 Africa/Lagos] Error loading initial data: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'school_15.classrooms' doesn't exist
+[07-Feb-2026 05:55:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php
+[07-Feb-2026 05:56:43 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[07-Feb-2026 05:56:43 Africa/Lagos] Request URI: /tenant/nobsams/admin/students.php
+[07-Feb-2026 05:56:43 Africa/Lagos] School Slug from Router: nobsams
+[07-Feb-2026 05:56:43 Africa/Lagos] ERROR connecting to school database: School database connection failed: SQLSTATE[HY000] [1049] Unknown database '15'
+[07-Feb-2026 05:56:43 Africa/Lagos] Skipping database queries - no database connection available
+[07-Feb-2026 05:56:43 Africa/Lagos] Loaded initial data: {"total_students":0,"new_admissions":0,"avg_gpa":0}
+[07-Feb-2026 05:56:43 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php
+[07-Feb-2026 05:58:42 Africa/Lagos] === TIMETABLE MANAGEMENT START ===
+[07-Feb-2026 05:58:42 Africa/Lagos] Request URI: /tenant/nobsams/admin/students.php
+[07-Feb-2026 05:58:42 Africa/Lagos] School Slug from Router: nobsams
+[07-Feb-2026 05:58:42 Africa/Lagos] ERROR connecting to school database: School database connection failed: SQLSTATE[HY000] [1049] Unknown database '15'
+[07-Feb-2026 05:58:42 Africa/Lagos] Skipping database queries - no database connection available
+[07-Feb-2026 05:58:42 Africa/Lagos] Loaded initial data: {"total_students":0,"new_admissions":0,"avg_gpa":0}
+[07-Feb-2026 05:58:42 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/students.php

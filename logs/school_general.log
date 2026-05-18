@@ -1,0 +1,15 @@
+[24-Feb-2026 13:29:12 Africa/Lagos] === SCHOOL GENERAL SETTINGS PAGE START ===
+[24-Feb-2026 13:29:12 Africa/Lagos] Platform database connection successful
+[24-Feb-2026 13:29:12 Africa/Lagos] School database connection successful
+[24-Feb-2026 13:29:12 Africa/Lagos] School details fetched successfully
+[24-Feb-2026 13:29:12 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.role_id' in 'ON'
+[24-Feb-2026 13:29:12 Africa/Lagos] === SCHOOL GENERAL SETTINGS PAGE END ===
+[24-Feb-2026 13:29:12 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[24-Feb-2026 13:30:22 Africa/Lagos] === SCHOOL GENERAL SETTINGS PAGE START ===
+[24-Feb-2026 13:30:22 Africa/Lagos] Platform database connection successful
+[24-Feb-2026 13:30:22 Africa/Lagos] School database connection successful
+[24-Feb-2026 13:30:22 Africa/Lagos] School details fetched successfully
+[24-Feb-2026 13:30:22 Africa/Lagos] Error fetching school data: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'u.role_id' in 'ON'
+[24-Feb-2026 13:30:22 Africa/Lagos] Settings update error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'website' in 'SET'
+[24-Feb-2026 13:30:22 Africa/Lagos] === SCHOOL GENERAL SETTINGS PAGE END ===
+[24-Feb-2026 13:30:22 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php

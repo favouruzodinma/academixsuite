@@ -248,3 +248,22 @@
 [30-Jan-2026 04:57:55 Africa/Lagos] PHP Warning:  Undefined array key "employment_type" in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
 [30-Jan-2026 04:57:55 Africa/Lagos] PHP Deprecated:  str_replace(): Passing null to parameter #3 ($subject) of type array|string is deprecated in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2243
 [30-Jan-2026 04:58:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php
+[03-Feb-2026 03:49:33 Africa/Lagos] === TEACHERS MANAGEMENT START ===
+[03-Feb-2026 03:49:33 Africa/Lagos] Request URI: /tenant/nobsams/admin/teachers.php
+[03-Feb-2026 03:49:33 Africa/Lagos] School Slug from Router: nobsams
+[03-Feb-2026 03:49:33 Africa/Lagos] Total teachers: 0
+[03-Feb-2026 03:49:33 Africa/Lagos] Active teachers: 0
+[03-Feb-2026 03:49:33 Africa/Lagos] On leave teachers: 0
+[03-Feb-2026 03:49:33 Africa/Lagos] New teachers this year: 0
+[03-Feb-2026 03:49:33 Africa/Lagos] Departments loaded: 0
+[03-Feb-2026 03:49:33 Africa/Lagos] Teachers loaded: 0
+[03-Feb-2026 03:49:33 Africa/Lagos] Featured teachers loaded: 0
+[03-Feb-2026 03:49:33 Africa/Lagos] Upcoming events loaded: 0
+[03-Feb-2026 03:49:33 Africa/Lagos] Qualification stats loaded
+[03-Feb-2026 03:49:33 Africa/Lagos] Department distribution loaded: 0
+[03-Feb-2026 03:49:33 Africa/Lagos] Average experience: 0
+[03-Feb-2026 03:49:33 Africa/Lagos] Teacher statuses loaded
+[03-Feb-2026 03:49:33 Africa/Lagos] PHP Warning:  Undefined variable $fullTimeRate in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2009
+[03-Feb-2026 03:49:33 Africa/Lagos] PHP Warning:  Undefined variable $partTimeRate in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2019
+[03-Feb-2026 03:49:33 Africa/Lagos] PHP Warning:  Undefined variable $substituteRate in /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php on line 2029
+[03-Feb-2026 03:49:33 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teachers.php

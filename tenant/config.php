@@ -29,7 +29,7 @@ define('SCHOOL_NAME', $school['name']);
 define('SCHOOL_DB_NAME', $school['database_name']);
 define('SCHOOL_UPLOAD_PATH', __DIR__ . '/../../../assets/uploads/schools/' . SCHOOL_ID . '/');
 define('SCHOOL_ASSETS_URL', '/assets/uploads/schools/' . SCHOOL_ID . '/');
-define('SCHOOL_PORTAL_URL', APP_URL . '/tenant/' . SCHOOL_SLUG);
+define('SCHOOL_PORTAL_URL', function_exists('school_portal_url') ? school_portal_url(SCHOOL_SLUG, '', true) : APP_URL . '/tenant/' . SCHOOL_SLUG);
 
 // School timezone (default to Africa/Lagos, can be customized per school)
 date_default_timezone_set('Africa/Lagos');
@@ -59,7 +59,7 @@ function isSchoolUserAuthenticated() {
 // Require school authentication
 function requireSchoolAuth() {
     if (!isSchoolUserAuthenticated()) {
-        header('Location: /tenant/' . SCHOOL_SLUG . '/login');
+        header('Location: ' . (function_exists('school_login_url') ? school_login_url(SCHOOL_SLUG, false) : '/tenant/' . SCHOOL_SLUG . '/login'));
         exit;
     }
 }

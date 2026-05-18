@@ -1,0 +1,110 @@
+[12-Mar-2026 16:23:25 Africa/Lagos] === ATTENDANCE PAGE START ===
+[12-Mar-2026 16:23:25 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?ajax=get_sections&class_id=8
+[12-Mar-2026 16:23:25 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[12-Mar-2026 16:23:25 Africa/Lagos] School database connection successful
+[12-Mar-2026 16:23:25 Africa/Lagos] Mail configuration loaded for school ID: 6
+[12-Mar-2026 16:23:25 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[12-Mar-2026 16:23:26 Africa/Lagos] === ATTENDANCE PAGE START ===
+[12-Mar-2026 16:23:26 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?academic_year=1&class_id=8&section_id=&attendance_date=2026-03-12
+[12-Mar-2026 16:23:26 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[12-Mar-2026 16:23:26 Africa/Lagos] School database connection successful
+[12-Mar-2026 16:23:26 Africa/Lagos] Mail configuration loaded for school ID: 6
+[12-Mar-2026 16:23:26 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[12-Mar-2026 16:23:26 Africa/Lagos] Fetched 0 students for class ID: 8 on date: 2026-03-12
+[12-Mar-2026 16:23:26 Africa/Lagos] Found 0 students
+[12-Mar-2026 16:23:26 Africa/Lagos] === ATTENDANCE PAGE END ===
+[12-Mar-2026 16:23:26 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[12-Mar-2026 16:23:49 Africa/Lagos] === ATTENDANCE PAGE START ===
+[12-Mar-2026 16:23:49 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?academic_year=1&class_id=8&section_id=&attendance_date=2026-03-12
+[12-Mar-2026 16:23:49 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[12-Mar-2026 16:23:49 Africa/Lagos] School database connection successful
+[12-Mar-2026 16:23:49 Africa/Lagos] Mail configuration loaded for school ID: 6
+[12-Mar-2026 16:23:49 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[12-Mar-2026 16:23:49 Africa/Lagos] Fetched 0 students for class ID: 8 on date: 2026-03-12
+[12-Mar-2026 16:23:49 Africa/Lagos] Found 0 students
+[12-Mar-2026 16:23:49 Africa/Lagos] === ATTENDANCE PAGE END ===
+[12-Mar-2026 16:23:49 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[12-Mar-2026 16:23:55 Africa/Lagos] === ATTENDANCE PAGE START ===
+[12-Mar-2026 16:23:55 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?academic_year=1&class_id=8&section_id=&attendance_date=2026-03-12
+[12-Mar-2026 16:23:55 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[12-Mar-2026 16:23:55 Africa/Lagos] School database connection successful
+[12-Mar-2026 16:23:55 Africa/Lagos] Mail configuration loaded for school ID: 6
+[12-Mar-2026 16:23:55 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[12-Mar-2026 16:23:55 Africa/Lagos] Fetched 0 students for class ID: 8 on date: 2026-03-12
+[12-Mar-2026 16:23:55 Africa/Lagos] Found 0 students
+[12-Mar-2026 16:23:55 Africa/Lagos] === ATTENDANCE PAGE END ===
+[12-Mar-2026 16:23:55 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[12-Mar-2026 16:23:59 Africa/Lagos] === ATTENDANCE PAGE START ===
+[12-Mar-2026 16:23:59 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?ajax=get_sections&class_id=4
+[12-Mar-2026 16:23:59 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[12-Mar-2026 16:23:59 Africa/Lagos] School database connection successful
+[12-Mar-2026 16:23:59 Africa/Lagos] Mail configuration loaded for school ID: 6
+[12-Mar-2026 16:23:59 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[12-Mar-2026 16:24:01 Africa/Lagos] === ATTENDANCE PAGE START ===
+[12-Mar-2026 16:24:01 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?academic_year=1&class_id=4&section_id=&attendance_date=2026-03-12
+[12-Mar-2026 16:24:01 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[12-Mar-2026 16:24:01 Africa/Lagos] School database connection successful
+[12-Mar-2026 16:24:01 Africa/Lagos] Mail configuration loaded for school ID: 6
+[12-Mar-2026 16:24:01 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[12-Mar-2026 16:24:01 Africa/Lagos] Fetched 12 students for class ID: 4 on date: 2026-03-12
+[12-Mar-2026 16:24:01 Africa/Lagos] Found 12 students
+[12-Mar-2026 16:24:01 Africa/Lagos] === ATTENDANCE PAGE END ===
+[12-Mar-2026 16:24:01 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[12-Mar-2026 16:24:33 Africa/Lagos] === ATTENDANCE PAGE START ===
+[12-Mar-2026 16:24:33 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?academic_year=1&class_id=4&section_id=5&attendance_date=2026-03-12
+[12-Mar-2026 16:24:33 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[12-Mar-2026 16:24:33 Africa/Lagos] School database connection successful
+[12-Mar-2026 16:24:33 Africa/Lagos] Mail configuration loaded for school ID: 6
+[12-Mar-2026 16:24:33 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[12-Mar-2026 16:24:33 Africa/Lagos] Fetched 12 students for class ID: 4 on date: 2026-03-12
+[12-Mar-2026 16:24:33 Africa/Lagos] Found 12 students
+[12-Mar-2026 16:24:33 Africa/Lagos] === ATTENDANCE PAGE END ===
+[12-Mar-2026 16:24:33 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[14-Mar-2026 04:25:30 Africa/Lagos] === ATTENDANCE PAGE START ===
+[14-Mar-2026 04:25:30 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php
+[14-Mar-2026 04:25:30 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[14-Mar-2026 04:25:30 Africa/Lagos] School database connection successful
+[14-Mar-2026 04:25:30 Africa/Lagos] Mail configuration loaded for school ID: 6
+[14-Mar-2026 04:25:30 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[14-Mar-2026 04:25:30 Africa/Lagos] === ATTENDANCE PAGE END ===
+[14-Mar-2026 04:25:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[14-Mar-2026 10:54:11 Africa/Lagos] === ATTENDANCE PAGE START ===
+[14-Mar-2026 10:54:11 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php
+[14-Mar-2026 10:54:11 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[14-Mar-2026 10:54:11 Africa/Lagos] School database connection successful
+[14-Mar-2026 10:54:11 Africa/Lagos] Mail configuration loaded for school ID: 6
+[14-Mar-2026 10:54:11 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[14-Mar-2026 10:54:11 Africa/Lagos] === ATTENDANCE PAGE END ===
+[14-Mar-2026 10:54:11 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[14-Mar-2026 17:38:56 Africa/Lagos] === ATTENDANCE PAGE START ===
+[14-Mar-2026 17:38:56 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php
+[14-Mar-2026 17:38:56 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[14-Mar-2026 17:38:56 Africa/Lagos] School database connection successful
+[14-Mar-2026 17:38:56 Africa/Lagos] Mail configuration loaded for school ID: 6
+[14-Mar-2026 17:38:56 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[14-Mar-2026 17:38:56 Africa/Lagos] === ATTENDANCE PAGE END ===
+[14-Mar-2026 17:38:56 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[14-Mar-2026 17:39:00 Africa/Lagos] === ATTENDANCE PAGE START ===
+[14-Mar-2026 17:39:00 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?ajax=get_sections&class_id=4
+[14-Mar-2026 17:39:00 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[14-Mar-2026 17:39:00 Africa/Lagos] School database connection successful
+[14-Mar-2026 17:39:00 Africa/Lagos] Mail configuration loaded for school ID: 6
+[14-Mar-2026 17:39:00 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[14-Mar-2026 17:39:03 Africa/Lagos] === ATTENDANCE PAGE START ===
+[14-Mar-2026 17:39:03 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?academic_year=1&class_id=4&section_id=5&attendance_date=2026-03-14
+[14-Mar-2026 17:39:03 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[14-Mar-2026 17:39:03 Africa/Lagos] School database connection successful
+[14-Mar-2026 17:39:03 Africa/Lagos] Mail configuration loaded for school ID: 6
+[14-Mar-2026 17:39:03 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[14-Mar-2026 17:39:03 Africa/Lagos] Fetched 12 students for class ID: 4 on date: 2026-03-14
+[14-Mar-2026 17:39:03 Africa/Lagos] Found 12 students
+[14-Mar-2026 17:39:03 Africa/Lagos] === ATTENDANCE PAGE END ===
+[14-Mar-2026 17:39:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[19-Mar-2026 13:05:05 Africa/Lagos] === ATTENDANCE PAGE START ===
+[19-Mar-2026 13:05:05 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php
+[19-Mar-2026 13:05:05 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[19-Mar-2026 13:05:05 Africa/Lagos] School database connection successful
+[19-Mar-2026 13:05:05 Africa/Lagos] Mail configuration loaded for school ID: 6
+[19-Mar-2026 13:05:05 Africa/Lagos] AttendanceManager initialized for school ID: 6
+[19-Mar-2026 13:05:05 Africa/Lagos] === ATTENDANCE PAGE END ===
+[19-Mar-2026 13:05:05 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php

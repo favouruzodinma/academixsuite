@@ -1,0 +1,473 @@
+[05-Mar-2026 20:13:57 Africa/Lagos] === TEACHER LIST PAGE START ===
+[05-Mar-2026 20:13:57 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[05-Mar-2026 20:13:57 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:13:57 Africa/Lagos] School database connection successful
+[05-Mar-2026 20:13:57 Africa/Lagos] TeacherManager initialized for school ID: 6
+[05-Mar-2026 20:13:57 Africa/Lagos] TeacherManager initialized successfully
+[05-Mar-2026 20:13:57 Africa/Lagos] Retrieved 1 teachers
+[05-Mar-2026 20:13:57 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[05-Mar-2026 20:13:57 Africa/Lagos] Fetched 1 teachers
+[05-Mar-2026 20:13:57 Africa/Lagos] === TEACHER LIST PAGE END ===
+[05-Mar-2026 20:13:57 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:24:43 Africa/Lagos] === TEACHER LIST PAGE START ===
+[05-Mar-2026 20:24:43 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[05-Mar-2026 20:24:43 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:24:43 Africa/Lagos] School database connection successful
+[05-Mar-2026 20:24:43 Africa/Lagos] TeacherManager initialized for school ID: 6
+[05-Mar-2026 20:24:43 Africa/Lagos] TeacherManager initialized successfully
+[05-Mar-2026 20:24:43 Africa/Lagos] Retrieved 1 teachers
+[05-Mar-2026 20:24:43 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[05-Mar-2026 20:24:43 Africa/Lagos] Fetched 1 teachers
+[05-Mar-2026 20:24:43 Africa/Lagos] === TEACHER LIST PAGE END ===
+[05-Mar-2026 20:24:43 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:24:45 Africa/Lagos] === TEACHER LIST PAGE START ===
+[05-Mar-2026 20:24:45 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php?error=teacher_not_found
+[05-Mar-2026 20:24:45 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:24:45 Africa/Lagos] School database connection successful
+[05-Mar-2026 20:24:45 Africa/Lagos] TeacherManager initialized for school ID: 6
+[05-Mar-2026 20:24:45 Africa/Lagos] TeacherManager initialized successfully
+[05-Mar-2026 20:24:45 Africa/Lagos] Retrieved 1 teachers
+[05-Mar-2026 20:24:45 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[05-Mar-2026 20:24:45 Africa/Lagos] Fetched 1 teachers
+[05-Mar-2026 20:24:45 Africa/Lagos] === TEACHER LIST PAGE END ===
+[05-Mar-2026 20:24:45 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:24:49 Africa/Lagos] === TEACHER LIST PAGE START ===
+[05-Mar-2026 20:24:49 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php?error=teacher_not_found
+[05-Mar-2026 20:24:49 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:24:49 Africa/Lagos] School database connection successful
+[05-Mar-2026 20:24:49 Africa/Lagos] TeacherManager initialized for school ID: 6
+[05-Mar-2026 20:24:49 Africa/Lagos] TeacherManager initialized successfully
+[05-Mar-2026 20:24:49 Africa/Lagos] Retrieved 1 teachers
+[05-Mar-2026 20:24:49 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[05-Mar-2026 20:24:49 Africa/Lagos] Fetched 1 teachers
+[05-Mar-2026 20:24:49 Africa/Lagos] === TEACHER LIST PAGE END ===
+[05-Mar-2026 20:24:49 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:25:01 Africa/Lagos] === TEACHER LIST PAGE START ===
+[05-Mar-2026 20:25:01 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[05-Mar-2026 20:25:01 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:25:01 Africa/Lagos] School database connection successful
+[05-Mar-2026 20:25:01 Africa/Lagos] TeacherManager initialized for school ID: 6
+[05-Mar-2026 20:25:01 Africa/Lagos] TeacherManager initialized successfully
+[05-Mar-2026 20:25:01 Africa/Lagos] Retrieved 1 teachers
+[05-Mar-2026 20:25:01 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[05-Mar-2026 20:25:01 Africa/Lagos] Fetched 1 teachers
+[05-Mar-2026 20:25:01 Africa/Lagos] === TEACHER LIST PAGE END ===
+[05-Mar-2026 20:25:01 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:25:09 Africa/Lagos] === TEACHER LIST PAGE START ===
+[05-Mar-2026 20:25:09 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php?error=teacher_not_found
+[05-Mar-2026 20:25:09 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:25:09 Africa/Lagos] School database connection successful
+[05-Mar-2026 20:25:09 Africa/Lagos] TeacherManager initialized for school ID: 6
+[05-Mar-2026 20:25:09 Africa/Lagos] TeacherManager initialized successfully
+[05-Mar-2026 20:25:09 Africa/Lagos] Retrieved 1 teachers
+[05-Mar-2026 20:25:09 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[05-Mar-2026 20:25:09 Africa/Lagos] Fetched 1 teachers
+[05-Mar-2026 20:25:09 Africa/Lagos] === TEACHER LIST PAGE END ===
+[05-Mar-2026 20:25:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:26:17 Africa/Lagos] === TEACHER LIST PAGE START ===
+[05-Mar-2026 20:26:17 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php?error=teacher_not_found
+[05-Mar-2026 20:26:17 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:26:17 Africa/Lagos] School database connection successful
+[05-Mar-2026 20:26:17 Africa/Lagos] TeacherManager initialized for school ID: 6
+[05-Mar-2026 20:26:17 Africa/Lagos] TeacherManager initialized successfully
+[05-Mar-2026 20:26:17 Africa/Lagos] Retrieved 1 teachers
+[05-Mar-2026 20:26:17 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[05-Mar-2026 20:26:17 Africa/Lagos] Fetched 1 teachers
+[05-Mar-2026 20:26:17 Africa/Lagos] === TEACHER LIST PAGE END ===
+[05-Mar-2026 20:26:17 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:58:09 Africa/Lagos] === TEACHER LIST PAGE START ===
+[05-Mar-2026 20:58:09 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[05-Mar-2026 20:58:09 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 20:58:09 Africa/Lagos] School database connection successful
+[05-Mar-2026 20:58:09 Africa/Lagos] TeacherManager initialized for school ID: 6
+[05-Mar-2026 20:58:09 Africa/Lagos] TeacherManager initialized successfully
+[05-Mar-2026 20:58:09 Africa/Lagos] Retrieved 1 teachers
+[05-Mar-2026 20:58:09 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[05-Mar-2026 20:58:09 Africa/Lagos] Fetched 1 teachers
+[05-Mar-2026 20:58:09 Africa/Lagos] === TEACHER LIST PAGE END ===
+[05-Mar-2026 20:58:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 21:07:54 Africa/Lagos] === TEACHER LIST PAGE START ===
+[05-Mar-2026 21:07:54 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[05-Mar-2026 21:07:54 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 21:07:54 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:07:54 Africa/Lagos] TeacherManager initialized for school ID: 6
+[05-Mar-2026 21:07:54 Africa/Lagos] TeacherManager initialized successfully
+[05-Mar-2026 21:07:54 Africa/Lagos] Retrieved 1 teachers
+[05-Mar-2026 21:07:54 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[05-Mar-2026 21:07:54 Africa/Lagos] Fetched 1 teachers
+[05-Mar-2026 21:07:54 Africa/Lagos] === TEACHER LIST PAGE END ===
+[05-Mar-2026 21:07:54 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 21:19:15 Africa/Lagos] === TEACHER LIST PAGE START ===
+[05-Mar-2026 21:19:15 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[05-Mar-2026 21:19:15 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[05-Mar-2026 21:19:15 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:19:15 Africa/Lagos] TeacherManager initialized for school ID: 6
+[05-Mar-2026 21:19:15 Africa/Lagos] TeacherManager initialized successfully
+[05-Mar-2026 21:19:15 Africa/Lagos] Retrieved 1 teachers
+[05-Mar-2026 21:19:15 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[05-Mar-2026 21:19:15 Africa/Lagos] Fetched 1 teachers
+[05-Mar-2026 21:19:15 Africa/Lagos] === TEACHER LIST PAGE END ===
+[05-Mar-2026 21:19:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[06-Mar-2026 09:17:56 Africa/Lagos] === TEACHER LIST PAGE START ===
+[06-Mar-2026 09:17:56 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[06-Mar-2026 09:17:56 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[06-Mar-2026 09:17:56 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:17:56 Africa/Lagos] TeacherManager initialized for school ID: 6
+[06-Mar-2026 09:17:56 Africa/Lagos] TeacherManager initialized successfully
+[06-Mar-2026 09:17:56 Africa/Lagos] Retrieved 1 teachers
+[06-Mar-2026 09:17:56 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[06-Mar-2026 09:17:56 Africa/Lagos] Fetched 1 teachers
+[06-Mar-2026 09:17:56 Africa/Lagos] === TEACHER LIST PAGE END ===
+[06-Mar-2026 09:17:56 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[06-Mar-2026 09:28:09 Africa/Lagos] === TEACHER LIST PAGE START ===
+[06-Mar-2026 09:28:09 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[06-Mar-2026 09:28:09 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[06-Mar-2026 09:28:09 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:28:09 Africa/Lagos] TeacherManager initialized for school ID: 6
+[06-Mar-2026 09:28:09 Africa/Lagos] TeacherManager initialized successfully
+[06-Mar-2026 09:28:09 Africa/Lagos] Retrieved 2 teachers
+[06-Mar-2026 09:28:09 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[06-Mar-2026 09:28:09 Africa/Lagos] Fetched 2 teachers
+[06-Mar-2026 09:28:09 Africa/Lagos] === TEACHER LIST PAGE END ===
+[06-Mar-2026 09:28:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 06:20:51 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 06:20:51 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 06:20:51 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 06:20:51 Africa/Lagos] School database connection successful
+[09-Mar-2026 06:20:51 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 06:20:51 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 06:20:51 Africa/Lagos] Retrieved 2 teachers
+[09-Mar-2026 06:20:51 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 06:20:51 Africa/Lagos] Fetched 2 teachers
+[09-Mar-2026 06:20:51 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 06:20:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 07:11:58 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 07:11:58 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 07:11:58 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 07:11:58 Africa/Lagos] School database connection successful
+[09-Mar-2026 07:11:58 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 07:11:58 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 07:11:58 Africa/Lagos] Retrieved 2 teachers
+[09-Mar-2026 07:11:58 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 07:11:58 Africa/Lagos] Fetched 2 teachers
+[09-Mar-2026 07:11:58 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 07:11:58 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 12:22:50 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 12:22:50 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 12:22:50 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 12:22:50 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:22:50 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 12:22:50 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 12:22:50 Africa/Lagos] Retrieved 2 teachers
+[09-Mar-2026 12:22:50 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 12:22:50 Africa/Lagos] Fetched 2 teachers
+[09-Mar-2026 12:22:50 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 12:22:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 12:52:42 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 12:52:42 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 12:52:42 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 12:52:42 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:52:42 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 12:52:42 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 12:52:42 Africa/Lagos] Retrieved 3 teachers
+[09-Mar-2026 12:52:42 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 12:52:42 Africa/Lagos] Fetched 3 teachers
+[09-Mar-2026 12:52:42 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 12:52:42 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 12:55:10 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 12:55:10 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 12:55:10 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 12:55:10 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:55:10 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 12:55:10 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 12:55:10 Africa/Lagos] Retrieved 3 teachers
+[09-Mar-2026 12:55:10 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 12:55:10 Africa/Lagos] Fetched 3 teachers
+[09-Mar-2026 12:55:10 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 12:55:10 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 13:13:36 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 13:13:36 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 13:13:36 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 13:13:36 Africa/Lagos] School database connection successful
+[09-Mar-2026 13:13:36 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 13:13:36 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 13:13:36 Africa/Lagos] Retrieved 3 teachers
+[09-Mar-2026 13:13:36 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 13:13:36 Africa/Lagos] Fetched 3 teachers
+[09-Mar-2026 13:13:36 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 13:13:36 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 13:23:49 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 13:23:49 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 13:23:49 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 13:23:49 Africa/Lagos] School database connection successful
+[09-Mar-2026 13:23:49 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 13:23:49 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 13:23:49 Africa/Lagos] Retrieved 4 teachers
+[09-Mar-2026 13:23:49 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 13:23:49 Africa/Lagos] Fetched 4 teachers
+[09-Mar-2026 13:23:49 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 13:23:49 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 13:31:49 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 13:31:49 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 13:31:49 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 13:31:49 Africa/Lagos] School database connection successful
+[09-Mar-2026 13:31:49 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 13:31:49 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 13:31:49 Africa/Lagos] Retrieved 5 teachers
+[09-Mar-2026 13:31:49 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 13:31:49 Africa/Lagos] Fetched 5 teachers
+[09-Mar-2026 13:31:49 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 13:31:49 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 13:40:05 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 13:40:05 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 13:40:05 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 13:40:05 Africa/Lagos] School database connection successful
+[09-Mar-2026 13:40:05 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 13:40:05 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 13:40:05 Africa/Lagos] Retrieved 5 teachers
+[09-Mar-2026 13:40:05 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 13:40:05 Africa/Lagos] Fetched 5 teachers
+[09-Mar-2026 13:40:05 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 13:40:05 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 13:46:32 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 13:46:32 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 13:46:32 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 13:46:32 Africa/Lagos] School database connection successful
+[09-Mar-2026 13:46:32 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 13:46:32 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 13:46:32 Africa/Lagos] Retrieved 6 teachers
+[09-Mar-2026 13:46:32 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 13:46:32 Africa/Lagos] Fetched 6 teachers
+[09-Mar-2026 13:46:32 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 13:46:32 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 14:10:13 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 14:10:13 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 14:10:13 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 14:10:13 Africa/Lagos] School database connection successful
+[09-Mar-2026 14:10:13 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 14:10:13 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 14:10:13 Africa/Lagos] Retrieved 6 teachers
+[09-Mar-2026 14:10:13 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 14:10:13 Africa/Lagos] Fetched 6 teachers
+[09-Mar-2026 14:10:13 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 14:10:13 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 14:10:17 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 14:10:17 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 14:10:17 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 14:10:17 Africa/Lagos] School database connection successful
+[09-Mar-2026 14:10:17 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 14:10:17 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 14:10:17 Africa/Lagos] Retrieved 6 teachers
+[09-Mar-2026 14:10:17 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 14:10:17 Africa/Lagos] Fetched 6 teachers
+[09-Mar-2026 14:10:17 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 14:10:17 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 21:32:49 Africa/Lagos] === TEACHER LIST PAGE START ===
+[09-Mar-2026 21:32:49 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[09-Mar-2026 21:32:49 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[09-Mar-2026 21:32:49 Africa/Lagos] School database connection successful
+[09-Mar-2026 21:32:49 Africa/Lagos] TeacherManager initialized for school ID: 6
+[09-Mar-2026 21:32:49 Africa/Lagos] TeacherManager initialized successfully
+[09-Mar-2026 21:32:49 Africa/Lagos] Retrieved 6 teachers
+[09-Mar-2026 21:32:49 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[09-Mar-2026 21:32:49 Africa/Lagos] Fetched 6 teachers
+[09-Mar-2026 21:32:49 Africa/Lagos] === TEACHER LIST PAGE END ===
+[09-Mar-2026 21:32:49 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[11-Mar-2026 12:08:28 Africa/Lagos] === TEACHER LIST PAGE START ===
+[11-Mar-2026 12:08:28 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[11-Mar-2026 12:08:28 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[11-Mar-2026 12:08:28 Africa/Lagos] School database connection successful
+[11-Mar-2026 12:08:28 Africa/Lagos] TeacherManager initialized for school ID: 6
+[11-Mar-2026 12:08:28 Africa/Lagos] TeacherManager initialized successfully
+[11-Mar-2026 12:08:28 Africa/Lagos] Retrieved 6 teachers
+[11-Mar-2026 12:08:28 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[11-Mar-2026 12:08:28 Africa/Lagos] Fetched 6 teachers
+[11-Mar-2026 12:08:28 Africa/Lagos] === TEACHER LIST PAGE END ===
+[11-Mar-2026 12:08:28 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[11-Mar-2026 19:09:56 Africa/Lagos] === TEACHER LIST PAGE START ===
+[11-Mar-2026 19:09:56 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[11-Mar-2026 19:09:56 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[11-Mar-2026 19:09:56 Africa/Lagos] School database connection successful
+[11-Mar-2026 19:09:56 Africa/Lagos] TeacherManager initialized for school ID: 6
+[11-Mar-2026 19:09:56 Africa/Lagos] TeacherManager initialized successfully
+[11-Mar-2026 19:09:56 Africa/Lagos] Retrieved 7 teachers
+[11-Mar-2026 19:09:56 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[11-Mar-2026 19:09:56 Africa/Lagos] Fetched 7 teachers
+[11-Mar-2026 19:09:56 Africa/Lagos] === TEACHER LIST PAGE END ===
+[11-Mar-2026 19:09:56 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[11-Mar-2026 19:43:42 Africa/Lagos] === TEACHER LIST PAGE START ===
+[11-Mar-2026 19:43:42 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[11-Mar-2026 19:43:42 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[11-Mar-2026 19:43:42 Africa/Lagos] School database connection successful
+[11-Mar-2026 19:43:42 Africa/Lagos] TeacherManager initialized for school ID: 6
+[11-Mar-2026 19:43:42 Africa/Lagos] TeacherManager initialized successfully
+[11-Mar-2026 19:43:42 Africa/Lagos] Retrieved 7 teachers
+[11-Mar-2026 19:43:42 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[11-Mar-2026 19:43:42 Africa/Lagos] Fetched 7 teachers
+[11-Mar-2026 19:43:42 Africa/Lagos] === TEACHER LIST PAGE END ===
+[11-Mar-2026 19:43:42 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[11-Mar-2026 19:45:43 Africa/Lagos] === TEACHER LIST PAGE START ===
+[11-Mar-2026 19:45:43 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[11-Mar-2026 19:45:43 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[11-Mar-2026 19:45:43 Africa/Lagos] School database connection successful
+[11-Mar-2026 19:45:43 Africa/Lagos] TeacherManager initialized for school ID: 6
+[11-Mar-2026 19:45:43 Africa/Lagos] TeacherManager initialized successfully
+[11-Mar-2026 19:45:43 Africa/Lagos] Retrieved 7 teachers
+[11-Mar-2026 19:45:43 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[11-Mar-2026 19:45:43 Africa/Lagos] Fetched 7 teachers
+[11-Mar-2026 19:45:43 Africa/Lagos] === TEACHER LIST PAGE END ===
+[11-Mar-2026 19:45:43 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 03:45:50 Africa/Lagos] === TEACHER LIST PAGE START ===
+[12-Mar-2026 03:45:50 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[12-Mar-2026 03:45:50 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 03:45:50 Africa/Lagos] School database connection successful
+[12-Mar-2026 03:45:50 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 03:45:50 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 03:45:50 Africa/Lagos] Retrieved 7 teachers
+[12-Mar-2026 03:45:50 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[12-Mar-2026 03:45:50 Africa/Lagos] Fetched 7 teachers
+[12-Mar-2026 03:45:50 Africa/Lagos] === TEACHER LIST PAGE END ===
+[12-Mar-2026 03:45:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 06:07:49 Africa/Lagos] === TEACHER LIST PAGE START ===
+[12-Mar-2026 06:07:49 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[12-Mar-2026 06:07:49 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 06:07:49 Africa/Lagos] School database connection successful
+[12-Mar-2026 06:07:49 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 06:07:49 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 06:07:49 Africa/Lagos] Retrieved 7 teachers
+[12-Mar-2026 06:07:49 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[12-Mar-2026 06:07:49 Africa/Lagos] Fetched 7 teachers
+[12-Mar-2026 06:07:49 Africa/Lagos] === TEACHER LIST PAGE END ===
+[12-Mar-2026 06:07:49 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 09:13:06 Africa/Lagos] === TEACHER LIST PAGE START ===
+[12-Mar-2026 09:13:06 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[12-Mar-2026 09:13:06 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 09:13:06 Africa/Lagos] School database connection successful
+[12-Mar-2026 09:13:06 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 09:13:06 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 09:13:06 Africa/Lagos] Retrieved 7 teachers
+[12-Mar-2026 09:13:06 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[12-Mar-2026 09:13:06 Africa/Lagos] Fetched 7 teachers
+[12-Mar-2026 09:13:06 Africa/Lagos] === TEACHER LIST PAGE END ===
+[12-Mar-2026 09:13:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 10:52:42 Africa/Lagos] === TEACHER LIST PAGE START ===
+[12-Mar-2026 10:52:42 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[12-Mar-2026 10:52:42 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 10:52:42 Africa/Lagos] School database connection successful
+[12-Mar-2026 10:52:42 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 10:52:42 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 10:52:42 Africa/Lagos] Retrieved 7 teachers
+[12-Mar-2026 10:52:42 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[12-Mar-2026 10:52:42 Africa/Lagos] Fetched 7 teachers
+[12-Mar-2026 10:52:42 Africa/Lagos] === TEACHER LIST PAGE END ===
+[12-Mar-2026 10:52:42 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 11:55:20 Africa/Lagos] === TEACHER LIST PAGE START ===
+[12-Mar-2026 11:55:20 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[12-Mar-2026 11:55:20 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 11:55:20 Africa/Lagos] School database connection successful
+[12-Mar-2026 11:55:20 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 11:55:20 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 11:55:20 Africa/Lagos] Retrieved 7 teachers
+[12-Mar-2026 11:55:20 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[12-Mar-2026 11:55:20 Africa/Lagos] Fetched 7 teachers
+[12-Mar-2026 11:55:20 Africa/Lagos] === TEACHER LIST PAGE END ===
+[12-Mar-2026 11:55:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 13:45:51 Africa/Lagos] === TEACHER LIST PAGE START ===
+[12-Mar-2026 13:45:51 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[12-Mar-2026 13:45:51 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 13:45:51 Africa/Lagos] School database connection successful
+[12-Mar-2026 13:45:51 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 13:45:51 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 13:45:51 Africa/Lagos] Retrieved 8 teachers
+[12-Mar-2026 13:45:51 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[12-Mar-2026 13:45:51 Africa/Lagos] Fetched 8 teachers
+[12-Mar-2026 13:45:51 Africa/Lagos] === TEACHER LIST PAGE END ===
+[12-Mar-2026 13:45:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 13:55:41 Africa/Lagos] === TEACHER LIST PAGE START ===
+[12-Mar-2026 13:55:41 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[12-Mar-2026 13:55:41 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 13:55:41 Africa/Lagos] School database connection successful
+[12-Mar-2026 13:55:41 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 13:55:41 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 13:55:41 Africa/Lagos] Retrieved 9 teachers
+[12-Mar-2026 13:55:41 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[12-Mar-2026 13:55:41 Africa/Lagos] Fetched 9 teachers
+[12-Mar-2026 13:55:41 Africa/Lagos] === TEACHER LIST PAGE END ===
+[12-Mar-2026 13:55:41 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 14:06:06 Africa/Lagos] === TEACHER LIST PAGE START ===
+[12-Mar-2026 14:06:06 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[12-Mar-2026 14:06:06 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 14:06:06 Africa/Lagos] School database connection successful
+[12-Mar-2026 14:06:06 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 14:06:06 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 14:06:06 Africa/Lagos] Retrieved 9 teachers
+[12-Mar-2026 14:06:06 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[12-Mar-2026 14:06:06 Africa/Lagos] Fetched 9 teachers
+[12-Mar-2026 14:06:06 Africa/Lagos] === TEACHER LIST PAGE END ===
+[12-Mar-2026 14:06:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 14:11:44 Africa/Lagos] === TEACHER LIST PAGE START ===
+[12-Mar-2026 14:11:44 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[12-Mar-2026 14:11:44 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 14:11:44 Africa/Lagos] School database connection successful
+[12-Mar-2026 14:11:44 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 14:11:44 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 14:11:44 Africa/Lagos] Retrieved 10 teachers
+[12-Mar-2026 14:11:44 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[12-Mar-2026 14:11:44 Africa/Lagos] Fetched 10 teachers
+[12-Mar-2026 14:11:44 Africa/Lagos] === TEACHER LIST PAGE END ===
+[12-Mar-2026 14:11:44 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 14:12:35 Africa/Lagos] === TEACHER LIST PAGE START ===
+[12-Mar-2026 14:12:35 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[12-Mar-2026 14:12:35 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[12-Mar-2026 14:12:35 Africa/Lagos] School database connection successful
+[12-Mar-2026 14:12:35 Africa/Lagos] TeacherManager initialized for school ID: 6
+[12-Mar-2026 14:12:35 Africa/Lagos] TeacherManager initialized successfully
+[12-Mar-2026 14:12:35 Africa/Lagos] Retrieved 10 teachers
+[12-Mar-2026 14:12:35 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[12-Mar-2026 14:12:35 Africa/Lagos] Fetched 10 teachers
+[12-Mar-2026 14:12:35 Africa/Lagos] === TEACHER LIST PAGE END ===
+[12-Mar-2026 14:12:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[14-Mar-2026 17:34:26 Africa/Lagos] === TEACHER LIST PAGE START ===
+[14-Mar-2026 17:34:26 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[14-Mar-2026 17:34:26 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[14-Mar-2026 17:34:26 Africa/Lagos] School database connection successful
+[14-Mar-2026 17:34:26 Africa/Lagos] TeacherManager initialized for school ID: 6
+[14-Mar-2026 17:34:26 Africa/Lagos] TeacherManager initialized successfully
+[14-Mar-2026 17:34:26 Africa/Lagos] Retrieved 10 teachers
+[14-Mar-2026 17:34:26 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[14-Mar-2026 17:34:26 Africa/Lagos] Fetched 10 teachers
+[14-Mar-2026 17:34:26 Africa/Lagos] === TEACHER LIST PAGE END ===
+[14-Mar-2026 17:34:26 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[16-Mar-2026 13:10:16 Africa/Lagos] === TEACHER LIST PAGE START ===
+[16-Mar-2026 13:10:16 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[16-Mar-2026 13:10:16 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[16-Mar-2026 13:10:16 Africa/Lagos] School database connection successful
+[16-Mar-2026 13:10:16 Africa/Lagos] TeacherManager initialized for school ID: 6
+[16-Mar-2026 13:10:16 Africa/Lagos] TeacherManager initialized successfully
+[16-Mar-2026 13:10:16 Africa/Lagos] Retrieved 10 teachers
+[16-Mar-2026 13:10:16 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[16-Mar-2026 13:10:16 Africa/Lagos] Fetched 10 teachers
+[16-Mar-2026 13:10:16 Africa/Lagos] === TEACHER LIST PAGE END ===
+[16-Mar-2026 13:10:16 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[29-Mar-2026 09:48:38 Africa/Lagos] === TEACHER LIST PAGE START ===
+[29-Mar-2026 09:48:38 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[29-Mar-2026 09:48:38 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[29-Mar-2026 09:48:38 Africa/Lagos] School database connection successful
+[29-Mar-2026 09:48:38 Africa/Lagos] TeacherManager initialized for school ID: 6
+[29-Mar-2026 09:48:38 Africa/Lagos] TeacherManager initialized successfully
+[29-Mar-2026 09:48:38 Africa/Lagos] Retrieved 10 teachers
+[29-Mar-2026 09:48:38 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[29-Mar-2026 09:48:38 Africa/Lagos] Fetched 10 teachers
+[29-Mar-2026 09:48:38 Africa/Lagos] === TEACHER LIST PAGE END ===
+[29-Mar-2026 09:48:38 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[29-Mar-2026 09:52:35 Africa/Lagos] === TEACHER LIST PAGE START ===
+[29-Mar-2026 09:52:35 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-list.php
+[29-Mar-2026 09:52:35 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php
+[29-Mar-2026 09:52:35 Africa/Lagos] School database connection successful
+[29-Mar-2026 09:52:35 Africa/Lagos] TeacherManager initialized for school ID: 6
+[29-Mar-2026 09:52:35 Africa/Lagos] TeacherManager initialized successfully
+[29-Mar-2026 09:52:35 Africa/Lagos] Retrieved 11 teachers
+[29-Mar-2026 09:52:35 Africa/Lagos] Error getting teacher stats: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'created_at' in 'WHERE'
+[29-Mar-2026 09:52:35 Africa/Lagos] Fetched 11 teachers
+[29-Mar-2026 09:52:35 Africa/Lagos] === TEACHER LIST PAGE END ===
+[29-Mar-2026 09:52:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-list.php

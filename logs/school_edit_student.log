@@ -1,0 +1,670 @@
+[05-Mar-2026 17:14:20 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[05-Mar-2026 17:14:20 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=1
+[05-Mar-2026 17:14:20 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[05-Mar-2026 17:14:20 Africa/Lagos] School database connection successful
+[05-Mar-2026 17:14:20 Africa/Lagos] Student data loaded successfully for ID: 1
+[05-Mar-2026 17:14:20 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[05-Mar-2026 17:14:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[05-Mar-2026 17:14:50 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[05-Mar-2026 17:14:50 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=1
+[05-Mar-2026 17:14:50 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[05-Mar-2026 17:14:50 Africa/Lagos] School database connection successful
+[05-Mar-2026 17:14:50 Africa/Lagos] Student data loaded successfully for ID: 1
+[05-Mar-2026 17:14:50 Africa/Lagos] === PROCESSING EDIT FORM SUBMISSION ===
+[05-Mar-2026 17:14:50 Africa/Lagos] Student updated successfully. ID: 1
+[05-Mar-2026 17:14:50 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[05-Mar-2026 17:14:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[05-Mar-2026 17:15:01 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[05-Mar-2026 17:15:01 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=1
+[05-Mar-2026 17:15:01 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[05-Mar-2026 17:15:01 Africa/Lagos] School database connection successful
+[05-Mar-2026 17:15:01 Africa/Lagos] Student data loaded successfully for ID: 1
+[05-Mar-2026 17:15:01 Africa/Lagos] === PROCESSING EDIT FORM SUBMISSION ===
+[05-Mar-2026 17:15:01 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[05-Mar-2026 17:15:01 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[05-Mar-2026 17:15:28 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[05-Mar-2026 17:15:28 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=1
+[05-Mar-2026 17:15:28 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[05-Mar-2026 17:15:28 Africa/Lagos] School database connection successful
+[05-Mar-2026 17:15:28 Africa/Lagos] Student data loaded successfully for ID: 1
+[05-Mar-2026 17:15:28 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[05-Mar-2026 17:15:28 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[05-Mar-2026 17:30:49 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[05-Mar-2026 17:30:49 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=2
+[05-Mar-2026 17:30:49 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[05-Mar-2026 17:30:49 Africa/Lagos] School database connection successful
+[05-Mar-2026 17:30:49 Africa/Lagos] Student data loaded successfully for ID: 2
+[05-Mar-2026 17:30:49 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[05-Mar-2026 17:30:49 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[06-Mar-2026 08:54:19 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[06-Mar-2026 08:54:19 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=3
+[06-Mar-2026 08:54:19 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[06-Mar-2026 08:54:19 Africa/Lagos] School database connection successful
+[06-Mar-2026 08:54:19 Africa/Lagos] Student data loaded successfully for ID: 3
+[06-Mar-2026 08:54:19 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[06-Mar-2026 08:54:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[09-Mar-2026 11:15:34 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[09-Mar-2026 11:15:34 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=4
+[09-Mar-2026 11:15:34 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[09-Mar-2026 11:15:34 Africa/Lagos] School database connection successful
+[09-Mar-2026 11:15:34 Africa/Lagos] Student data loaded successfully for ID: 4
+[09-Mar-2026 11:15:34 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[09-Mar-2026 11:15:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[09-Mar-2026 23:39:44 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[09-Mar-2026 23:39:44 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=2
+[09-Mar-2026 23:39:44 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[09-Mar-2026 23:39:44 Africa/Lagos] School database connection successful
+[09-Mar-2026 23:39:44 Africa/Lagos] Student data loaded successfully for ID: 2
+[09-Mar-2026 23:39:44 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[09-Mar-2026 23:39:44 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[11-Mar-2026 12:03:05 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[11-Mar-2026 12:03:05 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=14
+[11-Mar-2026 12:03:05 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[11-Mar-2026 12:03:05 Africa/Lagos] School database connection successful
+[11-Mar-2026 12:03:05 Africa/Lagos] Student data loaded successfully for ID: 14
+[11-Mar-2026 12:03:05 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[11-Mar-2026 12:03:05 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 06:08:20 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 06:08:20 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=14
+[12-Mar-2026 06:08:20 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 06:08:20 Africa/Lagos] School database connection successful
+[12-Mar-2026 06:08:20 Africa/Lagos] Student data loaded successfully for ID: 14
+[12-Mar-2026 06:08:20 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 06:08:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 11:38:53 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 11:38:53 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=23
+[12-Mar-2026 11:38:53 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 11:38:53 Africa/Lagos] School database connection successful
+[12-Mar-2026 11:38:53 Africa/Lagos] Student data loaded successfully for ID: 23
+[12-Mar-2026 11:38:53 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 11:38:53 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 11:39:00 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 11:39:00 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=23
+[12-Mar-2026 11:39:00 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 11:39:00 Africa/Lagos] School database connection successful
+[12-Mar-2026 11:39:00 Africa/Lagos] Student data loaded successfully for ID: 23
+[12-Mar-2026 11:39:00 Africa/Lagos] === PROCESSING EDIT FORM SUBMISSION ===
+[12-Mar-2026 11:39:00 Africa/Lagos] Student updated successfully. ID: 23
+[12-Mar-2026 11:39:00 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 11:39:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 11:39:19 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 11:39:19 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=21
+[12-Mar-2026 11:39:19 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 11:39:19 Africa/Lagos] School database connection successful
+[12-Mar-2026 11:39:19 Africa/Lagos] Student data loaded successfully for ID: 21
+[12-Mar-2026 11:39:19 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 11:39:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 11:39:27 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 11:39:27 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=21
+[12-Mar-2026 11:39:27 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 11:39:27 Africa/Lagos] School database connection successful
+[12-Mar-2026 11:39:27 Africa/Lagos] Student data loaded successfully for ID: 21
+[12-Mar-2026 11:39:27 Africa/Lagos] === PROCESSING EDIT FORM SUBMISSION ===
+[12-Mar-2026 11:39:27 Africa/Lagos] Student updated successfully. ID: 21
+[12-Mar-2026 11:39:27 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 11:39:27 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:25:30 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 12:25:30 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=30
+[12-Mar-2026 12:25:30 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:25:30 Africa/Lagos] School database connection successful
+[12-Mar-2026 12:25:30 Africa/Lagos] Student data loaded successfully for ID: 30
+[12-Mar-2026 12:25:30 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 12:25:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:25:38 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 12:25:38 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=30
+[12-Mar-2026 12:25:38 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:25:38 Africa/Lagos] School database connection successful
+[12-Mar-2026 12:25:38 Africa/Lagos] Student data loaded successfully for ID: 30
+[12-Mar-2026 12:25:38 Africa/Lagos] === PROCESSING EDIT FORM SUBMISSION ===
+[12-Mar-2026 12:25:38 Africa/Lagos] Error updating student: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '6-' for key 'unique_phone_school'
+[12-Mar-2026 12:25:38 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 12:25:38 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:25:58 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 12:25:58 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=30
+[12-Mar-2026 12:25:58 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:25:58 Africa/Lagos] School database connection successful
+[12-Mar-2026 12:25:58 Africa/Lagos] Student data loaded successfully for ID: 30
+[12-Mar-2026 12:25:58 Africa/Lagos] === PROCESSING EDIT FORM SUBMISSION ===
+[12-Mar-2026 12:25:58 Africa/Lagos] Error updating student: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '6-' for key 'unique_phone_school'
+[12-Mar-2026 12:25:58 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 12:25:58 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:49:24 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 12:49:24 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=32
+[12-Mar-2026 12:49:24 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:49:24 Africa/Lagos] School database connection successful
+[12-Mar-2026 12:49:24 Africa/Lagos] Student data loaded successfully for ID: 32
+[12-Mar-2026 12:49:24 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 12:49:24 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:54:08 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 12:54:08 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=30
+[12-Mar-2026 12:54:08 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:54:08 Africa/Lagos] Request Method: GET
+[12-Mar-2026 12:54:08 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 12:54:08 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 12:54:08 Africa/Lagos] User Type: admin
+[12-Mar-2026 12:54:08 Africa/Lagos] School ID: 6
+[12-Mar-2026 12:54:08 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 12:54:08 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 12:54:08 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 12:54:08 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 12:54:08 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 12:54:08 Africa/Lagos] Database class found
+[12-Mar-2026 12:54:08 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 12:54:08 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 12:54:08 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 12:54:08 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 12:54:08 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 12:54:08 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 12:54:08 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 12:54:08 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 12:54:08 Africa/Lagos] Student data loaded successfully for ID: 30
+[12-Mar-2026 12:54:08 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 12:54:08 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:55:02 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 12:55:02 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=30
+[12-Mar-2026 12:55:02 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:55:02 Africa/Lagos] Request Method: POST
+[12-Mar-2026 12:55:02 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 12:55:02 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 12:55:02 Africa/Lagos] User Type: admin
+[12-Mar-2026 12:55:02 Africa/Lagos] School ID: 6
+[12-Mar-2026 12:55:02 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 12:55:02 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 12:55:02 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 12:55:02 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 12:55:02 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 12:55:02 Africa/Lagos] Database class found
+[12-Mar-2026 12:55:02 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 12:55:02 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 12:55:02 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 12:55:02 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 12:55:02 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 12:55:02 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 12:55:02 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 12:55:02 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 12:55:02 Africa/Lagos] Student data loaded successfully for ID: 30
+[12-Mar-2026 12:55:02 Africa/Lagos] === POST REQUEST DETECTED (EDIT) ===
+[12-Mar-2026 12:55:02 Africa/Lagos] CSRF validation PASSED
+[12-Mar-2026 12:55:02 Africa/Lagos] Validation PASSED - calling StudentManager->updateStudent()
+[12-Mar-2026 12:55:02 Africa/Lagos] === UPDATE STUDENT START ===
+[12-Mar-2026 12:55:02 Africa/Lagos] Student ID: 30
+[12-Mar-2026 12:55:02 Africa/Lagos] School ID: 6
+[12-Mar-2026 12:55:02 Africa/Lagos] User ID: 1
+[12-Mar-2026 12:55:02 Africa/Lagos] Data received: ["academic_year_id","class_id","section_id","roll_number","admission_number","first_name","middle_name","last_name","gender","date_of_birth","student_phone","student_email","blood_group","allergies","medical_conditions","doctor_name","doctor_phone","current_address","permanent_address","previous_school","previous_class","transfer_certificate_no","password"]
+[12-Mar-2026 12:55:02 Africa/Lagos] Transaction started
+[12-Mar-2026 12:55:02 Africa/Lagos] Validation passed
+[12-Mar-2026 12:55:02 Africa/Lagos] Transaction rolled back due to error
+[12-Mar-2026 12:55:02 Africa/Lagos] === UPDATE STUDENT FAILED ===
+[12-Mar-2026 12:55:02 Africa/Lagos] Error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'academic_year_id' in 'SET'
+[12-Mar-2026 12:55:02 Africa/Lagos] Stack trace: #0 /home/academixsuite/public_html/includes/StudentManager.php(725): PDO->prepare('\n            UP...')
+#1 /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php(404): StudentManager->updateStudent(30, Array)
+#2 /home/academixsuite/public_html/tenant/router.php(365): require_once('/home/academixs...')
+#3 {main}
+[12-Mar-2026 12:55:02 Africa/Lagos] === STUDENT UPDATE FAILED ===
+[12-Mar-2026 12:55:02 Africa/Lagos] Message: Error updating student: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'academic_year_id' in 'SET'
+[12-Mar-2026 12:55:02 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 12:55:02 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=30
+[12-Mar-2026 12:55:02 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:55:02 Africa/Lagos] Request Method: GET
+[12-Mar-2026 12:55:02 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 12:55:02 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 12:55:02 Africa/Lagos] User Type: admin
+[12-Mar-2026 12:55:02 Africa/Lagos] School ID: 6
+[12-Mar-2026 12:55:02 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 12:55:02 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 12:55:02 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 12:55:02 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 12:55:02 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 12:55:02 Africa/Lagos] Database class found
+[12-Mar-2026 12:55:02 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 12:55:02 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 12:55:02 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 12:55:02 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 12:55:02 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 12:55:02 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 12:55:02 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 12:55:02 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 12:55:02 Africa/Lagos] Student data loaded successfully for ID: 30
+[12-Mar-2026 12:55:02 Africa/Lagos] Restoring form data from session after error
+[12-Mar-2026 12:55:02 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "academic_year_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 602
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 613
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "section_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 624
+[12-Mar-2026 12:55:02 Africa/Lagos] PHP Warning:  Undefined array key "section_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 870
+[12-Mar-2026 12:55:02 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:58:17 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 12:58:17 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=30
+[12-Mar-2026 12:58:17 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:58:17 Africa/Lagos] Request Method: GET
+[12-Mar-2026 12:58:17 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 12:58:17 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 12:58:17 Africa/Lagos] User Type: admin
+[12-Mar-2026 12:58:17 Africa/Lagos] School ID: 6
+[12-Mar-2026 12:58:17 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 12:58:17 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 12:58:17 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 12:58:17 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 12:58:17 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 12:58:17 Africa/Lagos] Database class found
+[12-Mar-2026 12:58:17 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 12:58:17 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 12:58:17 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 12:58:17 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 12:58:17 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 12:58:17 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 12:58:17 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 12:58:17 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 12:58:17 Africa/Lagos] Student data loaded successfully for ID: 30
+[12-Mar-2026 12:58:17 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 12:58:17 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:58:30 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 12:58:30 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=30
+[12-Mar-2026 12:58:30 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:58:30 Africa/Lagos] Request Method: POST
+[12-Mar-2026 12:58:30 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 12:58:30 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 12:58:30 Africa/Lagos] User Type: admin
+[12-Mar-2026 12:58:30 Africa/Lagos] School ID: 6
+[12-Mar-2026 12:58:30 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 12:58:30 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 12:58:30 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 12:58:30 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 12:58:30 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 12:58:30 Africa/Lagos] Database class found
+[12-Mar-2026 12:58:30 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 12:58:30 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 12:58:30 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 12:58:30 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 12:58:30 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 12:58:30 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 12:58:30 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 12:58:30 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 12:58:30 Africa/Lagos] Student data loaded successfully for ID: 30
+[12-Mar-2026 12:58:30 Africa/Lagos] === POST REQUEST DETECTED (EDIT) ===
+[12-Mar-2026 12:58:30 Africa/Lagos] CSRF validation PASSED
+[12-Mar-2026 12:58:30 Africa/Lagos] Validation PASSED - calling StudentManager->updateStudent()
+[12-Mar-2026 12:58:30 Africa/Lagos] === UPDATE STUDENT START ===
+[12-Mar-2026 12:58:30 Africa/Lagos] Student ID: 30
+[12-Mar-2026 12:58:30 Africa/Lagos] School ID: 6
+[12-Mar-2026 12:58:30 Africa/Lagos] User ID: 1
+[12-Mar-2026 12:58:30 Africa/Lagos] Data received: ["academic_year_id","class_id","section_id","roll_number","admission_number","first_name","middle_name","last_name","gender","date_of_birth","student_phone","student_email","blood_group","allergies","medical_conditions","doctor_name","doctor_phone","current_address","permanent_address","previous_school","previous_class","transfer_certificate_no","password"]
+[12-Mar-2026 12:58:30 Africa/Lagos] Transaction started
+[12-Mar-2026 12:58:30 Africa/Lagos] Validation passed
+[12-Mar-2026 12:58:30 Africa/Lagos] Student record updated
+[12-Mar-2026 12:58:30 Africa/Lagos] User record updated for user ID: 75
+[12-Mar-2026 12:58:30 Africa/Lagos] Audit log created
+[12-Mar-2026 12:58:30 Africa/Lagos] Transaction committed
+[12-Mar-2026 12:58:30 Africa/Lagos] === UPDATE STUDENT COMPLETED SUCCESSFULLY ===
+[12-Mar-2026 12:58:30 Africa/Lagos] === STUDENT UPDATED SUCCESSFULLY ===
+[12-Mar-2026 12:59:03 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 12:59:03 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=26
+[12-Mar-2026 12:59:03 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 12:59:03 Africa/Lagos] Request Method: GET
+[12-Mar-2026 12:59:03 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 12:59:03 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 12:59:03 Africa/Lagos] User Type: admin
+[12-Mar-2026 12:59:03 Africa/Lagos] School ID: 6
+[12-Mar-2026 12:59:03 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 12:59:03 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 12:59:03 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 12:59:03 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 12:59:03 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 12:59:03 Africa/Lagos] Database class found
+[12-Mar-2026 12:59:03 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 12:59:03 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 12:59:03 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 12:59:03 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 12:59:03 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 12:59:03 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 12:59:03 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 12:59:03 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 12:59:03 Africa/Lagos] Student data loaded successfully for ID: 26
+[12-Mar-2026 12:59:03 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 12:59:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 13:00:24 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 13:00:24 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=26
+[12-Mar-2026 13:00:24 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 13:00:24 Africa/Lagos] Request Method: GET
+[12-Mar-2026 13:00:24 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 13:00:24 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 13:00:24 Africa/Lagos] User Type: admin
+[12-Mar-2026 13:00:24 Africa/Lagos] School ID: 6
+[12-Mar-2026 13:00:24 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 13:00:24 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 13:00:24 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 13:00:24 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 13:00:24 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 13:00:24 Africa/Lagos] Database class found
+[12-Mar-2026 13:00:24 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 13:00:24 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 13:00:24 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 13:00:24 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 13:00:24 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 13:00:24 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 13:00:24 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 13:00:24 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 13:00:24 Africa/Lagos] Student data loaded successfully for ID: 26
+[12-Mar-2026 13:00:24 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 13:00:24 Africa/Lagos] PHP Warning:  Undefined variable $unreadCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 584
+[12-Mar-2026 13:00:24 Africa/Lagos] PHP Warning:  Undefined variable $notifications in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 593
+[12-Mar-2026 13:00:24 Africa/Lagos] PHP Fatal error:  Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php:593
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(365): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 593
+[12-Mar-2026 13:00:28 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 13:00:28 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=26
+[12-Mar-2026 13:00:28 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 13:00:28 Africa/Lagos] Request Method: GET
+[12-Mar-2026 13:00:28 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 13:00:28 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 13:00:28 Africa/Lagos] User Type: admin
+[12-Mar-2026 13:00:28 Africa/Lagos] School ID: 6
+[12-Mar-2026 13:00:28 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 13:00:28 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 13:00:28 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 13:00:28 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 13:00:28 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 13:00:28 Africa/Lagos] Database class found
+[12-Mar-2026 13:00:28 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 13:00:28 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 13:00:28 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 13:00:28 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 13:00:28 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 13:00:28 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 13:00:28 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 13:00:28 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 13:00:28 Africa/Lagos] Student data loaded successfully for ID: 26
+[12-Mar-2026 13:00:28 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 13:00:28 Africa/Lagos] PHP Warning:  Undefined variable $unreadCount in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 584
+[12-Mar-2026 13:00:28 Africa/Lagos] PHP Warning:  Undefined variable $notifications in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 593
+[12-Mar-2026 13:00:28 Africa/Lagos] PHP Fatal error:  Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php:593
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(365): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 593
+[12-Mar-2026 13:06:10 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 13:06:10 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=32
+[12-Mar-2026 13:06:10 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 13:06:10 Africa/Lagos] Request Method: GET
+[12-Mar-2026 13:06:10 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 13:06:10 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 13:06:10 Africa/Lagos] User Type: admin
+[12-Mar-2026 13:06:10 Africa/Lagos] School ID: 6
+[12-Mar-2026 13:06:10 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 13:06:10 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 13:06:10 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 13:06:10 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 13:06:10 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 13:06:10 Africa/Lagos] Database class found
+[12-Mar-2026 13:06:10 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 13:06:10 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 13:06:10 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 13:06:10 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 13:06:10 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 13:06:10 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 13:06:10 Africa/Lagos] Loaded 0 notifications, unread: 0
+[12-Mar-2026 13:06:10 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 13:06:10 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 13:06:10 Africa/Lagos] Student data loaded successfully for ID: 32
+[12-Mar-2026 13:06:10 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 13:06:10 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 13:06:21 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 13:06:21 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=32
+[12-Mar-2026 13:06:21 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 13:06:21 Africa/Lagos] Request Method: POST
+[12-Mar-2026 13:06:21 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 13:06:21 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 13:06:21 Africa/Lagos] User Type: admin
+[12-Mar-2026 13:06:21 Africa/Lagos] School ID: 6
+[12-Mar-2026 13:06:21 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 13:06:21 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 13:06:21 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 13:06:21 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 13:06:21 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 13:06:21 Africa/Lagos] Database class found
+[12-Mar-2026 13:06:21 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 13:06:21 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 13:06:21 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 13:06:21 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 13:06:21 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 13:06:21 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 13:06:21 Africa/Lagos] Loaded 0 notifications, unread: 0
+[12-Mar-2026 13:06:21 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 13:06:21 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 13:06:21 Africa/Lagos] Student data loaded successfully for ID: 32
+[12-Mar-2026 13:06:21 Africa/Lagos] === POST REQUEST DETECTED (EDIT) ===
+[12-Mar-2026 13:06:21 Africa/Lagos] CSRF validation PASSED
+[12-Mar-2026 13:06:21 Africa/Lagos] Validation PASSED - calling StudentManager->updateStudent()
+[12-Mar-2026 13:06:21 Africa/Lagos] === UPDATE STUDENT START ===
+[12-Mar-2026 13:06:21 Africa/Lagos] Student ID: 32
+[12-Mar-2026 13:06:21 Africa/Lagos] School ID: 6
+[12-Mar-2026 13:06:21 Africa/Lagos] User ID: 1
+[12-Mar-2026 13:06:21 Africa/Lagos] Data received: ["academic_year_id","class_id","section_id","roll_number","admission_number","first_name","middle_name","last_name","gender","date_of_birth","student_phone","student_email","blood_group","allergies","medical_conditions","doctor_name","doctor_phone","current_address","permanent_address","previous_school","previous_class","transfer_certificate_no","password"]
+[12-Mar-2026 13:06:21 Africa/Lagos] Transaction started
+[12-Mar-2026 13:06:21 Africa/Lagos] Validation passed
+[12-Mar-2026 13:06:21 Africa/Lagos] Student record updated
+[12-Mar-2026 13:06:21 Africa/Lagos] User record updated for user ID: 77
+[12-Mar-2026 13:06:21 Africa/Lagos] Audit log created
+[12-Mar-2026 13:06:21 Africa/Lagos] Transaction committed
+[12-Mar-2026 13:06:21 Africa/Lagos] === UPDATE STUDENT COMPLETED SUCCESSFULLY ===
+[12-Mar-2026 13:06:21 Africa/Lagos] === STUDENT UPDATED SUCCESSFULLY ===
+[12-Mar-2026 13:06:36 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 13:06:36 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=32
+[12-Mar-2026 13:06:36 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 13:06:36 Africa/Lagos] Request Method: GET
+[12-Mar-2026 13:06:36 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 13:06:36 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 13:06:36 Africa/Lagos] User Type: admin
+[12-Mar-2026 13:06:36 Africa/Lagos] School ID: 6
+[12-Mar-2026 13:06:36 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 13:06:36 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 13:06:36 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 13:06:36 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 13:06:36 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 13:06:36 Africa/Lagos] Database class found
+[12-Mar-2026 13:06:36 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 13:06:36 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 13:06:36 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 13:06:36 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 13:06:36 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 13:06:36 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 13:06:36 Africa/Lagos] Loaded 0 notifications, unread: 0
+[12-Mar-2026 13:06:36 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 13:06:36 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 13:06:36 Africa/Lagos] Student data loaded successfully for ID: 32
+[12-Mar-2026 13:06:36 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 13:06:36 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 13:06:46 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 13:06:46 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=32
+[12-Mar-2026 13:06:46 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 13:06:46 Africa/Lagos] Request Method: POST
+[12-Mar-2026 13:06:46 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 13:06:46 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 13:06:46 Africa/Lagos] User Type: admin
+[12-Mar-2026 13:06:46 Africa/Lagos] School ID: 6
+[12-Mar-2026 13:06:46 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 13:06:46 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 13:06:46 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 13:06:46 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 13:06:46 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 13:06:46 Africa/Lagos] Database class found
+[12-Mar-2026 13:06:46 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 13:06:46 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 13:06:46 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 13:06:46 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 13:06:46 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 13:06:46 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 13:06:46 Africa/Lagos] Loaded 0 notifications, unread: 0
+[12-Mar-2026 13:06:46 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 13:06:46 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 13:06:46 Africa/Lagos] Student data loaded successfully for ID: 32
+[12-Mar-2026 13:06:46 Africa/Lagos] === POST REQUEST DETECTED (EDIT) ===
+[12-Mar-2026 13:06:46 Africa/Lagos] CSRF validation PASSED
+[12-Mar-2026 13:06:46 Africa/Lagos] Validation PASSED - calling StudentManager->updateStudent()
+[12-Mar-2026 13:06:46 Africa/Lagos] === UPDATE STUDENT START ===
+[12-Mar-2026 13:06:46 Africa/Lagos] Student ID: 32
+[12-Mar-2026 13:06:46 Africa/Lagos] School ID: 6
+[12-Mar-2026 13:06:46 Africa/Lagos] User ID: 1
+[12-Mar-2026 13:06:46 Africa/Lagos] Data received: ["academic_year_id","class_id","section_id","roll_number","admission_number","first_name","middle_name","last_name","gender","date_of_birth","student_phone","student_email","blood_group","allergies","medical_conditions","doctor_name","doctor_phone","current_address","permanent_address","previous_school","previous_class","transfer_certificate_no","password"]
+[12-Mar-2026 13:06:46 Africa/Lagos] Transaction started
+[12-Mar-2026 13:06:46 Africa/Lagos] Validation passed
+[12-Mar-2026 13:06:46 Africa/Lagos] Student record updated
+[12-Mar-2026 13:06:46 Africa/Lagos] User record updated for user ID: 77
+[12-Mar-2026 13:06:46 Africa/Lagos] Audit log created
+[12-Mar-2026 13:06:46 Africa/Lagos] Transaction committed
+[12-Mar-2026 13:06:46 Africa/Lagos] === UPDATE STUDENT COMPLETED SUCCESSFULLY ===
+[12-Mar-2026 13:06:46 Africa/Lagos] === STUDENT UPDATED SUCCESSFULLY ===
+[12-Mar-2026 14:19:38 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 14:19:38 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=1
+[12-Mar-2026 14:19:38 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 14:19:38 Africa/Lagos] Request Method: GET
+[12-Mar-2026 14:19:38 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 14:19:38 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 14:19:38 Africa/Lagos] User Type: admin
+[12-Mar-2026 14:19:38 Africa/Lagos] School ID: 6
+[12-Mar-2026 14:19:38 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 14:19:38 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 14:19:38 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 14:19:38 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 14:19:38 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 14:19:38 Africa/Lagos] Database class found
+[12-Mar-2026 14:19:38 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 14:19:38 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 14:19:38 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 14:19:38 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 14:19:38 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 14:19:38 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 14:19:38 Africa/Lagos] Loaded 0 notifications, unread: 0
+[12-Mar-2026 14:19:38 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 14:19:38 Africa/Lagos] Retrieved 1 sections for class ID: 1
+[12-Mar-2026 14:19:38 Africa/Lagos] Student data loaded successfully for ID: 1
+[12-Mar-2026 14:19:38 Africa/Lagos] Restoring form data from session after error
+[12-Mar-2026 14:19:38 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "academic_year_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 717
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 728
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "section_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 739
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "roll_number" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 747
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "admission_number" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 751
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "first_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 768
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "middle_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 772
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "last_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 776
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "student_phone" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 793
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "student_email" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 797
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "allergies" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 861
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "medical_conditions" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 865
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "doctor_name" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 869
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "doctor_phone" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 873
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "previous_class" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 915
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "transfer_certificate_no" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 919
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "student_email" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 936
+[12-Mar-2026 14:19:38 Africa/Lagos] PHP Warning:  Undefined array key "section_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php on line 985
+[12-Mar-2026 14:19:38 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 14:20:02 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 14:20:02 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=1
+[12-Mar-2026 14:20:02 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 14:20:02 Africa/Lagos] Request Method: GET
+[12-Mar-2026 14:20:02 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 14:20:02 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 14:20:02 Africa/Lagos] User Type: admin
+[12-Mar-2026 14:20:02 Africa/Lagos] School ID: 6
+[12-Mar-2026 14:20:02 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 14:20:02 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 14:20:02 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 14:20:02 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 14:20:02 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 14:20:02 Africa/Lagos] Database class found
+[12-Mar-2026 14:20:02 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 14:20:02 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 14:20:02 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 14:20:02 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 14:20:02 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 14:20:02 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 14:20:02 Africa/Lagos] Loaded 0 notifications, unread: 0
+[12-Mar-2026 14:20:02 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 14:20:02 Africa/Lagos] Retrieved 1 sections for class ID: 1
+[12-Mar-2026 14:20:02 Africa/Lagos] Student data loaded successfully for ID: 1
+[12-Mar-2026 14:20:02 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 14:20:02 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 14:20:14 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 14:20:14 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=1
+[12-Mar-2026 14:20:14 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 14:20:14 Africa/Lagos] Request Method: GET
+[12-Mar-2026 14:20:14 Africa/Lagos] Session ID: 8b16a9aa5c7aaaba14f44fd2b1bbad4e
+[12-Mar-2026 14:20:14 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 14:20:14 Africa/Lagos] User Type: admin
+[12-Mar-2026 14:20:14 Africa/Lagos] School ID: 6
+[12-Mar-2026 14:20:14 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 14:20:14 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 14:20:14 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 14:20:14 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 14:20:14 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 14:20:14 Africa/Lagos] Database class found
+[12-Mar-2026 14:20:14 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 14:20:14 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 14:20:14 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 14:20:14 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 14:20:14 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 14:20:14 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 14:20:14 Africa/Lagos] Loaded 0 notifications, unread: 0
+[12-Mar-2026 14:20:14 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 14:20:14 Africa/Lagos] Retrieved 1 sections for class ID: 1
+[12-Mar-2026 14:20:14 Africa/Lagos] Student data loaded successfully for ID: 1
+[12-Mar-2026 14:20:14 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 14:20:14 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 15:24:40 Africa/Lagos] === EDIT STUDENT PAGE START ===
+[12-Mar-2026 15:24:40 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-student.php?id=32
+[12-Mar-2026 15:24:40 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php
+[12-Mar-2026 15:24:40 Africa/Lagos] Request Method: GET
+[12-Mar-2026 15:24:40 Africa/Lagos] Session ID: af96801a43ad464dfd828455a6266fe2
+[12-Mar-2026 15:24:40 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 15:24:40 Africa/Lagos] User Type: admin
+[12-Mar-2026 15:24:40 Africa/Lagos] School ID: 6
+[12-Mar-2026 15:24:40 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 15:24:40 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 15:24:40 Africa/Lagos] Authenticated User Type: admin
+[12-Mar-2026 15:24:40 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 15:24:40 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 15:24:40 Africa/Lagos] Database class found
+[12-Mar-2026 15:24:40 Africa/Lagos] Loading StudentManager from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/StudentManager.php
+[12-Mar-2026 15:24:40 Africa/Lagos] StudentManager loaded successfully
+[12-Mar-2026 15:24:40 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 15:24:40 Africa/Lagos] School database connection successful for: school_6
+[12-Mar-2026 15:24:40 Africa/Lagos] StudentManager initialized for school ID: 6
+[12-Mar-2026 15:24:40 Africa/Lagos] StudentManager initialized successfully
+[12-Mar-2026 15:24:40 Africa/Lagos] Loaded 0 notifications, unread: 0
+[12-Mar-2026 15:24:40 Africa/Lagos] Starting data fetch from database
+[12-Mar-2026 15:24:40 Africa/Lagos] Retrieved 1 sections for class ID: 4
+[12-Mar-2026 15:24:40 Africa/Lagos] Student data loaded successfully for ID: 32
+[12-Mar-2026 15:24:40 Africa/Lagos] === EDIT STUDENT PAGE END ===
+[12-Mar-2026 15:24:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-student.php

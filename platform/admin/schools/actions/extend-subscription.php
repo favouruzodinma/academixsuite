@@ -120,11 +120,15 @@ try {
     $logStmt->execute([$schoolId, $logDescription]);
     
     // Generate invoice for extension
+    $invoiceAccessToken = function_exists('generate_invoice_access_token') ? generate_invoice_access_token() : bin2hex(random_bytes(32));
+    $invoiceColumns = $db->query("SHOW COLUMNS FROM invoices")->fetchAll(PDO::FETCH_COLUMN, 0);
+    $hasAccessToken = in_array('access_token', $invoiceColumns, true);
     $invoiceStmt = $db->prepare("
         INSERT INTO invoices 
-        (school_id, invoice_number, amount, status, due_date, start_date, end_date, created_at)
+        (school_id, invoice_number" . ($hasAccessToken ? ", access_token" : "") . ", amount, status, due_date, start_date, end_date, created_at)
         SELECT ?, 
-               CONCAT('INV-', DATE_FORMAT(NOW(), '%Y%m%d-'), LPAD(FLOOR(RAND() * 10000), 4, '0')),
+               CONCAT('INV-', DATE_FORMAT(NOW(), '%Y%m%d-'), LPAD(FLOOR(RAND() * 10000), 4, '0'))" . ($hasAccessToken ? ",
+               ?" : "") . ",
                p.price_monthly * (? / 30),
                'pending',
                DATE_ADD(NOW(), INTERVAL 7 DAY),
@@ -135,7 +139,11 @@ try {
         LEFT JOIN plans p ON sub.plan_id = p.id
         WHERE sub.school_id = ?
     ");
-    $invoiceStmt->execute([$schoolId, $days, $newEndDate, $schoolId]);
+    $params = [$schoolId];
+    if ($hasAccessToken) {
+        $params[] = $invoiceAccessToken;
+    }
+    $invoiceStmt->execute(array_merge($params, [$days, $newEndDate, $schoolId]));
     
     echo json_encode([
         'success' => true, 

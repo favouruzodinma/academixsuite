@@ -16,6 +16,7 @@ class PortalCreator {
             'teacher', 
             'student',
             'parent',
+            'staff',
             'assets/css',
             'assets/js',
             'assets/images',
@@ -83,6 +84,7 @@ if (!\$school) {
             <li><a href="/tenant/$schoolSlug/teacher/dashboard.php">Teacher Portal</a></li>
             <li><a href="/tenant/$schoolSlug/student/dashboard.php">Student Portal</a></li>
             <li><a href="/tenant/$schoolSlug/parent/dashboard.php">Parent Portal</a></li>
+            <li><a href="/tenant/$schoolSlug/staff/dashboard.php">Staff Portal</a></li>
         </ul>
     </div>
     
@@ -119,28 +121,37 @@ if (\$_SERVER['REQUEST_METHOD'] === 'POST') {
     \$username = \$_POST['username'] ?? '';
     \$password = \$_POST['password'] ?? '';
     \$userType = \$_POST['user_type'] ?? '';
+    \$staffUserTypes = ['accountant', 'librarian', 'receptionist'];
     
     // Connect to school database
     \$schoolDb = Database::getSchoolConnection(\$school['database_name']);
     
     // Authenticate user (simplified example)
-    \$stmt = \$schoolDb->prepare("SELECT * FROM users WHERE (email = ? OR username = ?) AND user_type = ?");
-    \$stmt->execute([\$username, \$username, \$userType]);
+    if (\$userType === 'staff') {
+        \$placeholders = implode(',', array_fill(0, count(\$staffUserTypes), '?'));
+        \$stmt = \$schoolDb->prepare("SELECT * FROM users WHERE (email = ? OR username = ?) AND user_type IN (\$placeholders)");
+        \$stmt->execute(array_merge([\$username, \$username], \$staffUserTypes));
+    } else {
+        \$stmt = \$schoolDb->prepare("SELECT * FROM users WHERE (email = ? OR username = ?) AND user_type = ?");
+        \$stmt->execute([\$username, \$username, \$userType]);
+    }
     \$user = \$stmt->fetch();
     
     if (\$user && password_verify(\$password, \$user['password'])) {
+        \$sessionUserType = \$userType === 'staff' ? 'staff' : \$user['user_type'];
         // Set session data
         \$_SESSION['school_auth'] = [
             'school_id' => \$school['id'],
             'school_slug' => \$school['slug'],
             'school_name' => \$school['name'],
             'user_id' => \$user['id'],
-            'user_type' => \$user['user_type'],
+            'user_type' => \$sessionUserType,
+            'staff_role' => in_array(\$user['user_type'], \$staffUserTypes, true) ? \$user['user_type'] : null,
             'user_name' => \$user['name']
         ];
         
         // Redirect to appropriate dashboard
-        header("Location: /tenant/$schoolSlug/\$userType/dashboard.php");
+        header("Location: /tenant/$schoolSlug/\$sessionUserType/dashboard.php");
         exit;
     } else {
         \$error = "Invalid credentials";
@@ -178,6 +189,7 @@ if (\$_SERVER['REQUEST_METHOD'] === 'POST') {
                 <option value="teacher">Teacher</option>
                 <option value="student">Student</option>
                 <option value="parent">Parent</option>
+                <option value="staff">Staff</option>
             </select>
         </div>
         
@@ -191,8 +203,19 @@ PHP;
         file_put_contents($basePath . '/login.php', $loginContent);
         
         // Create dashboard templates for each user type
-        $userTypes = ['admin', 'teacher', 'student', 'parent'];
+        $userTypes = ['admin', 'teacher', 'student', 'parent', 'staff'];
         foreach ($userTypes as $type) {
+            if ($type !== 'admin') {
+                file_put_contents($basePath . '/' . $type . '/dashboard.php', self::createPortalPageStub($type, 'dashboard.php'));
+
+                $pages = self::getSamplePages($type);
+                foreach ($pages as $page => $title) {
+                    file_put_contents($basePath . '/' . $type . '/' . $page . '.php', self::createPortalPageStub($type, $page . '.php'));
+                }
+
+                continue;
+            }
+
             $dashboardContent = <<<PHP
 <?php
 /**
@@ -236,14 +259,21 @@ if (\$_SESSION['school_auth']['user_type'] !== '$type') {
                 <li><a href="/tenant/$schoolSlug/admin/teachers.php">Teachers</a></li>
                 <li><a href="/tenant/$schoolSlug/admin/settings.php">Settings</a></li>
             <?php elseif (\$type === 'teacher'): ?>
-                <li><a href="/tenant/$schoolSlug/teacher/my-classes.php">My Classes</a></li>
+                <li><a href="/tenant/$schoolSlug/teacher/classes.php">My Classes</a></li>
                 <li><a href="/tenant/$schoolSlug/teacher/attendance.php">Attendance</a></li>
+                <li><a href="/tenant/$schoolSlug/teacher/grades.php">Grades</a></li>
             <?php elseif (\$type === 'student'): ?>
                 <li><a href="/tenant/$schoolSlug/student/timetable.php">Timetable</a></li>
                 <li><a href="/tenant/$schoolSlug/student/grades.php">Grades</a></li>
+                <li><a href="/tenant/$schoolSlug/student/fees.php">Fees</a></li>
             <?php elseif (\$type === 'parent'): ?>
                 <li><a href="/tenant/$schoolSlug/parent/children.php">My Children</a></li>
                 <li><a href="/tenant/$schoolSlug/parent/fees.php">Fee Status</a></li>
+                <li><a href="/tenant/$schoolSlug/parent/messages.php">Messages</a></li>
+            <?php elseif (\$type === 'staff'): ?>
+                <li><a href="/tenant/$schoolSlug/staff/work.php">Work Queue</a></li>
+                <li><a href="/tenant/$schoolSlug/staff/attendance.php">Attendance</a></li>
+                <li><a href="/tenant/$schoolSlug/staff/profile.php">Profile</a></li>
             <?php endif; ?>
             <li><a href="/tenant/$schoolSlug/login.php?logout=1">Logout</a></li>
         </ul>
@@ -299,6 +329,22 @@ PHP;
             }
         }
     }
+
+    private static function createPortalPageStub($type, $pageFile) {
+        return <<<PHP
+<?php
+\$portalRole = '$type';
+\$portalPageKey = '$pageFile';
+\$portalShell = __DIR__ . '/../../{school-slug}/shared/role-page-shell.php';
+
+if (!file_exists(\$portalShell)) {
+    http_response_code(500);
+    exit('Portal shell template not found.');
+}
+
+require_once \$portalShell;
+PHP;
+    }
     
     private static function getSamplePages($userType) {
         $pages = [
@@ -311,23 +357,53 @@ PHP;
                 'settings' => 'School Settings'
             ],
             'teacher' => [
-                'my-classes' => 'My Classes',
+                'classes' => 'My Classes',
                 'attendance' => 'Take Attendance',
                 'grades' => 'Enter Grades',
+                'timetable' => 'Timetable',
                 'assignments' => 'Assignments',
-                'messages' => 'Messages'
+                'students' => 'Students',
+                'announcements' => 'Announcements',
+                'calendar' => 'Calendar',
+                'messages' => 'Messages',
+                'profile' => 'Profile'
             ],
             'student' => [
                 'timetable' => 'Class Timetable',
+                'attendance' => 'Attendance',
                 'assignments' => 'My Assignments',
                 'grades' => 'My Grades',
+                'results' => 'Report Cards',
+                'fees' => 'Fees',
+                'library' => 'Library',
+                'announcements' => 'Announcements',
+                'calendar' => 'Calendar',
+                'messages' => 'Messages',
                 'profile' => 'My Profile'
             ],
             'parent' => [
                 'children' => 'My Children',
                 'attendance' => 'Attendance View',
+                'grades' => 'Grades',
                 'fees' => 'Fee Payments',
-                'messages' => 'Messages'
+                'schedule' => 'Schedule',
+                'announcements' => 'Announcements',
+                'messages' => 'Messages',
+                'support' => 'Support',
+                'profile' => 'Profile'
+            ],
+            'staff' => [
+                'work' => 'Work Queue',
+                'attendance' => 'Staff Attendance',
+                'payroll' => 'Payroll',
+                'leave' => 'Leave Requests',
+                'library' => 'Library Operations',
+                'inventory' => 'Inventory',
+                'fees' => 'Fee Operations',
+                'messages' => 'Messages',
+                'reports' => 'Reports',
+                'calendar' => 'Calendar',
+                'profile' => 'Profile'
             ]
         ];
         

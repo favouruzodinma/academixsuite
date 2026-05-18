@@ -45,7 +45,6 @@ if (!function_exists('validateCSRFToken')) {
             return false;
         }
         
-        unset($_SESSION['csrf_tokens'][$token]);
         return true;
     }
 }
@@ -55,11 +54,10 @@ if (!validateCSRFToken($data['csrf_token'])) {
     exit;
 }
 $schoolId = $data['school_id'] ?? 0;
-$databaseName = $data['database_name'] ?? '';
 $exportFormat = $data['format'] ?? 'csv';
 $userTypes = $data['user_types'] ?? ['admin', 'teacher', 'student', 'parent'];
 
-if ($schoolId <= 0 || empty($databaseName)) {
+if ($schoolId <= 0) {
     echo json_encode(['success' => false, 'message' => 'Invalid parameters']);
     exit;
 }
@@ -68,44 +66,56 @@ try {
     $db = Database::getPlatformConnection();
     
     // Get school details
-    $schoolStmt = $db->prepare("SELECT name FROM schools WHERE id = ?");
+    $schoolStmt = $db->prepare("SELECT name, database_name FROM schools WHERE id = ?");
     $schoolStmt->execute([$schoolId]);
     $school = $schoolStmt->fetch();
     
-    if (!$school) {
-        echo json_encode(['success' => false, 'message' => 'School not found']);
+    if (!$school || empty($school['database_name'])) {
+        echo json_encode(['success' => false, 'message' => 'School not found or database not created']);
         exit;
     }
     
     // Connect to school database
-    $schoolDb = Database::getSchoolConnection($databaseName);
-    
-    // Build user type condition
-    $userTypePlaceholders = implode(',', array_fill(0, count($userTypes), '?'));
+    $schoolDb = Database::getSchoolConnection($school['database_name']);
+    $columns = getTableColumns($schoolDb, 'users');
+    $hasRoles = tableExists($schoolDb, 'roles') && tableExists($schoolDb, 'user_roles');
+    $selects = [
+        'u.id',
+        in_array('name', $columns, true) ? 'u.name' : "TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))) AS name",
+        in_array('email', $columns, true) ? 'u.email' : "'' AS email",
+        in_array('phone', $columns, true) ? 'u.phone' : "'' AS phone",
+        in_array('user_type', $columns, true) ? 'u.user_type' : "'user' AS user_type",
+        in_array('is_active', $columns, true) ? 'u.is_active' : '1 AS is_active',
+        in_array('email_verified_at', $columns, true) ? 'u.email_verified_at' : 'NULL AS email_verified_at',
+        in_array('last_login_at', $columns, true) ? 'u.last_login_at' : 'NULL AS last_login_at',
+        in_array('created_at', $columns, true) ? 'u.created_at' : 'NULL AS created_at',
+        in_array('updated_at', $columns, true) ? 'u.updated_at' : 'NULL AS updated_at',
+        $hasRoles ? "GROUP_CONCAT(r.name SEPARATOR ', ') AS roles" : "'' AS roles"
+    ];
+    $where = [];
+    $params = [];
+    if (in_array('is_active', $columns, true)) {
+        $where[] = 'u.is_active = 1';
+    }
+    if (in_array('user_type', $columns, true) && !empty($userTypes)) {
+        $where[] = 'u.user_type IN (' . implode(',', array_fill(0, count($userTypes), '?')) . ')';
+        $params = array_values($userTypes);
+    }
+    $joinSql = $hasRoles ? 'LEFT JOIN user_roles ur ON u.id = ur.user_id LEFT JOIN roles r ON ur.role_id = r.id' : '';
+    $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+    $groupSql = $hasRoles ? 'GROUP BY u.id' : '';
+    $orderSql = in_array('user_type', $columns, true) ? 'ORDER BY u.user_type, u.id' : 'ORDER BY u.id';
     
     // Get users data
     $userStmt = $schoolDb->prepare("
-        SELECT 
-            u.email,
-            u.first_name,
-            u.last_name,
-            u.user_type,
-            u.phone,
-            u.is_active,
-            u.email_verified_at,
-            u.last_login_at,
-            u.created_at,
-            u.updated_at,
-            GROUP_CONCAT(r.name SEPARATOR ', ') as roles
+        SELECT " . implode(', ', $selects) . "
         FROM users u
-        LEFT JOIN user_roles ur ON u.id = ur.user_id
-        LEFT JOIN roles r ON ur.role_id = r.id
-        WHERE u.is_active = 1 
-        AND u.user_type IN ($userTypePlaceholders)
-        GROUP BY u.id
-        ORDER BY u.user_type, u.created_at
+        $joinSql
+        $whereSql
+        $groupSql
+        $orderSql
     ");
-    $userStmt->execute($userTypes);
+    $userStmt->execute($params);
     $users = $userStmt->fetchAll();
     
     $totalUsers = count($users);
@@ -122,7 +132,7 @@ try {
     }
     
     $timestamp = date('Y-m-d_H-i-s');
-    $filename = "{$databaseName}_users_{$timestamp}";
+    $filename = "{$school['database_name']}_users_{$timestamp}";
     
     switch ($exportFormat) {
         case 'csv':
@@ -190,17 +200,16 @@ function generateCSV($users) {
     $output = fopen('php://temp', 'w');
     
     // Write headers
-    $headers = ['Email', 'First Name', 'Last Name', 'User Type', 'Phone', 'Active', 
+    $headers = ['Name', 'Email', 'User Type', 'Phone', 'Active',
                 'Email Verified', 'Last Login', 'Created At', 'Updated At', 'Roles'];
     fputcsv($output, $headers);
     
     // Write data
     foreach ($users as $user) {
         fputcsv($output, [
-            $user['email'],
-            $user['first_name'],
-            $user['last_name'],
-            $user['user_type'],
+            $user['name'] ?? '',
+            $user['email'] ?? '',
+            $user['user_type'] ?? '',
             $user['phone'] ?? '',
             $user['is_active'] ? 'Yes' : 'No',
             $user['email_verified_at'] ? 'Yes' : 'No',
@@ -265,13 +274,13 @@ function generatePDF($users, $schoolName) {
     foreach ($users as $user) {
         $html .= "
             <tr>
-                <td>{$user['email']}</td>
-                <td>{$user['first_name']} {$user['last_name']}</td>
-                <td>{$user['user_type']}</td>
-                <td>" . ($user['phone'] ?? '') . "</td>
+                <td>" . htmlspecialchars($user['email'] ?? '', ENT_QUOTES, 'UTF-8') . "</td>
+                <td>" . htmlspecialchars($user['name'] ?? '', ENT_QUOTES, 'UTF-8') . "</td>
+                <td>" . htmlspecialchars($user['user_type'] ?? '', ENT_QUOTES, 'UTF-8') . "</td>
+                <td>" . htmlspecialchars($user['phone'] ?? '', ENT_QUOTES, 'UTF-8') . "</td>
                 <td>" . ($user['is_active'] ? 'Yes' : 'No') . "</td>
-                <td>" . ($user['last_login_at'] ?? 'Never') . "</td>
-                <td>{$user['created_at']}</td>
+                <td>" . htmlspecialchars($user['last_login_at'] ?? 'Never', ENT_QUOTES, 'UTF-8') . "</td>
+                <td>" . htmlspecialchars($user['created_at'] ?? '', ENT_QUOTES, 'UTF-8') . "</td>
             </tr>
         ";
     }
@@ -294,5 +303,16 @@ function formatBytes($bytes, $precision = 2) {
     $pow = min($pow, count($units) - 1);
     $bytes /= pow(1024, $pow);
     return round($bytes, $precision) . ' ' . $units[$pow];
+}
+
+function getTableColumns(PDO $db, string $table): array {
+    $stmt = $db->query("SHOW COLUMNS FROM `$table`");
+    return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'Field');
+}
+
+function tableExists(PDO $db, string $table): bool {
+    $stmt = $db->prepare("SHOW TABLES LIKE ?");
+    $stmt->execute([$table]);
+    return (bool)$stmt->fetchColumn();
 }
 ?>

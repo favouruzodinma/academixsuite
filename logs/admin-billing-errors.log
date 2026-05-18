@@ -1,0 +1,314 @@
+[2026-01-31 17:36:27] Script started: view-invoice.php
+[2026-01-31 17:36:27] Authentication check started
+[2026-01-31 17:36:27] User authenticated successfully
+[2026-01-31 17:36:27] Processing invoice ID: 12
+[2026-01-31 17:36:27] Database connection established
+[2026-01-31 17:36:27] Preparing SQL query for invoice 12
+[2026-01-31 17:36:27] Error fetching invoice: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'pg.type' in 'SELECT'
+SQL: 
+    SELECT 
+        i.*,
+        s.name as school_name,
+        s.email as school_email,
+        s.phone as school_phone,
+        s.address as school_address,
+        s.city as school_city,
+        s.state as school_state,
+        s.country as school_country,
+        s.logo_path as school_logo,
+        s.primary_color as school_color,
+        sub.description as subscription_desc,
+        sub.status as subscription_status,
+        p.name as plan_name,
+        p.price_monthly,
+        p.student_limit,
+        p.teacher_limit,
+        p.storage_limit,
+        pg.name as payment_gateway_name,
+        pg.type as payment_gateway_type,
+        DATEDIFF(i.due_date, CURDATE()) as days_until_due,
+        CASE 
+            WHEN i.payment_status = 'success' THEN 'Paid'
+            WHEN i.payment_status = 'pending' AND i.due_date < CURDATE() THEN 'Overdue'
+            WHEN i.payment_status = 'pending' AND i.due_date >= CURDATE() THEN 'Pending'
+            WHEN i.payment_status = 'failed' THEN 'Failed'
+            WHEN i.payment_status = 'refunded' THEN 'Refunded'
+            ELSE 'Pending'
+        END as payment_status_text
+    FROM invoices i 
+    LEFT JOIN schools s ON i.school_id = s.id
+    LEFT JOIN subscriptions sub ON i.subscription_id = sub.id
+    LEFT JOIN plans p ON sub.plan_id = p.id
+    LEFT JOIN payment_gateways pg ON i.payment_gateway_id = pg.id
+    WHERE i.id = ?
+
+[2026-01-31 17:36:27] EXCEPTION: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'pg.type' in 'SELECT' in /home/academixsuite/public_html/platform/admin/billings/view-invoice.php on line 185
+Stack Trace:
+#0 /home/academixsuite/public_html/platform/admin/billings/view-invoice.php(185): PDO->prepare('\r\n    SELECT \r\n...')
+#1 {main}
+IP: 102.90.80.202
+URL: /platform/admin/billings/view-invoice.php?id=12
+User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
+
+[2026-01-31 17:37:22] Script started: view-invoice.php
+[2026-01-31 17:37:22] Authentication check started
+[2026-01-31 17:37:22] User authenticated successfully
+[2026-01-31 17:37:22] Processing invoice ID: 11
+[2026-01-31 17:37:22] Database connection established
+[2026-01-31 17:37:22] Preparing SQL query for invoice 11
+[2026-01-31 17:37:22] Error fetching invoice: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'pg.type' in 'SELECT'
+SQL: 
+    SELECT 
+        i.*,
+        s.name as school_name,
+        s.email as school_email,
+        s.phone as school_phone,
+        s.address as school_address,
+        s.city as school_city,
+        s.state as school_state,
+        s.country as school_country,
+        s.logo_path as school_logo,
+        s.primary_color as school_color,
+        sub.description as subscription_desc,
+        sub.status as subscription_status,
+        p.name as plan_name,
+        p.price_monthly,
+        p.student_limit,
+        p.teacher_limit,
+        p.storage_limit,
+        pg.name as payment_gateway_name,
+        pg.type as payment_gateway_type,
+        DATEDIFF(i.due_date, CURDATE()) as days_until_due,
+        CASE 
+            WHEN i.payment_status = 'success' THEN 'Paid'
+            WHEN i.payment_status = 'pending' AND i.due_date < CURDATE() THEN 'Overdue'
+            WHEN i.payment_status = 'pending' AND i.due_date >= CURDATE() THEN 'Pending'
+            WHEN i.payment_status = 'failed' THEN 'Failed'
+            WHEN i.payment_status = 'refunded' THEN 'Refunded'
+            ELSE 'Pending'
+        END as payment_status_text
+    FROM invoices i 
+    LEFT JOIN schools s ON i.school_id = s.id
+    LEFT JOIN subscriptions sub ON i.subscription_id = sub.id
+    LEFT JOIN plans p ON sub.plan_id = p.id
+    LEFT JOIN payment_gateways pg ON i.payment_gateway_id = pg.id
+    WHERE i.id = ?
+
+[2026-01-31 17:37:22] EXCEPTION: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'pg.type' in 'SELECT' in /home/academixsuite/public_html/platform/admin/billings/view-invoice.php on line 185
+Stack Trace:
+#0 /home/academixsuite/public_html/platform/admin/billings/view-invoice.php(185): PDO->prepare('\r\n    SELECT \r\n...')
+#1 {main}
+IP: 102.90.80.202
+URL: /platform/admin/billings/view-invoice.php?id=11
+User Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
+
+[2026-01-31 17:46:28] Script started: view-invoice.php
+[2026-01-31 17:46:28] Authentication check started
+[2026-01-31 17:46:28] User authenticated successfully
+[2026-01-31 17:46:28] Processing invoice ID: 12
+[2026-01-31 17:46:28] Database connection established
+[2026-01-31 17:46:28] Preparing SQL query for invoice 12
+[2026-01-31 17:46:28] Invoice found: INV-20260128-0014
+[2026-01-31 17:46:28] Fetching payment transactions for invoice 12
+[2026-01-31 17:46:28] Found 0 payment transaction records
+[2026-01-31 17:46:28] Fetching previous invoices for school ID: 14
+[2026-01-31 17:46:28] Found 0 previous invoices
+[2026-01-31 17:46:28] Calculated totals: Subtotal=$199.99 (₦299985), Tax=$0 (₦0), Total=$199.99 (₦299985)
+[2026-01-31 17:46:28] Rendering HTML page for invoice 12
+[2026-01-31 17:46:28] Sidebar included successfully
+[2026-01-31 17:46:28] Script completed successfully
+[2026-01-31 17:53:24] Script started: view-invoice.php
+[2026-01-31 17:53:24] Authentication check started
+[2026-01-31 17:53:24] User authenticated successfully
+[2026-01-31 17:53:24] Processing invoice ID: 4
+[2026-01-31 17:53:24] Database connection established
+[2026-01-31 17:53:24] Preparing SQL query for invoice 4
+[2026-01-31 17:53:24] Invoice found: INV-202512-0002
+[2026-01-31 17:53:24] Fetching payment transactions for invoice 4
+[2026-01-31 17:53:24] Found 0 payment transaction records
+[2026-01-31 17:53:24] Fetching previous invoices for school ID: 2
+[2026-01-31 17:53:24] Found 1 previous invoices
+[2026-01-31 17:53:24] Calculated totals: Subtotal=$49.99 (₦74985), Tax=$2.5 (₦3750), Total=$52.49 (₦78735)
+[2026-01-31 17:53:24] Rendering HTML page for invoice 4
+[2026-01-31 17:53:24] Sidebar included successfully
+[2026-01-31 17:53:24] Script completed successfully
+[2026-01-31 18:10:17] Script started: view-invoice.php
+[2026-01-31 18:10:17] Authentication check started
+[2026-01-31 18:10:17] User authenticated successfully
+[2026-01-31 18:10:17] Processing invoice ID: 12
+[2026-01-31 18:10:17] Database connection established
+[2026-01-31 18:10:17] Preparing SQL query for invoice 12
+[2026-01-31 18:10:17] Invoice found: INV-20260128-0014
+[2026-01-31 18:10:17] Fetching payment transactions for invoice 12
+[2026-01-31 18:10:17] Found 0 payment transaction records
+[2026-01-31 18:10:17] Fetching previous invoices for school ID: 14
+[2026-01-31 18:10:17] Found 0 previous invoices
+[2026-01-31 18:10:17] Calculated totals: Subtotal=$199.99 (₦299985), Tax=$0 (₦0), Total=$199.99 (₦299985)
+[2026-01-31 18:10:17] Rendering HTML page for invoice 12
+[2026-01-31 18:10:17] Sidebar included successfully
+[2026-01-31 18:10:17] Script completed successfully
+[2026-01-31 18:11:56] Script started: view-invoice.php
+[2026-01-31 18:11:56] Authentication check started
+[2026-01-31 18:11:56] User authenticated successfully
+[2026-01-31 18:11:56] Processing invoice ID: 12
+[2026-01-31 18:11:56] Database connection established
+[2026-01-31 18:11:56] Preparing SQL query for invoice 12
+[2026-01-31 18:11:56] Invoice found: INV-20260128-0014
+[2026-01-31 18:11:56] Fetching payment transactions for invoice 12
+[2026-01-31 18:11:56] Found 0 payment transaction records
+[2026-01-31 18:11:56] Fetching previous invoices for school ID: 14
+[2026-01-31 18:11:56] Found 0 previous invoices
+[2026-01-31 18:11:56] Calculated totals: Subtotal=$199.99 (₦299985), Tax=$0 (₦0), Total=$199.99 (₦299985)
+[2026-01-31 18:11:56] Rendering HTML page for invoice 12
+[2026-01-31 18:11:56] Sidebar included successfully
+[2026-01-31 18:11:56] Script completed successfully
+[2026-01-31 18:12:38] Script started: view-invoice.php
+[2026-01-31 18:12:38] Authentication check started
+[2026-01-31 18:12:38] User authenticated successfully
+[2026-01-31 18:12:38] Processing invoice ID: 12
+[2026-01-31 18:12:38] Database connection established
+[2026-01-31 18:12:38] Preparing SQL query for invoice 12
+[2026-01-31 18:12:38] Invoice found: INV-20260128-0014
+[2026-01-31 18:12:38] Fetching payment transactions for invoice 12
+[2026-01-31 18:12:38] Found 0 payment transaction records
+[2026-01-31 18:12:38] Fetching previous invoices for school ID: 14
+[2026-01-31 18:12:38] Found 0 previous invoices
+[2026-01-31 18:12:38] Calculated totals: Subtotal=$199.99 (₦299985), Tax=$0 (₦0), Total=$199.99 (₦299985)
+[2026-01-31 18:12:38] Rendering HTML page for invoice 12
+[2026-01-31 18:12:38] Sidebar included successfully
+[2026-01-31 18:12:38] Script completed successfully
+[2026-01-31 18:12:39] Script started: view-invoice.php
+[2026-01-31 18:12:39] Authentication check started
+[2026-01-31 18:12:39] User authenticated successfully
+[2026-01-31 18:12:39] Processing invoice ID: 12
+[2026-01-31 18:12:39] Database connection established
+[2026-01-31 18:12:39] Preparing SQL query for invoice 12
+[2026-01-31 18:12:39] Invoice found: INV-20260128-0014
+[2026-01-31 18:12:39] Fetching payment transactions for invoice 12
+[2026-01-31 18:12:39] Found 0 payment transaction records
+[2026-01-31 18:12:39] Fetching previous invoices for school ID: 14
+[2026-01-31 18:12:39] Found 0 previous invoices
+[2026-01-31 18:12:39] Calculated totals: Subtotal=$199.99 (₦299985), Tax=$0 (₦0), Total=$199.99 (₦299985)
+[2026-01-31 18:12:39] Rendering HTML page for invoice 12
+[2026-01-31 18:12:39] Sidebar included successfully
+[2026-01-31 18:12:39] Script completed successfully
+[2026-01-31 18:38:04] Script started: view-invoice.php
+[2026-01-31 18:38:04] Authentication check started
+[2026-01-31 18:38:04] User authenticated successfully
+[2026-01-31 18:38:04] Processing invoice ID: 10
+[2026-01-31 18:38:04] Database connection established
+[2026-01-31 18:38:04] Preparing SQL query for invoice 10
+[2026-01-31 18:38:04] Invoice found: INV-20260128-0012
+[2026-01-31 18:38:04] Fetching payment transactions for invoice 10
+[2026-01-31 18:38:04] Found 0 payment transaction records
+[2026-01-31 18:38:04] Fetching previous invoices for school ID: 12
+[2026-01-31 18:38:04] Found 0 previous invoices
+[2026-01-31 18:38:04] Calculated totals: Subtotal=$99.99 (₦149985), Tax=$0 (₦0), Total=$99.99 (₦149985)
+[2026-01-31 18:38:04] Rendering HTML page for invoice 10
+[2026-01-31 18:38:04] Sidebar included successfully
+[2026-01-31 18:38:04] Script completed successfully
+[2026-01-31 18:44:06] Script started: view-invoice.php
+[2026-01-31 18:44:06] Authentication check started
+[2026-01-31 18:44:06] User authenticated successfully
+[2026-01-31 18:44:06] Processing invoice ID: 1
+[2026-01-31 18:44:06] Database connection established
+[2026-01-31 18:44:06] Preparing SQL query for invoice 1
+[2026-01-31 18:44:06] Invoice found: INV-202601-0001
+[2026-01-31 18:44:06] Fetching payment transactions for invoice 1
+[2026-01-31 18:44:06] Found 1 payment transaction records
+[2026-01-31 18:44:06] Fetching previous invoices for school ID: 1
+[2026-01-31 18:44:06] Found 1 previous invoices
+[2026-01-31 18:44:06] Calculated totals: Subtotal=$99.99 (₦149985), Tax=$5 (₦7500), Total=$104.99 (₦157485)
+[2026-01-31 18:44:06] Rendering HTML page for invoice 1
+[2026-01-31 18:44:06] Sidebar included successfully
+[2026-01-31 18:44:06] Script completed successfully
+[2026-01-31 18:46:47] Script started: view-invoice.php
+[2026-01-31 18:46:47] Authentication check started
+[2026-01-31 18:46:47] User authenticated successfully
+[2026-01-31 18:46:47] Processing invoice ID: 1
+[2026-01-31 18:46:47] Database connection established
+[2026-01-31 18:46:47] Preparing SQL query for invoice 1
+[2026-01-31 18:46:47] Invoice found: INV-202601-0001
+[2026-01-31 18:46:47] Fetching payment transactions for invoice 1
+[2026-01-31 18:46:47] Found 1 payment transaction records
+[2026-01-31 18:46:47] Fetching previous invoices for school ID: 1
+[2026-01-31 18:46:47] Found 1 previous invoices
+[2026-01-31 18:46:47] Calculated totals: Subtotal=$99.99 (₦149985), Tax=$5 (₦7500), Total=$104.99 (₦157485)
+[2026-01-31 18:46:47] Rendering HTML page for invoice 1
+[2026-01-31 18:46:47] Sidebar included successfully
+[2026-01-31 18:46:47] Script completed successfully
+[2026-02-01 03:49:08] Script started: view-invoice.php
+[2026-02-01 03:49:08] Authentication check started
+[2026-02-01 03:49:08] User authenticated successfully
+[2026-02-01 03:49:08] Processing invoice ID: 12
+[2026-02-01 03:49:08] Database connection established
+[2026-02-01 03:49:08] Preparing SQL query for invoice 12
+[2026-02-01 03:49:08] Invoice found: INV-20260128-0014
+[2026-02-01 03:49:08] Fetching payment transactions for invoice 12
+[2026-02-01 03:49:08] Found 0 payment transaction records
+[2026-02-01 03:49:08] Fetching previous invoices for school ID: 14
+[2026-02-01 03:49:08] Found 0 previous invoices
+[2026-02-01 03:49:08] Calculated totals: Subtotal=$199.99 (₦299985), Tax=$0 (₦0), Total=$199.99 (₦299985)
+[2026-02-01 03:49:08] Rendering HTML page for invoice 12
+[2026-02-01 03:49:08] Sidebar included successfully
+[2026-02-01 03:49:08] Script completed successfully
+[2026-02-01 05:10:24] Script started: view-invoice.php
+[2026-02-01 05:10:24] Authentication check started
+[2026-02-01 05:10:24] User authenticated successfully
+[2026-02-01 05:10:24] Processing invoice ID: 12
+[2026-02-01 05:10:24] Database connection established
+[2026-02-01 05:10:24] Preparing SQL query for invoice 12
+[2026-02-01 05:10:24] Invoice found: INV-20260128-0014
+[2026-02-01 05:10:24] Fetching payment transactions for invoice 12
+[2026-02-01 05:10:24] Found 0 payment transaction records
+[2026-02-01 05:10:24] Fetching previous invoices for school ID: 14
+[2026-02-01 05:10:24] Found 0 previous invoices
+[2026-02-01 05:10:24] Calculated totals: Subtotal=$199.99 (₦299985), Tax=$0 (₦0), Total=$199.99 (₦299985)
+[2026-02-01 05:10:24] Rendering HTML page for invoice 12
+[2026-02-01 05:10:24] Sidebar included successfully
+[2026-02-01 05:10:24] Script completed successfully
+[2026-02-01 06:10:23] Script started: view-invoice.php
+[2026-02-01 06:10:23] Authentication check started
+[2026-02-01 06:10:23] User authenticated successfully
+[2026-02-01 06:10:23] Processing invoice ID: 12
+[2026-02-01 06:10:23] Database connection established
+[2026-02-01 06:10:23] Preparing SQL query for invoice 12
+[2026-02-01 06:10:23] Invoice found: INV-20260128-0014
+[2026-02-01 06:10:23] Fetching payment transactions for invoice 12
+[2026-02-01 06:10:23] Found 0 payment transaction records
+[2026-02-01 06:10:23] Fetching previous invoices for school ID: 14
+[2026-02-01 06:10:23] Found 0 previous invoices
+[2026-02-01 06:10:23] Calculated totals: Subtotal=$199.99 (₦299985), Tax=$0 (₦0), Total=$199.99 (₦299985)
+[2026-02-01 06:10:23] Rendering HTML page for invoice 12
+[2026-02-01 06:10:23] Sidebar included successfully
+[2026-02-01 06:10:23] Script completed successfully
+[2026-02-02 12:56:02] Script started: view-invoice.php
+[2026-02-02 12:56:02] Authentication check started
+[2026-02-02 12:56:02] User authenticated successfully
+[2026-02-02 12:56:02] Processing invoice ID: 14
+[2026-02-02 12:56:02] Database connection established
+[2026-02-02 12:56:02] Preparing SQL query for invoice 14
+[2026-02-02 12:56:02] Invoice found: INV-20260202-0016
+[2026-02-02 12:56:02] Fetching payment transactions for invoice 14
+[2026-02-02 12:56:02] Found 0 payment transaction records
+[2026-02-02 12:56:02] Fetching previous invoices for school ID: 16
+[2026-02-02 12:56:02] Found 0 previous invoices
+[2026-02-02 12:56:02] Calculated totals: Subtotal=$99.99 (₦149985), Tax=$0 (₦0), Total=$99.99 (₦149985)
+[2026-02-02 12:56:02] Rendering HTML page for invoice 14
+[2026-02-02 12:56:02] Sidebar included successfully
+[2026-02-02 12:56:02] Script completed successfully
+[2026-02-12 11:16:32] Script started: view-invoice.php
+[2026-02-12 11:16:32] Authentication check started
+[2026-02-12 11:16:32] User authenticated successfully
+[2026-02-12 11:16:32] Processing invoice ID: 14
+[2026-02-12 11:16:32] Database connection established
+[2026-02-12 11:16:32] Preparing SQL query for invoice 14
+[2026-02-12 11:16:32] Invoice found: INV-20260202-0016
+[2026-02-12 11:16:32] Fetching payment transactions for invoice 14
+[2026-02-12 11:16:32] Found 0 payment transaction records
+[2026-02-12 11:16:32] Fetching previous invoices for school ID: 16
+[2026-02-12 11:16:32] Found 0 previous invoices
+[2026-02-12 11:16:32] Calculated totals: Subtotal=$99.99 (₦149985), Tax=$0 (₦0), Total=$99.99 (₦149985)
+[2026-02-12 11:16:32] Rendering HTML page for invoice 14
+[2026-02-12 11:16:32] Sidebar included successfully
+[2026-02-12 11:16:32] Script completed successfully

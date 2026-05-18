@@ -11,18 +11,20 @@ ini_set('error_log', __DIR__ . '/../../logs/login.log');
 // Start session
 if (session_status() === PHP_SESSION_NONE) {
     session_name('academix_tenant');
-    session_start([
-        'cookie_lifetime' => 86400,
-        'cookie_httponly' => true,
-        'cookie_secure'   => false,
-    ]);
+    require_once __DIR__ . '/../../includes/session_config.php';
+    session_start(academix_session_options());
 }
 
 // Handle logout
 if (isset($_GET['logout'])) {
+    $autoloadPathForLogout = __DIR__ . '/../../includes/autoload.php';
+    if (file_exists($autoloadPathForLogout)) {
+        require_once $autoloadPathForLogout;
+    }
     session_destroy();
     setcookie(session_name(), '', time() - 3600, '/');
-    header('Location: ./login.php');
+    $logoutSchoolSlug = $_GET['school_slug'] ?? '';
+    header('Location: ' . (function_exists('school_login_url') ? school_login_url($logoutSchoolSlug, false) : './login.php'));
     exit;
 }
 
@@ -36,13 +38,15 @@ require_once $autoloadPath;
 
 // Initialize variables
 $error = '';
-$schoolSlug = $_GET['school_slug'] ?? '';
+$schoolSlug = $_GET['school_slug'] ?? (function_exists('school_subdomain_slug') ? school_subdomain_slug() : '');
 $school = null;
 
 // Check for existing session
 if (isset($_SESSION['school_auth']) && !empty($_SESSION['school_auth']['school_slug'])) {
     $userType = $_SESSION['school_auth']['user_type'] ?? 'admin';
-    $redirectUrl = "./{$_SESSION['school_auth']['school_slug']}/{$userType}/dashboard.php";
+    $redirectUrl = function_exists('school_route_url')
+        ? school_route_url($_SESSION['school_auth']['school_slug'], $userType, 'dashboard.php', false)
+        : "./{$_SESSION['school_auth']['school_slug']}/{$userType}/dashboard.php";
     header("Location: {$redirectUrl}");
     exit;
 }
@@ -70,10 +74,11 @@ if (!empty($schoolSlug)) {
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $postSchoolSlug = trim($_POST['school_slug'] ?? '');
+    $postSchoolSlug = trim($_POST['school_slug'] ?? $schoolSlug);
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     $userType = $_POST['user_type'] ?? 'admin';
+    $staffUserTypes = ['accountant', 'librarian', 'receptionist'];
     
     // Validate inputs
     if (empty($postSchoolSlug) || empty($username) || empty($password) || empty($userType)) {
@@ -133,9 +138,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $params[] = $school['id'];
                         }
                         
-                        if ($userType !== 'admin' && in_array('user_type', $columnNames)) {
-                            $query .= " AND user_type = ?";
-                            $params[] = $userType;
+                        if (in_array('user_type', $columnNames)) {
+                            if ($userType === 'staff') {
+                                $query .= " AND user_type IN (" . implode(',', array_fill(0, count($staffUserTypes), '?')) . ")";
+                                $params = array_merge($params, $staffUserTypes);
+                            } elseif ($userType !== 'admin') {
+                                $query .= " AND user_type = ?";
+                                $params[] = $userType;
+                            }
                         }
                         
                         if (in_array('is_active', $columnNames)) {
@@ -164,9 +174,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             if ($authenticated) {
                                 $dbUserType = $user['user_type'] ?? 'admin';
-                                if ($userType !== $dbUserType) {
+                                $typeMatches = $userType === 'staff'
+                                    ? in_array($dbUserType, $staffUserTypes, true)
+                                    : $userType === $dbUserType;
+                                if (!$typeMatches) {
                                     $error = "Access denied. Your account type is: " . ucfirst($dbUserType);
                                 } else {
+                                    $sessionUserType = $userType === 'staff' ? 'staff' : $userType;
+                                    session_regenerate_id(true);
+
+                                    if (password_needs_rehash($passwordHash, PASSWORD_DEFAULT) || $password === $passwordHash || md5($password) === $passwordHash) {
+                                        $rehashStmt = $schoolDb->prepare("UPDATE users SET password = ? WHERE id = ?");
+                                        $rehashStmt->execute([password_hash($password, PASSWORD_DEFAULT), $user['id']]);
+                                    }
+
                                     // Get user role
                                     $roleName = 'Administrator';
                                     if (in_array('user_roles', $schoolDb->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN, 0))) {
@@ -195,7 +216,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         'user_id' => $user['id'],
                                         'user_name' => $user['name'] ?? ($user['username'] ?? 'User'),
                                         'user_email' => $user['email'] ?? '',
-                                        'user_type' => $userType,
+                                        'user_type' => $sessionUserType,
+                                        'staff_role' => in_array($dbUserType, $staffUserTypes, true) ? $dbUserType : null,
                                         'role_name' => $roleName,
                                         'login_time' => time(),
                                         'login_ip' => $_SERVER['REMOTE_ADDR'] ?? ''
@@ -208,7 +230,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     }
                                     
                                     // Redirect to dashboard
-                                    $redirectUrl = "./{$school['slug']}/{$userType}/dashboard.php";
+                                    $redirectUrl = function_exists('school_route_url')
+                                        ? school_route_url($school['slug'], $sessionUserType, 'dashboard.php', false)
+                                        : "./{$school['slug']}/{$sessionUserType}/dashboard.php";
                                     header("Location: {$redirectUrl}");
                                     exit;
                                 }
@@ -404,7 +428,7 @@ try {
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ml-1">
                         <i class="fas fa-user-tag mr-1"></i> Access Type
                     </label>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <button type="button" class="user-type-btn p-3 text-center border border-slate-200 rounded-xl" data-type="admin">
                             <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center mx-auto mb-2">
                                 <i class="fas fa-user-shield text-indigo-600 text-sm"></i>
@@ -432,6 +456,13 @@ try {
                             </div>
                             <span class="block text-xs font-medium">Parent</span>
                             <input type="radio" name="user_type" value="parent" class="hidden">
+                        </button>
+                        <button type="button" class="user-type-btn p-3 text-center border border-slate-200 rounded-xl" data-type="staff">
+                            <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center mx-auto mb-2">
+                                <i class="fas fa-briefcase text-purple-600 text-sm"></i>
+                            </div>
+                            <span class="block text-xs font-medium">Staff</span>
+                            <input type="radio" name="user_type" value="staff" class="hidden">
                         </button>
                     </div>
                 </div>
@@ -631,6 +662,11 @@ try {
                     labelIcon = 'fas fa-user-tie';
                     labelText = 'Staff ID';
                     placeholder = 'Enter staff ID or email';
+                    break;
+                case 'staff':
+                    labelIcon = 'fas fa-briefcase';
+                    labelText = 'Employee ID';
+                    placeholder = 'Enter employee ID or email';
                     break;
             }
             

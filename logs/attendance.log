@@ -1,0 +1,45 @@
+[08-Mar-2026 18:20:06 Africa/Lagos] === ATTENDANCE PAGE START ===
+[08-Mar-2026 18:20:06 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?academic_year=1&class_id=1&section_id=1&attendance_date=2026-03-08
+[08-Mar-2026 18:20:06 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[08-Mar-2026 18:20:06 Africa/Lagos] School database connection successful
+[08-Mar-2026 18:20:06 Africa/Lagos] Error fetching students: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'g2.user_id' in 'SELECT'
+[08-Mar-2026 18:20:06 Africa/Lagos] === ATTENDANCE PAGE END ===
+[08-Mar-2026 18:20:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[08-Mar-2026 18:20:58 Africa/Lagos] === ATTENDANCE PAGE START ===
+[08-Mar-2026 18:20:58 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?academic_year=1&class_id=1&section_id=1&attendance_date=2026-03-08
+[08-Mar-2026 18:20:58 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[08-Mar-2026 18:20:58 Africa/Lagos] School database connection successful
+[08-Mar-2026 18:20:58 Africa/Lagos] Error fetching students: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'g2.user_id' in 'SELECT'
+[08-Mar-2026 18:20:58 Africa/Lagos] === ATTENDANCE PAGE END ===
+[08-Mar-2026 18:20:58 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[08-Mar-2026 18:21:16 Africa/Lagos] === ATTENDANCE PAGE START ===
+[08-Mar-2026 18:21:16 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?academic_year=1&class_id=1&section_id=1&attendance_date=2026-03-08
+[08-Mar-2026 18:21:16 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[08-Mar-2026 18:21:16 Africa/Lagos] School database connection successful
+[08-Mar-2026 18:21:16 Africa/Lagos] Error fetching students: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'g2.user_id' in 'SELECT'
+[08-Mar-2026 18:21:16 Africa/Lagos] === ATTENDANCE PAGE END ===
+[08-Mar-2026 18:21:16 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[08-Mar-2026 18:21:30 Africa/Lagos] === ATTENDANCE PAGE START ===
+[08-Mar-2026 18:21:30 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?
+[08-Mar-2026 18:21:30 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[08-Mar-2026 18:21:30 Africa/Lagos] School database connection successful
+[08-Mar-2026 18:21:30 Africa/Lagos] === ATTENDANCE PAGE END ===
+[08-Mar-2026 18:21:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[08-Mar-2026 18:21:34 Africa/Lagos] === ATTENDANCE PAGE START ===
+[08-Mar-2026 18:21:34 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?ajax=get_sections&class_id=1
+[08-Mar-2026 18:21:34 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[08-Mar-2026 18:21:34 Africa/Lagos] School database connection successful
+[08-Mar-2026 18:21:40 Africa/Lagos] === ATTENDANCE PAGE START ===
+[08-Mar-2026 18:21:40 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?academic_year=1&class_id=1&section_id=1&attendance_date=2026-03-08
+[08-Mar-2026 18:21:40 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[08-Mar-2026 18:21:40 Africa/Lagos] School database connection successful
+[08-Mar-2026 18:21:40 Africa/Lagos] Error fetching students: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'g2.user_id' in 'SELECT'
+[08-Mar-2026 18:21:40 Africa/Lagos] === ATTENDANCE PAGE END ===
+[08-Mar-2026 18:21:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[08-Mar-2026 18:22:00 Africa/Lagos] === ATTENDANCE PAGE START ===
+[08-Mar-2026 18:22:00 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/student-attendance.php?academic_year=1&class_id=1&section_id=1&attendance_date=2026-03-08
+[08-Mar-2026 18:22:00 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php
+[08-Mar-2026 18:22:00 Africa/Lagos] School database connection successful
+[08-Mar-2026 18:22:00 Africa/Lagos] Error fetching students: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'g2.user_id' in 'SELECT'
+[08-Mar-2026 18:22:00 Africa/Lagos] === ATTENDANCE PAGE END ===
+[08-Mar-2026 18:22:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/student-attendance.php

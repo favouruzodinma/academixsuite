@@ -176,6 +176,19 @@ function getPlanStatusColor($isActive)
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             overflow-x: hidden;
+            font-size: 14px; /* Base font size */
+        }
+
+        @media (min-width: 640px) {
+            body {
+                font-size: 15px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                font-size: 16px;
+            }
         }
 
         /* Fixed sidebar for desktop */
@@ -248,7 +261,13 @@ function getPlanStatusColor($isActive)
         .content-scrollable {
             flex: 1;
             overflow-y: auto;
-            padding-bottom: 2rem;
+            padding-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .content-scrollable {
+                padding-bottom: 2rem;
+            }
         }
 
         /* Responsive container */
@@ -256,21 +275,23 @@ function getPlanStatusColor($isActive)
             width: 100%;
             margin-left: auto;
             margin-right: auto;
-            padding-left: 1rem;
-            padding-right: 1rem;
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
         }
 
         @media (min-width: 640px) {
             .responsive-container {
                 max-width: 640px;
-                padding-left: 1.5rem;
-                padding-right: 1.5rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
             }
         }
 
         @media (min-width: 768px) {
             .responsive-container {
                 max-width: 768px;
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
             }
         }
 
@@ -293,7 +314,7 @@ function getPlanStatusColor($isActive)
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
             border-bottom: 1px solid #e2e8f0;
-            padding: 1rem 0;
+            padding: 0.75rem 0;
         }
 
         @media (min-width: 768px) {
@@ -302,24 +323,25 @@ function getPlanStatusColor($isActive)
             }
         }
 
-        /* Stats grid */
+        /* Stats grid - Mobile optimized */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
         }
 
         @media (min-width: 640px) {
             .stats-grid {
-                gap: 1rem;
+                gap: 0.75rem;
+                margin-bottom: 1.5rem;
             }
         }
 
         @media (min-width: 768px) {
             .stats-grid {
                 grid-template-columns: repeat(4, 1fr);
-                gap: 1.25rem;
+                gap: 1rem;
                 margin-bottom: 2rem;
             }
         }
@@ -328,35 +350,37 @@ function getPlanStatusColor($isActive)
         .stat-card {
             background: white;
             border: 1px solid #e2e8f0;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 640px) {
             .stat-card {
-                padding: 1.25rem;
+                padding: 1rem;
+                border-radius: 0.75rem;
             }
         }
 
-        /* Pricing cards grid */
+        /* Pricing cards grid - Mobile first */
         .pricing-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 640px) {
             .pricing-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 2rem;
+                gap: 1.5rem;
             }
         }
 
         @media (min-width: 1024px) {
             .pricing-grid {
                 grid-template-columns: repeat(3, 1fr);
+                gap: 2rem;
             }
         }
 
@@ -364,13 +388,19 @@ function getPlanStatusColor($isActive)
         .pricing-card {
             background: white;
             border: 1px solid #e2e8f0;
-            border-radius: 1rem;
+            border-radius: 0.75rem;
             overflow: hidden;
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
             height: 100%;
             position: relative;
+        }
+
+        @media (min-width: 640px) {
+            .pricing-card {
+                border-radius: 1rem;
+            }
         }
 
         .pricing-card:hover {
@@ -381,18 +411,24 @@ function getPlanStatusColor($isActive)
 
         .pricing-card.featured {
             border: 2px solid #3b82f6;
-            box-shadow: 0 20px 25px -5px rgb(59 130 246 / 0.1);
+            box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.1);
+        }
+
+        @media (min-width: 768px) {
+            .pricing-card.featured {
+                box-shadow: 0 20px 25px -5px rgb(59 130 246 / 0.1);
+            }
         }
 
         .pricing-card.featured::before {
             content: 'RECOMMENDED';
             position: absolute;
-            top: 12px;
+            top: 10px;
             right: -32px;
             background: #3b82f6;
             color: white;
-            padding: 0.25rem 2rem;
-            font-size: 0.75rem;
+            padding: 0.2rem 2rem;
+            font-size: 0.65rem;
             font-weight: 700;
             text-align: center;
             transform: rotate(45deg);
@@ -400,9 +436,22 @@ function getPlanStatusColor($isActive)
             letter-spacing: 0.05em;
         }
 
+        @media (min-width: 768px) {
+            .pricing-card.featured::before {
+                top: 12px;
+                font-size: 0.75rem;
+            }
+        }
+
         .pricing-content {
-            padding: 1.5rem;
+            padding: 1rem;
             flex: 1;
+        }
+
+        @media (min-width: 640px) {
+            .pricing-content {
+                padding: 1.5rem;
+            }
         }
 
         @media (min-width: 768px) {
@@ -411,12 +460,12 @@ function getPlanStatusColor($isActive)
             }
         }
 
-        /* Table container */
+        /* Table container - Mobile optimized */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            margin: 0 -1rem;
-            padding: 0 1rem;
+            margin: 0 -0.75rem;
+            padding: 0 0.75rem;
         }
 
         @media (min-width: 768px) {
@@ -430,24 +479,37 @@ function getPlanStatusColor($isActive)
             width: 100%;
             min-width: 768px;
             border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        @media (min-width: 768px) {
+            .responsive-table {
+                font-size: 0.9375rem;
+            }
         }
 
         .responsive-table th,
         .responsive-table td {
-            padding: 0.75rem 1rem;
+            padding: 0.5rem 0.75rem;
             text-align: left;
             border-bottom: 1px solid #e2e8f0;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 640px) {
+            .responsive-table th,
+            .responsive-table td {
+                padding: 0.75rem 1rem;
+            }
+        }
 
+        @media (min-width: 768px) {
             .responsive-table th,
             .responsive-table td {
                 padding: 1rem 1.5rem;
             }
         }
 
-        /* Feature list */
+        /* Feature list - Mobile optimized */
         .feature-list {
             list-style: none;
             padding: 0;
@@ -456,25 +518,40 @@ function getPlanStatusColor($isActive)
 
         .feature-list li {
             position: relative;
-            padding-left: 1.75rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
+            padding-left: 1.5rem;
+            margin-bottom: 0.375rem;
+            font-size: 0.8125rem;
+            line-height: 1.25;
         }
 
         .feature-list li::before {
             content: '✓';
             position: absolute;
             left: 0;
-            width: 1.25rem;
-            height: 1.25rem;
+            width: 1rem;
+            height: 1rem;
             background: #d1fae5;
             color: #059669;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: bold;
+        }
+
+        @media (min-width: 640px) {
+            .feature-list li {
+                padding-left: 1.75rem;
+                font-size: 0.8125rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .feature-list li::before {
+                width: 1.25rem;
+                height: 1.25rem;
+                font-size: 0.75rem;
+            }
         }
 
         @media (min-width: 768px) {
@@ -499,7 +576,7 @@ function getPlanStatusColor($isActive)
             align-items: center;
             justify-content: center;
             z-index: 50;
-            padding: 1rem;
+            padding: 0.5rem;
         }
 
         .modal.active {
@@ -508,11 +585,18 @@ function getPlanStatusColor($isActive)
 
         .modal-content {
             background: white;
-            border-radius: 1rem;
+            border-radius: 0.75rem;
             width: 100%;
-            max-width: 32rem;
+            max-width: 100%;
             max-height: 90vh;
             overflow-y: auto;
+        }
+
+        @media (min-width: 640px) {
+            .modal-content {
+                border-radius: 1rem;
+                max-width: 32rem;
+            }
         }
 
         @media (min-width: 768px) {
@@ -521,24 +605,24 @@ function getPlanStatusColor($isActive)
             }
         }
 
-        /* Form inputs */
+        /* Form inputs - Mobile optimized */
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
         .form-label {
             display: block;
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             font-weight: 500;
             color: #374151;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.375rem;
         }
 
         .form-input {
             width: 100%;
-            padding: 0.625rem 0.75rem;
+            padding: 0.5rem 0.625rem;
             border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
+            border-radius: 0.375rem;
             font-size: 0.875rem;
             transition: all 0.2s;
         }
@@ -552,20 +636,29 @@ function getPlanStatusColor($isActive)
         @media (min-width: 768px) {
             .form-label {
                 font-size: 0.875rem;
+                margin-bottom: 0.5rem;
             }
 
             .form-input {
                 padding: 0.75rem 1rem;
                 font-size: 1rem;
+                border-radius: 0.5rem;
             }
         }
 
-        /* Toggle switch */
+        /* Toggle switch - Mobile optimized */
         .toggle-switch {
             position: relative;
             display: inline-block;
-            width: 3.75rem;
-            height: 2rem;
+            width: 3.25rem;
+            height: 1.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .toggle-switch {
+                width: 3.75rem;
+                height: 2rem;
+            }
         }
 
         .toggle-switch input {
@@ -589,8 +682,8 @@ function getPlanStatusColor($isActive)
         .toggle-slider:before {
             position: absolute;
             content: "";
-            height: 1.5rem;
-            width: 1.5rem;
+            height: 1.25rem;
+            width: 1.25rem;
             left: 0.25rem;
             bottom: 0.25rem;
             background-color: white;
@@ -598,33 +691,52 @@ function getPlanStatusColor($isActive)
             border-radius: 50%;
         }
 
+        @media (min-width: 768px) {
+            .toggle-slider:before {
+                height: 1.5rem;
+                width: 1.5rem;
+                left: 0.25rem;
+                bottom: 0.25rem;
+            }
+        }
+
         input:checked+.toggle-slider {
             background-color: #3b82f6;
         }
 
         input:checked+.toggle-slider:before {
-            transform: translateX(1.75rem);
+            transform: translateX(1.5rem);
         }
 
-        /* Button styles */
+        @media (min-width: 768px) {
+            input:checked+.toggle-slider:before {
+                transform: translateX(1.75rem);
+            }
+        }
+
+        /* Button styles - Mobile optimized */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 0.625rem 1.25rem;
-            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.8125rem;
             font-weight: 500;
-            border-radius: 0.5rem;
+            border-radius: 0.375rem;
             transition: all 0.2s;
             cursor: pointer;
             border: none;
-            min-height: 2.75rem;
+            min-height: 2.5rem;
+            gap: 0.375rem;
         }
 
         @media (min-width: 768px) {
             .btn {
-                padding: 0.75rem 1.5rem;
+                padding: 0.625rem 1.25rem;
                 font-size: 0.875rem;
+                border-radius: 0.5rem;
+                min-height: 2.75rem;
+                gap: 0.5rem;
             }
         }
 
@@ -657,13 +769,21 @@ function getPlanStatusColor($isActive)
         }
 
         .btn-icon {
-            width: 2.5rem;
-            height: 2.5rem;
+            width: 2.25rem;
+            height: 2.25rem;
             padding: 0;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border-radius: 0.5rem;
+            border-radius: 0.375rem;
+        }
+
+        @media (min-width: 768px) {
+            .btn-icon {
+                width: 2.5rem;
+                height: 2.5rem;
+                border-radius: 0.5rem;
+            }
         }
 
         /* Notification */
@@ -672,14 +792,25 @@ function getPlanStatusColor($isActive)
             top: 1rem;
             right: 1rem;
             background: white;
-            border-radius: 0.75rem;
-            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
             box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1);
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
             z-index: 50;
             animation: slideIn 0.3s ease-out;
+            max-width: calc(100vw - 2rem);
+            font-size: 0.8125rem;
+        }
+
+        @media (min-width: 768px) {
+            .notification {
+                padding: 1rem 1.5rem;
+                border-radius: 0.75rem;
+                font-size: 0.875rem;
+                max-width: 400px;
+            }
         }
 
         @keyframes slideIn {
@@ -687,7 +818,6 @@ function getPlanStatusColor($isActive)
                 transform: translateX(100%);
                 opacity: 0;
             }
-
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -717,40 +847,73 @@ function getPlanStatusColor($isActive)
             }
         }
 
-        /* Typography */
+        /* Typography - Mobile optimized */
         .text-xs {
-            font-size: 0.75rem;
+            font-size: 0.6875rem;
             line-height: 1rem;
         }
 
         .text-sm {
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             line-height: 1.25rem;
         }
 
         .text-base {
-            font-size: 1rem;
+            font-size: 0.875rem;
             line-height: 1.5rem;
         }
 
         .text-lg {
-            font-size: 1.125rem;
+            font-size: 0.9375rem;
             line-height: 1.75rem;
         }
 
         .text-xl {
-            font-size: 1.25rem;
+            font-size: 1rem;
             line-height: 1.75rem;
         }
 
         .text-2xl {
-            font-size: 1.5rem;
+            font-size: 1.125rem;
             line-height: 2rem;
         }
 
         .text-3xl {
-            font-size: 1.875rem;
+            font-size: 1.25rem;
             line-height: 2.25rem;
+        }
+
+        @media (min-width: 640px) {
+            .text-xs {
+                font-size: 0.75rem;
+            }
+            
+            .text-sm {
+                font-size: 0.875rem;
+            }
+            
+            .text-base {
+                font-size: 1rem;
+            }
+            
+            .text-lg {
+                font-size: 1.125rem;
+            }
+            
+            .text-xl {
+                font-size: 1.25rem;
+                line-height: 1.75rem;
+            }
+            
+            .text-2xl {
+                font-size: 1.5rem;
+                line-height: 2rem;
+            }
+            
+            .text-3xl {
+                font-size: 1.875rem;
+                line-height: 2.25rem;
+            }
         }
 
         @media (min-width: 768px) {
@@ -758,12 +921,12 @@ function getPlanStatusColor($isActive)
                 font-size: 1.5rem;
                 line-height: 2rem;
             }
-
+            
             .text-2xl {
                 font-size: 1.875rem;
                 line-height: 2.5rem;
             }
-
+            
             .text-3xl {
                 font-size: 2.25rem;
                 line-height: 2.5rem;
@@ -970,13 +1133,52 @@ function getPlanStatusColor($isActive)
             display: none;
         }
 
+        /* Mobile first responsive classes */
+        @media (max-width: 639px) {
+            .sm\:hidden {
+                display: none;
+            }
+            
+            .sm\:flex {
+                display: flex;
+            }
+            
+            .sm\:grid-cols-1 {
+                grid-template-columns: 1fr;
+            }
+            
+            .sm\:grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media (min-width: 640px) {
             .sm\:flex {
                 display: flex;
             }
-
+            
             .sm\:hidden {
                 display: none;
+            }
+            
+            .sm\:grid-cols-1 {
+                grid-template-columns: 1fr;
+            }
+            
+            .sm\:grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .sm\:grid-cols-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .sm\:text-base {
+                font-size: 1rem;
+            }
+            
+            .sm\:text-lg {
+                font-size: 1.125rem;
             }
         }
 
@@ -984,27 +1186,39 @@ function getPlanStatusColor($isActive)
             .md\:flex {
                 display: flex;
             }
-
+            
             .md\:hidden {
                 display: none;
             }
-
+            
             .md\:grid-cols-2 {
                 grid-template-columns: repeat(2, 1fr);
             }
-
+            
             .md\:grid-cols-3 {
                 grid-template-columns: repeat(3, 1fr);
             }
-
+            
             .md\:grid-cols-4 {
                 grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .md\:text-lg {
+                font-size: 1.125rem;
+            }
+            
+            .md\:text-xl {
+                font-size: 1.25rem;
             }
         }
 
         @media (min-width: 1024px) {
             .lg\:hidden {
                 display: none;
+            }
+            
+            .lg\:grid-cols-3 {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
     </style>
@@ -1020,19 +1234,19 @@ function getPlanStatusColor($isActive)
     <!-- Edit Plan Modal -->
     <div id="editPlanModal" class="modal">
         <div class="modal-content">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl font-bold text-slate-900" id="modalTitle">Add New Plan</h3>
+            <div class="p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-4 sm:mb-6">
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900" id="modalTitle">Add New Plan</h3>
                     <button onclick="closeModal('editPlanModal')" class="btn-icon text-slate-400 hover:text-slate-600">
-                        <i class="fas fa-times"></i>
+                        <i class="fas fa-times text-sm sm:text-base"></i>
                     </button>
                 </div>
 
                 <form id="editPlanForm" method="POST" action="update_plan.php" onsubmit="return submitPlanForm(event)">
                     <input type="hidden" name="plan_id" id="editPlanId" value="">
 
-                    <div class="space-y-4">
-                        <div class="grid md:grid-cols-2 gap-4">
+                    <div class="space-y-3 sm:space-y-4">
+                        <div class="grid sm:grid-cols-2 gap-3 sm:gap-4">
                             <div class="form-group">
                                 <label class="form-label">Plan Name *</label>
                                 <input type="text" id="editPlanName" name="name" class="form-input" required>
@@ -1050,7 +1264,7 @@ function getPlanStatusColor($isActive)
                             <textarea id="editPlanDescription" name="description" class="form-input" rows="2" required></textarea>
                         </div>
 
-                        <div class="grid md:grid-cols-2 gap-4">
+                        <div class="grid sm:grid-cols-2 gap-3 sm:gap-4">
                             <div class="form-group">
                                 <label class="form-label">Monthly Price ($) *</label>
                                 <div class="relative">
@@ -1069,7 +1283,7 @@ function getPlanStatusColor($isActive)
                             </div>
                         </div>
 
-                        <div class="grid md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                             <div class="form-group">
                                 <label class="form-label">Student Limit *</label>
                                 <input type="number" id="editStudentLimit" name="student_limit" class="form-input" min="0" value="50" required>
@@ -1101,7 +1315,7 @@ function getPlanStatusColor($isActive)
                             <p class="text-xs text-slate-500 mt-1">Enter features as a JSON array. Example: ["Feature 1", "Feature 2"]</p>
                         </div>
 
-                        <div class="grid md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                             <div class="form-group">
                                 <label class="form-label">Sort Order *</label>
                                 <input type="number" id="editSortOrder" name="sort_order" class="form-input" min="0" value="0" required>
@@ -1125,12 +1339,12 @@ function getPlanStatusColor($isActive)
                         </div>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-slate-200">
-                        <button type="button" onclick="closeModal('editPlanModal')" class="btn btn-secondary flex-1">
+                    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-200">
+                        <button type="button" onclick="closeModal('editPlanModal')" class="btn btn-secondary flex-1 text-sm sm:text-base">
                             Cancel
                         </button>
-                        <button type="submit" id="submitPlanBtn" class="btn btn-primary flex-1">
-                            <i class="fas fa-save mr-2"></i>
+                        <button type="submit" id="submitPlanBtn" class="btn btn-primary flex-1 text-sm sm:text-base">
+                            <i class="fas fa-save mr-1 sm:mr-2 text-xs sm:text-sm"></i>
                             Save Plan
                         </button>
                     </div>
@@ -1142,19 +1356,19 @@ function getPlanStatusColor($isActive)
     <!-- Delete Plan Modal -->
     <div id="deletePlanModal" class="modal">
         <div class="modal-content">
-            <div class="p-8 text-center">
-                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+            <div class="p-6 sm:p-8 text-center">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-lg sm:text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-bold text-slate-900 mb-2">Delete Plan?</h3>
-                <p class="text-sm text-slate-600 mb-4">Are you sure you want to delete the "<span id="deletePlanName" class="font-bold"></span>" plan?</p>
-                <p class="text-xs text-slate-500 mb-6">This action cannot be undone. Schools using this plan will need to select a new plan.</p>
-                <div class="space-y-3">
-                    <button onclick="confirmDeletePlan()" class="btn btn-danger w-full">
-                        <i class="fas fa-trash mr-2"></i>
+                <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2">Delete Plan?</h3>
+                <p class="text-sm text-slate-600 mb-3 sm:mb-4">Are you sure you want to delete the "<span id="deletePlanName" class="font-bold"></span>" plan?</p>
+                <p class="text-xs text-slate-500 mb-4 sm:mb-6">This action cannot be undone. Schools using this plan will need to select a new plan.</p>
+                <div class="space-y-2 sm:space-y-3">
+                    <button onclick="confirmDeletePlan()" class="btn btn-danger w-full text-sm sm:text-base">
+                        <i class="fas fa-trash mr-1 sm:mr-2 text-xs sm:text-sm"></i>
                         Yes, Delete Plan
                     </button>
-                    <button onclick="closeModal('deletePlanModal')" class="btn btn-secondary w-full">
+                    <button onclick="closeModal('deletePlanModal')" class="btn btn-secondary w-full text-sm sm:text-base">
                         Cancel
                     </button>
                 </div>
@@ -1174,32 +1388,32 @@ function getPlanStatusColor($isActive)
             <!-- Fixed Header -->
             <header class="header-fixed">
                 <div class="responsive-container">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-4">
-                        <div class="flex items-center gap-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 py-3 sm:py-4">
+                        <div class="flex items-center gap-2 sm:gap-3">
                             <button onclick="toggleMobileSidebar()" class="mobile-menu-btn btn-icon text-slate-600 hover:text-slate-900">
-                                <i class="fas fa-bars"></i>
+                                <i class="fas fa-bars text-sm sm:text-base"></i>
                             </button>
                             <div>
-                                <h1 class="text-xl font-bold text-slate-900">Subscription Plans</h1>
-                                <p class="text-sm text-slate-500">Manage pricing tiers and features</p>
+                                <h1 class="text-lg sm:text-xl font-bold text-slate-900">Subscription Plans</h1>
+                                <p class="text-xs sm:text-sm text-slate-500">Manage pricing tiers and features</p>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-3">
-                            <div class="md:flex items-center gap-4 bg-white border border-slate-200 px-4 py-2 rounded-xl hidden">
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <div class="sm:flex items-center gap-3 sm:gap-4 bg-white border border-slate-200 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl hidden">
                                 <div class="text-center">
                                     <p class="text-xs font-semibold text-slate-400 uppercase">Total ARR</p>
                                     <p class="text-sm font-bold text-slate-900">₦<?php echo number_format($totalArrNgn, 0); ?></p>
                                 </div>
-                                <div class="h-8 w-px bg-slate-200"></div>
+                                <div class="h-6 sm:h-8 w-px bg-slate-200"></div>
                                 <div class="text-center">
                                     <p class="text-xs font-semibold text-slate-400 uppercase">Schools</p>
                                     <p class="text-sm font-bold text-emerald-600"><?php echo $totalSchools; ?></p>
                                 </div>
                             </div>
 
-                            <button onclick="createNewPlan()" class="btn btn-primary">
-                                <i class="fas fa-plus mr-2"></i>
+                            <button onclick="createNewPlan()" class="btn btn-primary text-sm sm:text-base">
+                                <i class="fas fa-plus text-xs sm:text-sm mr-1 sm:mr-2"></i>
                                 <span class="sm:inline hidden">New Plan</span>
                                 <span class="sm:hidden">Add</span>
                             </button>
@@ -1210,53 +1424,53 @@ function getPlanStatusColor($isActive)
 
             <!-- Scrollable Content Area -->
             <div class="content-scrollable">
-                <div class="responsive-container py-6">
+                <div class="responsive-container py-4 sm:py-6">
                     <!-- Stats Overview -->
                     <div class="stats-grid">
                         <div class="stat-card">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-                                    <i class="fas fa-layer-group text-blue-600"></i>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+                                    <i class="fas fa-layer-group text-blue-600 text-sm sm:text-base"></i>
                                 </div>
                                 <div>
                                     <p class="text-xs text-slate-500">Total Plans</p>
-                                    <p class="text-2xl font-bold text-slate-900"><?php echo $activePlansCount; ?></p>
+                                    <p class="text-lg sm:text-2xl font-bold text-slate-900"><?php echo $activePlansCount; ?></p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="stat-card">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
-                                    <i class="fas fa-school text-emerald-600"></i>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
+                                    <i class="fas fa-school text-emerald-600 text-sm sm:text-base"></i>
                                 </div>
                                 <div>
                                     <p class="text-xs text-slate-500">Active Schools</p>
-                                    <p class="text-2xl font-bold text-slate-900"><?php echo $totalSchools; ?></p>
+                                    <p class="text-lg sm:text-2xl font-bold text-slate-900"><?php echo $totalSchools; ?></p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="stat-card">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center">
-                                    <i class="fas fa-chart-line text-purple-600"></i>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-purple-600 text-sm sm:text-base"></i>
                                 </div>
                                 <div>
                                     <p class="text-xs text-slate-500">Monthly MRR</p>
-                                    <p class="text-2xl font-bold text-slate-900">₦<?php echo number_format($totalArrNgn / 12, 0); ?></p>
+                                    <p class="text-lg sm:text-2xl font-bold text-slate-900">₦<?php echo number_format($totalArrNgn / 12, 0); ?></p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="stat-card">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center">
-                                    <i class="fas fa-trophy text-amber-600"></i>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center">
+                                    <i class="fas fa-trophy text-amber-600 text-sm sm:text-base"></i>
                                 </div>
                                 <div>
                                     <p class="text-xs text-slate-500">Most Popular</p>
-                                    <p class="text-2xl font-bold text-slate-900">
+                                    <p class="text-lg sm:text-2xl font-bold text-slate-900">
                                         <?php
                                         $mostPopular = '';
                                         $maxCount = 0;
@@ -1280,33 +1494,33 @@ function getPlanStatusColor($isActive)
                     </div>
 
                     <!-- Billing Toggle -->
-                    <div class="bg-white rounded-xl p-6 text-center shadow-sm mb-8">
-                        <h3 class="text-lg font-bold text-slate-900 mb-2">Choose Billing Cycle</h3>
-                        <p class="text-sm text-slate-500 mb-6">Select your preferred billing frequency</p>
+                    <div class="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 text-center shadow-sm mb-6 sm:mb-8">
+                        <h3 class="text-base sm:text-lg font-bold text-slate-900 mb-1 sm:mb-2">Choose Billing Cycle</h3>
+                        <p class="text-xs sm:text-sm text-slate-500 mb-4 sm:mb-6">Select your preferred billing frequency</p>
 
-                        <div class="flex items-center justify-center gap-6 mb-6">
-                            <span class="text-sm font-semibold <?php echo !isset($_GET['billing']) || $_GET['billing'] === 'monthly' ? 'text-blue-600' : 'text-slate-500'; ?>">Monthly</span>
+                        <div class="flex items-center justify-center gap-4 sm:gap-6 mb-4 sm:mb-6">
+                            <span class="text-xs sm:text-sm font-semibold <?php echo !isset($_GET['billing']) || $_GET['billing'] === 'monthly' ? 'text-blue-600' : 'text-slate-500'; ?>">Monthly</span>
                             <label class="toggle-switch">
                                 <input type="checkbox" id="billingToggle" onchange="toggleBillingCycle()">
                                 <span class="toggle-slider"></span>
                             </label>
-                            <span class="text-sm font-semibold <?php echo isset($_GET['billing']) && $_GET['billing'] === 'yearly' ? 'text-blue-600' : 'text-slate-500'; ?>">
+                            <span class="text-xs sm:text-sm font-semibold <?php echo isset($_GET['billing']) && $_GET['billing'] === 'yearly' ? 'text-blue-600' : 'text-slate-500'; ?>">
                                 Yearly <span class="text-emerald-600">(Save 20%)</span>
                             </span>
                         </div>
                     </div>
 
                     <!-- Pricing Cards -->
-                    <div class="mb-8">
+                    <div class="mb-6 sm:mb-8">
                         <?php if (empty($plans)): ?>
-                            <div class="text-center py-12">
-                                <div class="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <i class="fas fa-layer-group text-3xl text-blue-600"></i>
+                            <div class="text-center py-8 sm:py-12">
+                                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-50 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                                    <i class="fas fa-layer-group text-2xl sm:text-3xl text-blue-600"></i>
                                 </div>
-                                <h3 class="text-2xl font-bold text-slate-900 mb-3">No Subscription Plans Yet</h3>
-                                <p class="text-sm text-slate-600 mb-6 max-w-md mx-auto">Create your first subscription plan to start offering services to schools</p>
-                                <button onclick="createNewPlan()" class="btn btn-primary">
-                                    <i class="fas fa-plus mr-2"></i>
+                                <h3 class="text-xl sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">No Subscription Plans Yet</h3>
+                                <p class="text-sm text-slate-600 mb-4 sm:mb-6 max-w-md mx-auto">Create your first subscription plan to start offering services to schools</p>
+                                <button onclick="createNewPlan()" class="btn btn-primary text-sm sm:text-base">
+                                    <i class="fas fa-plus mr-1 sm:mr-2 text-xs sm:text-sm"></i>
                                     Create First Plan
                                 </button>
                             </div>
@@ -1323,59 +1537,59 @@ function getPlanStatusColor($isActive)
                                 ?>
                                     <div class="pricing-card <?php echo $isFeatured ? 'featured' : ''; ?>" style="position: relative;">
                                         <div class="pricing-content">
-                                            <div class="flex items-center justify-between mb-6">
-                                                <div class="w-14 h-14 rounded-2xl <?php echo getPlanColorClass($plan['name']); ?> flex items-center justify-center border">
-                                                    <i class="<?php echo getPlanIcon($plan['name']); ?> text-xl"></i>
+                                            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl <?php echo getPlanColorClass($plan['name']); ?> flex items-center justify-center border">
+                                                    <i class="<?php echo getPlanIcon($plan['name']); ?> text-base sm:text-xl"></i>
                                                 </div>
-                                                <span class="px-3 py-1 text-xs font-bold rounded-full <?php echo $planBadge['class']; ?> text-white">
+                                                <span class="px-2 py-1 text-xs font-bold rounded-full <?php echo $planBadge['class']; ?> text-white">
                                                     <?php echo $planBadge['text']; ?>
                                                 </span>
                                             </div>
 
-                                            <h3 class="text-xl font-bold text-slate-900 mb-2"><?php echo htmlspecialchars($plan['name']); ?></h3>
-                                            <p class="text-sm text-slate-600 mb-6"><?php echo htmlspecialchars($plan['description']); ?></p>
+                                            <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-1 sm:mb-2"><?php echo htmlspecialchars($plan['name']); ?></h3>
+                                            <p class="text-xs sm:text-sm text-slate-600 mb-4 sm:mb-6"><?php echo htmlspecialchars($plan['description']); ?></p>
 
-                                            <div class="mb-6">
+                                            <div class="mb-4 sm:mb-6">
                                                 <div class="flex items-baseline mb-1">
-                                                    <span class="text-3xl font-bold text-slate-900 price-display"
+                                                    <span class="text-2xl sm:text-3xl font-bold text-slate-900 price-display"
                                                         data-monthly="<?php echo $monthlyPriceNgn; ?>"
                                                         data-yearly="<?php echo $yearlyPriceNgn; ?>">
                                                         ₦<?php echo number_format($monthlyPriceNgn, 0); ?>
                                                     </span>
-                                                    <span class="text-sm text-slate-500 font-medium ml-2 billing-period">/month</span>
+                                                    <span class="text-xs sm:text-sm text-slate-500 font-medium ml-1 sm:ml-2 billing-period">/month</span>
                                                 </div>
                                                 <p class="text-xs text-slate-500 billing-yearly">
                                                     ₦<?php echo number_format($yearlyPriceNgn, 0); ?> billed yearly
                                                 </p>
                                             </div>
 
-                                            <div class="space-y-3 mb-6">
-                                                <div class="flex items-center justify-between text-sm">
+                                            <div class="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+                                                <div class="flex items-center justify-between text-xs sm:text-sm">
                                                     <span class="text-slate-600">Students</span>
                                                     <span class="font-bold text-slate-900">
                                                         <?php echo $plan['student_limit'] == 0 ? 'Unlimited' : number_format($plan['student_limit']); ?>
                                                     </span>
                                                 </div>
-                                                <div class="flex items-center justify-between text-sm">
+                                                <div class="flex items-center justify-between text-xs sm:text-sm">
                                                     <span class="text-slate-600">Teachers</span>
                                                     <span class="font-bold text-slate-900">
                                                         <?php echo $plan['teacher_limit'] == 0 ? 'Unlimited' : number_format($plan['teacher_limit']); ?>
                                                     </span>
                                                 </div>
-                                                <div class="flex items-center justify-between text-sm">
+                                                <div class="flex items-center justify-between text-xs sm:text-sm">
                                                     <span class="text-slate-600">Campuses</span>
                                                     <span class="font-bold text-slate-900">
                                                         <?php echo $plan['campus_limit'] == 0 ? 'Unlimited' : number_format($plan['campus_limit']); ?>
                                                     </span>
                                                 </div>
-                                                <div class="flex items-center justify-between text-sm">
+                                                <div class="flex items-center justify-between text-xs sm:text-sm">
                                                     <span class="text-slate-600">Storage</span>
                                                     <span class="font-bold text-slate-900"><?php echo formatStorage($plan['storage_limit']); ?></span>
                                                 </div>
                                             </div>
 
-                                            <div class="mb-6">
-                                                <h4 class="text-xs font-bold text-slate-900 mb-3">KEY FEATURES</h4>
+                                            <div class="mb-4 sm:mb-6">
+                                                <h4 class="text-xs font-bold text-slate-900 mb-2 sm:mb-3">KEY FEATURES</h4>
                                                 <ul class="feature-list">
                                                     <?php
                                                     $featureCount = 0;
@@ -1383,12 +1597,12 @@ function getPlanStatusColor($isActive)
                                                         $featureCount++;
                                                         if ($featureCount > 5) break;
                                                     ?>
-                                                        <li class="text-sm text-slate-700">
+                                                        <li class="text-xs sm:text-sm text-slate-700">
                                                             <?php echo htmlspecialchars($feature); ?>
                                                         </li>
                                                     <?php endforeach; ?>
                                                     <?php if (count($planFeatures) > 5): ?>
-                                                        <li class="text-sm text-blue-600 font-medium">
+                                                        <li class="text-xs sm:text-sm text-blue-600 font-medium">
                                                             + <?php echo count($planFeatures) - 5; ?> more features
                                                         </li>
                                                     <?php endif; ?>
@@ -1396,11 +1610,11 @@ function getPlanStatusColor($isActive)
                                             </div>
                                         </div>
 
-                                        <div class="p-6 pt-0 mt-auto">
-                                            <div class="space-y-4">
+                                        <div class="p-4 sm:p-6 pt-0 mt-auto">
+                                            <div class="space-y-3 sm:space-y-4">
                                                 <button onclick="selectPlan(<?php echo $planId; ?>)"
-                                                    class="btn <?php echo getPlanButtonClass($plan['name']); ?> text-white w-full">
-                                                    <i class="fas fa-check-circle mr-2"></i>
+                                                    class="btn <?php echo getPlanButtonClass($plan['name']); ?> text-white w-full text-sm sm:text-base">
+                                                    <i class="fas fa-check-circle mr-1 sm:mr-2 text-xs sm:text-sm"></i>
                                                     Select Plan
                                                 </button>
 
@@ -1408,18 +1622,18 @@ function getPlanStatusColor($isActive)
                                                     <p class="text-xs text-slate-500">
                                                         <span class="font-bold text-slate-900"><?php echo $schoolCount; ?></span> schools using this plan
                                                     </p>
-                                                    <div class="flex items-center justify-center gap-4 mt-3">
+                                                    <div class="flex items-center justify-center gap-3 sm:gap-4 mt-2 sm:mt-3">
                                                         <button onclick="editPlan(<?php echo $planId; ?>)"
                                                             class="text-xs text-blue-600 hover:text-blue-800 font-medium">
-                                                            <i class="fas fa-edit mr-1"></i>Edit
+                                                            <i class="fas fa-edit mr-1 text-xs"></i>Edit
                                                         </button>
                                                         <button onclick="duplicatePlan(<?php echo $planId; ?>)"
                                                             class="text-xs text-emerald-600 hover:text-emerald-800 font-medium">
-                                                            <i class="fas fa-copy mr-1"></i>Duplicate
+                                                            <i class="fas fa-copy mr-1 text-xs"></i>Duplicate
                                                         </button>
                                                         <button onclick="deletePlan(<?php echo $planId; ?>, '<?php echo htmlspecialchars($plan['name']); ?>')"
                                                             class="text-xs text-red-600 hover:text-red-800 font-medium">
-                                                            <i class="fas fa-trash mr-1"></i>Delete
+                                                            <i class="fas fa-trash mr-1 text-xs"></i>Delete
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1430,14 +1644,14 @@ function getPlanStatusColor($isActive)
 
                                 <!-- Add New Plan Card -->
                                 <div class="pricing-card border-2 border-dashed border-slate-300 hover:border-blue-400">
-                                    <div class="h-full flex flex-col items-center justify-center p-8 text-center">
-                                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center mx-auto mb-6">
-                                            <i class="fas fa-plus text-blue-600 text-3xl"></i>
+                                    <div class="h-full flex flex-col items-center justify-center p-6 sm:p-8 text-center">
+                                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                                            <i class="fas fa-plus text-blue-600 text-2xl sm:text-3xl"></i>
                                         </div>
-                                        <h3 class="text-xl font-bold text-slate-900 mb-3">Create Custom Plan</h3>
-                                        <p class="text-sm text-slate-600 mb-6">Design a custom subscription plan for specific needs</p>
-                                        <button onclick="createNewPlan()" class="btn btn-primary">
-                                            <i class="fas fa-plus mr-2"></i>
+                                        <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2 sm:mb-3">Create Custom Plan</h3>
+                                        <p class="text-xs sm:text-sm text-slate-600 mb-4 sm:mb-6">Design a custom subscription plan for specific needs</p>
+                                        <button onclick="createNewPlan()" class="btn btn-primary text-sm sm:text-base">
+                                            <i class="fas fa-plus mr-1 sm:mr-2 text-xs sm:text-sm"></i>
                                             Create New Plan
                                         </button>
                                     </div>
@@ -1447,20 +1661,20 @@ function getPlanStatusColor($isActive)
                     </div>
 
                     <!-- Plan Management Table -->
-                    <div class="bg-white rounded-xl overflow-hidden shadow-sm">
-                        <div class="p-6 border-b border-slate-200">
-                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <div class="bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm">
+                        <div class="p-4 sm:p-6 border-b border-slate-200">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-900">Plan Management</h3>
-                                    <p class="text-sm text-slate-500">Manage and configure all subscription plans</p>
+                                    <h3 class="text-base sm:text-lg font-bold text-slate-900">Plan Management</h3>
+                                    <p class="text-xs sm:text-sm text-slate-500">Manage and configure all subscription plans</p>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <button onclick="exportPlans()" class="btn btn-secondary">
-                                        <i class="fas fa-file-export mr-2"></i>
+                                <div class="flex items-center gap-1 sm:gap-2">
+                                    <button onclick="exportPlans()" class="btn btn-secondary text-sm sm:text-base">
+                                        <i class="fas fa-file-export mr-1 sm:mr-2 text-xs sm:text-sm"></i>
                                         <span class="sm:inline hidden">Export</span>
                                     </button>
-                                    <button onclick="createNewPlan()" class="btn btn-primary">
-                                        <i class="fas fa-plus mr-2"></i>
+                                    <button onclick="createNewPlan()" class="btn btn-primary text-sm sm:text-base">
+                                        <i class="fas fa-plus mr-1 sm:mr-2 text-xs sm:text-sm"></i>
                                         <span class="sm:inline hidden">Add Plan</span>
                                         <span class="sm:hidden">Add</span>
                                     </button>
@@ -1472,19 +1686,19 @@ function getPlanStatusColor($isActive)
                             <table class="responsive-table">
                                 <thead class="bg-slate-50">
                                     <tr>
-                                        <th class="text-xs font-bold text-slate-500 uppercase py-3">Plan Details</th>
-                                        <th class="text-xs font-bold text-slate-500 uppercase py-3">Pricing</th>
-                                        <th class="text-xs font-bold text-slate-500 uppercase py-3">Limits</th>
-                                        <th class="text-xs font-bold text-slate-500 uppercase py-3">Status</th>
-                                        <th class="text-xs font-bold text-slate-500 uppercase py-3">Schools</th>
-                                        <th class="text-xs font-bold text-slate-500 uppercase py-3">Actions</th>
+                                        <th class="text-xs font-bold text-slate-500 uppercase py-2 sm:py-3">Plan Details</th>
+                                        <th class="text-xs font-bold text-slate-500 uppercase py-2 sm:py-3">Pricing</th>
+                                        <th class="text-xs font-bold text-slate-500 uppercase py-2 sm:py-3">Limits</th>
+                                        <th class="text-xs font-bold text-slate-500 uppercase py-2 sm:py-3">Status</th>
+                                        <th class="text-xs font-bold text-slate-500 uppercase py-2 sm:py-3">Schools</th>
+                                        <th class="text-xs font-bold text-slate-500 uppercase py-2 sm:py-3">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php if (empty($plans)): ?>
                                         <tr>
-                                            <td colspan="6" class="py-8 text-center">
-                                                <i class="fas fa-layer-group text-3xl text-slate-300 mb-3"></i>
+                                            <td colspan="6" class="py-6 sm:py-8 text-center">
+                                                <i class="fas fa-layer-group text-2xl sm:text-3xl text-slate-300 mb-2 sm:mb-3"></i>
                                                 <p class="text-sm text-slate-500">No subscription plans created yet</p>
                                             </td>
                                         </tr>
@@ -1496,20 +1710,20 @@ function getPlanStatusColor($isActive)
                                             $isDefault = $plan['is_default'];
                                         ?>
                                             <tr class="hover:bg-slate-50">
-                                                <td class="py-4">
-                                                    <div class="flex items-center gap-3">
-                                                        <div class="w-10 h-10 rounded-xl <?php echo getPlanColorClass($plan['name']); ?> flex items-center justify-center flex-shrink-0 border">
-                                                            <i class="<?php echo getPlanIcon($plan['name']); ?>"></i>
+                                                <td class="py-3 sm:py-4">
+                                                    <div class="flex items-center gap-2 sm:gap-3">
+                                                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl <?php echo getPlanColorClass($plan['name']); ?> flex items-center justify-center flex-shrink-0 border">
+                                                            <i class="<?php echo getPlanIcon($plan['name']); ?> text-xs sm:text-sm"></i>
                                                         </div>
                                                         <div class="min-w-0">
-                                                            <div class="text-sm font-bold text-slate-900 truncate"><?php echo htmlspecialchars($plan['name']); ?></div>
+                                                            <div class="text-xs sm:text-sm font-bold text-slate-900 truncate"><?php echo htmlspecialchars($plan['name']); ?></div>
                                                             <div class="text-xs text-slate-500 truncate"><?php echo htmlspecialchars($plan['slug']); ?></div>
                                                             <div class="text-xs text-slate-400 truncate md:block hidden"><?php echo htmlspecialchars(substr($plan['description'], 0, 50) . (strlen($plan['description']) > 50 ? '...' : '')); ?></div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td class="py-4">
-                                                    <div class="text-sm font-bold text-slate-900">
+                                                <td class="py-3 sm:py-4">
+                                                    <div class="text-xs sm:text-sm font-bold text-slate-900">
                                                         $<?php echo number_format($plan['price_monthly'], 2); ?>
                                                         <span class="text-xs text-slate-500 font-normal">/month</span>
                                                     </div>
@@ -1517,7 +1731,7 @@ function getPlanStatusColor($isActive)
                                                         ₦<?php echo number_format($plan['price_monthly'] * $exchange_rate, 0); ?> NGN
                                                     </div>
                                                 </td>
-                                                <td class="py-4">
+                                                <td class="py-3 sm:py-4">
                                                     <div class="space-y-1 text-xs">
                                                         <div>
                                                             <span class="text-slate-600">Students:</span>
@@ -1543,7 +1757,7 @@ function getPlanStatusColor($isActive)
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td class="py-4">
+                                                <td class="py-3 sm:py-4">
                                                     <div class="flex flex-col gap-1">
                                                         <span class="px-2 py-1 text-xs font-bold rounded-full <?php echo getPlanStatusColor($isActive); ?> w-fit">
                                                             <?php echo $isActive ? 'Active' : 'Inactive'; ?>
@@ -1555,26 +1769,26 @@ function getPlanStatusColor($isActive)
                                                         <?php endif; ?>
                                                     </div>
                                                 </td>
-                                                <td class="py-4">
-                                                    <div class="text-2xl font-bold text-slate-900"><?php echo $schoolCount; ?></div>
+                                                <td class="py-3 sm:py-4">
+                                                    <div class="text-lg sm:text-2xl font-bold text-slate-900"><?php echo $schoolCount; ?></div>
                                                     <div class="text-xs text-slate-500">active schools</div>
                                                 </td>
-                                                <td class="py-4">
+                                                <td class="py-3 sm:py-4">
                                                     <div class="flex items-center gap-1">
                                                         <button onclick="editPlan(<?php echo $planId; ?>)"
                                                             class="btn-icon bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200"
                                                             title="Edit Plan">
-                                                            <i class="fas fa-edit"></i>
+                                                            <i class="fas fa-edit text-xs sm:text-sm"></i>
                                                         </button>
                                                         <button onclick="duplicatePlan(<?php echo $planId; ?>)"
                                                             class="btn-icon bg-white border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-200"
                                                             title="Duplicate Plan">
-                                                            <i class="fas fa-copy"></i>
+                                                            <i class="fas fa-copy text-xs sm:text-sm"></i>
                                                         </button>
                                                         <button onclick="deletePlan(<?php echo $planId; ?>, '<?php echo htmlspecialchars($plan['name']); ?>')"
                                                             class="btn-icon bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200"
                                                             title="Delete Plan">
-                                                            <i class="fas fa-trash"></i>
+                                                            <i class="fas fa-trash text-xs sm:text-sm"></i>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -1727,8 +1941,8 @@ function getPlanStatusColor($isActive)
                 const ngnPrice = usdPrice * exchangeRate;
                 const yearlyPrice = calculateYearlyPrice(ngnPrice);
                 priceNgn.innerHTML = `
-                    <div>₦${ngnPrice.toLocaleString()} NGN per month</div>
-                    <div class="text-emerald-600">₦${yearlyPrice.toLocaleString()} NGN per year (Save 20%)</div>
+                    <div class="text-xs">₦${ngnPrice.toLocaleString()} NGN per month</div>
+                    <div class="text-xs text-emerald-600">₦${yearlyPrice.toLocaleString()} NGN per year (Save 20%)</div>
                 `;
             }
         }
@@ -1784,7 +1998,7 @@ function getPlanStatusColor($isActive)
                 form.reset();
                 document.getElementById('editPlanId').value = '';
                 document.getElementById('modalTitle').textContent = 'Add New Plan';
-                document.getElementById('submitPlanBtn').innerHTML = '<i class="fas fa-save mr-2"></i>Save Plan';
+                document.getElementById('submitPlanBtn').innerHTML = '<i class="fas fa-save mr-1 sm:mr-2 text-xs sm:text-sm"></i>Save Plan';
                 document.getElementById('editPlanStatus').value = '1';
                 document.getElementById('editIsDefault').value = '0';
                 document.getElementById('editSortOrder').value = '0';
@@ -1848,7 +2062,7 @@ function getPlanStatusColor($isActive)
                     }
 
                     document.getElementById('modalTitle').textContent = 'Edit Plan';
-                    document.getElementById('submitPlanBtn').innerHTML = '<i class="fas fa-save mr-2"></i>Update Plan';
+                    document.getElementById('submitPlanBtn').innerHTML = '<i class="fas fa-save mr-1 sm:mr-2 text-xs sm:text-sm"></i>Update Plan';
 
                     openModal('editPlanModal');
                     updatePriceConversion();
@@ -1922,7 +2136,7 @@ function getPlanStatusColor($isActive)
                 return false;
             }
 
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1 sm:mr-2 text-xs sm:text-sm"></i>Saving...';
             submitBtn.disabled = true;
 
             try {
@@ -2059,7 +2273,7 @@ function getPlanStatusColor($isActive)
                     }
 
                     document.getElementById('modalTitle').textContent = 'Duplicate Plan';
-                    document.getElementById('submitPlanBtn').innerHTML = '<i class="fas fa-copy mr-2"></i>Save Duplicate';
+                    document.getElementById('submitPlanBtn').innerHTML = '<i class="fas fa-copy mr-1 sm:mr-2 text-xs sm:text-sm"></i>Save Duplicate';
 
                     openModal('editPlanModal');
                     updatePriceConversion();
@@ -2149,8 +2363,8 @@ function getPlanStatusColor($isActive)
 
             notification.className = `notification ${colors[type]}`;
             notification.innerHTML = `
-                <i class="fas fa-${icons[type]}"></i>
-                <span class="text-sm font-medium">${message}</span>
+                <i class="fas fa-${icons[type]} text-xs sm:text-sm"></i>
+                <span class="text-xs sm:text-sm font-medium">${message}</span>
             `;
 
             container.appendChild(notification);

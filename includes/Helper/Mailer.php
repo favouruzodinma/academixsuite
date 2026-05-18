@@ -140,7 +140,7 @@ class Mailer {
         $port = $config['port'];
         $username = $config['username'];
         $password = $config['password'];
-        $encryption = $config['encryption'] ?? 'tls';
+        $encryption = $config['encryption'] ?? 'ssl';
         $from = $this->config['from']['address'];
         $fromName = $this->config['from']['name'];
         
@@ -162,7 +162,7 @@ class Mailer {
         // Send SMTP commands
         $this->smtpCommand($socket, "EHLO " . $host, 250);
         
-        if ($encryption === 'tls') {
+        if ($encryption === 'ssl') {
             $this->smtpCommand($socket, "STARTTLS", 220);
             stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
             $this->smtpCommand($socket, "EHLO " . $host, 250);

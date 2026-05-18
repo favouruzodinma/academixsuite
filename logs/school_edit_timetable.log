@@ -1,0 +1,244 @@
+[06-Mar-2026 07:35:33 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[06-Mar-2026 07:35:33 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=2
+[06-Mar-2026 07:35:33 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[06-Mar-2026 07:35:33 Africa/Lagos] School database connection successful
+[06-Mar-2026 07:35:33 Africa/Lagos] TimetableManager initialized for school ID: 6
+[06-Mar-2026 07:35:33 Africa/Lagos] TimetableManager initialized successfully
+[06-Mar-2026 07:35:33 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 13:33:26 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[10-Mar-2026 13:33:26 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=3
+[10-Mar-2026 13:33:26 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 13:33:26 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:33:26 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:33:26 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:33:26 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 13:33:58 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[10-Mar-2026 13:33:58 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=3
+[10-Mar-2026 13:33:58 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 13:33:58 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:33:58 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:33:58 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:33:58 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 13:35:36 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[10-Mar-2026 13:35:36 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=3
+[10-Mar-2026 13:35:36 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 13:35:36 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:35:36 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:35:36 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:35:36 Africa/Lagos] === PROCESSING TIMETABLE UPDATE FORM ===
+[10-Mar-2026 13:35:36 Africa/Lagos] Timetable update data prepared
+[10-Mar-2026 13:35:36 Africa/Lagos] Error updating timetable: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'updated_at' in 'SET'
+[10-Mar-2026 13:35:36 Africa/Lagos] Failed to update timetable: Error updating timetable: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'updated_at' in 'SET'
+[10-Mar-2026 13:49:58 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[10-Mar-2026 13:49:58 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=3
+[10-Mar-2026 13:49:58 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 13:49:58 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:49:58 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:49:58 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "academic_year_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 589
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "academic_term_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 607
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "academic_term_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 607
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "section_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 643
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 13:49:58 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 13:49:58 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 13:50:31 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[10-Mar-2026 13:50:31 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=3
+[10-Mar-2026 13:50:31 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 13:50:31 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:50:31 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:50:31 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:50:31 Africa/Lagos] === PROCESSING TIMETABLE UPDATE FORM ===
+[10-Mar-2026 13:50:31 Africa/Lagos] Timetable update data prepared
+[10-Mar-2026 13:50:31 Africa/Lagos] Error updating timetable: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'updated_at' in 'SET'
+[10-Mar-2026 13:50:31 Africa/Lagos] Failed to update timetable: Error updating timetable: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'updated_at' in 'SET'
+[10-Mar-2026 13:50:35 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[10-Mar-2026 13:50:35 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=3
+[10-Mar-2026 13:50:35 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 13:50:35 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:50:35 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:50:35 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "academic_year_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 589
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "academic_term_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 607
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "academic_term_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 607
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "section_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 643
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 13:50:35 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 13:50:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 13:50:39 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[10-Mar-2026 13:50:39 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=3
+[10-Mar-2026 13:50:39 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 13:50:39 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:50:39 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:50:39 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:50:39 Africa/Lagos] === PROCESSING TIMETABLE UPDATE FORM ===
+[10-Mar-2026 13:50:39 Africa/Lagos] Timetable update data prepared
+[10-Mar-2026 13:50:39 Africa/Lagos] Error updating timetable: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'updated_at' in 'SET'
+[10-Mar-2026 13:50:39 Africa/Lagos] Failed to update timetable: Error updating timetable: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'updated_at' in 'SET'
+[10-Mar-2026 16:19:00 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[10-Mar-2026 16:19:00 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=3
+[10-Mar-2026 16:19:00 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 16:19:00 Africa/Lagos] School database connection successful
+[10-Mar-2026 16:19:00 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 16:19:00 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 16:19:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 16:20:10 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[10-Mar-2026 16:20:10 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=3
+[10-Mar-2026 16:20:10 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 16:20:10 Africa/Lagos] School database connection successful
+[10-Mar-2026 16:20:10 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 16:20:10 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 16:20:10 Africa/Lagos] === PROCESSING TIMETABLE UPDATE FORM ===
+[10-Mar-2026 16:20:10 Africa/Lagos] Timetable update data prepared
+[10-Mar-2026 16:20:10 Africa/Lagos] Error updating timetable: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'updated_at' in 'SET'
+[10-Mar-2026 16:20:10 Africa/Lagos] Failed to update timetable: Error updating timetable: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'updated_at' in 'SET'
+[10-Mar-2026 16:20:15 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[10-Mar-2026 16:20:15 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=3
+[10-Mar-2026 16:20:15 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 16:20:15 Africa/Lagos] School database connection successful
+[10-Mar-2026 16:20:15 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 16:20:15 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "academic_year_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 589
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "academic_term_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 607
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "academic_term_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 607
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "class_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 625
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "section_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 643
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "subject_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 727
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 16:20:15 Africa/Lagos] PHP Warning:  Undefined array key "teacher_id" in /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php on line 745
+[10-Mar-2026 16:20:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 16:20:45 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[10-Mar-2026 16:20:45 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=1
+[10-Mar-2026 16:20:45 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[10-Mar-2026 16:20:45 Africa/Lagos] School database connection successful
+[10-Mar-2026 16:20:45 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 16:20:45 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 16:20:45 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[12-Mar-2026 07:55:57 Africa/Lagos] === EDIT TIMETABLE PAGE START ===
+[12-Mar-2026 07:55:57 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/edit-timetable.php?id=1
+[12-Mar-2026 07:55:57 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php
+[12-Mar-2026 07:55:57 Africa/Lagos] School database connection successful
+[12-Mar-2026 07:55:57 Africa/Lagos] TimetableManager initialized for school ID: 6
+[12-Mar-2026 07:55:57 Africa/Lagos] TimetableManager initialized successfully
+[12-Mar-2026 07:55:57 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/edit-timetable.php

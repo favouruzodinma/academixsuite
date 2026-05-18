@@ -1,0 +1,10 @@
+/* Default Styles */
+
+.column img,
+.vc_column_container img,
+.wpb_column img,
+.elementor-column img {
+    max-width: 100%;
+    height: auto;
+    display: inherit;
+}

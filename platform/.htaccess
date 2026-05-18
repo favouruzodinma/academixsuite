@@ -1,0 +1,11 @@
+Options -Indexes
+
+<FilesMatch "\.(env|ini|log|sql|sqlite|bak|backup|old|orig|swp|zip|gz)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^admin/backups/ - [F,L]
+    RewriteRule (^|/)\. - [F,L]
+</IfModule>

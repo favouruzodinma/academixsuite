@@ -1,0 +1,454 @@
+/*----*****---- << Open Hours Style >> ----*****----*/
+
+.wdt-listings-business-hours-container
+{
+    padding: 30px 35px 50px;
+
+    border-width: 1px;
+    border-style: solid;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-status
+{
+    line-height: normal;
+
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    align-items: center;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-status .wdt-open-hours-status
+{
+    display: flex;
+    align-items: center;
+
+    color: #000000;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-status .wdt-open-hours-status:before
+{
+    font-family: 'Font Awesome 5 Free';
+    font-size: 14px;
+    font-weight: 100;
+    line-height: 30px;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+    margin: 0 10px 0 0;
+    margin-right: 10px;
+
+    content: '\f017';
+    text-align: center;
+
+    color: #ffffff;
+    border-radius: 50%;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-status .wdt-open-hours-status.wdt-open:before
+{
+    background-color: #43e795;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-status .wdt-open-hours-status.wdt-closed:before
+{
+    background-color: #e32225;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-status span[class*='wdt-business-hours-']
+{
+    font-weight: 400;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-list
+{
+    margin: 0;
+
+    list-style: none;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-list li
+{
+    font-weight: 400;
+    line-height: normal;
+
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+
+    margin: 0;
+    padding-bottom: 15px;
+
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-list li:last-child
+{
+    border-bottom: none;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-list li + li
+{
+    margin-top: 18px;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-list li span.wdt-business-hours-label
+{
+    font-weight: 600;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-list li .wdt-business-hours-time,
+.wdt-listings-business-hours-container .wdt-listings-business-hours-status .wdt-business-hours-time
+{
+    text-transform: lowercase;
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-currenttime
+{
+    font-weight: 600;
+    line-height: normal;
+
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+
+    display: flex;
+    float: none;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    width: auto;
+    padding: 10px 20px;
+
+    -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+}
+
+.wdt-listings-business-hours-container .wdt-listings-business-hours-currenttime span
+{
+    margin-left: 10px;
+}
+
+
+/*----*****---- << Open Hours Status >> ----*****----*/
+
+
+/* Type 1 */
+
+.wdt-listings-business-hours-status-container.type1 .wdt-open-hours-status
+{
+    font-size: 14px;
+
+    color: #000000;
+}
+
+.wdt-listings-business-hours-status-container.type1 .wdt-open-hours-status.wdt-open:before
+{
+    color: #43e795;
+}
+
+.wdt-listings-business-hours-status-container.type1 .wdt-open-hours-status.wdt-closed:before
+{
+    color: #e32225;
+}
+
+.wdt-listings-business-hours-status-container.type1 .wdt-open-hours-status:before
+{
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 100;
+
+    position: relative;
+
+    margin: 0 10px 0 0;
+
+    content: '\f017';
+}
+
+
+/* Type 2 */
+
+.wdt-listings-business-hours-status-container.type2
+{
+    display: flex;
+    flex-wrap: wrap;
+
+    margin-bottom: 10px;
+
+    grid-column-gap: 25px;
+    grid-row-gap: 15px;
+}
+
+.wdt-listings-business-hours-status-container.type2 .wdt-open-hours-status
+{
+    font-size: 14px;
+    line-height: normal;
+
+    display: flex;
+    align-items: center;
+}
+
+.wdt-listings-business-hours-status-container.type2 .wdt-open-hours-status:before
+{
+    font-family: 'Font Awesome 5 Free';
+    line-height: 30px;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+
+    content: '\f017';
+    text-align: center;
+
+    color: #ffffff;
+    border-radius: 50%;
+}
+
+.wdt-listings-business-hours-status-container.type2 .wdt-open-hours-status.wdt-open:before
+{
+    background-color: #43e795;
+}
+
+.wdt-listings-business-hours-status-container.type2 .wdt-open-hours-status.wdt-closed:before
+{
+    background-color: #e32225;
+}
+
+
+/* Type 3 */
+
+.wdt-listings-business-hours-status-container.type3
+{
+    display: flex;
+    flex-wrap: wrap;
+
+    margin-bottom: 10px;
+
+    grid-column-gap: 35px;
+    grid-row-gap: 15px;
+}
+
+.wdt-listings-business-hours-status-container.type3 .wdt-open-hours-status
+{
+    font-size: 14px;
+    line-height: normal;
+
+    display: flex;
+    align-items: center;
+
+    padding: 10px 20px;
+
+    color: #ffffff;
+    border-radius: 20px;
+}
+
+.wdt-listings-business-hours-status-container.type3 .wdt-open-hours-status:before
+{
+    font-family: 'Font Awesome 5 Free';
+    font-size: 12px;
+    font-weight: 600;
+
+    position: relative;
+
+    margin-right: 10px;
+
+    color: #ffffff;
+}
+
+.wdt-listings-business-hours-status-container.type3 .wdt-open-hours-status.wdt-open
+{
+    background-color: #43e795;
+}
+
+.wdt-listings-business-hours-status-container.type3 .wdt-open-hours-status.wdt-open:before
+{
+    content: '\f09c';
+}
+
+.wdt-listings-business-hours-status-container.type3 .wdt-open-hours-status.wdt-closed
+{
+    background-color: #e32225;
+}
+
+.wdt-listings-business-hours-status-container.type3 .wdt-open-hours-status.wdt-closed:before
+{
+    content: '\f023';
+}
+
+
+/* Type 4 */
+
+.wdt-listings-business-hours-status-container.type4
+{
+    display: flex;
+    flex-wrap: wrap;
+
+    margin-bottom: 10px;
+
+    grid-column-gap: 35px;
+    grid-row-gap: 15px;
+}
+
+.wdt-listings-business-hours-status-container.type4 .wdt-open-hours-status
+{
+    font-size: 14px;
+    line-height: normal;
+
+    display: flex;
+    align-items: center;
+
+    padding: 10px 20px;
+
+    color: #ffffff;
+}
+
+.wdt-listings-business-hours-status-container.type4 .wdt-open-hours-status:before
+{
+    font-family: 'Font Awesome 5 Free';
+    font-size: 12px;
+    font-weight: 600;
+
+    position: relative;
+
+    margin-right: 10px;
+
+    color: #ffffff;
+}
+
+.wdt-listings-business-hours-status-container.type4 .wdt-open-hours-status.wdt-open
+{
+    background-color: #43e795;
+}
+
+.wdt-listings-business-hours-status-container.type4 .wdt-open-hours-status.wdt-open:before
+{
+    content: '\f09c';
+}
+
+.wdt-listings-business-hours-status-container.type4 .wdt-open-hours-status.wdt-closed
+{
+    background-color: #e32225;
+}
+
+.wdt-listings-business-hours-status-container.type4 .wdt-open-hours-status.wdt-closed:before
+{
+    content: '\f023';
+}
+
+
+/* Type 5 */
+
+.wdt-listings-business-hours-status-container.type5
+{
+    display: flex;
+    flex-wrap: wrap;
+
+    margin-bottom: 10px;
+
+    grid-column-gap: 35px;
+    grid-row-gap: 15px;
+}
+
+.wdt-listings-business-hours-status-container.type5 .wdt-open-hours-status
+{
+    font-size: 14px;
+    line-height: normal;
+
+    display: flex;
+    align-items: center;
+}
+
+.wdt-listings-business-hours-status-container.type5 .wdt-open-hours-status:before
+{
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 600;
+    line-height: 30px;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+    margin: 0;
+
+    text-align: center;
+
+    color: #ffffff;
+    border-radius: 50%;
+}
+
+.wdt-listings-business-hours-status-container.type5 .wdt-open-hours-status.wdt-open:before
+{
+    content: '\f09c';
+
+    background-color: #43e795;
+}
+
+.wdt-listings-business-hours-status-container.type5 .wdt-open-hours-status.wdt-closed:before
+{
+    content: '\f023';
+
+    background-color: #e32225;
+}
+
+
+/*----*****---- << Mobile (Landscape) >> ----*****----*/
+
+
+/* Note: Design for a width of 767px */
+
+@media only screen and (max-width: 767px)
+{
+    .wdt-listings-business-hours-container .wdt-listings-business-hours-currenttime
+    {
+        width: 100%;
+    }
+}
+
+
+/*----*****---- << Mobile (Portrait) >> ----*****----*/
+
+
+/* Note: Design for a width of 480px */
+
+@media only screen and (max-width: 479px)
+{
+    .wdt-listings-business-hours-container .wdt-listings-business-hours-status,
+    .wdt-listings-business-hours-container .wdt-listings-business-hours-list li
+    {
+        font-size: 14px;
+    }
+    .wdt-listings-business-hours-container
+    {
+        padding: 25px 25px 50px;
+    }
+}

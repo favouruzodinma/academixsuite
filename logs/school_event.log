@@ -1,0 +1,1008 @@
+[07-Mar-2026 00:03:19 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:03:19 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:03:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:04:44 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:04:44 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:04:44 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:04:48 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:04:48 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:04:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:06:22 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:06:22 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:06:22 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:06:50 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:06:50 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:06:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:11:10 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:11:10 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:11:10 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:11:10 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:11:10 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:11:10 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:11:10 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:11:10 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:11:10 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:11:10 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:11:10 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:11:10 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:11:10 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:11:10 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:11:10 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:11:33 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:11:33 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:11:33 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:11:33 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:11:33 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:11:33 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:11:33 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:11:33 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:11:33 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:11:33 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:11:33 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:11:33 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:11:33 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:11:33 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:11:33 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:11:59 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:11:59 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:11:59 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:11:59 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:11:59 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:11:59 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:11:59 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:11:59 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:11:59 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:11:59 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:11:59 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:11:59 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:11:59 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:11:59 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:11:59 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:12:56 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:12:56 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:12:56 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:12:56 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:12:56 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:12:56 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:12:56 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:12:56 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:12:56 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:12:56 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:12:56 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:12:56 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:12:56 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:12:56 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:12:56 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:13:09 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:13:09 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:13:09 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:13:09 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:13:09 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:13:09 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:13:09 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:13:09 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:13:09 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:13:09 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:13:09 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:13:09 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:13:09 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:13:09 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:13:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:13:45 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:13:45 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:13:45 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:13:45 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:13:45 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:13:45 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:13:45 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:13:45 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:13:45 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:13:45 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:13:45 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:13:45 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:13:45 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:13:45 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:13:45 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:25:15 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:25:15 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:25:15 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:25:15 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:25:15 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:25:15 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:25:15 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:25:15 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:25:15 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:25:15 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:25:15 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:25:15 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:25:15 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:25:15 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:25:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:26:31 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:26:31 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:26:31 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:26:31 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:26:31 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:26:31 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:26:31 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:26:31 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:26:31 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:26:31 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:26:31 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:26:31 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:26:31 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:26:31 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:26:31 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:27:13 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:27:13 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:27:13 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:27:13 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:27:13 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:27:13 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:27:13 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:27:13 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:27:13 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:27:13 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:27:13 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:27:13 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:27:13 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:27:13 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:27:13 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:28:03 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:28:03 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:28:03 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:28:03 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:28:03 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:28:03 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:28:03 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:28:03 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:28:03 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:28:03 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:28:03 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:28:03 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:28:03 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:28:03 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:28:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:31:48 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:31:48 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:31:48 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:31:48 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:31:48 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:31:48 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:31:48 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:31:48 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:31:48 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:31:48 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:31:48 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:31:48 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:31:48 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:31:48 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:31:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:32:28 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:32:28 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:32:28 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:32:28 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:32:28 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:32:28 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:32:28 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:32:28 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:32:28 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:32:28 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:32:28 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:32:28 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:32:28 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:32:28 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:32:28 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:32:44 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:32:44 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:32:44 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:32:44 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:32:44 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:32:44 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:32:44 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:32:44 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:32:44 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:32:44 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:32:44 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:32:44 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:32:44 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:32:44 Africa/Lagos] Error updating event: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'updated_at' in 'SET'
+[07-Mar-2026 00:32:44 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:32:44 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:32:50 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:32:50 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:32:50 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:32:50 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:32:50 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:32:50 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:32:50 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:32:50 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:32:50 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:32:50 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:32:50 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:32:50 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:32:50 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:32:50 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:32:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:35:50 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:35:50 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:35:50 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:35:50 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:35:50 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:35:50 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:35:50 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:35:50 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:35:50 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:35:50 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:35:50 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:35:50 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:35:50 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:35:50 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:35:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:36:12 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:36:12 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:36:12 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:36:12 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:36:12 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:36:12 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:36:12 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:36:12 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:36:12 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:36:12 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:36:12 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:36:12 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:36:12 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:36:12 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:36:12 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:36:21 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:36:21 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:36:21 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:36:21 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:36:21 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:36:21 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:36:21 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:36:21 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:36:21 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:36:21 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:36:21 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:36:21 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:36:21 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:36:21 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:36:21 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:37:00 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:37:00 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:37:00 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:37:00 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:37:00 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:37:00 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:37:00 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:37:00 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:37:00 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:37:00 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:37:00 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:37:00 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:37:00 Africa/Lagos] Fetched 1 events
+[07-Mar-2026 00:37:00 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:37:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:37:41 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:37:41 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:37:41 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:37:41 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:37:41 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:37:41 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:37:41 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:37:41 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:37:41 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:37:41 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:37:41 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:37:41 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:37:41 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 00:37:41 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:37:41 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:41:34 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:41:34 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:41:34 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:41:34 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:41:34 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:41:34 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:41:34 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:41:34 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:41:34 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:41:34 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:41:34 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:41:34 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:41:34 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 00:41:34 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:41:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:41:50 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:41:50 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:41:50 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:41:50 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:41:50 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:41:50 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:41:50 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:41:50 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:41:50 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:41:50 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:41:50 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:41:50 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:41:50 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 00:41:50 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:41:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:42:19 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:42:19 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:42:19 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:42:19 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:42:19 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:42:19 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:42:19 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:42:19 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:42:19 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:42:19 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:42:19 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:42:19 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:42:19 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 00:42:19 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:42:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:43:00 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:43:00 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:43:00 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:43:00 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:43:00 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:43:00 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:43:00 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:43:00 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:43:00 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:43:00 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:43:00 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:43:00 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:43:00 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 00:43:00 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:43:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:43:39 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 00:43:39 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 00:43:39 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 00:43:39 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 00:43:39 Africa/Lagos] Autoload loaded
+[07-Mar-2026 00:43:39 Africa/Lagos] EventManager loaded
+[07-Mar-2026 00:43:39 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 00:43:39 Africa/Lagos] Platform DB connected
+[07-Mar-2026 00:43:39 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 00:43:39 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 00:43:39 Africa/Lagos] EventManager initialized
+[07-Mar-2026 00:43:39 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 00:43:39 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 00:43:39 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 00:43:39 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 03:45:40 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 03:45:40 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 03:45:40 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 03:45:40 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 03:45:40 Africa/Lagos] Autoload loaded
+[07-Mar-2026 03:45:40 Africa/Lagos] EventManager loaded
+[07-Mar-2026 03:45:40 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 03:45:40 Africa/Lagos] Platform DB connected
+[07-Mar-2026 03:45:40 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 03:45:40 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 03:45:40 Africa/Lagos] EventManager initialized
+[07-Mar-2026 03:45:40 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 03:45:40 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 03:45:40 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 03:45:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 03:45:50 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 03:45:50 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 03:45:50 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 03:45:50 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 03:45:50 Africa/Lagos] Autoload loaded
+[07-Mar-2026 03:45:50 Africa/Lagos] EventManager loaded
+[07-Mar-2026 03:45:50 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 03:45:50 Africa/Lagos] Platform DB connected
+[07-Mar-2026 03:45:50 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 03:45:50 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 03:45:50 Africa/Lagos] EventManager initialized
+[07-Mar-2026 03:45:50 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 03:45:50 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 03:45:50 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 03:45:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 03:46:19 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 03:46:19 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 03:46:19 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 03:46:19 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 03:46:19 Africa/Lagos] Autoload loaded
+[07-Mar-2026 03:46:19 Africa/Lagos] EventManager loaded
+[07-Mar-2026 03:46:19 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 03:46:19 Africa/Lagos] Platform DB connected
+[07-Mar-2026 03:46:19 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 03:46:19 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 03:46:19 Africa/Lagos] EventManager initialized
+[07-Mar-2026 03:46:19 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 03:46:19 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 03:46:19 Africa/Lagos] Error updating event: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'updated_at' in 'SET'
+[07-Mar-2026 03:46:19 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 03:46:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 03:46:27 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 03:46:27 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 03:46:27 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 03:46:27 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 03:46:27 Africa/Lagos] Autoload loaded
+[07-Mar-2026 03:46:27 Africa/Lagos] EventManager loaded
+[07-Mar-2026 03:46:27 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 03:46:27 Africa/Lagos] Platform DB connected
+[07-Mar-2026 03:46:27 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 03:46:27 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 03:46:27 Africa/Lagos] EventManager initialized
+[07-Mar-2026 03:46:27 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 03:46:27 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 03:46:27 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 03:46:27 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 03:46:41 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 03:46:41 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 03:46:41 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 03:46:41 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 03:46:41 Africa/Lagos] Autoload loaded
+[07-Mar-2026 03:46:41 Africa/Lagos] EventManager loaded
+[07-Mar-2026 03:46:41 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 03:46:41 Africa/Lagos] Platform DB connected
+[07-Mar-2026 03:46:41 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 03:46:41 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 03:46:41 Africa/Lagos] EventManager initialized
+[07-Mar-2026 03:46:41 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 03:46:41 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 03:46:41 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 03:46:41 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 03:46:44 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 03:46:44 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 03:46:44 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 03:46:44 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 03:46:44 Africa/Lagos] Autoload loaded
+[07-Mar-2026 03:46:44 Africa/Lagos] EventManager loaded
+[07-Mar-2026 03:46:44 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 03:46:44 Africa/Lagos] Platform DB connected
+[07-Mar-2026 03:46:44 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 03:46:44 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 03:46:44 Africa/Lagos] EventManager initialized
+[07-Mar-2026 03:46:44 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 03:46:44 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 03:46:44 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 03:46:44 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 06:58:34 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 06:58:34 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 06:58:34 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 06:58:34 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 06:58:34 Africa/Lagos] Autoload loaded
+[07-Mar-2026 06:58:34 Africa/Lagos] EventManager loaded
+[07-Mar-2026 06:58:34 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 06:58:34 Africa/Lagos] Platform DB connected
+[07-Mar-2026 06:58:34 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 06:58:34 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 06:58:34 Africa/Lagos] EventManager initialized
+[07-Mar-2026 06:58:34 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 06:58:34 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 06:58:34 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 06:58:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 06:58:41 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 06:58:41 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 06:58:41 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 06:58:41 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 06:58:41 Africa/Lagos] Autoload loaded
+[07-Mar-2026 06:58:41 Africa/Lagos] EventManager loaded
+[07-Mar-2026 06:58:41 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 06:58:41 Africa/Lagos] Platform DB connected
+[07-Mar-2026 06:58:41 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 06:58:41 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 06:58:41 Africa/Lagos] EventManager initialized
+[07-Mar-2026 06:58:41 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 06:58:41 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 06:58:41 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 06:58:41 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 07:35:34 Africa/Lagos] === EVENT PAGE START ===
+[07-Mar-2026 07:35:34 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[07-Mar-2026 07:35:34 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[07-Mar-2026 07:35:34 Africa/Lagos] User: ID=1, Type=admin
+[07-Mar-2026 07:35:34 Africa/Lagos] Autoload loaded
+[07-Mar-2026 07:35:34 Africa/Lagos] EventManager loaded
+[07-Mar-2026 07:35:34 Africa/Lagos] GuardianManager loaded
+[07-Mar-2026 07:35:34 Africa/Lagos] Platform DB connected
+[07-Mar-2026 07:35:34 Africa/Lagos] School DB connected: school_6
+[07-Mar-2026 07:35:34 Africa/Lagos] EventManager initialized for school ID: 6
+[07-Mar-2026 07:35:34 Africa/Lagos] EventManager initialized
+[07-Mar-2026 07:35:34 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 07:35:34 Africa/Lagos] Fetched 1 upcoming events
+[07-Mar-2026 07:35:34 Africa/Lagos] === EVENT PAGE END ===
+[07-Mar-2026 07:35:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:36:22 Africa/Lagos] === EVENT PAGE START ===
+[09-Mar-2026 12:36:22 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:36:22 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[09-Mar-2026 12:36:22 Africa/Lagos] User: ID=1, Type=admin
+[09-Mar-2026 12:36:22 Africa/Lagos] Autoload loaded
+[09-Mar-2026 12:36:22 Africa/Lagos] EventManager loaded
+[09-Mar-2026 12:36:22 Africa/Lagos] GuardianManager loaded
+[09-Mar-2026 12:36:22 Africa/Lagos] Platform DB connected
+[09-Mar-2026 12:36:22 Africa/Lagos] School DB connected: school_6
+[09-Mar-2026 12:36:22 Africa/Lagos] EventManager initialized for school ID: 6
+[09-Mar-2026 12:36:22 Africa/Lagos] EventManager initialized
+[09-Mar-2026 12:36:22 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 12:36:22 Africa/Lagos] Fetched 1 upcoming events
+[09-Mar-2026 12:36:22 Africa/Lagos] === EVENT PAGE END ===
+[09-Mar-2026 12:36:22 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:39:38 Africa/Lagos] === EVENT PAGE START ===
+[09-Mar-2026 12:39:38 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:39:38 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[09-Mar-2026 12:39:38 Africa/Lagos] User: ID=1, Type=admin
+[09-Mar-2026 12:39:38 Africa/Lagos] Autoload loaded
+[09-Mar-2026 12:39:38 Africa/Lagos] EventManager loaded
+[09-Mar-2026 12:39:38 Africa/Lagos] GuardianManager loaded
+[09-Mar-2026 12:39:38 Africa/Lagos] Platform DB connected
+[09-Mar-2026 12:39:38 Africa/Lagos] School DB connected: school_6
+[09-Mar-2026 12:39:38 Africa/Lagos] EventManager initialized for school ID: 6
+[09-Mar-2026 12:39:38 Africa/Lagos] EventManager initialized
+[09-Mar-2026 12:39:38 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 12:39:38 Africa/Lagos] Fetched 1 upcoming events
+[09-Mar-2026 12:39:39 Africa/Lagos] Sent 12 email notifications for event ID: 3
+[09-Mar-2026 12:39:39 Africa/Lagos] === EVENT PAGE END ===
+[09-Mar-2026 12:39:39 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:39:47 Africa/Lagos] === EVENT PAGE START ===
+[09-Mar-2026 12:39:47 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:39:47 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[09-Mar-2026 12:39:47 Africa/Lagos] User: ID=1, Type=admin
+[09-Mar-2026 12:39:47 Africa/Lagos] Autoload loaded
+[09-Mar-2026 12:39:47 Africa/Lagos] EventManager loaded
+[09-Mar-2026 12:39:47 Africa/Lagos] GuardianManager loaded
+[09-Mar-2026 12:39:47 Africa/Lagos] Platform DB connected
+[09-Mar-2026 12:39:47 Africa/Lagos] School DB connected: school_6
+[09-Mar-2026 12:39:47 Africa/Lagos] EventManager initialized for school ID: 6
+[09-Mar-2026 12:39:47 Africa/Lagos] EventManager initialized
+[09-Mar-2026 12:39:47 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 12:39:47 Africa/Lagos] Fetched 2 upcoming events
+[09-Mar-2026 12:39:48 Africa/Lagos] Sent 12 email notifications for event ID: 4
+[09-Mar-2026 12:39:48 Africa/Lagos] === EVENT PAGE END ===
+[09-Mar-2026 12:39:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:40:07 Africa/Lagos] === EVENT PAGE START ===
+[09-Mar-2026 12:40:07 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:40:07 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[09-Mar-2026 12:40:07 Africa/Lagos] User: ID=1, Type=admin
+[09-Mar-2026 12:40:07 Africa/Lagos] Autoload loaded
+[09-Mar-2026 12:40:07 Africa/Lagos] EventManager loaded
+[09-Mar-2026 12:40:07 Africa/Lagos] GuardianManager loaded
+[09-Mar-2026 12:40:07 Africa/Lagos] Platform DB connected
+[09-Mar-2026 12:40:07 Africa/Lagos] School DB connected: school_6
+[09-Mar-2026 12:40:07 Africa/Lagos] EventManager initialized for school ID: 6
+[09-Mar-2026 12:40:07 Africa/Lagos] EventManager initialized
+[09-Mar-2026 12:40:07 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 12:40:07 Africa/Lagos] Fetched 3 upcoming events
+[09-Mar-2026 12:40:07 Africa/Lagos] === EVENT PAGE END ===
+[09-Mar-2026 12:40:07 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:40:11 Africa/Lagos] === EVENT PAGE START ===
+[09-Mar-2026 12:40:11 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:40:11 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[09-Mar-2026 12:40:11 Africa/Lagos] User: ID=1, Type=admin
+[09-Mar-2026 12:40:11 Africa/Lagos] Autoload loaded
+[09-Mar-2026 12:40:11 Africa/Lagos] EventManager loaded
+[09-Mar-2026 12:40:11 Africa/Lagos] GuardianManager loaded
+[09-Mar-2026 12:40:11 Africa/Lagos] Platform DB connected
+[09-Mar-2026 12:40:11 Africa/Lagos] School DB connected: school_6
+[09-Mar-2026 12:40:11 Africa/Lagos] EventManager initialized for school ID: 6
+[09-Mar-2026 12:40:11 Africa/Lagos] EventManager initialized
+[09-Mar-2026 12:40:11 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 12:40:11 Africa/Lagos] Fetched 3 upcoming events
+[09-Mar-2026 12:40:11 Africa/Lagos] === EVENT PAGE END ===
+[09-Mar-2026 12:40:11 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:40:17 Africa/Lagos] === EVENT PAGE START ===
+[09-Mar-2026 12:40:17 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:40:17 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[09-Mar-2026 12:40:17 Africa/Lagos] User: ID=1, Type=admin
+[09-Mar-2026 12:40:17 Africa/Lagos] Autoload loaded
+[09-Mar-2026 12:40:17 Africa/Lagos] EventManager loaded
+[09-Mar-2026 12:40:17 Africa/Lagos] GuardianManager loaded
+[09-Mar-2026 12:40:17 Africa/Lagos] Platform DB connected
+[09-Mar-2026 12:40:17 Africa/Lagos] School DB connected: school_6
+[09-Mar-2026 12:40:17 Africa/Lagos] EventManager initialized for school ID: 6
+[09-Mar-2026 12:40:17 Africa/Lagos] EventManager initialized
+[09-Mar-2026 12:40:17 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 12:40:17 Africa/Lagos] Fetched 3 upcoming events
+[09-Mar-2026 12:40:18 Africa/Lagos] Sent 12 email notifications for event ID: 4
+[09-Mar-2026 12:40:18 Africa/Lagos] === EVENT PAGE START ===
+[09-Mar-2026 12:40:18 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:40:18 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[09-Mar-2026 12:40:18 Africa/Lagos] User: ID=1, Type=admin
+[09-Mar-2026 12:40:18 Africa/Lagos] Autoload loaded
+[09-Mar-2026 12:40:18 Africa/Lagos] EventManager loaded
+[09-Mar-2026 12:40:18 Africa/Lagos] GuardianManager loaded
+[09-Mar-2026 12:40:18 Africa/Lagos] Platform DB connected
+[09-Mar-2026 12:40:18 Africa/Lagos] School DB connected: school_6
+[09-Mar-2026 12:40:18 Africa/Lagos] EventManager initialized for school ID: 6
+[09-Mar-2026 12:40:18 Africa/Lagos] EventManager initialized
+[09-Mar-2026 12:40:18 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 12:40:18 Africa/Lagos] Fetched 2 upcoming events
+[09-Mar-2026 12:40:18 Africa/Lagos] === EVENT PAGE END ===
+[09-Mar-2026 12:40:18 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:40:19 Africa/Lagos] === EVENT PAGE START ===
+[09-Mar-2026 12:40:19 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[09-Mar-2026 12:40:19 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[09-Mar-2026 12:40:19 Africa/Lagos] User: ID=1, Type=admin
+[09-Mar-2026 12:40:19 Africa/Lagos] Autoload loaded
+[09-Mar-2026 12:40:19 Africa/Lagos] EventManager loaded
+[09-Mar-2026 12:40:19 Africa/Lagos] GuardianManager loaded
+[09-Mar-2026 12:40:19 Africa/Lagos] Platform DB connected
+[09-Mar-2026 12:40:19 Africa/Lagos] School DB connected: school_6
+[09-Mar-2026 12:40:19 Africa/Lagos] EventManager initialized for school ID: 6
+[09-Mar-2026 12:40:19 Africa/Lagos] EventManager initialized
+[09-Mar-2026 12:40:19 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 12:40:19 Africa/Lagos] Fetched 2 upcoming events
+[09-Mar-2026 12:40:19 Africa/Lagos] === EVENT PAGE END ===
+[09-Mar-2026 12:40:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[11-Mar-2026 11:42:46 Africa/Lagos] === EVENT PAGE START ===
+[11-Mar-2026 11:42:46 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[11-Mar-2026 11:42:46 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[11-Mar-2026 11:42:46 Africa/Lagos] User: ID=1, Type=admin
+[11-Mar-2026 11:42:46 Africa/Lagos] Autoload loaded
+[11-Mar-2026 11:42:46 Africa/Lagos] EventManager loaded
+[11-Mar-2026 11:42:46 Africa/Lagos] GuardianManager loaded
+[11-Mar-2026 11:42:46 Africa/Lagos] Platform DB connected
+[11-Mar-2026 11:42:46 Africa/Lagos] School DB connected: school_6
+[11-Mar-2026 11:42:46 Africa/Lagos] EventManager initialized for school ID: 6
+[11-Mar-2026 11:42:46 Africa/Lagos] EventManager initialized
+[11-Mar-2026 11:42:46 Africa/Lagos] GuardianManager initialized for school ID: 6
+[11-Mar-2026 11:42:46 Africa/Lagos] Fetched 2 upcoming events
+[11-Mar-2026 11:42:46 Africa/Lagos] === EVENT PAGE END ===
+[11-Mar-2026 11:42:46 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 03:46:03 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 03:46:03 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 03:46:03 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 03:46:03 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 03:46:03 Africa/Lagos] Autoload loaded
+[12-Mar-2026 03:46:03 Africa/Lagos] EventManager loaded
+[12-Mar-2026 03:46:03 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 03:46:03 Africa/Lagos] Platform DB connected
+[12-Mar-2026 03:46:03 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 03:46:03 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 03:46:03 Africa/Lagos] EventManager initialized
+[12-Mar-2026 03:46:03 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 03:46:03 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 03:46:03 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 03:46:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 03:46:17 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 03:46:17 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 03:46:17 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 03:46:17 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 03:46:17 Africa/Lagos] Autoload loaded
+[12-Mar-2026 03:46:17 Africa/Lagos] EventManager loaded
+[12-Mar-2026 03:46:17 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 03:46:17 Africa/Lagos] Platform DB connected
+[12-Mar-2026 03:46:17 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 03:46:17 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 03:46:17 Africa/Lagos] EventManager initialized
+[12-Mar-2026 03:46:17 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 03:46:17 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 03:46:17 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 03:46:17 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 03:46:25 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 03:46:25 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 03:46:25 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 03:46:25 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 03:46:25 Africa/Lagos] Autoload loaded
+[12-Mar-2026 03:46:25 Africa/Lagos] EventManager loaded
+[12-Mar-2026 03:46:25 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 03:46:25 Africa/Lagos] Platform DB connected
+[12-Mar-2026 03:46:25 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 03:46:25 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 03:46:25 Africa/Lagos] EventManager initialized
+[12-Mar-2026 03:46:25 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 03:46:25 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 03:46:25 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 03:46:25 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 03:46:28 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 03:46:28 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 03:46:28 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 03:46:28 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 03:46:28 Africa/Lagos] Autoload loaded
+[12-Mar-2026 03:46:28 Africa/Lagos] EventManager loaded
+[12-Mar-2026 03:46:28 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 03:46:28 Africa/Lagos] Platform DB connected
+[12-Mar-2026 03:46:28 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 03:46:28 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 03:46:28 Africa/Lagos] EventManager initialized
+[12-Mar-2026 03:46:28 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 03:46:28 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 03:46:28 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 03:46:28 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 06:11:03 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 06:11:03 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 06:11:03 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 06:11:03 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 06:11:03 Africa/Lagos] Autoload loaded
+[12-Mar-2026 06:11:03 Africa/Lagos] EventManager loaded
+[12-Mar-2026 06:11:03 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 06:11:03 Africa/Lagos] Platform DB connected
+[12-Mar-2026 06:11:03 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 06:11:03 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 06:11:03 Africa/Lagos] EventManager initialized
+[12-Mar-2026 06:11:03 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 06:11:03 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 06:11:03 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 06:11:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 06:38:57 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 06:38:57 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 06:38:57 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 06:38:57 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 06:38:57 Africa/Lagos] Autoload loaded
+[12-Mar-2026 06:38:57 Africa/Lagos] EventManager loaded
+[12-Mar-2026 06:38:57 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 06:38:57 Africa/Lagos] Platform DB connected
+[12-Mar-2026 06:38:57 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 06:38:57 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 06:38:57 Africa/Lagos] EventManager initialized
+[12-Mar-2026 06:38:57 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 06:38:57 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 06:38:57 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 06:38:57 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 06:39:02 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 06:39:02 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 06:39:02 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 06:39:02 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 06:39:02 Africa/Lagos] Autoload loaded
+[12-Mar-2026 06:39:02 Africa/Lagos] EventManager loaded
+[12-Mar-2026 06:39:02 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 06:39:02 Africa/Lagos] Platform DB connected
+[12-Mar-2026 06:39:02 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 06:39:02 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 06:39:02 Africa/Lagos] EventManager initialized
+[12-Mar-2026 06:39:02 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 06:39:03 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 06:39:03 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 06:39:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 06:39:05 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 06:39:05 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 06:39:05 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 06:39:05 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 06:39:05 Africa/Lagos] Autoload loaded
+[12-Mar-2026 06:39:05 Africa/Lagos] EventManager loaded
+[12-Mar-2026 06:39:05 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 06:39:05 Africa/Lagos] Platform DB connected
+[12-Mar-2026 06:39:05 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 06:39:05 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 06:39:05 Africa/Lagos] EventManager initialized
+[12-Mar-2026 06:39:05 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 06:39:05 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 06:39:05 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 06:39:05 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 06:39:14 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 06:39:14 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 06:39:14 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 06:39:14 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 06:39:14 Africa/Lagos] Autoload loaded
+[12-Mar-2026 06:39:14 Africa/Lagos] EventManager loaded
+[12-Mar-2026 06:39:14 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 06:39:14 Africa/Lagos] Platform DB connected
+[12-Mar-2026 06:39:14 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 06:39:14 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 06:39:14 Africa/Lagos] EventManager initialized
+[12-Mar-2026 06:39:14 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 06:39:14 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 06:39:14 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 06:39:14 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 06:39:26 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 06:39:26 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 06:39:26 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 06:39:26 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 06:39:26 Africa/Lagos] Autoload loaded
+[12-Mar-2026 06:39:26 Africa/Lagos] EventManager loaded
+[12-Mar-2026 06:39:26 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 06:39:26 Africa/Lagos] Platform DB connected
+[12-Mar-2026 06:39:26 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 06:39:26 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 06:39:26 Africa/Lagos] EventManager initialized
+[12-Mar-2026 06:39:26 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 06:39:26 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 06:39:26 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 06:39:26 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 07:53:03 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 07:53:03 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 07:53:03 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 07:53:03 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 07:53:03 Africa/Lagos] Autoload loaded
+[12-Mar-2026 07:53:03 Africa/Lagos] EventManager loaded
+[12-Mar-2026 07:53:03 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 07:53:03 Africa/Lagos] Platform DB connected
+[12-Mar-2026 07:53:03 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 07:53:03 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 07:53:03 Africa/Lagos] EventManager initialized
+[12-Mar-2026 07:53:03 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 07:53:03 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 07:53:03 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 07:53:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 08:05:40 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 08:05:40 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 08:05:40 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 08:05:40 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 08:05:40 Africa/Lagos] Autoload loaded
+[12-Mar-2026 08:05:40 Africa/Lagos] EventManager loaded
+[12-Mar-2026 08:05:40 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 08:05:40 Africa/Lagos] Platform DB connected
+[12-Mar-2026 08:05:40 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 08:05:40 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 08:05:40 Africa/Lagos] EventManager initialized
+[12-Mar-2026 08:05:40 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 08:05:40 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 08:05:40 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 08:05:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 09:32:45 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 09:32:45 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 09:32:45 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 09:32:45 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 09:32:45 Africa/Lagos] Autoload loaded
+[12-Mar-2026 09:32:45 Africa/Lagos] EventManager loaded
+[12-Mar-2026 09:32:45 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 09:32:45 Africa/Lagos] Platform DB connected
+[12-Mar-2026 09:32:45 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 09:32:45 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 09:32:45 Africa/Lagos] EventManager initialized
+[12-Mar-2026 09:32:45 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 09:32:45 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 09:32:45 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 09:32:45 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 09:32:49 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 09:32:49 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 09:32:49 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 09:32:49 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 09:32:49 Africa/Lagos] Autoload loaded
+[12-Mar-2026 09:32:49 Africa/Lagos] EventManager loaded
+[12-Mar-2026 09:32:49 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 09:32:49 Africa/Lagos] Platform DB connected
+[12-Mar-2026 09:32:49 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 09:32:49 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 09:32:49 Africa/Lagos] EventManager initialized
+[12-Mar-2026 09:32:49 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 09:32:49 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 09:32:49 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 09:32:49 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 09:32:51 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 09:32:51 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 09:32:51 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 09:32:51 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 09:32:51 Africa/Lagos] Autoload loaded
+[12-Mar-2026 09:32:51 Africa/Lagos] EventManager loaded
+[12-Mar-2026 09:32:51 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 09:32:51 Africa/Lagos] Platform DB connected
+[12-Mar-2026 09:32:51 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 09:32:51 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 09:32:51 Africa/Lagos] EventManager initialized
+[12-Mar-2026 09:32:51 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 09:32:51 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 09:32:51 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 09:32:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 11:01:36 Africa/Lagos] === EVENT PAGE START ===
+[12-Mar-2026 11:01:36 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[12-Mar-2026 11:01:36 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[12-Mar-2026 11:01:36 Africa/Lagos] User: ID=1, Type=admin
+[12-Mar-2026 11:01:36 Africa/Lagos] Autoload loaded
+[12-Mar-2026 11:01:36 Africa/Lagos] EventManager loaded
+[12-Mar-2026 11:01:36 Africa/Lagos] GuardianManager loaded
+[12-Mar-2026 11:01:36 Africa/Lagos] Platform DB connected
+[12-Mar-2026 11:01:36 Africa/Lagos] School DB connected: school_6
+[12-Mar-2026 11:01:36 Africa/Lagos] EventManager initialized for school ID: 6
+[12-Mar-2026 11:01:36 Africa/Lagos] EventManager initialized
+[12-Mar-2026 11:01:36 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 11:01:36 Africa/Lagos] Fetched 2 upcoming events
+[12-Mar-2026 11:01:36 Africa/Lagos] === EVENT PAGE END ===
+[12-Mar-2026 11:01:36 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[13-Mar-2026 11:21:30 Africa/Lagos] === EVENT PAGE START ===
+[13-Mar-2026 11:21:30 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[13-Mar-2026 11:21:30 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[13-Mar-2026 11:21:30 Africa/Lagos] User: ID=1, Type=admin
+[13-Mar-2026 11:21:30 Africa/Lagos] Autoload loaded
+[13-Mar-2026 11:21:30 Africa/Lagos] EventManager loaded
+[13-Mar-2026 11:21:30 Africa/Lagos] GuardianManager loaded
+[13-Mar-2026 11:21:30 Africa/Lagos] Platform DB connected
+[13-Mar-2026 11:21:30 Africa/Lagos] School DB connected: school_6
+[13-Mar-2026 11:21:30 Africa/Lagos] EventManager initialized for school ID: 6
+[13-Mar-2026 11:21:30 Africa/Lagos] EventManager initialized
+[13-Mar-2026 11:21:30 Africa/Lagos] GuardianManager initialized for school ID: 6
+[13-Mar-2026 11:21:30 Africa/Lagos] Fetched 1 upcoming events
+[13-Mar-2026 11:21:30 Africa/Lagos] === EVENT PAGE END ===
+[13-Mar-2026 11:21:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[14-Mar-2026 17:38:45 Africa/Lagos] === EVENT PAGE START ===
+[14-Mar-2026 17:38:45 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[14-Mar-2026 17:38:45 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[14-Mar-2026 17:38:45 Africa/Lagos] User: ID=1, Type=admin
+[14-Mar-2026 17:38:45 Africa/Lagos] Autoload loaded
+[14-Mar-2026 17:38:45 Africa/Lagos] EventManager loaded
+[14-Mar-2026 17:38:45 Africa/Lagos] GuardianManager loaded
+[14-Mar-2026 17:38:45 Africa/Lagos] Platform DB connected
+[14-Mar-2026 17:38:45 Africa/Lagos] School DB connected: school_6
+[14-Mar-2026 17:38:45 Africa/Lagos] EventManager initialized for school ID: 6
+[14-Mar-2026 17:38:45 Africa/Lagos] EventManager initialized
+[14-Mar-2026 17:38:45 Africa/Lagos] GuardianManager initialized for school ID: 6
+[14-Mar-2026 17:38:45 Africa/Lagos] Fetched 1 upcoming events
+[14-Mar-2026 17:38:45 Africa/Lagos] === EVENT PAGE END ===
+[14-Mar-2026 17:38:45 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[15-Mar-2026 08:52:48 Africa/Lagos] === EVENT PAGE START ===
+[15-Mar-2026 08:52:48 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[15-Mar-2026 08:52:48 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[15-Mar-2026 08:52:48 Africa/Lagos] User: ID=1, Type=admin
+[15-Mar-2026 08:52:48 Africa/Lagos] Autoload loaded
+[15-Mar-2026 08:52:48 Africa/Lagos] EventManager loaded
+[15-Mar-2026 08:52:48 Africa/Lagos] GuardianManager loaded
+[15-Mar-2026 08:52:48 Africa/Lagos] Platform DB connected
+[15-Mar-2026 08:52:48 Africa/Lagos] School DB connected: school_6
+[15-Mar-2026 08:52:48 Africa/Lagos] EventManager initialized for school ID: 6
+[15-Mar-2026 08:52:48 Africa/Lagos] EventManager initialized
+[15-Mar-2026 08:52:48 Africa/Lagos] GuardianManager initialized for school ID: 6
+[15-Mar-2026 08:52:48 Africa/Lagos] Fetched 1 upcoming events
+[15-Mar-2026 08:52:48 Africa/Lagos] === EVENT PAGE END ===
+[15-Mar-2026 08:52:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[25-Mar-2026 04:20:37 Africa/Lagos] === EVENT PAGE START ===
+[25-Mar-2026 04:20:37 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[25-Mar-2026 04:20:37 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[25-Mar-2026 04:20:37 Africa/Lagos] User: ID=1, Type=admin
+[25-Mar-2026 04:20:37 Africa/Lagos] Autoload loaded
+[25-Mar-2026 04:20:37 Africa/Lagos] EventManager loaded
+[25-Mar-2026 04:20:37 Africa/Lagos] GuardianManager loaded
+[25-Mar-2026 04:20:37 Africa/Lagos] Platform DB connected
+[25-Mar-2026 04:20:37 Africa/Lagos] School DB connected: school_6
+[25-Mar-2026 04:20:37 Africa/Lagos] EventManager initialized for school ID: 6
+[25-Mar-2026 04:20:37 Africa/Lagos] EventManager initialized
+[25-Mar-2026 04:20:37 Africa/Lagos] GuardianManager initialized for school ID: 6
+[25-Mar-2026 04:20:37 Africa/Lagos] Fetched 1 upcoming events
+[25-Mar-2026 04:20:37 Africa/Lagos] === EVENT PAGE END ===
+[25-Mar-2026 04:20:37 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[25-Mar-2026 04:20:50 Africa/Lagos] === EVENT PAGE START ===
+[25-Mar-2026 04:20:50 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[25-Mar-2026 04:20:50 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[25-Mar-2026 04:20:50 Africa/Lagos] User: ID=1, Type=admin
+[25-Mar-2026 04:20:50 Africa/Lagos] Autoload loaded
+[25-Mar-2026 04:20:50 Africa/Lagos] EventManager loaded
+[25-Mar-2026 04:20:50 Africa/Lagos] GuardianManager loaded
+[25-Mar-2026 04:20:50 Africa/Lagos] Platform DB connected
+[25-Mar-2026 04:20:50 Africa/Lagos] School DB connected: school_6
+[25-Mar-2026 04:20:50 Africa/Lagos] EventManager initialized for school ID: 6
+[25-Mar-2026 04:20:50 Africa/Lagos] EventManager initialized
+[25-Mar-2026 04:20:50 Africa/Lagos] GuardianManager initialized for school ID: 6
+[25-Mar-2026 04:20:50 Africa/Lagos] Fetched 1 upcoming events
+[25-Mar-2026 04:20:50 Africa/Lagos] === EVENT PAGE END ===
+[25-Mar-2026 04:20:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[25-Mar-2026 04:20:52 Africa/Lagos] === EVENT PAGE START ===
+[25-Mar-2026 04:20:52 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[25-Mar-2026 04:20:52 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[25-Mar-2026 04:20:52 Africa/Lagos] User: ID=1, Type=admin
+[25-Mar-2026 04:20:52 Africa/Lagos] Autoload loaded
+[25-Mar-2026 04:20:52 Africa/Lagos] EventManager loaded
+[25-Mar-2026 04:20:52 Africa/Lagos] GuardianManager loaded
+[25-Mar-2026 04:20:52 Africa/Lagos] Platform DB connected
+[25-Mar-2026 04:20:52 Africa/Lagos] School DB connected: school_6
+[25-Mar-2026 04:20:52 Africa/Lagos] EventManager initialized for school ID: 6
+[25-Mar-2026 04:20:52 Africa/Lagos] EventManager initialized
+[25-Mar-2026 04:20:52 Africa/Lagos] GuardianManager initialized for school ID: 6
+[25-Mar-2026 04:20:52 Africa/Lagos] Fetched 1 upcoming events
+[25-Mar-2026 04:20:52 Africa/Lagos] === EVENT PAGE END ===
+[25-Mar-2026 04:20:52 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[26-Mar-2026 14:00:14 Africa/Lagos] === EVENT PAGE START ===
+[26-Mar-2026 14:00:14 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[26-Mar-2026 14:00:14 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[26-Mar-2026 14:00:14 Africa/Lagos] User: ID=1, Type=admin
+[26-Mar-2026 14:00:14 Africa/Lagos] Autoload loaded
+[26-Mar-2026 14:00:14 Africa/Lagos] EventManager loaded
+[26-Mar-2026 14:00:14 Africa/Lagos] GuardianManager loaded
+[26-Mar-2026 14:00:14 Africa/Lagos] Platform DB connected
+[26-Mar-2026 14:00:14 Africa/Lagos] School DB connected: school_6
+[26-Mar-2026 14:00:14 Africa/Lagos] EventManager initialized for school ID: 6
+[26-Mar-2026 14:00:14 Africa/Lagos] EventManager initialized
+[26-Mar-2026 14:00:14 Africa/Lagos] GuardianManager initialized for school ID: 6
+[26-Mar-2026 14:00:14 Africa/Lagos] Fetched 1 upcoming events
+[26-Mar-2026 14:00:14 Africa/Lagos] === EVENT PAGE END ===
+[26-Mar-2026 14:00:14 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[29-Mar-2026 09:45:16 Africa/Lagos] === EVENT PAGE START ===
+[29-Mar-2026 09:45:16 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php
+[29-Mar-2026 09:45:16 Africa/Lagos] School: ID=6, Name=bitflux wallet
+[29-Mar-2026 09:45:16 Africa/Lagos] User: ID=1, Type=admin
+[29-Mar-2026 09:45:16 Africa/Lagos] Autoload loaded
+[29-Mar-2026 09:45:16 Africa/Lagos] EventManager loaded
+[29-Mar-2026 09:45:16 Africa/Lagos] GuardianManager loaded
+[29-Mar-2026 09:45:16 Africa/Lagos] Platform DB connected
+[29-Mar-2026 09:45:16 Africa/Lagos] School DB connected: school_6
+[29-Mar-2026 09:45:16 Africa/Lagos] EventManager initialized for school ID: 6
+[29-Mar-2026 09:45:16 Africa/Lagos] EventManager initialized
+[29-Mar-2026 09:45:16 Africa/Lagos] GuardianManager initialized for school ID: 6
+[29-Mar-2026 09:45:16 Africa/Lagos] Fetched 0 upcoming events
+[29-Mar-2026 09:45:16 Africa/Lagos] === EVENT PAGE END ===
+[29-Mar-2026 09:45:16 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/event.php

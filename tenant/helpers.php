@@ -12,18 +12,20 @@ function school_url($path = '', $includeSchoolSlug = true, $includeUserType = tr
         return "#";
     }
     
-    $url = "/academixsuite/tenant/{$schoolSlug}";
-    
-    if ($includeUserType && !empty($userType)) {
-        $url .= "/{$userType}";
-    }
-    
     $path = ltrim($path, '/');
-    if (!empty($path)) {
-        $url .= "/{$path}";
+    $role = ($includeUserType && !empty($userType)) ? $userType : '';
+
+    if (function_exists('school_route_url')) {
+        return school_route_url($schoolSlug, $role, $path, false);
     }
-    
-    return $url;
+
+    $url = "/tenant/{$schoolSlug}";
+
+    if ($role !== '') {
+        $url .= "/{$role}";
+    }
+
+    return $path !== '' ? $url . "/{$path}" : $url;
 }
 
 // Get current school info

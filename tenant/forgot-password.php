@@ -11,11 +11,8 @@ ini_set('error_log', __DIR__ . '/../logs/password_reset.log');
 // Start session
 if (session_status() === PHP_SESSION_NONE) {
     session_name('academix_tenant');
-    session_start([
-        'cookie_lifetime' => 86400,
-        'cookie_httponly' => true,
-        'cookie_secure'   => false,
-    ]);
+    require_once __DIR__ . '/../includes/session_config.php';
+    session_start(academix_session_options());
 }
 
 // Load configuration
@@ -29,8 +26,14 @@ require_once $autoloadPath;
 // Initialize variables
 $error = '';
 $success = '';
-$schoolSlug = $_GET['school_slug'] ?? '';
+$schoolSlug = trim((string)($_GET['school_slug'] ?? (function_exists('school_subdomain_slug') ? school_subdomain_slug() : '')), '/');
 $school = null;
+
+if (function_exists('redirect_legacy_school_url_to_subdomain')) {
+    redirect_legacy_school_url_to_subdomain($schoolSlug, 'forgot-password.php', $_GET);
+}
+
+$backToLoginUrl = function_exists('school_login_url') ? school_login_url($schoolSlug, false) : '/tenant/login.php' . ($schoolSlug ? '?school_slug=' . urlencode($schoolSlug) : '');
 
 // Get school information if slug provided
 if (!empty($schoolSlug)) {
@@ -146,15 +149,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             }
                             
                             // Send reset email
-                            $resetLink = "https://{$_SERVER['HTTP_HOST']}/academixsuite/tenant/forgot-password.php?token={$token}&school_slug={$schoolSlugPost}";
-                            
-                            // In production, you would send an actual email
-                            // For now, store in session for display
-                            $_SESSION['reset_token_demo'] = $token;
-                            $_SESSION['reset_email'] = $email;
-                            $_SESSION['reset_expires'] = $expires_at;
-                            
-                            $success = 'Password reset instructions have been sent to your email.';
+                            $resetLink = function_exists('school_portal_url')
+                                ? school_portal_url($schoolSlugPost, 'forgot-password.php?token=' . urlencode($token), true)
+                                : "https://{$_SERVER['HTTP_HOST']}/tenant/forgot-password.php?token={$token}&school_slug={$schoolSlugPost}";
+
+                            // Dispatch via the configured mailer. The raw token must NEVER be
+                            // shown in the response or stored in $_SESSION — that would defeat
+                            // the entire purpose of the reset link.
+                            try {
+                                if (class_exists('\\AcademixSuite\\Services\\NotificationService')) {
+                                    $notifier = new \AcademixSuite\Services\NotificationService($school['id']);
+                                    $notifier->sendPasswordResetEmail($email, $resetLink, $expires_at);
+                                }
+                            } catch (Exception $mailEx) {
+                                error_log("Password reset mail error: " . $mailEx->getMessage());
+                            }
+
+                            $success = 'If that email is registered, password reset instructions have been sent.';
                             error_log("Password reset requested for: {$email} in school: {$schoolSlugPost}");
                             
                         } catch (Exception $e) {
@@ -162,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $error = 'Could not process reset request. Please try again.';
                         }
                     } else {
-                        $error = 'No active account found with this email address';
+                        $success = 'If that email is registered, password reset instructions have been sent.';
                     }
                 }
             } catch (Exception $e) {
@@ -236,10 +247,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $success = 'Password has been reset successfully. You can now login with your new password.';
                             error_log("Password reset completed for: {$resetRecord['email']} in school: {$schoolSlugPost}");
                             
-                            // Clear demo token if set
-                            if (isset($_SESSION['reset_token_demo'])) {
-                                unset($_SESSION['reset_token_demo'], $_SESSION['reset_email'], $_SESSION['reset_expires']);
-                            }
+                            // Clear any legacy demo session keys (removed in security hardening).
+                            unset($_SESSION['reset_token_demo'], $_SESSION['reset_email'], $_SESSION['reset_expires']);
                         }
                     }
                 }
@@ -542,7 +551,7 @@ try {
                     </button>
                     
                     <div class="text-center pt-4 border-t border-slate-200">
-                        <a href="/academixsuite/tenant/login.php<?php echo $schoolSlug ? '?school_slug=' . urlencode($schoolSlug) : ''; ?>" 
+                        <a href="<?php echo htmlspecialchars($backToLoginUrl); ?>" 
                            class="text-sm text-indigo-600 hover:text-indigo-800 inline-flex items-center">
                             <i class="fas fa-arrow-left mr-1"></i> Back to Login
                         </a>
@@ -624,23 +633,9 @@ try {
                         </div>
                     </div>
                     
-                    <?php if (isset($_SESSION['reset_token_demo'])): ?>
-                    <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                        <h4 class="text-sm font-bold text-blue-800 mb-2 flex items-center">
-                            <i class="fas fa-envelope-open-text mr-2"></i> Demo Reset Token
-                        </h4>
-                        <p class="text-xs text-blue-600 mb-1">For testing purposes:</p>
-                        <div class="bg-white p-3 rounded-lg border border-blue-100">
-                            <p class="text-xs font-mono text-blue-800 break-all">Token: <?php echo $_SESSION['reset_token_demo']; ?></p>
-                            <p class="text-xs text-blue-600 mt-1">Expires: <?php echo $_SESSION['reset_expires']; ?></p>
-                            <p class="text-xs text-blue-600">Email: <?php echo $_SESSION['reset_email']; ?></p>
-                        </div>
-                        <p class="text-xs text-blue-600 mt-2">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            In production, this would be sent via email.
-                        </p>
-                    </div>
-                    <?php endif; ?>
+                    <?php /* SECURITY: demo reset-token panel removed — the raw token must never
+                              be rendered to the page or stored in session. Tokens are now delivered
+                              only via the configured mailer. */ ?>
 
                     <div class="flex items-center gap-3 p-3 bg-indigo-50/50 border border-indigo-100 rounded-lg">
                         <i class="fas fa-envelope text-indigo-500 text-sm"></i>
@@ -653,7 +648,7 @@ try {
                     </button>
                     
                     <div class="text-center pt-4 border-t border-slate-200">
-                        <a href="/academixsuite/tenant/login.php<?php echo $schoolSlug ? '?school_slug=' . urlencode($schoolSlug) : ''; ?>" 
+                        <a href="<?php echo htmlspecialchars($backToLoginUrl); ?>" 
                            class="text-sm text-indigo-600 hover:text-indigo-800 inline-flex items-center">
                             <i class="fas fa-arrow-left mr-1"></i> Back to Login
                         </a>

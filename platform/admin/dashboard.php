@@ -159,11 +159,11 @@ try {
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2563eb">
     <title>Executive Dashboard | <?php echo APP_NAME; ?> Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -177,20 +177,51 @@ try {
             --brand-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --brand-surface: #ffffff;
             --brand-bg: #f8fafc;
+            --font-size-xs: clamp(0.625rem, 0.5rem + 0.3vw, 0.75rem); /* 10-12px */
+            --font-size-sm: clamp(0.75rem, 0.625rem + 0.3vw, 0.875rem); /* 12-14px */
+            --font-size-base: clamp(0.875rem, 0.75rem + 0.3vw, 1rem); /* 14-16px */
+            --font-size-lg: clamp(1rem, 0.875rem + 0.3vw, 1.125rem); /* 16-18px */
+            --font-size-xl: clamp(1.125rem, 1rem + 0.3vw, 1.25rem); /* 18-20px */
+            --font-size-2xl: clamp(1.25rem, 1rem + 0.6vw, 1.5rem); /* 20-24px */
+            --font-size-3xl: clamp(1.5rem, 1.25rem + 0.6vw, 2rem); /* 24-32px */
+            --font-size-4xl: clamp(1.75rem, 1.5rem + 0.6vw, 2.5rem); /* 28-40px */
+            --spacing-xs: clamp(0.25rem, 0.125rem + 0.3vw, 0.5rem);
+            --spacing-sm: clamp(0.5rem, 0.375rem + 0.3vw, 0.75rem);
+            --spacing-base: clamp(0.75rem, 0.625rem + 0.3vw, 1rem);
+            --spacing-md: clamp(1rem, 0.875rem + 0.3vw, 1.25rem);
+            --spacing-lg: clamp(1.25rem, 1rem + 0.6vw, 1.5rem);
+            --spacing-xl: clamp(1.5rem, 1.25rem + 0.6vw, 2rem);
+            --radius-sm: clamp(0.375rem, 0.25rem + 0.3vw, 0.5rem);
+            --radius-base: clamp(0.5rem, 0.375rem + 0.3vw, 0.75rem);
+            --radius-lg: clamp(0.75rem, 0.625rem + 0.3vw, 1rem);
+            --radius-xl: clamp(1rem, 0.875rem + 0.3vw, 1.25rem);
         }
 
         * {
             box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--brand-bg);
             color: #1e293b;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            font-size: var(--font-size-base);
+            line-height: 1.5;
             overflow-x: hidden;
         }
+
+        /* Responsive Typography */
+        .text-xs-responsive { font-size: var(--font-size-xs); }
+        .text-sm-responsive { font-size: var(--font-size-sm); }
+        .text-base-responsive { font-size: var(--font-size-base); }
+        .text-lg-responsive { font-size: var(--font-size-lg); }
+        .text-xl-responsive { font-size: var(--font-size-xl); }
+        .text-2xl-responsive { font-size: var(--font-size-2xl); }
+        .text-3xl-responsive { font-size: var(--font-size-3xl); }
+        .text-4xl-responsive { font-size: var(--font-size-4xl); }
 
         /* Glassmorphism effects */
         .glass-header {
@@ -221,6 +252,7 @@ try {
                 top: 0;
                 left: 0;
                 right: 0;
+                height: 64px;
             }
 
             .glass-card {
@@ -230,42 +262,77 @@ try {
             }
 
             body {
-                padding-top: 80px;
+                padding-top: 64px;
+            }
+
+            /* Prevent text size adjustment on orientation change */
+            html {
+                -webkit-text-size-adjust: 100%;
+                text-size-adjust: 100%;
             }
         }
 
-        /* Touch-friendly buttons */
+        /* Touch-friendly interactive elements */
         @media (hover: none) and (pointer: coarse) {
-
-            button,
-            a,
-            [role="button"] {
-                min-height: 44px;
-                min-width: 44px;
+            button, 
+            a[role="button"], 
+            [role="button"],
+            .touch-target {
+                min-height: 44px !important;
+                min-width: 44px !important;
+                padding: 12px !important;
             }
 
-            input,
-            select,
+            input, 
+            select, 
             textarea {
-                font-size: 16px;
-                /* Prevents zoom on iOS */
+                font-size: 16px !important; /* Prevents iOS zoom */
+                min-height: 44px;
+            }
+
+            /* Improve tap targets */
+            .touch-target-small {
+                min-height: 36px !important;
+                min-width: 36px !important;
+                padding: 8px !important;
             }
         }
 
-        /* Stat cards */
+        /* Stat cards - Mobile optimized */
         .stat-card {
             background: white;
             border: 1px solid #e2e8f0;
             position: relative;
             overflow: hidden;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 12px;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-base);
+        }
+
+        @media (min-width: 640px) {
+            .stat-card {
+                padding: var(--spacing-lg);
+            }
         }
 
         .stat-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
             border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        /* Mobile-first responsive grids */
+        .responsive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-base);
+        }
+
+        @media (max-width: 640px) {
+            .responsive-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-sm);
+            }
         }
 
         /* Custom scrollbar for desktop */
@@ -296,7 +363,6 @@ try {
                 opacity: 0;
                 transform: translateY(10px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -308,22 +374,28 @@ try {
         }
 
         /* Timeline styling for mobile */
-        @media (max-width: 768px) {
-            .timeline-item {
-                padding-left: 16px;
-                margin-bottom: 16px;
-            }
+        .timeline-item {
+            padding-left: var(--spacing-lg);
+            margin-bottom: var(--spacing-base);
+            position: relative;
+        }
 
-            .timeline-item::before {
-                width: 10px;
-                height: 10px;
-            }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: var(--spacing-xs);
+            width: 8px;
+            height: 8px;
+            background: #cbd5e1;
+            border-radius: 50%;
         }
 
         /* Table responsive */
         .table-responsive {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+            width: 100%;
         }
 
         /* Hide scrollbar on mobile but keep functionality */
@@ -336,134 +408,207 @@ try {
             display: none;
         }
 
-        /* Safe area insets for iOS */
+        /* Safe area insets for modern mobile browsers */
         .pb-safe {
-            padding-bottom: env(safe-area-inset-bottom, 20px);
+            padding-bottom: env(safe-area-inset-bottom, var(--spacing-lg));
         }
 
         .pt-safe {
-            padding-top: env(safe-area-inset-top, 20px);
+            padding-top: env(safe-area-inset-top, 0);
         }
 
-        /* Mobile menu animation */
-        .mobile-menu-enter {
-            transform: translateX(-100%);
+        /* Mobile menu overlay */
+        #sidebarOverlay {
+            transition: opacity 0.3s ease;
         }
 
-        .mobile-menu-enter-active {
-            transform: translateX(0);
-            transition: transform 300ms ease-out;
+        /* Card content spacing */
+        .card-content {
+            padding: var(--spacing-base);
         }
 
-        .mobile-menu-exit {
-            transform: translateX(0);
+        @media (min-width: 768px) {
+            .card-content {
+                padding: var(--spacing-lg);
+            }
         }
 
-        .mobile-menu-exit-active {
-            transform: translateX(-100%);
-            transition: transform 300ms ease-in;
+        /* Responsive icon sizes */
+        .icon-responsive {
+            font-size: var(--font-size-lg);
+        }
+
+        @media (min-width: 768px) {
+            .icon-responsive {
+                font-size: var(--font-size-xl);
+            }
+        }
+
+        /* Responsive chart container */
+        .chart-container {
+            height: 200px;
+            position: relative;
+        }
+
+        @media (min-width: 640px) {
+            .chart-container {
+                height: 250px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        /* Fluid spacing utilities */
+        .fluid-gap-2 { gap: var(--spacing-xs); }
+        .fluid-gap-4 { gap: var(--spacing-sm); }
+        .fluid-gap-6 { gap: var(--spacing-base); }
+        .fluid-gap-8 { gap: var(--spacing-md); }
+        .fluid-p-4 { padding: var(--spacing-sm); }
+        .fluid-p-6 { padding: var(--spacing-base); }
+        .fluid-p-8 { padding: var(--spacing-md); }
+
+        /* Improved mobile readability */
+        .mobile-text-truncate {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Responsive font weights */
+        .font-responsive-bold {
+            font-weight: 600;
+        }
+
+        @media (min-width: 768px) {
+            .font-responsive-bold {
+                font-weight: 700;
+            }
+        }
+
+        /* Mobile tap feedback */
+        .touch-feedback {
+            transition: background-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .touch-feedback:active {
+            background-color: #f1f5f9;
+            transform: scale(0.98);
+        }
+
+        /* Improved form controls on mobile */
+        select.form-select-responsive {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 1em 1em;
+            padding-right: 40px;
+            font-size: var(--font-size-base);
         }
     </style>
 </head>
-
-<body class="antialiased selection:bg-blue-100 selection:text-blue-900">
+<body class="antialiased selection:bg-blue-100 selection:text-blue-900 min-h-screen bg-slate-50">
 
     <!-- Mobile Sidebar Overlay -->
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[999] lg:hidden hidden" onclick="mobileSidebarToggle()"></div>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-[999] lg:hidden hidden" onclick="mobileSidebarToggle()"></div>
 
     <div class="flex flex-col lg:flex-row min-h-screen">
-
         <?php include_once('filepath/sidebar.php'); ?>
 
         <main class="flex-1 flex flex-col min-w-0">
-
             <!-- Header -->
-            <header class="h-20 glass-header px-4 md:px-6 lg:px-8 flex items-center justify-between shrink-0 z-40 pt-safe">
-                <div class="flex items-center gap-2">
-                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition touch-manipulation" aria-label="Toggle menu">
-                        <i class="fas fa-bars-staggered"></i>
+            <header class="glass-header px-4 sm:px-6 lg:px-8 flex items-center justify-between shrink-0 z-40 pt-safe h-16 sm:h-20">
+                <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                    <button onclick="mobileSidebarToggle()" class="lg:hidden text-slate-600 p-2 hover:bg-slate-100 rounded-lg transition touch-target touch-feedback" aria-label="Toggle menu">
+                        <i class="fas fa-bars-staggered icon-responsive"></i>
                     </button>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-base md:text-lg font-black text-slate-900 tracking-tight truncate">Executive Dashboard</h1>
-                        <div class="hidden md:flex items-center gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <h1 class="text-lg-responsive font-black text-slate-900 truncate">Executive Dashboard</h1>
+                        <div class="hidden sm:flex items-center gap-2 ml-2">
                             <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                            <span class="text-xs font-black text-emerald-600 uppercase tracking-widest">All Systems Nominal</span>
+                            <span class="text-xs-responsive font-black text-emerald-600 uppercase tracking-widest">All Systems Nominal</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 md:gap-4">
-                    <!-- Quick Stats Badge - hidden on smallest screens -->
-                    <div class="hidden sm:flex items-center gap-2 bg-white border border-slate-200 px-3 md:px-4 py-2 rounded-xl">
+                <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                    <!-- Quick Stats Badge -->
+                    <div class="hidden xs:flex items-center gap-2 bg-white border border-slate-200 px-3 py-2 rounded-xl">
                         <div class="text-right">
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Schools</p>
-                            <p class="text-sm font-black text-slate-900"><?php echo $stats['total_schools']; ?></p>
+                            <p class="text-xs-responsive font-black text-slate-400 uppercase tracking-widest">Schools</p>
+                            <p class="text-sm-responsive font-black text-slate-900"><?php echo $stats['total_schools']; ?></p>
                         </div>
                         <div class="w-px h-6 bg-slate-200"></div>
                         <div class="text-right">
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Revenue</p>
-                            <p class="text-sm font-black text-slate-900">₦<?php echo number_format($stats['total_revenue'], 0); ?></p>
+                            <p class="text-xs-responsive font-black text-slate-400 uppercase tracking-widest">Revenue</p>
+                            <p class="text-sm-responsive font-black text-slate-900">₦<?php echo number_format($stats['total_revenue'], 0); ?></p>
                         </div>
                     </div>
 
                     <!-- Search - hidden on mobile -->
-                    <div class="hidden md:flex items-center bg-white border border-slate-200 px-4 py-2.5 rounded-xl group focus-within:ring-2 focus-within:ring-blue-100 focus-within:border-blue-300 transition-all">
-                        <i class="fas fa-search text-slate-400 text-sm"></i>
-                        <input type="text" placeholder="Search..." class="bg-transparent outline-none ml-3 text-sm w-40 lg:w-64 placeholder:text-slate-400 font-medium">
+                    <div class="hidden sm:flex items-center bg-white border border-slate-200 px-3 sm:px-4 py-2.5 rounded-xl group focus-within:ring-2 focus-within:ring-blue-100 focus-within:border-blue-300 transition-all min-w-[180px] lg:min-w-[240px]">
+                        <i class="fas fa-search text-slate-400 text-sm-responsive"></i>
+                        <input type="text" placeholder="Search..." class="bg-transparent outline-none ml-3 text-sm-responsive w-full placeholder:text-slate-400 font-medium">
                     </div>
 
                     <!-- Mobile search button -->
-                    <button onclick="toggleMobileSearch()" class="md:hidden w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-blue-600 transition touch-manipulation" aria-label="Search">
-                        <i class="fas fa-search"></i>
+                    <button onclick="toggleMobileSearch()" class="sm:hidden w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-blue-600 transition touch-target touch-feedback" aria-label="Search">
+                        <i class="fas fa-search icon-responsive"></i>
                     </button>
 
                     <!-- Actions -->
-                    <div class="flex items-center gap-2">
-                        <button class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-blue-600 transition touch-manipulation" aria-label="Notifications">
-                            <i class="fas fa-bell"></i>
+                    <div class="flex items-center gap-1 sm:gap-2">
+                        <button class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-blue-600 transition touch-target touch-feedback relative" aria-label="Notifications">
+                            <i class="fas fa-bell icon-responsive"></i>
                             <?php if ($stats['pending_tickets'] > 0): ?>
-                                <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                                <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                             <?php endif; ?>
                         </button>
-                        <a href="logout.php" class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-red-600 transition touch-manipulation" title="Logout" aria-label="Logout">
-                            <i class="fas fa-sign-out-alt"></i>
+                        <a href="logout.php" class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-red-600 transition touch-target touch-feedback" title="Logout" aria-label="Logout">
+                            <i class="fas fa-sign-out-alt icon-responsive"></i>
                         </a>
                     </div>
                 </div>
             </header>
 
             <!-- Mobile Search Bar -->
-            <div id="mobileSearch" class="lg:hidden hidden px-4 py-3 bg-white border-b border-slate-200">
+            <div id="mobileSearch" class="sm:hidden hidden px-4 py-3 bg-white border-b border-slate-200">
                 <div class="flex items-center bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-                    <i class="fas fa-search text-slate-400 text-sm"></i>
-                    <input type="text" placeholder="Search across network..." class="flex-1 bg-transparent outline-none ml-2 text-sm placeholder:text-slate-400 font-medium">
-                    <button onclick="toggleMobileSearch()" class="ml-2 text-slate-400 hover:text-slate-600">
+                    <i class="fas fa-search text-slate-400 text-sm-responsive"></i>
+                    <input type="text" placeholder="Search across network..." class="flex-1 bg-transparent outline-none ml-2 text-sm-responsive placeholder:text-slate-400 font-medium">
+                    <button onclick="toggleMobileSearch()" class="ml-2 text-slate-400 hover:text-slate-600 touch-target-small">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Main Content -->
-            <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 custom-scrollbar pb-safe">
+            <div class="flex-1 overflow-y-auto fluid-p-6 custom-scrollbar pb-safe">
                 <!-- Dashboard Header -->
                 <div class="max-w-7xl mx-auto mb-6 md:mb-8">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
-                        <div>
-                            <h2 class="text-xl md:text-2xl lg:text-3xl font-black text-slate-900 mb-2">Platform Overview</h2>
-                            <p class="text-sm md:text-base text-slate-500 font-medium">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+                        <div class="min-w-0">
+                            <h2 class="text-2xl-responsive font-black text-slate-900 mb-2">Platform Overview</h2>
+                            <p class="text-sm-responsive text-slate-500 font-medium mobile-text-truncate">
                                 Monitoring <?php echo $stats['total_schools']; ?> institutions •
                                 ₦<?php echo number_format($stats['arr']); ?> ARR •
                                 <?php echo $stats['pending_tickets']; ?> pending tickets
                             </p>
                         </div>
-                        <div class="flex gap-2 md:gap-3 flex-wrap">
-                            <button onclick="exportDashboardData()" class="px-4 md:px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2 touch-manipulation text-sm md:text-base">
+                        <div class="flex gap-2 sm:gap-3 flex-wrap">
+                            <button onclick="exportDashboardData()" class="px-3 sm:px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-responsive-bold rounded-xl hover:bg-slate-50 transition flex items-center gap-2 touch-target touch-feedback text-sm-responsive whitespace-nowrap">
                                 <i class="fas fa-file-export"></i>
-                                <span class="hidden xs:inline">Export</span>
+                                <span>Export</span>
                             </button>
-                            <a href="schools/add.php" class="px-4 md:px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg transition-all flex items-center gap-2 shadow-lg shadow-blue-200 touch-manipulation text-sm md:text-base">
+                            <a href="schools/add.php" class="px-3 sm:px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-responsive-bold rounded-xl hover:shadow-lg transition-all flex items-center gap-2 shadow-lg shadow-blue-200 touch-target touch-feedback text-sm-responsive whitespace-nowrap">
                                 <i class="fas fa-plus"></i>
-                                <span class="hidden xs:inline">New School</span>
+                                <span>New School</span>
                             </a>
                         </div>
                     </div>
@@ -471,30 +616,30 @@ try {
 
                 <!-- Key Metrics Grid -->
                 <div class="max-w-7xl mx-auto mb-6 md:mb-8">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                    <div class="responsive-grid fluid-gap-4">
                         <!-- Total Schools Card -->
-                        <div class="stat-card p-4 md:p-6 animate-fadeInUp">
-                            <div class="flex justify-between items-start mb-4 md:mb-6">
-                                <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-                                    <i class="fas fa-school text-blue-600 text-lg md:text-xl"></i>
+                        <div class="stat-card animate-fadeInUp">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
+                                    <i class="fas fa-school text-blue-600 icon-responsive"></i>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-xs font-black <?php echo $stats['today_registrations'] > 0 ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 bg-slate-100'; ?> px-2 py-1 rounded-full">
+                                    <div class="text-xs-responsive font-black <?php echo $stats['today_registrations'] > 0 ? 'text-emerald-600 bg-emerald-50' : 'text-slate-600 bg-slate-100'; ?> px-2 py-1 rounded-full">
                                         +<?php echo $stats['today_registrations']; ?> Today
                                     </div>
-                                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total Schools</div>
+                                    <div class="text-xs-responsive font-bold text-slate-400 uppercase tracking-widest mt-1">Total Schools</div>
                                 </div>
                             </div>
-                            <p class="text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Institutions</p>
+                            <p class="text-xs-responsive font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Institutions</p>
                             <div class="flex items-end justify-between">
                                 <div>
-                                    <h3 class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900"><?php echo $stats['total_schools']; ?></h3>
-                                    <p class="text-xs text-slate-400 font-medium mt-1 truncate">
+                                    <h3 class="text-3xl-responsive font-black text-slate-900"><?php echo $stats['total_schools']; ?></h3>
+                                    <p class="text-xs-responsive text-slate-400 font-medium mt-1 truncate">
                                         <?php echo $stats['active_schools']; ?> Active •
                                         <?php echo $stats['trial_schools']; ?> Trial
                                     </p>
                                 </div>
-                                <div class="w-12 h-12 md:w-16 md:h-16">
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0">
                                     <svg class="w-full h-full" viewBox="0 0 36 36">
                                         <path class="text-slate-100" fill="currentColor" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                         <?php
@@ -507,31 +652,29 @@ try {
                         </div>
 
                         <!-- Revenue Card -->
-                        <div class="stat-card p-4 md:p-6 animate-fadeInUp">
-                            <div class="flex justify-between items-start mb-4 md:mb-6">
-                                <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center">
-                                    <i class="fas fa-chart-line text-emerald-600 text-lg md:text-xl"></i>
+                        <div class="stat-card animate-fadeInUp">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-emerald-600 icon-responsive"></i>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-xs font-black <?php echo $growth > 0 ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'; ?> px-2 py-1 rounded-full">
+                                    <div class="text-xs-responsive font-black <?php echo $growth > 0 ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'; ?> px-2 py-1 rounded-full">
                                         <?php echo $growth > 0 ? '+' : ''; ?><?php echo $growth; ?>% Growth
                                     </div>
-                                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">MRR</div>
+                                    <div class="text-xs-responsive font-bold text-slate-400 uppercase tracking-widest mt-1">MRR</div>
                                 </div>
                             </div>
-                            <p class="text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Monthly Revenue</p>
+                            <p class="text-xs-responsive font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Monthly Revenue</p>
                             <div class="flex items-end justify-between">
-                                <div>
-                                    <!-- Changed from $ to ₦ -->
-                                    <h3 class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900">₦<?php echo number_format($stats['total_revenue'], 0); ?></h3>
-                                    <!-- Changed from $ to ₦ -->
-                                    <p class="text-xs text-slate-400 font-medium mt-1 truncate">₦<?php echo number_format($stats['arr'], 0); ?> ARR</p>
+                                <div class="min-w-0">
+                                    <h3 class="text-3xl-responsive font-black text-slate-900 truncate">₦<?php echo number_format($stats['total_revenue'], 0); ?></h3>
+                                    <p class="text-xs-responsive text-slate-400 font-medium mt-1 truncate">₦<?php echo number_format($stats['arr'], 0); ?> ARR</p>
                                 </div>
-                                <div class="text-right">
-                                    <div class="text-xl md:text-2xl font-black <?php echo $growth > 0 ? 'text-emerald-600' : 'text-red-600'; ?>">
+                                <div class="text-right flex-shrink-0 ml-2">
+                                    <div class="text-xl-responsive font-black <?php echo $growth > 0 ? 'text-emerald-600' : 'text-red-600'; ?>">
                                         <?php echo $growth > 0 ? '↑' : '↓'; ?>
                                     </div>
-                                    <div class="text-xs font-bold <?php echo $growth > 0 ? 'text-emerald-600' : 'text-red-600'; ?> mt-1">
+                                    <div class="text-xs-responsive font-bold <?php echo $growth > 0 ? 'text-emerald-600' : 'text-red-600'; ?> mt-1">
                                         <?php echo $growth > 0 ? 'Growing' : 'Declining'; ?>
                                     </div>
                                 </div>
@@ -539,25 +682,25 @@ try {
                         </div>
 
                         <!-- Plan Distribution Card -->
-                        <div class="stat-card p-4 md:p-6 animate-fadeInUp">
-                            <div class="flex justify-between items-start mb-4 md:mb-6">
-                                <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-amber-100 to-amber-50 flex items-center justify-center">
-                                    <i class="fas fa-layer-group text-amber-600 text-lg md:text-xl"></i>
+                        <div class="stat-card animate-fadeInUp">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-amber-100 to-amber-50 flex items-center justify-center">
+                                    <i class="fas fa-layer-group text-amber-600 icon-responsive"></i>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-xs font-black text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
+                                    <div class="text-xs-responsive font-black text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
                                         <?php echo $enterprise_count; ?> Enterprise
                                     </div>
-                                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Premium</div>
+                                    <div class="text-xs-responsive font-bold text-slate-400 uppercase tracking-widest mt-1">Premium</div>
                                 </div>
                             </div>
-                            <p class="text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Plan Distribution</p>
+                            <p class="text-xs-responsive font-black text-slate-500 uppercase tracking-[0.15em] mb-2">Plan Distribution</p>
                             <div class="flex items-end justify-between">
                                 <div>
-                                    <h3 class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900"><?php echo count($plan_distribution); ?></h3>
-                                    <p class="text-xs text-slate-400 font-medium mt-1">Active Plans</p>
+                                    <h3 class="text-3xl-responsive font-black text-slate-900"><?php echo count($plan_distribution); ?></h3>
+                                    <p class="text-xs-responsive text-slate-400 font-medium mt-1">Active Plans</p>
                                 </div>
-                                <div class="w-12 h-12 md:w-16 md:h-16">
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0">
                                     <svg class="w-full h-full" viewBox="0 0 36 36">
                                         <path class="text-slate-100" fill="currentColor" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                                         <?php
@@ -570,29 +713,29 @@ try {
                         </div>
 
                         <!-- System Health Card -->
-                        <div class="stat-card p-4 md:p-6 animate-fadeInUp">
-                            <div class="flex justify-between items-start mb-4 md:mb-6">
-                                <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-red-100 to-red-50 flex items-center justify-center">
-                                    <i class="fas fa-heartbeat text-red-600 text-lg md:text-xl"></i>
+                        <div class="stat-card animate-fadeInUp">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-red-100 to-red-50 flex items-center justify-center">
+                                    <i class="fas fa-heartbeat text-red-600 icon-responsive"></i>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-xs font-black <?php echo $critical_count > 0 ? 'text-red-600 bg-red-50' : 'text-emerald-600 bg-emerald-50'; ?> px-2 py-1 rounded-full">
+                                    <div class="text-xs-responsive font-black <?php echo $critical_count > 0 ? 'text-red-600 bg-red-50' : 'text-emerald-600 bg-emerald-50'; ?> px-2 py-1 rounded-full">
                                         <?php echo $critical_count; ?> Critical
                                     </div>
-                                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Status</div>
+                                    <div class="text-xs-responsive font-bold text-slate-400 uppercase tracking-widest mt-1">Status</div>
                                 </div>
                             </div>
-                            <p class="text-xs font-black text-slate-500 uppercase tracking-[0.15em] mb-2">System Health</p>
+                            <p class="text-xs-responsive font-black text-slate-500 uppercase tracking-[0.15em] mb-2">System Health</p>
                             <div class="flex items-end justify-between">
                                 <div>
-                                    <h3 class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900"><?php echo $system_health['network_uptime']; ?>%</h3>
-                                    <p class="text-xs text-slate-400 font-medium mt-1">Uptime - 30 Days</p>
+                                    <h3 class="text-3xl-responsive font-black text-slate-900"><?php echo $system_health['network_uptime']; ?>%</h3>
+                                    <p class="text-xs-responsive text-slate-400 font-medium mt-1">Uptime - 30 Days</p>
                                 </div>
-                                <div class="text-right">
-                                    <div class="text-xl md:text-2xl font-black <?php echo $critical_count > 0 ? 'text-red-600' : 'text-emerald-600'; ?>">
+                                <div class="text-right flex-shrink-0 ml-2">
+                                    <div class="text-xl-responsive font-black <?php echo $critical_count > 0 ? 'text-red-600' : 'text-emerald-600'; ?>">
                                         <?php echo $critical_count > 0 ? '!' : '✓'; ?>
                                     </div>
-                                    <div class="text-xs font-bold <?php echo $critical_count > 0 ? 'text-red-600' : 'text-emerald-600'; ?> mt-1">
+                                    <div class="text-xs-responsive font-bold <?php echo $critical_count > 0 ? 'text-red-600' : 'text-emerald-600'; ?> mt-1">
                                         <?php echo $critical_count > 0 ? 'Attention' : 'Optimal'; ?>
                                     </div>
                                 </div>
@@ -603,27 +746,27 @@ try {
 
                 <!-- Charts & Recent Activity -->
                 <div class="max-w-7xl mx-auto mb-6 md:mb-8">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Revenue Chart -->
                         <div class="lg:col-span-2">
-                            <div class="glass-card rounded-2xl p-4 md:p-6">
-                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 md:mb-8 gap-4">
-                                    <div>
-                                        <h3 class="text-base md:text-lg font-black text-slate-900 mb-1">Revenue Analytics</h3>
-                                        <p class="text-sm text-slate-500">Monthly recurring revenue growth (in Naira)</p> <!-- Updated text -->
+                            <div class="glass-card rounded-2xl fluid-p-6">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                                    <div class="min-w-0">
+                                        <h3 class="text-lg-responsive font-black text-slate-900 mb-1">Revenue Analytics</h3>
+                                        <p class="text-sm-responsive text-slate-500">Monthly recurring revenue growth (in Naira)</p>
                                     </div>
                                     <div class="flex items-center gap-2 w-full sm:w-auto">
-                                        <select id="chartPeriod" class="flex-1 sm:flex-none text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white">
+                                        <select id="chartPeriod" class="form-select-responsive flex-1 sm:flex-none text-sm-responsive border border-slate-200 rounded-lg px-3 py-2 bg-white min-w-[140px]">
                                             <option value="6">Last 6 Months</option>
                                             <option value="12">Last 12 Months</option>
                                             <option value="24">Last 2 Years</option>
                                         </select>
-                                        <button onclick="downloadChart()" class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-blue-600 transition touch-manipulation">
+                                        <button onclick="downloadChart()" class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-blue-600 transition touch-target-small touch-feedback">
                                             <i class="fas fa-download"></i>
                                         </button>
                                     </div>
                                 </div>
-                                <div class="h-64 md:h-72">
+                                <div class="chart-container">
                                     <canvas id="revenueChart"></canvas>
                                 </div>
                             </div>
@@ -631,34 +774,34 @@ try {
 
                         <!-- Recent Activity -->
                         <div class="space-y-6">
-                            <div class="glass-card rounded-2xl p-4 md:p-6">
+                            <div class="glass-card rounded-2xl fluid-p-6">
                                 <div class="flex justify-between items-center mb-6">
-                                    <h3 class="text-base md:text-lg font-black text-slate-900">Recent Activity</h3>
-                                    <a href="logs/activity.php" class="text-xs font-bold text-blue-600 hover:underline">View All</a>
+                                    <h3 class="text-lg-responsive font-black text-slate-900">Recent Activity</h3>
+                                    <a href="logs/activity.php" class="text-sm-responsive font-bold text-blue-600 hover:underline whitespace-nowrap">View All</a>
                                 </div>
 
-                                <div class="space-y-4 max-h-96 overflow-y-auto custom-scrollbar hide-scrollbar">
+                                <div class="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar hide-scrollbar">
                                     <?php if (empty($recent_activities)): ?>
-                                        <div class="text-center py-6 md:py-8">
-                                            <i class="fas fa-history text-2xl md:text-3xl text-slate-300 mb-3"></i>
-                                            <p class="text-sm text-slate-500">No recent activities</p>
+                                        <div class="text-center py-8">
+                                            <i class="fas fa-history text-3xl text-slate-300 mb-3"></i>
+                                            <p class="text-sm-responsive text-slate-500">No recent activities</p>
                                         </div>
                                     <?php else: ?>
                                         <?php foreach ($recent_activities as $activity): ?>
                                             <div class="timeline-item">
-                                                <div class="bg-slate-50 rounded-xl p-3 md:p-4">
+                                                <div class="bg-slate-50 rounded-xl p-4">
                                                     <div class="flex justify-between items-start mb-2">
-                                                        <p class="font-bold text-slate-900 text-sm truncate"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $activity['event']))); ?></p>
-                                                        <span class="text-xs font-bold text-slate-500 whitespace-nowrap ml-2">
+                                                        <p class="font-bold text-slate-900 text-sm-responsive truncate"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $activity['event']))); ?></p>
+                                                        <span class="text-xs-responsive font-bold text-slate-500 whitespace-nowrap ml-2">
                                                             <?php
                                                             $date = new DateTime($activity['created_at']);
                                                             echo $date->format('g:i A');
                                                             ?>
                                                         </span>
                                                     </div>
-                                                    <p class="text-xs md:text-sm text-slate-600 line-clamp-2"><?php echo htmlspecialchars($activity['new_values']); ?></p>
+                                                    <p class="text-sm-responsive text-slate-600 line-clamp-2 mobile-text-truncate"><?php echo htmlspecialchars($activity['new_values']); ?></p>
                                                     <div class="flex items-center gap-2 mt-2">
-                                                        <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                                                        <span class="text-xs-responsive font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
                                                             <?php echo htmlspecialchars($activity['user_type']); ?>
                                                         </span>
                                                     </div>
@@ -670,19 +813,19 @@ try {
                             </div>
 
                             <!-- Quick Insights -->
-                            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-4 md:p-6 text-white shadow-lg">
-                                <h4 class="text-base md:text-lg font-black mb-2 md:mb-3">Growth Insights</h4>
-                                <p class="text-xs md:text-sm text-blue-100 leading-relaxed mb-3 md:mb-4">
+                            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl fluid-p-6 text-white shadow-lg">
+                                <h4 class="text-lg-responsive font-black mb-3">Growth Insights</h4>
+                                <p class="text-sm-responsive text-blue-100 leading-relaxed mb-4 mobile-text-truncate">
                                     Platform adoption increased by <strong><?php echo $growth; ?>%</strong> this month.
                                     <?php if ($enterprise_count > 0): ?>
                                         Enterprise tier accounts for <strong><?php echo round(($enterprise_count / max(1, $stats['total_schools'])) * 100); ?>%</strong> of total ARR.
                                     <?php endif; ?>
                                 </p>
                                 <div class="flex items-center justify-between">
-                                    <a href="reports/schools-growth.php" class="text-xs font-bold bg-white text-blue-600 px-3 md:px-4 py-2 rounded-lg hover:bg-blue-50 transition touch-manipulation">View Report</a>
+                                    <a href="reports/schools-growth.php" class="text-sm-responsive font-bold bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition touch-target touch-feedback whitespace-nowrap">View Report</a>
                                     <div class="text-right">
-                                        <div class="text-xl md:text-2xl font-black">↑ <?php echo $growth; ?>%</div>
-                                        <div class="text-xs font-bold text-blue-200">MoM Growth</div>
+                                        <div class="text-2xl-responsive font-black">↑ <?php echo $growth; ?>%</div>
+                                        <div class="text-xs-responsive font-bold text-blue-200">MoM Growth</div>
                                     </div>
                                 </div>
                             </div>
@@ -692,42 +835,42 @@ try {
 
                 <!-- Recent Schools & Performance -->
                 <div class="max-w-7xl mx-auto">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <!-- Recent Schools Table -->
                         <div class="glass-card rounded-2xl overflow-hidden">
-                            <div class="px-4 md:px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                                <h3 class="font-black text-slate-900 text-base md:text-lg">Recently Onboarded</h3>
-                                <a href="schools/index.php" class="text-xs font-bold text-blue-600 hover:underline">View All</a>
+                            <div class="px-4 sm:px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                <h3 class="font-black text-slate-900 text-lg-responsive truncate">Recently Onboarded</h3>
+                                <a href="schools/index.php" class="text-sm-responsive font-bold text-blue-600 hover:underline whitespace-nowrap">View All</a>
                             </div>
                             <div class="table-responsive">
                                 <table class="w-full min-w-[500px]">
                                     <thead class="bg-slate-50/30 border-b border-slate-100">
                                         <tr class="text-left">
-                                            <th class="px-4 md:px-6 py-3 md:py-4 text-xs font-black text-slate-500 uppercase tracking-wider">School</th>
-                                            <th class="px-4 md:px-6 py-3 md:py-4 text-xs font-black text-slate-500 uppercase tracking-wider">Plan</th>
-                                            <th class="px-4 md:px-6 py-3 md:py-4 text-xs font-black text-slate-500 uppercase tracking-wider">Status</th>
-                                            <th class="px-4 md:px-6 py-3 md:py-4 text-xs font-black text-slate-500 uppercase tracking-wider">Actions</th>
+                                            <th class="px-4 sm:px-6 py-3 text-xs-responsive font-black text-slate-500 uppercase tracking-wider">School</th>
+                                            <th class="px-4 sm:px-6 py-3 text-xs-responsive font-black text-slate-500 uppercase tracking-wider">Plan</th>
+                                            <th class="px-4 sm:px-6 py-3 text-xs-responsive font-black text-slate-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-4 sm:px-6 py-3 text-xs-responsive font-black text-slate-500 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-50">
                                         <?php if (empty($recent_schools)): ?>
                                             <tr>
-                                                <td colspan="4" class="px-4 md:px-6 py-8 text-center">
-                                                    <i class="fas fa-school text-2xl md:text-3xl text-slate-300 mb-3"></i>
-                                                    <p class="text-sm text-slate-500">No schools onboarded yet</p>
+                                                <td colspan="4" class="px-4 sm:px-6 py-8 text-center">
+                                                    <i class="fas fa-school text-3xl text-slate-300 mb-3"></i>
+                                                    <p class="text-sm-responsive text-slate-500">No schools onboarded yet</p>
                                                 </td>
                                             </tr>
                                         <?php else: ?>
                                             <?php foreach ($recent_schools as $school): ?>
                                                 <tr class="hover:bg-slate-50/50 transition-colors">
-                                                    <td class="px-4 md:px-6 py-3 md:py-4">
+                                                    <td class="px-4 sm:px-6 py-3">
                                                         <div class="flex items-center gap-3">
-                                                            <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-50 flex items-center justify-center font-black text-blue-600 text-xs md:text-sm">
+                                                            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center font-black text-blue-600 text-sm-responsive flex-shrink-0">
                                                                 <?php echo strtoupper(substr($school['name'], 0, 2)); ?>
                                                             </div>
                                                             <div class="min-w-0 flex-1">
-                                                                <div class="font-bold text-slate-900 text-sm truncate"><?php echo htmlspecialchars($school['name']); ?></div>
-                                                                <div class="text-xs text-slate-400 truncate">
+                                                                <div class="font-bold text-slate-900 text-sm-responsive truncate"><?php echo htmlspecialchars($school['name']); ?></div>
+                                                                <div class="text-xs-responsive text-slate-400 truncate">
                                                                     <?php echo htmlspecialchars($school['city'] ?? 'N/A'); ?> •
                                                                     <?php
                                                                     $created = new DateTime($school['created_at']);
@@ -737,7 +880,7 @@ try {
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td class="px-4 md:px-6 py-3 md:py-4">
+                                                    <td class="px-4 sm:px-6 py-3">
                                                         <?php
                                                         $planClass = '';
                                                         $planText = $school['plan_name'] ?? 'No Plan';
@@ -757,11 +900,11 @@ try {
                                                                 $planClass = 'bg-slate-100 text-slate-600';
                                                         }
                                                         ?>
-                                                        <span class="px-2 md:px-3 py-1 <?php echo $planClass; ?> text-xs font-black rounded-lg truncate inline-block max-w-[100px]">
+                                                        <span class="px-3 py-1 <?php echo $planClass; ?> text-xs-responsive font-black rounded-lg truncate inline-block max-w-[120px]">
                                                             <?php echo htmlspecialchars($planText); ?>
                                                         </span>
                                                     </td>
-                                                    <td class="px-4 md:px-6 py-3 md:py-4">
+                                                    <td class="px-4 sm:px-6 py-3">
                                                         <?php
                                                         $statusColor = '';
                                                         $statusText = ucfirst($school['status']);
@@ -782,16 +925,16 @@ try {
                                                                 $statusColor = 'text-slate-600';
                                                         }
                                                         ?>
-                                                        <span class="flex items-center gap-2 text-xs font-bold <?php echo $statusColor; ?>">
+                                                        <span class="flex items-center gap-2 text-xs-responsive font-bold <?php echo $statusColor; ?>">
                                                             <span class="w-2 h-2 bg-current rounded-full flex-shrink-0"></span>
                                                             <span class="truncate"><?php echo $statusText; ?></span>
                                                         </span>
                                                     </td>
-                                                    <td class="px-4 md:px-6 py-3 md:py-4">
+                                                    <td class="px-4 sm:px-6 py-3">
                                                         <a href="schools/view.php?id=<?php echo $school['id']; ?>"
-                                                            class="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-blue-600 transition touch-manipulation"
+                                                            class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-blue-600 transition touch-target-small touch-feedback"
                                                             title="View Details">
-                                                            <i class="fas fa-eye text-sm"></i>
+                                                            <i class="fas fa-eye"></i>
                                                         </a>
                                                     </td>
                                                 </tr>
@@ -803,23 +946,23 @@ try {
                         </div>
 
                         <!-- Performance Metrics -->
-                        <div class="glass-card rounded-2xl p-4 md:p-6">
-                            <div class="flex justify-between items-center mb-6 md:mb-8">
-                                <div>
-                                    <h3 class="text-base md:text-lg font-black text-slate-900 mb-1">Platform Performance</h3>
-                                    <p class="text-sm text-slate-500">Real-time system metrics</p>
+                        <div class="glass-card rounded-2xl fluid-p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <div class="min-w-0">
+                                    <h3 class="text-lg-responsive font-black text-slate-900 mb-1">Platform Performance</h3>
+                                    <p class="text-sm-responsive text-slate-500">Real-time system metrics</p>
                                 </div>
-                                <div class="text-right">
-                                    <div class="text-xl md:text-2xl font-black <?php echo $critical_count > 0 ? 'text-red-600' : 'text-emerald-600'; ?>">
+                                <div class="text-right flex-shrink-0 ml-2">
+                                    <div class="text-2xl-responsive font-black <?php echo $critical_count > 0 ? 'text-red-600' : 'text-emerald-600'; ?>">
                                         <?php echo $system_health['network_uptime']; ?>%
                                     </div>
-                                    <div class="text-xs font-bold <?php echo $critical_count > 0 ? 'text-red-600' : 'text-emerald-600'; ?>">Uptime</div>
+                                    <div class="text-xs-responsive font-bold <?php echo $critical_count > 0 ? 'text-red-600' : 'text-emerald-600'; ?>">Uptime</div>
                                 </div>
                             </div>
 
-                            <div class="space-y-4 md:space-y-6">
+                            <div class="space-y-6">
                                 <div>
-                                    <div class="flex justify-between text-sm mb-2">
+                                    <div class="flex justify-between text-sm-responsive mb-2">
                                         <span class="font-bold text-slate-700">API Response Time</span>
                                         <span class="font-bold text-slate-900"><?php echo $system_health['api_response_time']; ?>ms</span>
                                     </div>
@@ -830,7 +973,7 @@ try {
                                 </div>
 
                                 <div>
-                                    <div class="flex justify-between text-sm mb-2">
+                                    <div class="flex justify-between text-sm-responsive mb-2">
                                         <span class="font-bold text-slate-700">Database Load</span>
                                         <span class="font-bold text-slate-900"><?php echo $system_health['database_load']; ?>%</span>
                                     </div>
@@ -841,7 +984,7 @@ try {
                                 </div>
 
                                 <div>
-                                    <div class="flex justify-between text-sm mb-2">
+                                    <div class="flex justify-between text-sm-responsive mb-2">
                                         <span class="font-bold text-slate-700">Storage Utilization</span>
                                         <span class="font-bold text-slate-900"><?php echo $system_health['storage_utilization']; ?>%</span>
                                     </div>
@@ -879,8 +1022,8 @@ try {
                         pointBackgroundColor: '#2563eb',
                         pointBorderColor: '#ffffff',
                         pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
+                        pointRadius: window.innerWidth < 768 ? 3 : 4,
+                        pointHoverRadius: window.innerWidth < 768 ? 5 : 6
                     }]
                 },
                 options: {
@@ -898,9 +1041,14 @@ try {
                             borderWidth: 1,
                             padding: 12,
                             displayColors: false,
+                            bodyFont: {
+                                size: window.innerWidth < 768 ? 12 : 14
+                            },
+                            titleFont: {
+                                size: window.innerWidth < 768 ? 11 : 13
+                            },
                             callbacks: {
                                 label: function(context) {
-                                    // Changed from $ to ₦
                                     return `₦${context.parsed.y.toLocaleString()}`;
                                 }
                             }
@@ -915,7 +1063,6 @@ try {
                             },
                             ticks: {
                                 callback: function(value) {
-                                    // Changed from $ to ₦ and adjust scale for larger Naira amounts
                                     if (value >= 1000000) {
                                         return '₦' + (value / 1000000).toFixed(1) + 'M';
                                     } else if (value >= 1000) {
@@ -927,7 +1074,8 @@ try {
                                 font: {
                                     family: 'Inter',
                                     size: window.innerWidth < 768 ? 10 : 12
-                                }
+                                },
+                                padding: 8
                             }
                         },
                         x: {
@@ -938,13 +1086,22 @@ try {
                                 font: {
                                     family: 'Inter',
                                     size: window.innerWidth < 768 ? 10 : 12
-                                }
+                                },
+                                padding: 8
                             }
                         }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    animation: {
+                        duration: window.innerWidth < 768 ? 500 : 750
                     }
                 }
             });
         }
+
         // Sidebar functionality
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -973,15 +1130,26 @@ try {
         function toggleMobileSearch() {
             const searchBar = document.getElementById('mobileSearch');
             searchBar.classList.toggle('hidden');
+            
+            // Focus on search input when opened
+            if (!searchBar.classList.contains('hidden')) {
+                setTimeout(() => {
+                    const searchInput = searchBar.querySelector('input');
+                    if (searchInput) searchInput.focus();
+                }, 100);
+            }
         }
 
         // Export dashboard data
         function exportDashboardData() {
             const exportBtn = event.currentTarget;
             const originalHtml = exportBtn.innerHTML;
-            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            // Show loading state
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Exporting...</span>';
             exportBtn.disabled = true;
-
+            
+            // Simulate export process
             setTimeout(() => {
                 exportBtn.innerHTML = originalHtml;
                 exportBtn.disabled = false;
@@ -992,15 +1160,15 @@ try {
         // Notification system
         function showNotification(message, type) {
             const notification = document.createElement('div');
-            notification.className = `fixed top-4 md:top-6 right-4 md:right-6 px-4 md:px-6 py-3 rounded-xl shadow-lg z-[1001] animate-fadeInUp ${
+            notification.className = `fixed top-4 right-4 sm:top-6 sm:right-6 px-4 py-3 rounded-xl shadow-lg z-[1001] animate-fadeInUp ${
                 type === 'success' ? 'bg-emerald-500 text-white' :
                 type === 'error' ? 'bg-red-500 text-white' :
                 'bg-blue-500 text-white'
-            }`;
+            } max-w-[90vw]`;
             notification.innerHTML = `
-                <div class="flex items-center gap-2 md:gap-3">
+                <div class="flex items-center gap-3">
                     <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                    <span class="font-medium text-sm md:text-base">${message}</span>
+                    <span class="font-medium text-sm sm:text-base truncate">${message}</span>
                 </div>
             `;
             document.body.appendChild(notification);
@@ -1015,18 +1183,18 @@ try {
         function downloadChart() {
             const canvas = document.getElementById('revenueChart');
             const link = document.createElement('a');
-            link.download = 'revenue-chart.png';
-            link.href = canvas.toDataURL('image/png');
+            link.download = 'revenue-chart-' + new Date().toISOString().split('T')[0] + '.png';
+            link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
+            showNotification('Chart downloaded successfully', 'success');
         }
 
-        // Handle window resize
+        // Handle window resize with throttling
         let resizeTimer;
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(function() {
                 if (typeof Chart !== 'undefined') {
-                    // Destroy and recreate charts on resize
                     const revenueChart = Chart.getChart('revenueChart');
                     if (revenueChart) {
                         revenueChart.destroy();
@@ -1036,13 +1204,26 @@ try {
             }, 250);
         });
 
+        // Handle orientation change
+        window.addEventListener('orientationchange', function() {
+            setTimeout(function() {
+                if (typeof Chart !== 'undefined') {
+                    const revenueChart = Chart.getChart('revenueChart');
+                    if (revenueChart) {
+                        revenueChart.destroy();
+                        initCharts();
+                    }
+                }
+            }, 300);
+        });
+
         // Initialize everything
         document.addEventListener('DOMContentLoaded', function() {
             initCharts();
 
-            // Add touch manipulation class to all interactive elements
-            document.querySelectorAll('button, a[href], input, select, textarea').forEach(el => {
-                el.classList.add('touch-manipulation');
+            // Add touch feedback to all interactive elements
+            document.querySelectorAll('button, a[href], .touch-target, .touch-target-small').forEach(el => {
+                el.classList.add('touch-feedback');
             });
 
             // Close sidebar when clicking outside on mobile
@@ -1067,10 +1248,25 @@ try {
                     if (sidebar) sidebar.classList.add('-translate-x-full');
                     if (overlay) overlay.classList.add('hidden');
                     document.body.style.overflow = 'auto';
+                    
+                    // Also close mobile search if open
+                    const mobileSearch = document.getElementById('mobileSearch');
+                    if (mobileSearch && !mobileSearch.classList.contains('hidden')) {
+                        mobileSearch.classList.add('hidden');
+                    }
                 }
             });
+
+            // Prevent zoom on double-tap (for iOS)
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
         });
     </script>
 </body>
-
 </html>

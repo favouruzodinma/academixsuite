@@ -1,0 +1,259 @@
+.wdt-listings-attachment-holder .wdt-listings-attachment-box-item,
+.wdt-listings-attachment-holder .wdt-listings-attachment-box-item span,
+.wdt-listings-attachment-holder.type5 .wdt-listings-attachment-box-item a,
+.wdt-listings-attachment-holder.type5 .wdt-listings-attachment-box-item a:before
+{
+    -webkit-transition: all .3s linear;
+       -moz-transition: all .3s linear;
+        -ms-transition: all .3s linear;
+         -o-transition: all .3s linear;
+            transition: all .3s linear;
+}
+
+
+/*----*****---- << Media Attachments >> ----*****----*/
+
+.wdt-listings-attachment-holder
+{
+    display: flex;
+    flex-wrap: wrap;
+
+    margin-bottom: 10px;
+}
+
+.wdt-listings-attachment-holder .wdt-listings-attachment-box-item
+{
+    line-height: 1em;
+
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    margin-bottom: 25px;
+}
+
+.wdt-listings-attachment-holder .wdt-listings-attachment-box-item:not(:last-child)
+{
+    margin-right: 25px;
+}
+
+
+/* Type 1 */
+
+.wdt-listings-attachment-holder.type1 .wdt-listings-attachment-box-item
+{
+    font-size: 14px;
+
+/* align-items: center; */
+    line-height: normal;
+
+    color: #000000;
+}
+
+.wdt-listings-attachment-holder.type1 .wdt-listings-attachment-box-item span
+{
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 100;
+
+    position: relative;
+
+    margin: 0 10px 0 0;
+}
+
+
+/* Type 2 */
+
+
+/* .wdt-listings-attachment-holder.type2 {
+    display: inline-grid;
+    grid-column-gap: 25px;
+    grid-row-gap: 15px;
+    margin-bottom: 10px;
+    grid-auto-flow: column;
+} */
+
+.wdt-listings-attachment-holder.type2 .wdt-listings-attachment-box-item
+{
+    font-size: 14px;
+    line-height: normal;
+    /* display: flex;
+    align-items: center; */
+}
+
+.wdt-listings-attachment-holder.type2 .wdt-listings-attachment-box-item span
+{
+    font-family: 'Font Awesome 5 Free';
+    font-size: 16px;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+    margin-right: 10px;
+
+    text-align: center;
+
+    border-radius: 50%;
+}
+
+.wdt-listings-attachment-holder.type2 .wdt-listings-attachment-box-item:not(:hover) span
+{
+    color: #ffffff;
+}
+
+
+/* Type 3 */
+
+
+/* .wdt-listings-attachment-holder.type3 {
+    display: flex;
+    flex-wrap: wrap;
+} */
+
+.wdt-listings-attachment-holder.type3 .wdt-listings-attachment-box-item
+{
+/* display: flex;
+    align-items: center; */
+    position: relative;
+
+    border-width: 2px;
+    border-style: solid;
+    /* align-items: center; */
+    border-radius: 40px;
+}
+
+.wdt-listings-attachment-holder.type3 .wdt-listings-attachment-box-item span
+{
+    font-family: 'Font Awesome 5 Free';
+    font-size: 12px;
+    font-weight: 600;
+
+    position: absolute;
+    top: 50%;
+    left: 30px;
+
+    margin-right: 10px;
+
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.wdt-listings-attachment-holder.type3 .wdt-listings-attachment-box-item > a
+{
+    padding: 15px 30px 15px 50px;
+}
+
+.wdt-listings-attachment-holder.type3 .wdt-listings-attachment-box-item:hover,
+.wdt-listings-attachment-holder.type3 .wdt-listings-attachment-box-item:hover span,
+.wdt-listings-attachment-holder.type3 .wdt-listings-attachment-box-item:hover a
+{
+    color: #000000;
+}
+
+
+/* Type 4 */
+
+
+/* .wdt-listings-attachment-holder.type4 {
+    display: flex;
+    flex-wrap: wrap;
+} */
+
+.wdt-listings-attachment-holder.type4 .wdt-listings-attachment-box-item
+{
+    /* align-items: center; */
+    position: relative;
+    /* display: grid;
+    grid-template-columns: auto 100%; */
+}
+
+.wdt-listings-attachment-holder.type4 .wdt-listings-attachment-box-item a
+{
+    padding: 15px 30px 15px 50px;
+}
+
+.wdt-listings-attachment-holder.type4 .wdt-listings-attachment-box-item span
+{
+    font-family: 'Font Awesome 5 Free';
+    font-size: 12px;
+/* margin-right: 10px; */
+    font-weight: 600;
+
+    position: absolute;
+    top: 50%;
+    left: 30px;
+
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.wdt-listings-attachment-holder.type4 .wdt-listings-attachment-box-item span,
+.wdt-listings-attachment-holder.type4 .wdt-listings-attachment-box-item a
+{
+    color: #ffffff;
+}
+
+.wdt-listings-attachment-holder.type4 .wdt-listings-attachment-box-item:hover span,
+.wdt-listings-attachment-holder.type4 .wdt-listings-attachment-box-item:hover a
+{
+    color: #000000;
+}
+
+
+/* Type 5 */
+
+
+/* .wdt-listings-attachment-holder.type5 {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+} */
+
+.wdt-listings-attachment-holder.type5 .wdt-listings-attachment-box-item
+{
+    font-size: 14px;
+    line-height: normal;
+    /* display: grid;
+    align-items: center;
+    grid-template-columns: auto 100%; */
+}
+
+.wdt-listings-attachment-holder.type5 .wdt-listings-attachment-box-item a
+{
+    font-size: 0;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 50px;
+    height: 50px;
+
+    border-radius: 50%;
+    background-color: #f2f2f2;
+}
+
+.wdt-listings-attachment-holder.type5 .wdt-listings-attachment-box-item a span
+{
+    font-family: 'Font Awesome 5 Free';
+    font-size: initial;
+
+    position: relative;
+    top: 0;
+    left: 0;
+
+    color: #000000;
+}
+
+.wdt-listings-attachment-holder.type5 .wdt-listings-attachment-box-item a:hover span
+{
+    color: #ffffff;
+}

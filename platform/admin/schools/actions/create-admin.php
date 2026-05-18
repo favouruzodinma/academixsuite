@@ -45,7 +45,6 @@ if (!function_exists('validateCSRFToken')) {
             return false;
         }
         
-        unset($_SESSION['csrf_tokens'][$token]);
         return true;
     }
 }
@@ -55,9 +54,8 @@ if (!validateCSRFToken($data['csrf_token'])) {
     exit;
 }
 $schoolId = $data['school_id'] ?? 0;
-$databaseName = $data['database_name'] ?? '';
 
-if ($schoolId <= 0 || empty($databaseName)) {
+if ($schoolId <= 0) {
     echo json_encode(['success' => false, 'message' => 'Invalid parameters']);
     exit;
 }
@@ -66,17 +64,17 @@ try {
     $db = Database::getPlatformConnection();
     
     // Get school details
-    $schoolStmt = $db->prepare("SELECT name, email FROM schools WHERE id = ?");
+    $schoolStmt = $db->prepare("SELECT name, email, database_name FROM schools WHERE id = ?");
     $schoolStmt->execute([$schoolId]);
     $school = $schoolStmt->fetch();
     
-    if (!$school) {
-        echo json_encode(['success' => false, 'message' => 'School not found']);
+    if (!$school || empty($school['database_name'])) {
+        echo json_encode(['success' => false, 'message' => 'School not found or database not created']);
         exit;
     }
     
     // Connect to school database
-    $schoolDb = Database::getSchoolConnection($databaseName);
+    $schoolDb = Database::getSchoolConnection($school['database_name']);
     
     // Generate admin credentials
     $adminEmail = "admin@" . strtolower(preg_replace('/[^a-z0-9]/', '', $school['name'])) . ".edu";
@@ -93,14 +91,33 @@ try {
         exit;
     }
     
-    // Create admin user
-    $createStmt = $schoolDb->prepare("
-        INSERT INTO users 
-        (email, password, first_name, last_name, user_type, is_active, email_verified_at, 
-         created_at, updated_at, password_reset_required)
-        VALUES (?, ?, 'School', 'Administrator', 'admin', 1, NOW(), NOW(), NOW(), 1)
-    ");
-    $createStmt->execute([$adminEmail, $hashedPassword]);
+    $userColumns = getTableColumns($schoolDb, 'users');
+    $adminData = [
+        'school_id' => $schoolId,
+        'name' => 'School Administrator',
+        'first_name' => 'School',
+        'last_name' => 'Administrator',
+        'email' => $adminEmail,
+        'username' => $adminEmail,
+        'password' => $hashedPassword,
+        'user_type' => 'admin',
+        'is_active' => 1,
+        'email_verified_at' => date('Y-m-d H:i:s'),
+        'password_reset_required' => 1,
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    $adminData = array_intersect_key($adminData, array_flip($userColumns));
+
+    if (!isset($adminData['email'], $adminData['password'], $adminData['user_type'])) {
+        echo json_encode(['success' => false, 'message' => 'Users table is missing required admin account columns']);
+        exit;
+    }
+
+    $columns = '`' . implode('`, `', array_keys($adminData)) . '`';
+    $placeholders = ':' . implode(', :', array_keys($adminData));
+    $createStmt = $schoolDb->prepare("INSERT INTO users ($columns) VALUES ($placeholders)");
+    $createStmt->execute($adminData);
     $adminId = $schoolDb->lastInsertId();
     
     // Assign admin role/permissions
@@ -132,11 +149,18 @@ try {
         <p>Thank you,<br>Platform Administration</p>
     ";
     
-    // Send email (implement your email function)
-    // sendEmail($school['email'], $subject, $message);
-    
-    // Also send to the admin email itself
-    // sendEmail($adminEmail, "Your Admin Account - {$school['name']}", $message);
+    $emailSent = false;
+    $emailError = null;
+    try {
+        $emailService = new EmailService();
+        if (!empty($school['email']) && filter_var($school['email'], FILTER_VALIDATE_EMAIL)) {
+            $result = $emailService->sendEmail($school['email'], $subject, $message);
+            $emailSent = (bool)($result['success'] ?? false);
+            $emailError = $result['error'] ?? null;
+        }
+    } catch (Exception $e) {
+        $emailError = $e->getMessage();
+    }
     
     // Log the action
     $logStmt = $db->prepare("
@@ -165,16 +189,21 @@ try {
         'admin_details' => [
             'email' => $adminEmail,
             'temporary_password' => $tempPassword,
-            'first_name' => 'School',
-            'last_name' => 'Administrator',
+            'name' => 'School Administrator',
             'user_type' => 'admin'
         ],
-        'notification' => 'Credentials have been sent to the school email',
+        'notification' => $emailSent ? 'Credentials have been sent to the school email' : 'Admin created; email notification was not sent',
+        'email_error' => $emailError,
         'security_note' => 'User must change password on first login'
     ]);
     
 } catch (Exception $e) {
     error_log("Error creating admin: " . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Error creating admin: ' . $e->getMessage()]);
+}
+
+function getTableColumns(PDO $db, string $table): array {
+    $stmt = $db->query("SHOW COLUMNS FROM `$table`");
+    return array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'Field');
 }
 ?>

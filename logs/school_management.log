@@ -1,0 +1,1266 @@
+[05-Mar-2026 01:46:30 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 01:46:30 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 01:46:30 Africa/Lagos] School database connection successful
+[05-Mar-2026 01:46:30 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 01:46:30 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 01:46:30 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 01:46:30 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 01:46:30 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 01:46:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 08:00:46 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 08:00:46 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 08:00:46 Africa/Lagos] School database connection successful
+[05-Mar-2026 08:00:46 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 08:00:46 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 08:00:46 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 08:00:46 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 08:00:46 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 08:00:46 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 08:43:29 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 08:43:29 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 08:43:29 Africa/Lagos] School database connection successful
+[05-Mar-2026 08:43:29 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 08:43:29 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 08:43:29 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 08:43:29 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 08:43:29 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 08:43:29 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 14:01:19 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 14:01:19 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 14:01:19 Africa/Lagos] School database connection successful
+[05-Mar-2026 14:01:19 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 14:01:19 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 14:01:19 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 14:01:19 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 14:01:19 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 14:01:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 14:10:20 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 14:10:20 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 14:10:20 Africa/Lagos] School database connection successful
+[05-Mar-2026 14:10:20 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 14:10:20 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 14:10:20 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 14:10:20 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 14:10:20 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 14:10:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 14:34:47 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 14:34:47 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 14:34:47 Africa/Lagos] School database connection successful
+[05-Mar-2026 14:34:47 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 14:34:47 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 14:34:47 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 14:34:47 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 14:34:47 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 14:34:47 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 14:37:47 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 14:37:47 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 14:37:47 Africa/Lagos] School database connection successful
+[05-Mar-2026 14:37:47 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 14:37:47 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 14:37:47 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 14:37:47 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 14:37:47 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 14:37:47 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 15:11:18 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 15:11:18 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 15:11:18 Africa/Lagos] School database connection successful
+[05-Mar-2026 15:11:18 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 15:11:18 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 15:11:18 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 15:11:18 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 15:11:18 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 15:11:18 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 15:12:18 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 15:12:18 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 15:12:18 Africa/Lagos] School database connection successful
+[05-Mar-2026 15:12:18 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 15:12:18 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 15:12:18 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 15:12:18 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 15:12:18 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 15:12:18 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 16:29:15 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 16:29:15 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 16:29:15 Africa/Lagos] School database connection successful
+[05-Mar-2026 16:29:15 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 16:29:15 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 16:29:15 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 16:29:15 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 16:29:15 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 16:29:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 17:15:38 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 17:15:38 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 17:15:38 Africa/Lagos] School database connection successful
+[05-Mar-2026 17:15:38 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 17:15:38 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 17:15:38 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 17:15:38 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 17:15:38 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 17:15:38 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 19:00:45 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 19:00:45 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 19:00:45 Africa/Lagos] School database connection successful
+[05-Mar-2026 19:00:45 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 19:00:45 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 19:00:45 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 19:00:45 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 19:00:45 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 19:00:45 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 19:32:53 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 19:32:53 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 19:32:53 Africa/Lagos] School database connection successful
+[05-Mar-2026 19:32:53 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 19:32:53 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 19:32:53 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 19:32:53 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 19:32:53 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 19:32:53 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 19:33:25 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 19:33:25 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 19:33:25 Africa/Lagos] School database connection successful
+[05-Mar-2026 19:33:25 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 19:33:25 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 19:33:25 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 19:33:25 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 19:33:25 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 19:33:25 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 19:34:35 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 19:34:35 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 19:34:35 Africa/Lagos] School database connection successful
+[05-Mar-2026 19:34:35 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 19:34:35 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 19:34:35 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 19:34:35 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 19:34:35 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 19:34:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 19:34:56 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 19:34:56 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 19:34:56 Africa/Lagos] School database connection successful
+[05-Mar-2026 19:34:56 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 19:34:56 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 19:34:56 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 19:34:56 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 19:34:56 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 19:34:56 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 20:59:00 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 20:59:00 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 20:59:00 Africa/Lagos] School database connection successful
+[05-Mar-2026 20:59:00 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 20:59:00 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 20:59:00 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 20:59:00 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 20:59:00 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 20:59:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 21:00:52 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 21:00:52 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 21:00:52 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:00:52 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 21:00:52 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 21:00:52 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 21:00:52 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 21:00:52 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 21:00:52 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 21:05:25 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 21:05:25 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 21:05:25 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:05:25 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 21:05:25 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 21:05:25 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 21:05:25 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 21:05:25 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 21:05:25 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 21:09:27 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 21:09:27 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 21:09:27 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:09:27 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 21:09:27 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 21:09:27 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 21:09:27 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 21:09:27 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 21:09:27 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 21:15:32 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 21:15:32 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 21:15:32 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:15:32 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 21:15:32 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 21:15:32 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 21:15:32 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3267
+[05-Mar-2026 21:15:32 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3277
+[05-Mar-2026 21:15:32 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 22:05:44 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 22:05:44 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 22:05:44 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:05:44 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 22:05:44 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 22:05:44 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 22:05:44 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[05-Mar-2026 22:05:44 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[05-Mar-2026 22:05:44 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 22:06:31 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 22:06:31 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 22:06:31 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:06:31 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 22:06:31 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 22:06:31 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 22:06:31 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[05-Mar-2026 22:06:31 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[05-Mar-2026 22:06:31 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 22:06:41 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 22:06:41 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 22:06:41 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:06:41 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 22:06:41 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 22:06:41 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 22:06:41 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[05-Mar-2026 22:06:41 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[05-Mar-2026 22:06:41 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 22:07:23 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 22:07:23 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 22:07:23 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:07:23 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 22:07:23 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 22:07:23 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 22:07:23 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[05-Mar-2026 22:07:23 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[05-Mar-2026 22:07:23 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 22:09:48 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 22:09:48 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 22:09:48 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:09:48 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 22:09:48 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 22:09:48 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 22:09:48 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[05-Mar-2026 22:09:48 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[05-Mar-2026 22:09:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 22:11:23 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 22:11:23 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 22:11:23 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:11:23 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 22:11:23 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 22:11:23 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 22:11:23 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[05-Mar-2026 22:11:23 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[05-Mar-2026 22:11:23 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 22:13:52 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 22:13:52 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 22:13:52 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:13:52 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 22:13:52 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 22:13:52 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 22:13:52 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[05-Mar-2026 22:13:52 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[05-Mar-2026 22:13:52 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 22:20:04 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 22:20:04 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 22:20:04 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:20:04 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 22:20:04 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 22:20:04 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 22:20:04 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[05-Mar-2026 22:20:04 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[05-Mar-2026 22:20:04 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 22:20:30 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 22:20:30 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 22:20:30 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:20:30 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 22:20:30 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 22:20:30 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 22:20:30 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[05-Mar-2026 22:20:30 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[05-Mar-2026 22:20:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[05-Mar-2026 22:32:24 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[05-Mar-2026 22:32:24 Africa/Lagos] Platform database connection successful
+[05-Mar-2026 22:32:24 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:32:24 Africa/Lagos] School details fetched successfully
+[05-Mar-2026 22:32:24 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[05-Mar-2026 22:32:24 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[05-Mar-2026 22:32:24 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[05-Mar-2026 22:32:24 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[05-Mar-2026 22:32:24 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 02:55:20 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 02:55:20 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 02:55:20 Africa/Lagos] School database connection successful
+[06-Mar-2026 02:55:20 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 02:55:20 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 02:55:20 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 02:55:20 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 02:55:20 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 02:55:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 08:55:02 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 08:55:02 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 08:55:02 Africa/Lagos] School database connection successful
+[06-Mar-2026 08:55:02 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 08:55:02 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 08:55:02 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 08:55:02 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 08:55:02 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 08:55:02 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:00:26 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:00:26 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:00:26 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:00:26 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:00:26 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:00:26 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:00:26 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:00:26 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:00:26 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:02:10 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:02:10 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:02:10 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:02:10 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:02:10 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:02:10 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:02:10 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:02:10 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:02:10 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:03:35 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:03:35 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:03:35 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:03:35 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:03:35 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:03:35 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:03:35 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:03:35 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:03:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:07:39 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:07:39 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:07:39 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:07:39 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:07:39 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:07:39 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:07:39 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:07:39 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:07:39 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:09:36 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:09:36 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:09:36 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:09:36 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:09:36 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:09:36 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:09:36 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:09:36 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:09:36 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:12:06 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:12:06 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:12:06 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:12:06 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:12:06 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:12:06 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:12:06 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:12:06 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:12:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:13:22 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:13:22 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:13:22 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:13:22 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:13:22 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:13:22 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:13:22 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:13:22 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:13:22 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:14:34 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:14:34 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:14:34 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:14:34 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:14:34 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:14:34 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:14:34 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:14:34 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:14:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:17:05 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:17:05 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:17:05 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:17:05 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:17:05 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:17:05 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:17:05 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:17:05 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:17:05 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:18:38 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:18:38 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:18:38 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:18:38 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:18:38 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:18:38 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:18:38 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:18:38 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:18:38 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:19:09 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:19:09 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:19:09 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:19:09 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:19:09 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:19:09 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:19:09 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:19:09 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:19:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:20:53 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:20:53 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:20:53 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:20:53 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:20:53 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:20:53 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:20:53 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:20:53 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:20:53 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:21:51 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:21:51 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:21:51 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:21:51 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:21:51 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:21:51 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:21:51 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:21:51 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:21:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:22:15 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:22:15 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:22:15 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:22:15 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:22:15 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:22:15 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:22:15 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:22:15 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:22:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:22:35 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:22:35 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:22:35 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:22:35 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:22:35 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:22:35 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:22:35 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:22:35 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:22:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:22:56 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:22:56 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:22:56 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:22:56 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:22:56 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:22:56 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:22:56 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:22:56 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:22:56 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:22:59 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:22:59 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:22:59 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:22:59 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:22:59 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:22:59 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:22:59 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:22:59 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:22:59 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:23:31 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:23:31 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:23:31 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:23:31 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:23:31 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:23:31 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:23:31 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:23:31 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:23:31 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:24:40 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:24:40 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:24:40 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:24:40 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:24:40 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:24:40 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:24:40 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:24:40 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:24:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:26:30 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:26:30 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:26:30 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:26:30 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:26:30 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:26:30 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:26:30 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:26:30 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:26:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:28:51 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:28:51 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:28:51 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:28:51 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:28:51 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:28:51 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:28:51 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:28:51 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:28:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:29:40 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:29:40 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:29:40 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:29:40 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:29:40 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:29:40 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:29:40 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:29:40 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:29:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:34:22 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:34:22 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:34:22 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:34:22 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:34:22 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:34:22 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:34:22 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:34:22 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:34:22 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:41:57 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:41:57 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:41:57 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:41:57 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:41:57 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:41:57 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:41:57 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:41:57 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:41:57 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:45:53 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:45:53 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:45:53 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:45:53 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:45:53 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:45:53 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:45:53 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:45:53 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:45:53 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:48:10 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:48:10 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:48:10 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:48:10 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:48:10 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:48:10 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:48:10 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:48:10 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:48:10 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:49:19 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:49:19 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:49:19 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:49:19 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:49:19 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:49:19 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:49:19 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:49:19 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:49:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:53:40 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:53:40 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:53:40 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:53:40 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:53:40 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:53:40 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:53:40 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:53:40 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:53:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:55:20 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:55:20 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:55:20 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:55:20 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:55:20 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:55:20 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:55:20 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:55:20 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:55:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 09:59:16 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 09:59:16 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 09:59:16 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:59:16 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 09:59:16 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 09:59:16 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 09:59:16 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 09:59:16 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 09:59:16 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 10:00:49 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 10:00:49 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 10:00:49 Africa/Lagos] School database connection successful
+[06-Mar-2026 10:00:49 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 10:00:49 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 10:00:49 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 10:00:49 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 10:00:49 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 10:00:49 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 10:02:37 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 10:02:37 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 10:02:37 Africa/Lagos] School database connection successful
+[06-Mar-2026 10:02:37 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 10:02:37 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 10:02:37 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 10:02:37 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 10:02:37 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 10:02:37 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 10:04:10 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 10:04:10 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 10:04:10 Africa/Lagos] School database connection successful
+[06-Mar-2026 10:04:10 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 10:04:10 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 10:04:10 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 10:04:10 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 10:04:10 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 10:04:10 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 10:05:09 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 10:05:09 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 10:05:09 Africa/Lagos] School database connection successful
+[06-Mar-2026 10:05:09 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 10:05:09 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 10:05:09 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 10:05:09 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 10:05:09 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 10:05:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 10:11:37 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 10:11:37 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 10:11:37 Africa/Lagos] School database connection successful
+[06-Mar-2026 10:11:37 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 10:11:37 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 10:11:37 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 10:11:37 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 10:11:37 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 10:11:37 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 10:12:39 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 10:12:39 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 10:12:39 Africa/Lagos] School database connection successful
+[06-Mar-2026 10:12:39 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 10:12:39 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 10:12:39 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 10:12:39 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 10:12:39 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 10:12:39 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 10:13:33 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 10:13:33 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 10:13:33 Africa/Lagos] School database connection successful
+[06-Mar-2026 10:13:33 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 10:13:33 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 10:13:33 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 10:13:33 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 10:13:33 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 10:13:33 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 10:40:44 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 10:40:44 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 10:40:44 Africa/Lagos] School database connection successful
+[06-Mar-2026 10:40:44 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 10:40:44 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 10:40:44 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 10:40:44 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 10:40:44 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 10:40:44 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 13:07:35 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 13:07:35 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 13:07:35 Africa/Lagos] School database connection successful
+[06-Mar-2026 13:07:35 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 13:07:35 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 13:07:35 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 13:07:35 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 13:07:35 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 13:07:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 21:54:00 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 21:54:00 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 21:54:00 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:54:00 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 21:54:00 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 21:54:00 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 21:54:00 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 21:54:00 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 21:54:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[06-Mar-2026 22:47:17 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[06-Mar-2026 22:47:17 Africa/Lagos] Platform database connection successful
+[06-Mar-2026 22:47:17 Africa/Lagos] School database connection successful
+[06-Mar-2026 22:47:17 Africa/Lagos] School details fetched successfully
+[06-Mar-2026 22:47:17 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[06-Mar-2026 22:47:17 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[06-Mar-2026 22:47:17 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[06-Mar-2026 22:47:17 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[06-Mar-2026 22:47:17 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[07-Mar-2026 00:38:25 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[07-Mar-2026 00:38:25 Africa/Lagos] Platform database connection successful
+[07-Mar-2026 00:38:25 Africa/Lagos] School database connection successful
+[07-Mar-2026 00:38:25 Africa/Lagos] School details fetched successfully
+[07-Mar-2026 00:38:25 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[07-Mar-2026 00:38:25 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[07-Mar-2026 00:38:25 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[07-Mar-2026 00:38:25 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[07-Mar-2026 00:38:25 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[07-Mar-2026 16:01:34 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[07-Mar-2026 16:01:34 Africa/Lagos] Platform database connection successful
+[07-Mar-2026 16:01:34 Africa/Lagos] School database connection successful
+[07-Mar-2026 16:01:34 Africa/Lagos] School details fetched successfully
+[07-Mar-2026 16:01:34 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[07-Mar-2026 16:01:34 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[07-Mar-2026 16:01:34 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[07-Mar-2026 16:01:34 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[07-Mar-2026 16:01:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[08-Mar-2026 15:23:27 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[08-Mar-2026 15:23:27 Africa/Lagos] Platform database connection successful
+[08-Mar-2026 15:23:27 Africa/Lagos] School database connection successful
+[08-Mar-2026 15:23:27 Africa/Lagos] School details fetched successfully
+[08-Mar-2026 15:23:27 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[08-Mar-2026 15:23:27 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[08-Mar-2026 15:23:27 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[08-Mar-2026 15:23:27 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[08-Mar-2026 15:23:27 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[08-Mar-2026 15:25:03 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[08-Mar-2026 15:25:03 Africa/Lagos] Platform database connection successful
+[08-Mar-2026 15:25:03 Africa/Lagos] School database connection successful
+[08-Mar-2026 15:25:03 Africa/Lagos] School details fetched successfully
+[08-Mar-2026 15:25:03 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[08-Mar-2026 15:25:03 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[08-Mar-2026 15:25:03 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[08-Mar-2026 15:25:03 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[08-Mar-2026 15:25:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[08-Mar-2026 18:38:14 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[08-Mar-2026 18:38:14 Africa/Lagos] Platform database connection successful
+[08-Mar-2026 18:38:14 Africa/Lagos] School database connection successful
+[08-Mar-2026 18:38:14 Africa/Lagos] School details fetched successfully
+[08-Mar-2026 18:38:14 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[08-Mar-2026 18:38:14 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[08-Mar-2026 18:38:14 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[08-Mar-2026 18:38:14 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[08-Mar-2026 18:38:14 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[08-Mar-2026 18:44:41 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[08-Mar-2026 18:44:41 Africa/Lagos] Platform database connection successful
+[08-Mar-2026 18:44:41 Africa/Lagos] School database connection successful
+[08-Mar-2026 18:44:41 Africa/Lagos] School details fetched successfully
+[08-Mar-2026 18:44:41 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[08-Mar-2026 18:44:41 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[08-Mar-2026 18:44:41 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[08-Mar-2026 18:44:41 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[08-Mar-2026 18:44:41 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[08-Mar-2026 18:45:26 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[08-Mar-2026 18:45:26 Africa/Lagos] Platform database connection successful
+[08-Mar-2026 18:45:26 Africa/Lagos] School database connection successful
+[08-Mar-2026 18:45:26 Africa/Lagos] School details fetched successfully
+[08-Mar-2026 18:45:26 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[08-Mar-2026 18:45:26 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[08-Mar-2026 18:45:26 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[08-Mar-2026 18:45:26 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[08-Mar-2026 18:45:26 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 10:48:12 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 10:48:12 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 10:48:12 Africa/Lagos] School database connection successful
+[09-Mar-2026 10:48:12 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 10:48:12 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 10:48:12 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 10:48:12 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 10:48:12 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 10:48:12 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 12:53:24 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 12:53:24 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 12:53:24 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:53:24 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 12:53:24 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 12:53:24 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 12:53:24 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 12:53:24 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 12:53:24 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 12:54:33 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 12:54:33 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 12:54:33 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:54:33 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 12:54:33 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 12:54:33 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 12:54:33 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 12:54:33 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 12:54:33 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 12:57:00 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 12:57:00 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 12:57:00 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:57:00 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 12:57:00 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 12:57:00 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 12:57:00 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 12:57:00 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 12:57:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 12:57:47 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 12:57:47 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 12:57:47 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:57:47 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 12:57:47 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 12:57:47 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 12:57:47 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 12:57:47 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 12:57:47 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 13:13:42 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 13:13:42 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 13:13:42 Africa/Lagos] School database connection successful
+[09-Mar-2026 13:13:42 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 13:13:42 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 13:13:42 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 13:13:42 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 13:13:42 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 13:13:42 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 14:09:56 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 14:09:56 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 14:09:56 Africa/Lagos] School database connection successful
+[09-Mar-2026 14:09:56 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 14:09:56 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 14:09:56 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 14:09:56 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 14:09:56 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 14:09:56 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 14:10:01 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 14:10:01 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 14:10:01 Africa/Lagos] School database connection successful
+[09-Mar-2026 14:10:01 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 14:10:01 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 14:10:01 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 14:10:01 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 14:10:01 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 14:10:01 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 15:25:48 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 15:25:48 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 15:25:48 Africa/Lagos] School database connection successful
+[09-Mar-2026 15:25:48 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 15:25:48 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 15:25:48 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 15:25:48 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 15:25:48 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 15:25:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 16:50:35 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 16:50:35 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 16:50:35 Africa/Lagos] School database connection successful
+[09-Mar-2026 16:50:35 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 16:50:35 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 16:50:35 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 16:50:35 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 16:50:35 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 16:50:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 21:47:51 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 21:47:51 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 21:47:51 Africa/Lagos] School database connection successful
+[09-Mar-2026 21:47:51 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 21:47:51 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 21:47:51 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 21:47:51 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 21:47:51 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 21:47:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 22:25:38 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 22:25:38 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 22:25:38 Africa/Lagos] School database connection successful
+[09-Mar-2026 22:25:38 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 22:25:38 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 22:25:38 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 22:25:38 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 22:25:38 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 22:25:38 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 22:31:36 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 22:31:36 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 22:31:36 Africa/Lagos] School database connection successful
+[09-Mar-2026 22:31:36 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 22:31:36 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 22:31:36 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 22:31:36 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 22:31:36 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 22:31:36 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 23:11:24 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 23:11:24 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 23:11:24 Africa/Lagos] School database connection successful
+[09-Mar-2026 23:11:24 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 23:11:24 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 23:11:24 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 23:11:24 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 23:11:24 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 23:11:24 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[09-Mar-2026 23:58:22 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[09-Mar-2026 23:58:22 Africa/Lagos] Platform database connection successful
+[09-Mar-2026 23:58:22 Africa/Lagos] School database connection successful
+[09-Mar-2026 23:58:22 Africa/Lagos] School details fetched successfully
+[09-Mar-2026 23:58:22 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[09-Mar-2026 23:58:22 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[09-Mar-2026 23:58:22 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[09-Mar-2026 23:58:22 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[09-Mar-2026 23:58:22 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:01:04 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[10-Mar-2026 00:01:04 Africa/Lagos] Platform database connection successful
+[10-Mar-2026 00:01:04 Africa/Lagos] School database connection successful
+[10-Mar-2026 00:01:04 Africa/Lagos] School details fetched successfully
+[10-Mar-2026 00:01:04 Africa/Lagos] Error fetching class subjects: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:01:04 Africa/Lagos] === SCHOOL MANAGEMENT HUB END ===
+[10-Mar-2026 00:01:04 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3428
+[10-Mar-2026 00:01:04 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 3438
+[10-Mar-2026 00:01:04 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:16:05 Africa/Lagos] === SCHOOL MANAGEMENT HUB START ===
+[10-Mar-2026 00:16:05 Africa/Lagos] Platform database connection successful
+[10-Mar-2026 00:16:05 Africa/Lagos] School database connection successful
+[10-Mar-2026 00:16:05 Africa/Lagos] PHP Fatal error:  Uncaught ArgumentCountError: Too few arguments to function SchoolActionManager::__construct(), 4 passed in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 301 and exactly 5 expected in /home/academixsuite/public_html/includes/SchoolActionManager.php:13
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php(301): SchoolActionManager->__construct(Object(PDO), Object(PDO), 6, 'bitflux-wallet-...')
+#1 /home/academixsuite/public_html/tenant/router.php(365): require_once('/home/academixs...')
+#2 {main}
+  thrown in /home/academixsuite/public_html/includes/SchoolActionManager.php on line 13
+[10-Mar-2026 00:17:03 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:17:03 Africa/Lagos] PHP Warning:  Undefined variable $success in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 415
+[10-Mar-2026 00:17:03 Africa/Lagos] PHP Warning:  Undefined variable $error in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 423
+[10-Mar-2026 00:17:03 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:17:03 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:17:03 Africa/Lagos] PHP Warning:  Undefined variable $recentAnnouncements in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1050
+[10-Mar-2026 00:17:03 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1050
+[10-Mar-2026 00:17:03 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1764
+[10-Mar-2026 00:17:03 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1774
+[10-Mar-2026 00:17:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:24:46 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:24:46 Africa/Lagos] PHP Warning:  Undefined variable $success in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 415
+[10-Mar-2026 00:24:46 Africa/Lagos] PHP Warning:  Undefined variable $error in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 423
+[10-Mar-2026 00:24:46 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:24:46 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:24:46 Africa/Lagos] PHP Warning:  Undefined variable $recentAnnouncements in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1050
+[10-Mar-2026 00:24:46 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1050
+[10-Mar-2026 00:24:46 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1764
+[10-Mar-2026 00:24:46 Africa/Lagos] PHP Warning:  Undefined variable $currencySymbol in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1774
+[10-Mar-2026 00:24:46 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:24:50 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/academic_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/classes_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/subjects_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/financial_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:24:50 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/api_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:24:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:27:13 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/academic_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/classes_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/subjects_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/financial_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:27:13 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/api_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:27:13 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:27:17 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/academic_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/classes_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/subjects_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/financial_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:27:17 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/api_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:27:17 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:30:47 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/academic_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/classes_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/subjects_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/financial_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:30:47 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/api_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:30:47 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:33:57 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/academic_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/classes_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/subjects_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/financial_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:33:57 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/api_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:33:57 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:34:06 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/academic_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/classes_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/subjects_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/financial_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:34:06 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/api_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:34:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:34:15 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/academic_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/classes_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/subjects_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/financial_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:34:15 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/api_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:34:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:34:43 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/academic_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/classes_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/subjects_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/financial_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:34:43 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/api_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:34:43 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:37:18 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/academic_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/classes_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/subjects_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/financial_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:37:18 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/api_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:37:18 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:44:09 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(modals/academic_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/academic_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1403
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(modals/classes_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/classes_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1404
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(modals/subjects_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/subjects_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1405
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(modals/financial_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/financial_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1406
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(modals/api_modals.php): Failed to open stream: No such file or directory in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:44:09 Africa/Lagos] PHP Warning:  include(): Failed opening 'modals/api_modals.php' for inclusion (include_path='.:/opt/cpanel/ea-php84/root/usr/share/pear') in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 1407
+[10-Mar-2026 00:44:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:45:16 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:45:16 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:45:16 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:45:16 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:45:28 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to undefined method SchoolActionManager::getAcademicYearById() in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php:95
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(365): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 95
+[10-Mar-2026 00:46:51 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:46:51 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:46:51 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:46:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:47:46 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:47:46 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:47:46 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:47:46 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:51:13 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:51:13 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:51:13 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:51:13 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:51:15 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:51:15 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:51:15 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:51:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:52:29 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:52:29 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:52:29 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:52:29 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:52:33 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:52:33 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:52:33 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:52:33 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:52:36 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:52:36 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:52:36 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:52:36 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:53:08 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:53:08 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:53:08 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:53:08 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:55:37 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:55:37 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:55:37 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:55:37 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:55:44 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:55:44 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:55:44 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:55:44 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 00:57:05 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 00:57:05 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:57:05 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 00:57:05 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 01:16:39 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 01:16:39 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 01:16:39 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 01:16:39 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 06:26:34 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 06:26:34 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 06:26:34 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 06:26:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 12:49:56 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 12:49:56 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 12:49:56 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 12:49:56 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 12:53:19 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 12:53:19 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 12:53:19 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 12:53:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 13:26:53 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 13:26:53 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 13:26:53 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 13:26:53 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 14:39:40 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 14:39:40 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 14:39:40 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 14:39:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[10-Mar-2026 17:30:30 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[10-Mar-2026 17:30:30 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 17:30:30 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[10-Mar-2026 17:30:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[11-Mar-2026 04:29:16 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[11-Mar-2026 04:29:16 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[11-Mar-2026 04:29:16 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[11-Mar-2026 04:29:16 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[11-Mar-2026 06:08:08 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[11-Mar-2026 06:08:08 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[11-Mar-2026 06:08:08 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[11-Mar-2026 06:08:08 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[11-Mar-2026 11:57:30 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[11-Mar-2026 11:57:30 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[11-Mar-2026 11:57:30 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[11-Mar-2026 11:57:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[11-Mar-2026 11:57:46 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to undefined method SchoolActionManager::getAcademicTermById() in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php:127
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(365): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 127
+[11-Mar-2026 11:57:54 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[11-Mar-2026 11:57:54 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[11-Mar-2026 11:57:54 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[11-Mar-2026 11:57:54 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[11-Mar-2026 11:57:59 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to undefined method SchoolActionManager::getAcademicYearById() in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php:95
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(365): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 95
+[11-Mar-2026 11:59:34 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[11-Mar-2026 11:59:34 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[11-Mar-2026 11:59:34 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[11-Mar-2026 11:59:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[12-Mar-2026 05:59:41 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[12-Mar-2026 05:59:41 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 05:59:41 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 05:59:41 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[12-Mar-2026 09:47:36 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[12-Mar-2026 09:47:36 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 09:47:36 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 09:47:36 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[12-Mar-2026 09:48:15 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to undefined method SchoolActionManager::createSection() in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php:194
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(365): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 194
+[12-Mar-2026 09:48:34 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[12-Mar-2026 09:48:34 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 09:48:34 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 09:48:34 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[12-Mar-2026 11:17:37 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[12-Mar-2026 11:17:37 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 11:17:37 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 11:17:37 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[12-Mar-2026 11:18:09 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to undefined method SchoolActionManager::getSectionById() in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php:198
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(365): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 198
+[12-Mar-2026 12:42:22 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[12-Mar-2026 12:42:22 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 12:42:22 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 12:42:22 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[12-Mar-2026 15:28:20 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[12-Mar-2026 15:28:20 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 15:28:20 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 15:28:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[12-Mar-2026 15:28:55 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[12-Mar-2026 15:28:55 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 15:28:55 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 15:28:55 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[12-Mar-2026 15:29:10 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[12-Mar-2026 15:29:10 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 15:29:10 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[12-Mar-2026 15:29:10 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[14-Mar-2026 17:41:25 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[14-Mar-2026 17:41:25 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[14-Mar-2026 17:41:25 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[14-Mar-2026 17:41:25 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[14-Mar-2026 17:46:27 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[14-Mar-2026 17:46:27 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[14-Mar-2026 17:46:27 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[14-Mar-2026 17:46:27 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[24-Mar-2026 09:39:50 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[24-Mar-2026 09:39:50 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[24-Mar-2026 09:39:50 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[24-Mar-2026 09:39:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php
+[24-Mar-2026 09:40:19 Africa/Lagos] PHP Fatal error:  Uncaught Error: Call to undefined method SchoolActionManager::getAcademicYearById() in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php:95
+Stack trace:
+#0 /home/academixsuite/public_html/tenant/router.php(365): require_once()
+#1 {main}
+  thrown in /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php on line 95
+[24-Mar-2026 09:57:18 Africa/Lagos] getClassSubjects error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cs.school_id' in 'WHERE'
+[24-Mar-2026 09:57:18 Africa/Lagos] PHP Warning:  Undefined variable $languages in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[24-Mar-2026 09:57:18 Africa/Lagos] PHP Warning:  foreach() argument must be of type array|object, null given in /home/academixsuite/public_html/tenant/{school-slug}/admin/tabs/general_settings.php on line 244
+[24-Mar-2026 09:57:18 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/general.php

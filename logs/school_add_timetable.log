@@ -1,0 +1,404 @@
+[05-Mar-2026 21:39:22 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[05-Mar-2026 21:39:22 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-timetable.php
+[05-Mar-2026 21:39:22 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-timetable.php
+[05-Mar-2026 21:39:22 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:39:22 Africa/Lagos] TimetableManager initialized for school ID: 6
+[05-Mar-2026 21:39:22 Africa/Lagos] TimetableManager initialized successfully
+[05-Mar-2026 21:39:22 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[05-Mar-2026 21:39:22 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-timetable.php
+[05-Mar-2026 21:39:39 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[05-Mar-2026 21:39:39 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-timetable.php
+[05-Mar-2026 21:39:39 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-timetable.php
+[05-Mar-2026 21:39:39 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:39:39 Africa/Lagos] TimetableManager initialized for school ID: 6
+[05-Mar-2026 21:39:39 Africa/Lagos] TimetableManager initialized successfully
+[05-Mar-2026 21:39:39 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[05-Mar-2026 21:39:39 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-timetable.php
+[05-Mar-2026 21:46:24 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[05-Mar-2026 21:46:24 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-timetable.php
+[05-Mar-2026 21:46:24 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-timetable.php
+[05-Mar-2026 21:46:24 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:46:24 Africa/Lagos] TimetableManager initialized for school ID: 6
+[05-Mar-2026 21:46:24 Africa/Lagos] TimetableManager initialized successfully
+[05-Mar-2026 21:46:24 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[05-Mar-2026 21:46:24 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-timetable.php
+[05-Mar-2026 21:47:17 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[05-Mar-2026 21:47:17 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-timetable.php
+[05-Mar-2026 21:47:17 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-timetable.php
+[05-Mar-2026 21:47:17 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:47:17 Africa/Lagos] TimetableManager initialized for school ID: 6
+[05-Mar-2026 21:47:17 Africa/Lagos] TimetableManager initialized successfully
+[05-Mar-2026 21:47:17 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[05-Mar-2026 21:47:17 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-timetable.php
+[05-Mar-2026 21:48:09 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[05-Mar-2026 21:48:09 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-timetable.php
+[05-Mar-2026 21:48:09 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-timetable.php
+[05-Mar-2026 21:48:09 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:48:09 Africa/Lagos] TimetableManager initialized for school ID: 6
+[05-Mar-2026 21:48:09 Africa/Lagos] TimetableManager initialized successfully
+[05-Mar-2026 21:48:09 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[05-Mar-2026 21:48:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-timetable.php
+[05-Mar-2026 21:48:30 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[05-Mar-2026 21:48:30 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/teacher-timetable.php
+[05-Mar-2026 21:48:30 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-timetable.php
+[05-Mar-2026 21:48:30 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:48:30 Africa/Lagos] TimetableManager initialized for school ID: 6
+[05-Mar-2026 21:48:30 Africa/Lagos] TimetableManager initialized successfully
+[05-Mar-2026 21:48:30 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[05-Mar-2026 21:48:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/teacher-timetable.php
+[05-Mar-2026 21:54:07 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[05-Mar-2026 21:54:07 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[05-Mar-2026 21:54:07 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[05-Mar-2026 21:54:07 Africa/Lagos] School database connection successful
+[05-Mar-2026 21:54:07 Africa/Lagos] TimetableManager initialized for school ID: 6
+[05-Mar-2026 21:54:07 Africa/Lagos] TimetableManager initialized successfully
+[05-Mar-2026 21:54:07 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[05-Mar-2026 21:54:07 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[05-Mar-2026 22:01:39 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[05-Mar-2026 22:01:39 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[05-Mar-2026 22:01:39 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[05-Mar-2026 22:01:39 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:01:39 Africa/Lagos] TimetableManager initialized for school ID: 6
+[05-Mar-2026 22:01:39 Africa/Lagos] TimetableManager initialized successfully
+[05-Mar-2026 22:01:39 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[05-Mar-2026 22:01:39 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[05-Mar-2026 22:01:48 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[05-Mar-2026 22:01:48 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[05-Mar-2026 22:01:48 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[05-Mar-2026 22:01:48 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:01:48 Africa/Lagos] TimetableManager initialized for school ID: 6
+[05-Mar-2026 22:01:48 Africa/Lagos] TimetableManager initialized successfully
+[05-Mar-2026 22:01:48 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[05-Mar-2026 22:01:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[05-Mar-2026 22:05:37 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[05-Mar-2026 22:05:37 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[05-Mar-2026 22:05:37 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[05-Mar-2026 22:05:37 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:05:37 Africa/Lagos] TimetableManager initialized for school ID: 6
+[05-Mar-2026 22:05:37 Africa/Lagos] TimetableManager initialized successfully
+[05-Mar-2026 22:05:37 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[05-Mar-2026 22:05:37 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[05-Mar-2026 22:07:29 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[05-Mar-2026 22:07:29 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[05-Mar-2026 22:07:29 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[05-Mar-2026 22:07:29 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:07:29 Africa/Lagos] TimetableManager initialized for school ID: 6
+[05-Mar-2026 22:07:29 Africa/Lagos] TimetableManager initialized successfully
+[05-Mar-2026 22:07:29 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[05-Mar-2026 22:07:29 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[05-Mar-2026 22:08:10 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[05-Mar-2026 22:08:10 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[05-Mar-2026 22:08:10 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[05-Mar-2026 22:08:10 Africa/Lagos] School database connection successful
+[05-Mar-2026 22:08:10 Africa/Lagos] TimetableManager initialized for school ID: 6
+[05-Mar-2026 22:08:10 Africa/Lagos] TimetableManager initialized successfully
+[05-Mar-2026 22:08:10 Africa/Lagos] === PROCESSING TIMETABLE FORM SUBMISSION ===
+[05-Mar-2026 22:08:10 Africa/Lagos] Timetable data prepared
+[05-Mar-2026 22:08:10 Africa/Lagos] === ADD TIMETABLE TRANSACTION STARTED ===
+[05-Mar-2026 22:08:10 Africa/Lagos] Timetable entry created with ID: 1
+[05-Mar-2026 22:08:10 Africa/Lagos] === TIMETABLE ADDED SUCCESSFULLY === ID: 1
+[05-Mar-2026 22:08:10 Africa/Lagos] Timetable added successfully: Timetable entry added successfully
+[06-Mar-2026 02:24:17 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[06-Mar-2026 02:24:17 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[06-Mar-2026 02:24:17 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[06-Mar-2026 02:24:17 Africa/Lagos] School database connection successful
+[06-Mar-2026 02:24:17 Africa/Lagos] TimetableManager initialized for school ID: 6
+[06-Mar-2026 02:24:17 Africa/Lagos] TimetableManager initialized successfully
+[06-Mar-2026 02:24:17 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[06-Mar-2026 02:24:17 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[06-Mar-2026 02:25:44 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[06-Mar-2026 02:25:44 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[06-Mar-2026 02:25:44 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[06-Mar-2026 02:25:44 Africa/Lagos] School database connection successful
+[06-Mar-2026 02:25:44 Africa/Lagos] TimetableManager initialized for school ID: 6
+[06-Mar-2026 02:25:44 Africa/Lagos] TimetableManager initialized successfully
+[06-Mar-2026 02:25:44 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[06-Mar-2026 02:25:44 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[06-Mar-2026 02:29:55 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[06-Mar-2026 02:29:55 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[06-Mar-2026 02:29:55 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[06-Mar-2026 02:29:55 Africa/Lagos] School database connection successful
+[06-Mar-2026 02:29:55 Africa/Lagos] TimetableManager initialized for school ID: 6
+[06-Mar-2026 02:29:55 Africa/Lagos] TimetableManager initialized successfully
+[06-Mar-2026 02:29:55 Africa/Lagos] === PROCESSING TIMETABLE FORM SUBMISSION ===
+[06-Mar-2026 02:29:55 Africa/Lagos] Timetable data prepared
+[06-Mar-2026 02:29:55 Africa/Lagos] === ADD TIMETABLE TRANSACTION STARTED ===
+[06-Mar-2026 02:29:55 Africa/Lagos] Timetable entry created with ID: 2
+[06-Mar-2026 02:29:55 Africa/Lagos] === TIMETABLE ADDED SUCCESSFULLY === ID: 2
+[06-Mar-2026 02:29:55 Africa/Lagos] Timetable added successfully: Timetable entry added successfully
+[06-Mar-2026 07:35:12 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[06-Mar-2026 07:35:12 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[06-Mar-2026 07:35:12 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[06-Mar-2026 07:35:12 Africa/Lagos] School database connection successful
+[06-Mar-2026 07:35:12 Africa/Lagos] TimetableManager initialized for school ID: 6
+[06-Mar-2026 07:35:12 Africa/Lagos] TimetableManager initialized successfully
+[06-Mar-2026 07:35:12 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[06-Mar-2026 07:35:12 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[06-Mar-2026 09:10:18 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[06-Mar-2026 09:10:18 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[06-Mar-2026 09:10:18 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[06-Mar-2026 09:10:18 Africa/Lagos] School database connection successful
+[06-Mar-2026 09:10:18 Africa/Lagos] TimetableManager initialized for school ID: 6
+[06-Mar-2026 09:10:18 Africa/Lagos] TimetableManager initialized successfully
+[06-Mar-2026 09:10:18 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[06-Mar-2026 09:10:18 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[06-Mar-2026 10:41:09 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[06-Mar-2026 10:41:09 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[06-Mar-2026 10:41:09 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[06-Mar-2026 10:41:09 Africa/Lagos] School database connection successful
+[06-Mar-2026 10:41:09 Africa/Lagos] TimetableManager initialized for school ID: 6
+[06-Mar-2026 10:41:09 Africa/Lagos] TimetableManager initialized successfully
+[06-Mar-2026 10:41:09 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[06-Mar-2026 10:41:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[09-Mar-2026 06:20:35 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[09-Mar-2026 06:20:35 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[09-Mar-2026 06:20:35 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[09-Mar-2026 06:20:35 Africa/Lagos] School database connection successful
+[09-Mar-2026 06:20:35 Africa/Lagos] TimetableManager initialized for school ID: 6
+[09-Mar-2026 06:20:35 Africa/Lagos] TimetableManager initialized successfully
+[09-Mar-2026 06:20:35 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[09-Mar-2026 06:20:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[09-Mar-2026 12:17:17 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[09-Mar-2026 12:17:17 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[09-Mar-2026 12:17:17 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[09-Mar-2026 12:17:17 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:17:17 Africa/Lagos] TimetableManager initialized for school ID: 6
+[09-Mar-2026 12:17:17 Africa/Lagos] TimetableManager initialized successfully
+[09-Mar-2026 12:17:17 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[09-Mar-2026 12:17:17 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[09-Mar-2026 12:18:09 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[09-Mar-2026 12:18:09 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[09-Mar-2026 12:18:09 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[09-Mar-2026 12:18:09 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:18:09 Africa/Lagos] TimetableManager initialized for school ID: 6
+[09-Mar-2026 12:18:09 Africa/Lagos] TimetableManager initialized successfully
+[09-Mar-2026 12:18:09 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[09-Mar-2026 12:18:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[09-Mar-2026 12:18:37 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[09-Mar-2026 12:18:37 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[09-Mar-2026 12:18:37 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[09-Mar-2026 12:18:37 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:18:37 Africa/Lagos] TimetableManager initialized for school ID: 6
+[09-Mar-2026 12:18:37 Africa/Lagos] TimetableManager initialized successfully
+[09-Mar-2026 12:18:37 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[09-Mar-2026 12:18:37 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[09-Mar-2026 12:40:58 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[09-Mar-2026 12:40:58 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[09-Mar-2026 12:40:58 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[09-Mar-2026 12:40:58 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:40:58 Africa/Lagos] TimetableManager initialized for school ID: 6
+[09-Mar-2026 12:40:58 Africa/Lagos] TimetableManager initialized successfully
+[09-Mar-2026 12:40:58 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[09-Mar-2026 12:40:58 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[09-Mar-2026 12:41:19 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[09-Mar-2026 12:41:19 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[09-Mar-2026 12:41:19 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[09-Mar-2026 12:41:19 Africa/Lagos] School database connection successful
+[09-Mar-2026 12:41:19 Africa/Lagos] TimetableManager initialized for school ID: 6
+[09-Mar-2026 12:41:19 Africa/Lagos] TimetableManager initialized successfully
+[09-Mar-2026 12:41:19 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[09-Mar-2026 12:41:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:27:20 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 13:27:20 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 13:27:20 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:27:20 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:27:20 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:27:20 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:27:20 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[10-Mar-2026 13:27:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:32:05 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 13:32:05 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 13:32:05 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:32:05 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:32:05 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:32:05 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:32:05 Africa/Lagos] === PROCESSING TIMETABLE FORM SUBMISSION ===
+[10-Mar-2026 13:32:05 Africa/Lagos] Timetable data prepared
+[10-Mar-2026 13:32:05 Africa/Lagos] === ADD TIMETABLE TRANSACTION STARTED ===
+[10-Mar-2026 13:32:05 Africa/Lagos] Timetable entry created with ID: 3
+[10-Mar-2026 13:32:05 Africa/Lagos] === TIMETABLE ADDED SUCCESSFULLY === ID: 3
+[10-Mar-2026 13:32:05 Africa/Lagos] Timetable added successfully: Timetable entry added successfully
+[10-Mar-2026 13:33:08 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 13:33:08 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 13:33:08 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:33:08 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:33:08 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:33:08 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:33:08 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[10-Mar-2026 13:33:08 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:34:14 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 13:34:14 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 13:34:14 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:34:14 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:34:14 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:34:14 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:34:14 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[10-Mar-2026 13:34:14 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:34:45 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 13:34:45 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 13:34:45 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:34:45 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:34:45 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:34:45 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:34:45 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[10-Mar-2026 13:34:45 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:36:01 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 13:36:01 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 13:36:01 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:36:01 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:36:01 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:36:01 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:36:01 Africa/Lagos] === PROCESSING TIMETABLE FORM SUBMISSION ===
+[10-Mar-2026 13:36:01 Africa/Lagos] Timetable data prepared
+[10-Mar-2026 13:36:01 Africa/Lagos] === ADD TIMETABLE TRANSACTION STARTED ===
+[10-Mar-2026 13:36:01 Africa/Lagos] Timetable entry created with ID: 4
+[10-Mar-2026 13:36:01 Africa/Lagos] === TIMETABLE ADDED SUCCESSFULLY === ID: 4
+[10-Mar-2026 13:36:01 Africa/Lagos] Timetable added successfully: Timetable entry added successfully
+[10-Mar-2026 13:36:12 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 13:36:12 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 13:36:12 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:36:12 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:36:12 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:36:12 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:36:12 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[10-Mar-2026 13:36:12 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:37:13 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 13:37:13 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 13:37:13 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:37:13 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:37:13 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:37:13 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:37:13 Africa/Lagos] === PROCESSING TIMETABLE FORM SUBMISSION ===
+[10-Mar-2026 13:37:13 Africa/Lagos] Timetable data prepared
+[10-Mar-2026 13:37:13 Africa/Lagos] === ADD TIMETABLE TRANSACTION STARTED ===
+[10-Mar-2026 13:37:13 Africa/Lagos] Transaction rolled back
+[10-Mar-2026 13:37:13 Africa/Lagos] Error adding timetable: Required field 'subject_id' is missing
+[10-Mar-2026 13:37:13 Africa/Lagos] Failed to add timetable: Error adding timetable: Required field 'subject_id' is missing
+[10-Mar-2026 13:37:17 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 13:37:17 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 13:37:17 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:37:17 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:37:17 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:37:17 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:37:17 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[10-Mar-2026 13:37:17 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:37:43 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 13:37:43 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 13:37:43 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:37:43 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:37:43 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:37:43 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:37:43 Africa/Lagos] === PROCESSING TIMETABLE FORM SUBMISSION ===
+[10-Mar-2026 13:37:43 Africa/Lagos] Timetable data prepared
+[10-Mar-2026 13:37:43 Africa/Lagos] === ADD TIMETABLE TRANSACTION STARTED ===
+[10-Mar-2026 13:37:43 Africa/Lagos] Transaction rolled back
+[10-Mar-2026 13:37:43 Africa/Lagos] Error adding timetable: Required field 'subject_id' is missing
+[10-Mar-2026 13:37:43 Africa/Lagos] Failed to add timetable: Error adding timetable: Required field 'subject_id' is missing
+[10-Mar-2026 13:37:47 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 13:37:47 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 13:37:47 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:37:47 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:37:47 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:37:47 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:37:47 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[10-Mar-2026 13:37:47 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:51:44 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 13:51:44 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php?class_id=2&academic_year=1&academic_term=2
+[10-Mar-2026 13:51:44 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 13:51:44 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:51:44 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 13:51:44 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 13:51:44 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[10-Mar-2026 13:51:44 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 16:17:53 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 16:17:53 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 16:17:53 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 16:17:53 Africa/Lagos] School database connection successful
+[10-Mar-2026 16:17:53 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 16:17:53 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 16:17:53 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[10-Mar-2026 16:17:53 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 16:21:18 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 16:21:18 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 16:21:18 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 16:21:18 Africa/Lagos] School database connection successful
+[10-Mar-2026 16:21:18 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 16:21:18 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 16:21:18 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[10-Mar-2026 16:21:18 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 16:22:45 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[10-Mar-2026 16:22:45 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[10-Mar-2026 16:22:45 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[10-Mar-2026 16:22:45 Africa/Lagos] School database connection successful
+[10-Mar-2026 16:22:45 Africa/Lagos] TimetableManager initialized for school ID: 6
+[10-Mar-2026 16:22:45 Africa/Lagos] TimetableManager initialized successfully
+[10-Mar-2026 16:22:45 Africa/Lagos] === PROCESSING TIMETABLE FORM SUBMISSION ===
+[10-Mar-2026 16:22:45 Africa/Lagos] Timetable data prepared
+[10-Mar-2026 16:22:45 Africa/Lagos] === ADD TIMETABLE TRANSACTION STARTED ===
+[10-Mar-2026 16:22:45 Africa/Lagos] Transaction rolled back
+[10-Mar-2026 16:22:45 Africa/Lagos] Error adding timetable: Teacher already assigned to mathematic for Junior Secondary School 1 at this time
+[10-Mar-2026 16:22:45 Africa/Lagos] Failed to add timetable: Error adding timetable: Teacher already assigned to mathematic for Junior Secondary School 1 at this time
+[11-Mar-2026 14:56:57 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[11-Mar-2026 14:56:57 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[11-Mar-2026 14:56:57 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[11-Mar-2026 14:56:57 Africa/Lagos] School database connection successful
+[11-Mar-2026 14:56:57 Africa/Lagos] TimetableManager initialized for school ID: 6
+[11-Mar-2026 14:56:57 Africa/Lagos] TimetableManager initialized successfully
+[11-Mar-2026 14:56:57 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[11-Mar-2026 14:56:57 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[12-Mar-2026 07:55:19 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[12-Mar-2026 07:55:19 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[12-Mar-2026 07:55:19 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[12-Mar-2026 07:55:19 Africa/Lagos] School database connection successful
+[12-Mar-2026 07:55:19 Africa/Lagos] TimetableManager initialized for school ID: 6
+[12-Mar-2026 07:55:19 Africa/Lagos] TimetableManager initialized successfully
+[12-Mar-2026 07:55:19 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[12-Mar-2026 07:55:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[12-Mar-2026 07:59:59 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[12-Mar-2026 07:59:59 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[12-Mar-2026 07:59:59 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[12-Mar-2026 07:59:59 Africa/Lagos] School database connection successful
+[12-Mar-2026 07:59:59 Africa/Lagos] TimetableManager initialized for school ID: 6
+[12-Mar-2026 07:59:59 Africa/Lagos] TimetableManager initialized successfully
+[12-Mar-2026 07:59:59 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[12-Mar-2026 07:59:59 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[12-Mar-2026 14:08:42 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[12-Mar-2026 14:08:42 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[12-Mar-2026 14:08:42 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[12-Mar-2026 14:08:42 Africa/Lagos] School database connection successful
+[12-Mar-2026 14:08:42 Africa/Lagos] TimetableManager initialized for school ID: 6
+[12-Mar-2026 14:08:42 Africa/Lagos] TimetableManager initialized successfully
+[12-Mar-2026 14:08:42 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[12-Mar-2026 14:08:42 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[12-Mar-2026 14:13:19 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[12-Mar-2026 14:13:19 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[12-Mar-2026 14:13:19 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[12-Mar-2026 14:13:19 Africa/Lagos] School database connection successful
+[12-Mar-2026 14:13:19 Africa/Lagos] TimetableManager initialized for school ID: 6
+[12-Mar-2026 14:13:19 Africa/Lagos] TimetableManager initialized successfully
+[12-Mar-2026 14:13:19 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[12-Mar-2026 14:13:19 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[13-Mar-2026 07:39:55 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[13-Mar-2026 07:39:55 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[13-Mar-2026 07:39:55 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[13-Mar-2026 07:39:55 Africa/Lagos] School database connection successful
+[13-Mar-2026 07:39:55 Africa/Lagos] TimetableManager initialized for school ID: 6
+[13-Mar-2026 07:39:55 Africa/Lagos] TimetableManager initialized successfully
+[13-Mar-2026 07:39:55 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[13-Mar-2026 07:39:55 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[14-Mar-2026 04:25:07 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[14-Mar-2026 04:25:07 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[14-Mar-2026 04:25:07 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[14-Mar-2026 04:25:07 Africa/Lagos] School database connection successful
+[14-Mar-2026 04:25:07 Africa/Lagos] TimetableManager initialized for school ID: 6
+[14-Mar-2026 04:25:07 Africa/Lagos] TimetableManager initialized successfully
+[14-Mar-2026 04:25:07 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[14-Mar-2026 04:25:07 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[24-Mar-2026 09:50:06 Africa/Lagos] === ADD TIMETABLE PAGE START ===
+[24-Mar-2026 09:50:06 Africa/Lagos] Request URI: /tenant/bitflux-wallet-1771434696/admin/add-timetable.php
+[24-Mar-2026 09:50:06 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php
+[24-Mar-2026 09:50:06 Africa/Lagos] School database connection successful
+[24-Mar-2026 09:50:06 Africa/Lagos] TimetableManager initialized for school ID: 6
+[24-Mar-2026 09:50:06 Africa/Lagos] TimetableManager initialized successfully
+[24-Mar-2026 09:50:06 Africa/Lagos] === ADD TIMETABLE PAGE END ===
+[24-Mar-2026 09:50:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/add-timetable.php

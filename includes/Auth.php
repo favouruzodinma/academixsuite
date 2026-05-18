@@ -8,7 +8,9 @@
 class Auth
 {
     private $db;
-    private $loginAttempts = [];
+    // NOTE: $loginAttempts was an in-memory array — useless across requests.
+    // Brute-force protection is now persisted in the login_attempts table
+    // via ensureLoginAttemptsTable()/recordFailedAttempt()/isLoginLocked().
 
     public function __construct()
     {
@@ -51,12 +53,12 @@ class Auth
      */
     public function loginSuperAdmin($email, $password)
     {
-        // Check login attempts
+        // Check login attempts (DB-backed — see isLoginLocked).
         if ($this->isLoginLocked($email, 'super_admin')) {
             return [
                 'success' => false,
-                'message' => 'Too many login attempts. Please try again in ' .
-                    round((LOGIN_LOCKOUT_TIME - (time() - $this->loginAttempts[$email]['last_attempt'])) / 60) . ' minutes.'
+                'message' => 'Too many login attempts. Please try again in '
+                    . max(1, round(LOGIN_LOCKOUT_TIME / 60)) . ' minutes.'
             ];
         }
 
@@ -189,6 +191,9 @@ class Auth
                 }
             }
 
+            $staffUserTypes = [ROLE_ACCOUNTANT, ROLE_LIBRARIAN, 'receptionist'];
+            $sessionUserType = in_array($user['user_type'], $staffUserTypes, true) ? 'staff' : $user['user_type'];
+
             // Set session data
             $_SESSION['school_user'] = [
                 'id' => $user['id'],
@@ -198,7 +203,8 @@ class Auth
                 'school_db' => $school['database_name'],
                 'name' => $user['name'],
                 'email' => $user['email'],
-                'user_type' => $user['user_type'],
+                'user_type' => $sessionUserType,
+                'staff_role' => in_array($user['user_type'], $staffUserTypes, true) ? $user['user_type'] : null,
                 'permissions' => array_unique($permissions),
                 'login_time' => time(),
                 'last_activity' => time()
@@ -226,7 +232,8 @@ class Auth
             return [
                 'success' => true,
                 'message' => 'Login successful',
-                'user_type' => $user['user_type'],
+                'user_type' => $sessionUserType,
+                'staff_role' => in_array($user['user_type'], $staffUserTypes, true) ? $user['user_type'] : null,
                 'redirect' => $redirect
             ];
         } catch (Exception $e) {
@@ -245,17 +252,18 @@ class Auth
     {
         switch ($userType) {
             case ROLE_SCHOOL_ADMIN:
-                return "/tenant/$schoolSlug/admin/dashboard.php";
+                return function_exists('school_route_url') ? school_route_url($schoolSlug, 'admin', 'dashboard.php', false) : "/tenant/$schoolSlug/admin/dashboard.php";
             case ROLE_TEACHER:
-                return "/tenant/$schoolSlug/teacher/dashboard.php";
+                return function_exists('school_route_url') ? school_route_url($schoolSlug, 'teacher', 'dashboard.php', false) : "/tenant/$schoolSlug/teacher/dashboard.php";
             case ROLE_STUDENT:
-                return "/tenant/$schoolSlug/student/dashboard.php";
+                return function_exists('school_route_url') ? school_route_url($schoolSlug, 'student', 'dashboard.php', false) : "/tenant/$schoolSlug/student/dashboard.php";
             case ROLE_PARENT:
-                return "/tenant/$schoolSlug/parent/dashboard.php";
+                return function_exists('school_route_url') ? school_route_url($schoolSlug, 'parent', 'dashboard.php', false) : "/tenant/$schoolSlug/parent/dashboard.php";
             case ROLE_ACCOUNTANT:
-                return "/tenant/$schoolSlug/accountant/dashboard.php";
             case ROLE_LIBRARIAN:
-                return "/tenant/$schoolSlug/librarian/dashboard.php";
+            case 'receptionist':
+            case 'staff':
+                return function_exists('school_route_url') ? school_route_url($schoolSlug, 'staff', 'dashboard.php', false) : "/tenant/$schoolSlug/staff/dashboard.php";
             default:
                 return "/tenant/$schoolSlug/dashboard.php";
         }
@@ -699,64 +707,121 @@ class Auth
      * @param string $key
      * @param string $type
      * @return bool
+     *
+     * SECURITY: persistence is the whole point of brute-force protection.
+     * The original implementation stored attempts in an instance property
+     * ($this->loginAttempts), which was reset on every HTTP request — so
+     * lockout never engaged. Attempts are now stored in the platform DB.
      */
     private function isLoginLocked($key, $type)
     {
-        if (!isset($this->loginAttempts[$key])) {
+        $this->ensureLoginAttemptsTable();
+
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT attempt_count, UNIX_TIMESTAMP(last_attempt_at) AS last_ts
+                 FROM login_attempts WHERE attempt_key = ? AND attempt_type = ?"
+            );
+            $stmt->execute([$this->fingerprint($key), $type]);
+            $row = $stmt->fetch();
+        } catch (Exception $e) {
+            error_log("isLoginLocked query error: " . $e->getMessage());
+            return false; // fail-open on infra error rather than locking everyone out
+        }
+
+        if (!$row) {
             return false;
         }
 
-        $attempts = $this->loginAttempts[$key];
+        $count = (int) $row['attempt_count'];
+        $age   = time() - (int) $row['last_ts'];
 
-        // Check if locked out
-        if (
-            $attempts['count'] >= MAX_LOGIN_ATTEMPTS &&
-            (time() - $attempts['last_attempt']) < LOGIN_LOCKOUT_TIME
-        ) {
-            return true;
-        }
-
-        // Reset count if lockout time has passed
-        if ((time() - $attempts['last_attempt']) >= LOGIN_LOCKOUT_TIME) {
-            unset($this->loginAttempts[$key]);
+        // Window has elapsed → expire the row so the user gets a fresh slate.
+        if ($age >= LOGIN_LOCKOUT_TIME) {
+            $this->clearFailedAttempts($key);
             return false;
         }
 
-        return false;
+        return $count >= MAX_LOGIN_ATTEMPTS;
     }
 
     /**
-     * Record failed login attempt
+     * Record failed login attempt (DB-backed; survives across requests).
      * @param string $key
      * @param string $type
      */
     private function recordFailedAttempt($key, $type)
     {
-        if (!isset($this->loginAttempts[$key])) {
-            $this->loginAttempts[$key] = [
-                'count' => 0,
-                'last_attempt' => time(),
-                'type' => $type
-            ];
+        $this->ensureLoginAttemptsTable();
+        $hashed = $this->fingerprint($key);
+        $ip     = $_SERVER['REMOTE_ADDR'] ?? '';
+
+        try {
+            $stmt = $this->db->prepare(
+                "INSERT INTO login_attempts
+                    (attempt_key, attempt_type, attempt_count, last_attempt_at, last_ip)
+                 VALUES (?, ?, 1, NOW(), ?)
+                 ON DUPLICATE KEY UPDATE
+                    attempt_count = attempt_count + 1,
+                    last_attempt_at = NOW(),
+                    last_ip = VALUES(last_ip)"
+            );
+            $stmt->execute([$hashed, $type, $ip]);
+        } catch (Exception $e) {
+            error_log("recordFailedAttempt error: " . $e->getMessage());
         }
-
-        $this->loginAttempts[$key]['count']++;
-        $this->loginAttempts[$key]['last_attempt'] = time();
-
-        // Log failed attempt
-        error_log("Failed login attempt for $key ($type). Attempt: " .
-            $this->loginAttempts[$key]['count']);
     }
 
     /**
-     * Clear failed attempts for a key
+     * Clear failed attempts for a key (called after a successful login).
      * @param string $key
      */
     private function clearFailedAttempts($key)
     {
-        if (isset($this->loginAttempts[$key])) {
-            unset($this->loginAttempts[$key]);
+        try {
+            $stmt = $this->db->prepare("DELETE FROM login_attempts WHERE attempt_key = ?");
+            $stmt->execute([$this->fingerprint($key)]);
+        } catch (Exception $e) {
+            error_log("clearFailedAttempts error: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Lazily ensure the login_attempts table exists. Cheap because we only do
+     * it once per request via a static flag.
+     */
+    private function ensureLoginAttemptsTable()
+    {
+        static $ensured = false;
+        if ($ensured) {
+            return;
+        }
+        try {
+            $this->db->exec(
+                "CREATE TABLE IF NOT EXISTS login_attempts (
+                    attempt_key   CHAR(64) NOT NULL,
+                    attempt_type  VARCHAR(32) NOT NULL,
+                    attempt_count INT UNSIGNED NOT NULL DEFAULT 0,
+                    last_attempt_at DATETIME NOT NULL,
+                    last_ip       VARCHAR(45) DEFAULT NULL,
+                    PRIMARY KEY (attempt_key),
+                    KEY idx_type (attempt_type),
+                    KEY idx_last (last_attempt_at)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+            );
+            $ensured = true;
+        } catch (Exception $e) {
+            error_log("ensureLoginAttemptsTable error: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Hash the attempt key so raw emails don't sit in the DB next to attempt
+     * counts. Same input → same hash, so lookups stay O(1).
+     */
+    private function fingerprint($key)
+    {
+        return hash('sha256', strtolower(trim($key)));
     }
 
     /**

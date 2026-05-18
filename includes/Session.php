@@ -145,30 +145,42 @@ class Session {
      * @param string $formId
      * @return bool
      */
+    /**
+     * Validate a CSRF token without consuming it.
+     *
+     * The original implementation deleted the token on every successful
+     * validation, which made AJAX-heavy pages effectively unusable (the
+     * second request would always fail), and led developers to disable
+     * CSRF checks entirely on those pages. We now keep the token until
+     * it expires; for single-use semantics call consumeCsrfToken() instead.
+     */
     public static function validateCsrfToken($token, $formId = 'default') {
         self::start();
-        
-        if (!isset($_SESSION['csrf_tokens'][$formId])) {
+
+        if (!is_string($token) || $token === '' || !isset($_SESSION['csrf_tokens'][$formId])) {
             return false;
         }
-        
+
         $stored = $_SESSION['csrf_tokens'][$formId];
-        
-        // Check if expired
+
         if (time() > $stored['expiry']) {
             unset($_SESSION['csrf_tokens'][$formId]);
             return false;
         }
-        
-        // Validate token
-        if (!hash_equals($stored['token'], $token)) {
+
+        return hash_equals($stored['token'], $token);
+    }
+
+    /**
+     * Single-use validate — use for very sensitive flows (password change,
+     * funds transfer) where you want to invalidate the token after one use.
+     */
+    public static function consumeCsrfToken($token, $formId = 'default') {
+        $ok = self::validateCsrfToken($token, $formId);
+        if ($ok) {
             unset($_SESSION['csrf_tokens'][$formId]);
-            return false;
         }
-        
-        // Remove token after validation (single use)
-        unset($_SESSION['csrf_tokens'][$formId]);
-        return true;
+        return $ok;
     }
     
     /**

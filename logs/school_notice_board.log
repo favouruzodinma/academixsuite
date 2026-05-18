@@ -1,0 +1,977 @@
+[06-Mar-2026 20:16:32 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:16:32 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:16:32 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:16:32 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:16:32 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:16:32 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:16:32 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:16:32 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:16:32 Africa/Lagos] Database class found
+[06-Mar-2026 20:16:32 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:16:32 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:16:32 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:16:32 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:16:32 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:16:32 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:16:32 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:17:47 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:17:47 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:17:47 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:17:47 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:17:47 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:17:47 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:17:47 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:17:47 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:17:47 Africa/Lagos] Database class found
+[06-Mar-2026 20:17:47 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:17:47 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:17:47 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:17:47 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:17:47 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:17:47 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:17:47 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:28:29 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:28:29 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:28:29 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:28:29 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:28:29 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:28:29 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:28:29 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:28:29 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:28:29 Africa/Lagos] Database class found
+[06-Mar-2026 20:28:29 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:28:29 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:28:29 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:28:29 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:28:29 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:28:29 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:28:29 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:28:40 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:28:40 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:28:40 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:28:40 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:28:40 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:28:40 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:28:40 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:28:40 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:28:40 Africa/Lagos] Database class found
+[06-Mar-2026 20:28:40 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:28:40 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:28:40 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:28:40 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:28:40 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:28:40 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:28:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:29:18 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:29:18 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:29:18 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:29:18 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:29:18 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:29:18 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:29:18 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:29:18 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:29:18 Africa/Lagos] Database class found
+[06-Mar-2026 20:29:18 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:29:18 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:29:18 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:29:18 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:29:18 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:29:18 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:29:18 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:29:38 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:29:38 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:29:38 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:29:38 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:29:38 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:29:38 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:29:38 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:29:38 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:29:38 Africa/Lagos] Database class found
+[06-Mar-2026 20:29:38 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:29:38 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:29:38 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:29:38 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:29:38 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:29:38 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:29:38 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:29:49 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:29:49 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:29:49 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:29:49 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:29:49 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:29:49 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:29:49 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:29:49 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:29:49 Africa/Lagos] Database class found
+[06-Mar-2026 20:29:49 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:29:49 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:29:49 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:29:49 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:29:49 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:29:49 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:29:49 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:30:06 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:30:06 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:30:06 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:30:06 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:30:06 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:30:06 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:30:06 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:30:06 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:30:06 Africa/Lagos] Database class found
+[06-Mar-2026 20:30:06 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:30:06 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:30:06 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:30:06 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:30:06 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:30:06 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:30:06 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:30:14 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:30:14 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:30:14 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:30:14 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:30:14 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:30:14 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:30:14 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:30:14 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:30:14 Africa/Lagos] Database class found
+[06-Mar-2026 20:30:14 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:30:14 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:30:14 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:30:14 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:30:14 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:30:14 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:30:14 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:30:29 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:30:29 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:30:29 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:30:29 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:30:29 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:30:29 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:30:29 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:30:29 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:30:29 Africa/Lagos] Database class found
+[06-Mar-2026 20:30:29 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:30:29 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:30:29 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:30:29 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:30:29 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:30:29 Africa/Lagos] Error processing notice action: SQLSTATE[HY093]: Invalid parameter number
+[06-Mar-2026 20:30:29 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:30:29 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:30:40 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:30:40 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:30:40 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:30:40 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:30:40 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:30:40 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:30:40 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:30:40 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:30:40 Africa/Lagos] Database class found
+[06-Mar-2026 20:30:40 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:30:40 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:30:40 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:30:40 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:30:40 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:30:40 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:30:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:33:30 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:33:30 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:33:30 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:33:30 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:33:30 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:33:30 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:33:30 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:33:30 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:33:30 Africa/Lagos] Database class found
+[06-Mar-2026 20:33:30 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:33:30 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:33:30 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:33:30 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:33:30 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:33:30 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:33:30 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:37:39 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:37:39 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:37:39 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:37:39 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:37:39 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:37:39 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:37:39 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:37:39 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:37:39 Africa/Lagos] Database class found
+[06-Mar-2026 20:37:39 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:37:39 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:37:39 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:37:39 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:37:39 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:37:39 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:37:39 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:37:56 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:37:56 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:37:56 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:37:56 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:37:56 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:37:56 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:37:56 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:37:56 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:37:56 Africa/Lagos] Database class found
+[06-Mar-2026 20:37:56 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:37:56 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:37:56 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:37:56 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:37:56 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:37:56 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:37:56 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:38:09 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:38:09 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:38:09 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:38:09 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:38:09 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:38:09 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:38:09 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:38:09 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:38:09 Africa/Lagos] Database class found
+[06-Mar-2026 20:38:09 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:38:09 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:38:09 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:38:09 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:38:09 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:38:09 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:38:09 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:38:25 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:38:25 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:38:25 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:38:25 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:38:25 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:38:25 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:38:25 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:38:25 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:38:25 Africa/Lagos] Database class found
+[06-Mar-2026 20:38:25 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:38:25 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:38:25 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:38:25 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:38:25 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:38:25 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:38:25 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:47:50 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:47:50 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:47:50 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:47:50 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:47:50 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:47:50 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:47:50 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:47:50 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:47:50 Africa/Lagos] Database class found
+[06-Mar-2026 20:47:50 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:47:50 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:47:50 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:47:50 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:47:50 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:47:50 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:47:50 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:49:00 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 20:49:00 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 20:49:00 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 20:49:00 Africa/Lagos] School ID: 6
+[06-Mar-2026 20:49:00 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 20:49:00 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 20:49:00 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 20:49:00 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 20:49:00 Africa/Lagos] Database class found
+[06-Mar-2026 20:49:00 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 20:49:00 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 20:49:00 Africa/Lagos] School database connection successful
+[06-Mar-2026 20:49:00 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 20:49:00 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 20:49:00 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 20:49:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:25:29 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:25:29 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:25:29 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:25:29 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:25:29 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:25:29 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:25:29 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:25:29 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:25:29 Africa/Lagos] Database class found
+[06-Mar-2026 21:25:29 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:25:29 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:25:29 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:25:29 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:25:29 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:25:29 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:25:29 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:25:52 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:25:52 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:25:52 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:25:52 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:25:52 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:25:52 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:25:52 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:25:52 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:25:52 Africa/Lagos] Database class found
+[06-Mar-2026 21:25:52 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:25:52 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:25:52 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:25:52 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:25:52 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:25:52 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:25:52 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:34:35 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:34:35 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:34:35 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:34:35 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:34:35 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:34:35 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:34:35 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:34:35 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:34:35 Africa/Lagos] Database class found
+[06-Mar-2026 21:34:35 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:34:35 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:34:35 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:34:35 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:34:35 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:34:35 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:34:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:35:00 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:35:00 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:35:00 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:35:00 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:35:00 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:35:00 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:35:00 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:35:00 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:35:00 Africa/Lagos] Database class found
+[06-Mar-2026 21:35:00 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:35:00 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:35:00 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:35:00 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:35:00 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:35:00 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:35:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:35:15 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:35:15 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:35:15 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:35:15 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:35:15 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:35:15 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:35:15 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:35:15 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:35:15 Africa/Lagos] Database class found
+[06-Mar-2026 21:35:15 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:35:15 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:35:15 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:35:15 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:35:15 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:35:15 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:35:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:43:49 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:43:49 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:43:49 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:43:49 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:43:49 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:43:49 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:43:49 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:43:49 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:43:49 Africa/Lagos] Database class found
+[06-Mar-2026 21:43:49 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:43:49 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:43:49 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:43:49 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:43:49 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:43:49 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:43:49 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:45:57 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:45:57 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:45:57 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:45:57 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:45:57 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:45:57 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:45:57 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:45:57 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:45:57 Africa/Lagos] Database class found
+[06-Mar-2026 21:45:57 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:45:57 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:45:57 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:45:57 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:45:57 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:45:57 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:45:57 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:46:15 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:46:15 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:46:15 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:46:15 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:46:15 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:46:15 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:46:15 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:46:15 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:46:15 Africa/Lagos] Database class found
+[06-Mar-2026 21:46:15 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:46:15 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:46:15 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:46:15 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:46:15 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:46:15 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:46:15 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:47:20 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:47:20 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:47:20 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:47:20 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:47:20 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:47:20 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:47:20 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:47:20 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:47:20 Africa/Lagos] Database class found
+[06-Mar-2026 21:47:20 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:47:20 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:47:20 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:47:20 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:47:20 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:47:20 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:47:20 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:49:07 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:49:07 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:49:07 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:49:07 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:49:07 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:49:07 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:49:07 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:49:07 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:49:07 Africa/Lagos] Database class found
+[06-Mar-2026 21:49:07 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:49:07 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:49:07 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:49:07 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:49:07 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:49:07 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:49:07 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:50:27 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:50:27 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:50:27 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:50:27 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:50:27 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:50:27 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:50:27 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:50:27 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:50:27 Africa/Lagos] Database class found
+[06-Mar-2026 21:50:27 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:50:27 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:50:27 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:50:27 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:50:27 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:50:27 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:50:27 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:50:59 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:50:59 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:50:59 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:50:59 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:50:59 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:50:59 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:50:59 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:50:59 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:50:59 Africa/Lagos] Database class found
+[06-Mar-2026 21:50:59 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:50:59 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:50:59 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:50:59 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:50:59 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:50:59 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:50:59 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:51:43 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:51:43 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:51:43 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:51:43 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:51:43 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:51:43 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:51:43 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:51:43 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:51:43 Africa/Lagos] Database class found
+[06-Mar-2026 21:51:43 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:51:43 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:51:43 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:51:43 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:51:43 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:51:43 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:51:43 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:51:54 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:51:54 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:51:54 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:51:54 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:51:54 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:51:54 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:51:54 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:51:54 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:51:54 Africa/Lagos] Database class found
+[06-Mar-2026 21:51:54 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:51:54 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:51:54 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:51:54 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:51:54 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:51:54 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:51:54 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:53:48 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 21:53:48 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 21:53:48 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 21:53:48 Africa/Lagos] School ID: 6
+[06-Mar-2026 21:53:48 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 21:53:48 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 21:53:48 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 21:53:48 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 21:53:48 Africa/Lagos] Database class found
+[06-Mar-2026 21:53:48 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 21:53:48 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 21:53:48 Africa/Lagos] School database connection successful
+[06-Mar-2026 21:53:48 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 21:53:48 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 21:53:48 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 21:53:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 22:46:52 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 22:46:52 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 22:46:52 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 22:46:52 Africa/Lagos] School ID: 6
+[06-Mar-2026 22:46:52 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 22:46:52 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 22:46:52 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 22:46:52 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 22:46:52 Africa/Lagos] Database class found
+[06-Mar-2026 22:46:52 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 22:46:52 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 22:46:52 Africa/Lagos] School database connection successful
+[06-Mar-2026 22:46:52 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 22:46:52 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 22:46:52 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 22:46:52 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 22:49:29 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 22:49:29 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 22:49:29 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 22:49:29 Africa/Lagos] School ID: 6
+[06-Mar-2026 22:49:29 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 22:49:29 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 22:49:29 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 22:49:29 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 22:49:29 Africa/Lagos] Database class found
+[06-Mar-2026 22:49:29 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 22:49:29 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 22:49:29 Africa/Lagos] School database connection successful
+[06-Mar-2026 22:49:29 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 22:49:29 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 22:49:29 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 22:49:29 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 23:01:18 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[06-Mar-2026 23:01:18 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[06-Mar-2026 23:01:18 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[06-Mar-2026 23:01:18 Africa/Lagos] School ID: 6
+[06-Mar-2026 23:01:18 Africa/Lagos] School Name: bitflux wallet
+[06-Mar-2026 23:01:18 Africa/Lagos] Authenticated User ID: 1
+[06-Mar-2026 23:01:18 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[06-Mar-2026 23:01:18 Africa/Lagos] Autoload loaded successfully
+[06-Mar-2026 23:01:18 Africa/Lagos] Database class found
+[06-Mar-2026 23:01:18 Africa/Lagos] GuardianManager loaded successfully
+[06-Mar-2026 23:01:18 Africa/Lagos] Attempting to connect to database: school_6
+[06-Mar-2026 23:01:18 Africa/Lagos] School database connection successful
+[06-Mar-2026 23:01:18 Africa/Lagos] GuardianManager initialized for school ID: 6
+[06-Mar-2026 23:01:18 Africa/Lagos] Fetched 1 notices successfully
+[06-Mar-2026 23:01:18 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[06-Mar-2026 23:01:18 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[07-Mar-2026 03:44:48 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[07-Mar-2026 03:44:48 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[07-Mar-2026 03:44:48 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[07-Mar-2026 03:44:48 Africa/Lagos] School ID: 6
+[07-Mar-2026 03:44:48 Africa/Lagos] School Name: bitflux wallet
+[07-Mar-2026 03:44:48 Africa/Lagos] Authenticated User ID: 1
+[07-Mar-2026 03:44:48 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[07-Mar-2026 03:44:48 Africa/Lagos] Autoload loaded successfully
+[07-Mar-2026 03:44:48 Africa/Lagos] Database class found
+[07-Mar-2026 03:44:48 Africa/Lagos] GuardianManager loaded successfully
+[07-Mar-2026 03:44:48 Africa/Lagos] Attempting to connect to database: school_6
+[07-Mar-2026 03:44:48 Africa/Lagos] School database connection successful
+[07-Mar-2026 03:44:48 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 03:44:48 Africa/Lagos] Fetched 1 notices successfully
+[07-Mar-2026 03:44:48 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[07-Mar-2026 03:44:48 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[07-Mar-2026 03:45:00 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[07-Mar-2026 03:45:00 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[07-Mar-2026 03:45:00 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[07-Mar-2026 03:45:00 Africa/Lagos] School ID: 6
+[07-Mar-2026 03:45:00 Africa/Lagos] School Name: bitflux wallet
+[07-Mar-2026 03:45:00 Africa/Lagos] Authenticated User ID: 1
+[07-Mar-2026 03:45:00 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[07-Mar-2026 03:45:00 Africa/Lagos] Autoload loaded successfully
+[07-Mar-2026 03:45:00 Africa/Lagos] Database class found
+[07-Mar-2026 03:45:00 Africa/Lagos] GuardianManager loaded successfully
+[07-Mar-2026 03:45:00 Africa/Lagos] Attempting to connect to database: school_6
+[07-Mar-2026 03:45:00 Africa/Lagos] School database connection successful
+[07-Mar-2026 03:45:00 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 03:45:00 Africa/Lagos] Fetched 1 notices successfully
+[07-Mar-2026 03:45:00 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[07-Mar-2026 03:45:00 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[07-Mar-2026 03:45:11 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[07-Mar-2026 03:45:11 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[07-Mar-2026 03:45:11 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[07-Mar-2026 03:45:11 Africa/Lagos] School ID: 6
+[07-Mar-2026 03:45:11 Africa/Lagos] School Name: bitflux wallet
+[07-Mar-2026 03:45:11 Africa/Lagos] Authenticated User ID: 1
+[07-Mar-2026 03:45:11 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[07-Mar-2026 03:45:11 Africa/Lagos] Autoload loaded successfully
+[07-Mar-2026 03:45:11 Africa/Lagos] Database class found
+[07-Mar-2026 03:45:11 Africa/Lagos] GuardianManager loaded successfully
+[07-Mar-2026 03:45:11 Africa/Lagos] Attempting to connect to database: school_6
+[07-Mar-2026 03:45:11 Africa/Lagos] School database connection successful
+[07-Mar-2026 03:45:11 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 03:45:11 Africa/Lagos] Fetched 1 notices successfully
+[07-Mar-2026 03:45:11 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[07-Mar-2026 03:45:11 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[07-Mar-2026 07:03:16 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[07-Mar-2026 07:03:16 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[07-Mar-2026 07:03:16 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[07-Mar-2026 07:03:16 Africa/Lagos] School ID: 6
+[07-Mar-2026 07:03:16 Africa/Lagos] School Name: bitflux wallet
+[07-Mar-2026 07:03:16 Africa/Lagos] Authenticated User ID: 1
+[07-Mar-2026 07:03:16 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[07-Mar-2026 07:03:16 Africa/Lagos] Autoload loaded successfully
+[07-Mar-2026 07:03:16 Africa/Lagos] Database class found
+[07-Mar-2026 07:03:16 Africa/Lagos] GuardianManager loaded successfully
+[07-Mar-2026 07:03:16 Africa/Lagos] Attempting to connect to database: school_6
+[07-Mar-2026 07:03:16 Africa/Lagos] School database connection successful
+[07-Mar-2026 07:03:16 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 07:03:16 Africa/Lagos] Fetched 1 notices successfully
+[07-Mar-2026 07:03:16 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[07-Mar-2026 07:03:16 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[07-Mar-2026 08:53:32 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[07-Mar-2026 08:53:32 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[07-Mar-2026 08:53:32 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[07-Mar-2026 08:53:32 Africa/Lagos] School ID: 6
+[07-Mar-2026 08:53:32 Africa/Lagos] School Name: bitflux wallet
+[07-Mar-2026 08:53:32 Africa/Lagos] Authenticated User ID: 1
+[07-Mar-2026 08:53:32 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[07-Mar-2026 08:53:32 Africa/Lagos] Autoload loaded successfully
+[07-Mar-2026 08:53:32 Africa/Lagos] Database class found
+[07-Mar-2026 08:53:32 Africa/Lagos] GuardianManager loaded successfully
+[07-Mar-2026 08:53:32 Africa/Lagos] Attempting to connect to database: school_6
+[07-Mar-2026 08:53:32 Africa/Lagos] School database connection successful
+[07-Mar-2026 08:53:32 Africa/Lagos] GuardianManager initialized for school ID: 6
+[07-Mar-2026 08:53:32 Africa/Lagos] Fetched 1 notices successfully
+[07-Mar-2026 08:53:32 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[07-Mar-2026 08:53:32 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[09-Mar-2026 11:03:22 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[09-Mar-2026 11:03:22 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[09-Mar-2026 11:03:22 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[09-Mar-2026 11:03:22 Africa/Lagos] School ID: 6
+[09-Mar-2026 11:03:22 Africa/Lagos] School Name: bitflux wallet
+[09-Mar-2026 11:03:22 Africa/Lagos] Authenticated User ID: 1
+[09-Mar-2026 11:03:22 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[09-Mar-2026 11:03:22 Africa/Lagos] Autoload loaded successfully
+[09-Mar-2026 11:03:22 Africa/Lagos] Database class found
+[09-Mar-2026 11:03:22 Africa/Lagos] GuardianManager loaded successfully
+[09-Mar-2026 11:03:22 Africa/Lagos] Attempting to connect to database: school_6
+[09-Mar-2026 11:03:22 Africa/Lagos] School database connection successful
+[09-Mar-2026 11:03:22 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 11:03:22 Africa/Lagos] Fetched 1 notices successfully
+[09-Mar-2026 11:03:22 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[09-Mar-2026 11:03:22 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[09-Mar-2026 11:03:38 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[09-Mar-2026 11:03:38 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[09-Mar-2026 11:03:38 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[09-Mar-2026 11:03:38 Africa/Lagos] School ID: 6
+[09-Mar-2026 11:03:38 Africa/Lagos] School Name: bitflux wallet
+[09-Mar-2026 11:03:38 Africa/Lagos] Authenticated User ID: 1
+[09-Mar-2026 11:03:38 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[09-Mar-2026 11:03:38 Africa/Lagos] Autoload loaded successfully
+[09-Mar-2026 11:03:38 Africa/Lagos] Database class found
+[09-Mar-2026 11:03:38 Africa/Lagos] GuardianManager loaded successfully
+[09-Mar-2026 11:03:38 Africa/Lagos] Attempting to connect to database: school_6
+[09-Mar-2026 11:03:38 Africa/Lagos] School database connection successful
+[09-Mar-2026 11:03:38 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 11:03:38 Africa/Lagos] Fetched 1 notices successfully
+[09-Mar-2026 11:03:38 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[09-Mar-2026 11:03:38 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[09-Mar-2026 11:22:10 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[09-Mar-2026 11:22:10 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[09-Mar-2026 11:22:10 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[09-Mar-2026 11:22:10 Africa/Lagos] School ID: 6
+[09-Mar-2026 11:22:10 Africa/Lagos] School Name: bitflux wallet
+[09-Mar-2026 11:22:10 Africa/Lagos] Authenticated User ID: 1
+[09-Mar-2026 11:22:10 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[09-Mar-2026 11:22:10 Africa/Lagos] Autoload loaded successfully
+[09-Mar-2026 11:22:10 Africa/Lagos] Database class found
+[09-Mar-2026 11:22:10 Africa/Lagos] GuardianManager loaded successfully
+[09-Mar-2026 11:22:10 Africa/Lagos] Attempting to connect to database: school_6
+[09-Mar-2026 11:22:10 Africa/Lagos] School database connection successful
+[09-Mar-2026 11:22:10 Africa/Lagos] GuardianManager initialized for school ID: 6
+[09-Mar-2026 11:22:10 Africa/Lagos] Fetched 1 notices successfully
+[09-Mar-2026 11:22:10 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[09-Mar-2026 11:22:10 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 01:06:39 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[10-Mar-2026 01:06:39 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 01:06:39 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 01:06:39 Africa/Lagos] School ID: 6
+[10-Mar-2026 01:06:39 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 01:06:39 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 01:06:39 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 01:06:39 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 01:06:39 Africa/Lagos] Database class found
+[10-Mar-2026 01:06:39 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 01:06:39 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 01:06:39 Africa/Lagos] School database connection successful
+[10-Mar-2026 01:06:39 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 01:06:39 Africa/Lagos] Fetched 1 notices successfully
+[10-Mar-2026 01:06:39 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[10-Mar-2026 01:06:39 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 08:34:39 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[10-Mar-2026 08:34:39 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 08:34:39 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 08:34:39 Africa/Lagos] School ID: 6
+[10-Mar-2026 08:34:39 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 08:34:39 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 08:34:39 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 08:34:39 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 08:34:39 Africa/Lagos] Database class found
+[10-Mar-2026 08:34:39 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 08:34:39 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 08:34:39 Africa/Lagos] School database connection successful
+[10-Mar-2026 08:34:39 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 08:34:39 Africa/Lagos] Fetched 1 notices successfully
+[10-Mar-2026 08:34:39 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[10-Mar-2026 08:34:39 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 08:36:12 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[10-Mar-2026 08:36:12 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 08:36:12 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 08:36:12 Africa/Lagos] School ID: 6
+[10-Mar-2026 08:36:12 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 08:36:12 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 08:36:12 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 08:36:12 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 08:36:12 Africa/Lagos] Database class found
+[10-Mar-2026 08:36:12 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 08:36:12 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 08:36:12 Africa/Lagos] School database connection successful
+[10-Mar-2026 08:36:12 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 08:36:12 Africa/Lagos] Fetched 1 notices successfully
+[10-Mar-2026 08:36:12 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[10-Mar-2026 08:36:12 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 08:36:35 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[10-Mar-2026 08:36:35 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 08:36:35 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 08:36:35 Africa/Lagos] School ID: 6
+[10-Mar-2026 08:36:35 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 08:36:35 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 08:36:35 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 08:36:35 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 08:36:35 Africa/Lagos] Database class found
+[10-Mar-2026 08:36:35 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 08:36:35 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 08:36:35 Africa/Lagos] School database connection successful
+[10-Mar-2026 08:36:35 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 08:36:35 Africa/Lagos] Fetched 1 notices successfully
+[10-Mar-2026 08:36:35 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[10-Mar-2026 08:36:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 08:36:44 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[10-Mar-2026 08:36:44 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 08:36:44 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 08:36:44 Africa/Lagos] School ID: 6
+[10-Mar-2026 08:36:44 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 08:36:44 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 08:36:44 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 08:36:44 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 08:36:44 Africa/Lagos] Database class found
+[10-Mar-2026 08:36:44 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 08:36:44 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 08:36:44 Africa/Lagos] School database connection successful
+[10-Mar-2026 08:36:44 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 08:36:44 Africa/Lagos] Fetched 2 notices successfully
+[10-Mar-2026 08:36:44 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[10-Mar-2026 08:36:44 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 08:37:13 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[10-Mar-2026 08:37:13 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 08:37:13 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 08:37:13 Africa/Lagos] School ID: 6
+[10-Mar-2026 08:37:13 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 08:37:13 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 08:37:13 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 08:37:13 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 08:37:13 Africa/Lagos] Database class found
+[10-Mar-2026 08:37:13 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 08:37:13 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 08:37:13 Africa/Lagos] School database connection successful
+[10-Mar-2026 08:37:13 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 08:37:13 Africa/Lagos] Fetched 2 notices successfully
+[10-Mar-2026 08:37:13 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[10-Mar-2026 08:37:13 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 09:44:01 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[10-Mar-2026 09:44:01 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 09:44:01 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 09:44:01 Africa/Lagos] School ID: 6
+[10-Mar-2026 09:44:01 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 09:44:01 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 09:44:01 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 09:44:01 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 09:44:01 Africa/Lagos] Database class found
+[10-Mar-2026 09:44:01 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 09:44:01 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 09:44:01 Africa/Lagos] School database connection successful
+[10-Mar-2026 09:44:01 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 09:44:01 Africa/Lagos] Fetched 1 notices successfully
+[10-Mar-2026 09:44:01 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[10-Mar-2026 09:44:01 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 13:14:57 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[10-Mar-2026 13:14:57 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 13:14:57 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 13:14:57 Africa/Lagos] School ID: 6
+[10-Mar-2026 13:14:57 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 13:14:57 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 13:14:57 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 13:14:57 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 13:14:57 Africa/Lagos] Database class found
+[10-Mar-2026 13:14:57 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 13:14:57 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 13:14:57 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:14:57 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 13:14:57 Africa/Lagos] Fetched 2 notices successfully
+[10-Mar-2026 13:14:57 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[10-Mar-2026 13:14:57 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 13:15:35 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[10-Mar-2026 13:15:35 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 13:15:35 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 13:15:35 Africa/Lagos] School ID: 6
+[10-Mar-2026 13:15:35 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 13:15:35 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 13:15:35 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 13:15:35 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 13:15:35 Africa/Lagos] Database class found
+[10-Mar-2026 13:15:35 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 13:15:35 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 13:15:35 Africa/Lagos] School database connection successful
+[10-Mar-2026 13:15:35 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 13:15:35 Africa/Lagos] Fetched 2 notices successfully
+[10-Mar-2026 13:15:35 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[10-Mar-2026 13:15:35 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 15:22:51 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[10-Mar-2026 15:22:51 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 15:22:51 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 15:22:51 Africa/Lagos] School ID: 6
+[10-Mar-2026 15:22:51 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 15:22:51 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 15:22:51 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 15:22:51 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 15:22:51 Africa/Lagos] Database class found
+[10-Mar-2026 15:22:51 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 15:22:51 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 15:22:51 Africa/Lagos] School database connection successful
+[10-Mar-2026 15:22:51 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 15:22:51 Africa/Lagos] Fetched 2 notices successfully
+[10-Mar-2026 15:22:51 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[10-Mar-2026 15:22:51 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 16:10:11 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[10-Mar-2026 16:10:11 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[10-Mar-2026 16:10:11 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[10-Mar-2026 16:10:11 Africa/Lagos] School ID: 6
+[10-Mar-2026 16:10:11 Africa/Lagos] School Name: bitflux wallet
+[10-Mar-2026 16:10:11 Africa/Lagos] Authenticated User ID: 1
+[10-Mar-2026 16:10:11 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[10-Mar-2026 16:10:11 Africa/Lagos] Autoload loaded successfully
+[10-Mar-2026 16:10:11 Africa/Lagos] Database class found
+[10-Mar-2026 16:10:11 Africa/Lagos] GuardianManager loaded successfully
+[10-Mar-2026 16:10:11 Africa/Lagos] Attempting to connect to database: school_6
+[10-Mar-2026 16:10:11 Africa/Lagos] School database connection successful
+[10-Mar-2026 16:10:11 Africa/Lagos] GuardianManager initialized for school ID: 6
+[10-Mar-2026 16:10:11 Africa/Lagos] Fetched 2 notices successfully
+[10-Mar-2026 16:10:11 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[10-Mar-2026 16:10:11 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[11-Mar-2026 04:32:31 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[11-Mar-2026 04:32:31 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[11-Mar-2026 04:32:31 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[11-Mar-2026 04:32:31 Africa/Lagos] School ID: 6
+[11-Mar-2026 04:32:31 Africa/Lagos] School Name: bitflux wallet
+[11-Mar-2026 04:32:31 Africa/Lagos] Authenticated User ID: 1
+[11-Mar-2026 04:32:31 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[11-Mar-2026 04:32:31 Africa/Lagos] Autoload loaded successfully
+[11-Mar-2026 04:32:31 Africa/Lagos] Database class found
+[11-Mar-2026 04:32:31 Africa/Lagos] GuardianManager loaded successfully
+[11-Mar-2026 04:32:31 Africa/Lagos] Attempting to connect to database: school_6
+[11-Mar-2026 04:32:31 Africa/Lagos] School database connection successful
+[11-Mar-2026 04:32:31 Africa/Lagos] GuardianManager initialized for school ID: 6
+[11-Mar-2026 04:32:31 Africa/Lagos] Fetched 2 notices successfully
+[11-Mar-2026 04:32:31 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[11-Mar-2026 04:32:31 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[12-Mar-2026 08:02:03 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[12-Mar-2026 08:02:03 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[12-Mar-2026 08:02:03 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 08:02:03 Africa/Lagos] School ID: 6
+[12-Mar-2026 08:02:03 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 08:02:03 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 08:02:03 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 08:02:03 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 08:02:03 Africa/Lagos] Database class found
+[12-Mar-2026 08:02:03 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 08:02:03 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 08:02:03 Africa/Lagos] School database connection successful
+[12-Mar-2026 08:02:03 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 08:02:03 Africa/Lagos] Fetched 2 notices successfully
+[12-Mar-2026 08:02:03 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[12-Mar-2026 08:02:03 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[12-Mar-2026 09:21:36 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[12-Mar-2026 09:21:36 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[12-Mar-2026 09:21:36 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[12-Mar-2026 09:21:36 Africa/Lagos] School ID: 6
+[12-Mar-2026 09:21:36 Africa/Lagos] School Name: bitflux wallet
+[12-Mar-2026 09:21:36 Africa/Lagos] Authenticated User ID: 1
+[12-Mar-2026 09:21:36 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[12-Mar-2026 09:21:36 Africa/Lagos] Autoload loaded successfully
+[12-Mar-2026 09:21:36 Africa/Lagos] Database class found
+[12-Mar-2026 09:21:36 Africa/Lagos] GuardianManager loaded successfully
+[12-Mar-2026 09:21:36 Africa/Lagos] Attempting to connect to database: school_6
+[12-Mar-2026 09:21:36 Africa/Lagos] School database connection successful
+[12-Mar-2026 09:21:36 Africa/Lagos] GuardianManager initialized for school ID: 6
+[12-Mar-2026 09:21:36 Africa/Lagos] Fetched 2 notices successfully
+[12-Mar-2026 09:21:36 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[12-Mar-2026 09:21:36 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[14-Mar-2026 05:19:21 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[14-Mar-2026 05:19:21 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[14-Mar-2026 05:19:21 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[14-Mar-2026 05:19:21 Africa/Lagos] School ID: 6
+[14-Mar-2026 05:19:21 Africa/Lagos] School Name: bitflux wallet
+[14-Mar-2026 05:19:21 Africa/Lagos] Authenticated User ID: 1
+[14-Mar-2026 05:19:21 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[14-Mar-2026 05:19:21 Africa/Lagos] Autoload loaded successfully
+[14-Mar-2026 05:19:21 Africa/Lagos] Database class found
+[14-Mar-2026 05:19:21 Africa/Lagos] GuardianManager loaded successfully
+[14-Mar-2026 05:19:21 Africa/Lagos] Attempting to connect to database: school_6
+[14-Mar-2026 05:19:21 Africa/Lagos] School database connection successful
+[14-Mar-2026 05:19:21 Africa/Lagos] GuardianManager initialized for school ID: 6
+[14-Mar-2026 05:19:21 Africa/Lagos] Fetched 2 notices successfully
+[14-Mar-2026 05:19:21 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[14-Mar-2026 05:19:21 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[24-Mar-2026 09:36:40 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[24-Mar-2026 09:36:40 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[24-Mar-2026 09:36:40 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[24-Mar-2026 09:36:40 Africa/Lagos] School ID: 6
+[24-Mar-2026 09:36:40 Africa/Lagos] School Name: bitflux wallet
+[24-Mar-2026 09:36:40 Africa/Lagos] Authenticated User ID: 1
+[24-Mar-2026 09:36:40 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[24-Mar-2026 09:36:40 Africa/Lagos] Autoload loaded successfully
+[24-Mar-2026 09:36:40 Africa/Lagos] Database class found
+[24-Mar-2026 09:36:40 Africa/Lagos] GuardianManager loaded successfully
+[24-Mar-2026 09:36:40 Africa/Lagos] Attempting to connect to database: school_6
+[24-Mar-2026 09:36:40 Africa/Lagos] School database connection successful
+[24-Mar-2026 09:36:40 Africa/Lagos] GuardianManager initialized for school ID: 6
+[24-Mar-2026 09:36:40 Africa/Lagos] Fetched 2 notices successfully
+[24-Mar-2026 09:36:40 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[24-Mar-2026 09:36:40 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[11-Apr-2026 18:07:17 Africa/Lagos] === NOTICE BOARD PAGE START ===
+[11-Apr-2026 18:07:17 Africa/Lagos] Script: /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php
+[11-Apr-2026 18:07:17 Africa/Lagos] School Slug: bitflux-wallet-1771434696
+[11-Apr-2026 18:07:17 Africa/Lagos] School ID: 6
+[11-Apr-2026 18:07:17 Africa/Lagos] School Name: bitflux wallet
+[11-Apr-2026 18:07:17 Africa/Lagos] Authenticated User ID: 1
+[11-Apr-2026 18:07:17 Africa/Lagos] Loading autoload from: /home/academixsuite/public_html/tenant/{school-slug}/admin/../../../includes/autoload.php
+[11-Apr-2026 18:07:17 Africa/Lagos] Autoload loaded successfully
+[11-Apr-2026 18:07:17 Africa/Lagos] Database class found
+[11-Apr-2026 18:07:17 Africa/Lagos] GuardianManager loaded successfully
+[11-Apr-2026 18:07:17 Africa/Lagos] Attempting to connect to database: school_6
+[11-Apr-2026 18:07:17 Africa/Lagos] School database connection successful
+[11-Apr-2026 18:07:17 Africa/Lagos] GuardianManager initialized for school ID: 6
+[11-Apr-2026 18:07:17 Africa/Lagos] Fetched 2 notices successfully
+[11-Apr-2026 18:07:17 Africa/Lagos] === NOTICE BOARD PAGE END ===
+[11-Apr-2026 18:07:17 Africa/Lagos] ROUTER END: Successfully served /home/academixsuite/public_html/tenant/{school-slug}/admin/notice-board.php

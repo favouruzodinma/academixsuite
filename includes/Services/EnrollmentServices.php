@@ -923,8 +923,9 @@ class EnrollmentService {
      * Generate login URL
      */
     private function generateLoginUrl(string $slug): string {
-        $baseUrl = defined('APP_URL') ? APP_URL : 'https://academixsuite.com';
-        return $baseUrl . '/tenant/' . $slug . '/login';
+        return function_exists('school_portal_url')
+            ? school_portal_url($slug, 'login.php', true)
+            : ((defined('APP_URL') ? rtrim(APP_URL, '/') : 'https://academixsuite.com') . '/tenant/' . $slug . '/login');
     }
     
     /**

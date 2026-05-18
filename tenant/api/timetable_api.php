@@ -13,9 +13,8 @@ ini_set('error_log', __DIR__ . '/../../logs/api_timetable.log');
 // Set session cookie parameters for cross-page access
 session_set_cookie_params([
     'lifetime' => 86400,
-    'path' => '/academixsuite',
-    'domain' => $_SERVER['HTTP_HOST'],
-    'secure' => isset($_SERVER['HTTPS']),
+    'path' => '/',
+    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
     'httponly' => true,
     'samesite' => 'Lax'
 ]);
@@ -25,12 +24,19 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Set JSON header with CORS
+// Set JSON header with same-origin CORS only
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$host = $_SERVER['HTTP_HOST'] ?? '';
+if ($origin) {
+    $originHost = parse_url($origin, PHP_URL_HOST);
+    if ($originHost && strcasecmp($originHost, preg_replace('/:\d+$/', '', $host)) === 0) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+        header('Access-Control-Allow-Credentials: true');
+    }
+}
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Accept, Origin');
-header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Max-Age: 86400');
 
 // Handle preflight requests
@@ -39,13 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Debug logging
-error_log("=== TIMETABLE API REQUEST ===");
-error_log("Session ID: " . session_id());
-error_log("Session Data: " . print_r($_SESSION, true));
-error_log("Request URI: " . $_SERVER['REQUEST_URI']);
-error_log("GET Params: " . print_r($_GET, true));
-error_log("POST Params: " . print_r($_POST, true));
+// Minimal request logging. Do not log full session or request bodies.
+error_log("Timetable API request: " . ($_SERVER['REQUEST_METHOD'] ?? 'CLI') . " " . ($_SERVER['REQUEST_URI'] ?? ''));
 
 // Database configuration
 require_once __DIR__ . '/../../includes/autoload.php';
@@ -80,6 +81,10 @@ function authenticateRequest() {
         $input = file_get_contents('php://input');
         $data = json_decode($input, true);
         $schoolSlug = $data['school_slug'] ?? '';
+    }
+
+    if (empty($schoolSlug) && function_exists('school_subdomain_slug')) {
+        $schoolSlug = school_subdomain_slug() ?? '';
     }
     
     if (empty($schoolSlug)) {
@@ -137,6 +142,10 @@ try {
             if (empty($schoolSlug)) $schoolSlug = $data['school_slug'] ?? '';
             if (empty($action)) $action = $data['action'] ?? '';
         }
+    }
+
+    if (empty($schoolSlug) && function_exists('school_subdomain_slug')) {
+        $schoolSlug = school_subdomain_slug() ?? '';
     }
     
     if (empty($schoolSlug)) {
@@ -947,11 +956,6 @@ function debugDatabase($db) {
         jsonError('Debug failed: ' . $e->getMessage());
     }
 }
-
-// Add to the beginning of your API
-error_log("Session ID: " . session_id());
-error_log("School Auth: " . print_r($_SESSION['school_auth'] ?? 'Not set', true));
-error_log("School Info: " . print_r($_SESSION['school_info'] ?? 'Not set', true));
 
 // Function to copy timetable
 function copyTimetable($db, $schoolId) {
