@@ -1,4 +1,7 @@
 <?php
+if (!function_exists('env')) {
+    require_once __DIR__ . '/functions.php';
+}
 return [
     'default_gateway' => env('DEFAULT_PAYMENT_GATEWAY', 'paystack'),
     

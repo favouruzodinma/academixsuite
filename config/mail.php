@@ -1,4 +1,7 @@
 <?php
+if (!function_exists('env')) {
+    require_once __DIR__ . '/functions.php';
+}
 return [
     'driver' => env('MAIL_DRIVER', 'smtp'),
     'host' => env('MAIL_HOST', 'academixsuite.com'),

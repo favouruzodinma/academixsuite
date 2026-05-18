@@ -1,0 +1,2 @@
+[18-May-2026 23:18:32 Africa/Lagos] Platform database error: Platform database connection failed: SQLSTATE[HY000] [2002] No such file or directory
+[18-May-2026 23:18:32 Africa/Lagos] Error fetching schools: Platform database connection failed: SQLSTATE[HY000] [2002] No such file or directory
