@@ -1,0 +1,42 @@
+RewriteEngine On
+RewriteBase /
+
+DirectoryIndex index.php
+Options -Indexes
+
+# Keep the wildcard document root as a thin bridge only. The real application
+# remains one level above this folder, usually /public_html on cPanel.
+
+# Block sensitive files and directories inside this bridge folder.
+RewriteRule (^|/)\. - [F,L]
+RewriteRule \.(sql|sqlite|db|bak|backup|swp|swo|log|ini|env|lock|orig|old|tmp)$ - [F,L,NC]
+RewriteRule ^(logs|backups|database|vendor|tests|config|includes)(/|$) - [F,L,NC]
+
+# Serve tenant assets from the parent application while the wildcard docroot
+# stays at /public_html/_wildcard_.academixsuite.com.
+RewriteRule ^tenant/assets/(.*)$ asset.php?path=tenant/assets/$1 [L,QSA,NC]
+RewriteRule ^assets/uploads/(.*)$ asset.php?path=assets/uploads/$1 [L,QSA,NC]
+RewriteRule ^assets/(.*)$ asset.php?path=tenant/assets/$1 [L,QSA,NC]
+RewriteRule ^(admin|admin2|teacher|student|parent|staff)/assets/(.*)$ asset.php?path=tenant/assets/$2 [L,QSA,NC]
+RewriteRule ^uploads/(.*)$ asset.php?path=uploads/$1 [L,QSA,NC]
+RewriteRule ^public/(.*)$ asset.php?path=public/$1 [L,QSA,NC]
+RewriteRule ^wp-content/uploads/(.*)$ asset.php?path=wp-content/uploads/$1 [L,QSA,NC]
+
+# Allow the bridge's own PHP entry points.
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Everything else is routed by the bridge front controller.
+RewriteRule ^ index.php [L,QSA]
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+<FilesMatch "^(\.htaccess|\.htpasswd|\.env(\..*)?|composer\.(json|lock)|package(-lock)?\.json|README\.md|.*\.(sql|sqlite|db|bak|backup|log|ini|orig|old|tmp|swp))$">
+    Require all denied
+</FilesMatch>

@@ -131,8 +131,11 @@ $metricValues = ['Rate' => '94%', 'Average' => '81%', 'Outstanding' => 'NGN 0', 
 <aside class="sidebar">
     <button type="button" class="sidebar-close-btn"><iconify-icon icon="radix-icons:cross-2"></iconify-icon></button>
     <div class="sidebar-logo d-flex align-items-center justify-content-between">
+        <?php
+            $schoolLogo = !empty($school['logo_path']) ? $school['logo_path'] : ($assetUrl . 'images/logo.png');
+        ?>
         <a href="<?php echo rp_h($baseUrl . 'dashboard.php'); ?>">
-            <img src="<?php echo rp_h($assetUrl); ?>images/logo.png" alt="site logo" class="light-logo">
+            <img src="<?php echo rp_h($schoolLogo); ?>" alt="<?php echo rp_h($school['name'] ?? 'School'); ?> logo" class="light-logo">
             <img src="<?php echo rp_h($assetUrl); ?>images/logo-light.png" alt="site logo" class="dark-logo">
             <img src="<?php echo rp_h($assetUrl); ?>images/logo-icon.png" alt="site logo" class="logo-icon">
         </a>

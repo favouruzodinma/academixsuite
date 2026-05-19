@@ -5,20 +5,103 @@ if (!isset($adminUser)) {
 if (!isset($schoolSlug)) {
     $schoolSlug = $GLOBALS['SCHOOL_SLUG'] ?? '';
 }
+if (!isset($school) || !is_array($school)) {
+    $school = $GLOBALS['SCHOOL_DATA'] ?? ($_SESSION['school_info'][$schoolSlug] ?? []);
+}
 if (!isset($currentPage)) {
     $currentPage = $GLOBALS['CURRENT_PAGE'] ?? basename($_SERVER['PHP_SELF']);
 }
+
+if (!function_exists('academix_sidebar_asset_url')) {
+    function academix_sidebar_asset_url($path, $fallback = '') {
+        $path = trim((string) $path);
+        if ($path === '') {
+            $path = $fallback;
+        }
+        if ($path === '') {
+            return '';
+        }
+        if (preg_match('#^https?://#i', $path)) {
+            return $path;
+        }
+        return '/' . ltrim($path, '/');
+    }
+}
+
+if (!function_exists('academix_sidebar_user_name')) {
+    function academix_sidebar_user_name($user) {
+        $name = trim((string) ($user['name'] ?? ''));
+        if ($name !== '') {
+            return $name;
+        }
+
+        $name = trim((string) ($user['full_name'] ?? ''));
+        if ($name !== '') {
+            return $name;
+        }
+
+        $name = trim(trim((string) ($user['first_name'] ?? '')) . ' ' . trim((string) ($user['last_name'] ?? '')));
+        return $name !== '' ? $name : 'Admin User';
+    }
+}
+
+$schoolName = trim((string) ($school['name'] ?? 'School Portal'));
+// Prefer the centralized helper (school logo from DB → AcademixSuite logo fallback).
+$schoolLogo = function_exists('school_logo_url')
+    ? school_logo_url($school)
+    : academix_sidebar_asset_url($school['logo_path'] ?? '', '/tenant/assets/images/logo-icon.png');
+$adminName = academix_sidebar_user_name($adminUser);
+$adminRole = trim((string) ($adminUser['role_name'] ?? $adminUser['role'] ?? 'Administrator'));
+$adminAvatar = academix_sidebar_asset_url(
+    $adminUser['avatar'] ?? ($adminUser['profile_photo'] ?? ''),
+    '/tenant/assets/images/thumbs/leave-request-img2.png'
+);
 ?>
+<style>
+    .sidebar-logo .school-brand-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+    .sidebar-logo img.school-brand-logo,
+    .sidebar-logo img.school-brand-logo-icon {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        object-fit: contain;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid var(--neutral-200);
+        padding: 4px;
+    }
+    .sidebar-logo .school-brand-name {
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--text-primary-light);
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .sidebar.active .sidebar-logo .school-brand-name {
+        display: none;
+    }
+    .sidebar.active:hover .sidebar-logo .school-brand-name {
+        display: inline-block;
+    }
+</style>
 <aside class="sidebar">
     <button type="button" class="sidebar-close-btn">
-        <iconify-icon icon="radix-icons:cross-2"></iconify-icon>
+        <i class="ri-close-line"></i>
     </button>
     <div class="">
         <div class="sidebar-logo d-flex align-items-center justify-content-between">
-            <a href="index.php" class="">
-                <img src="https://academixsuite.com/tenant/assets/images/logo.png" alt="site logo" class="light-logo">
-                <img src="https://academixsuite.com/tenant/assets/images/logo-light.png" alt="site logo" class="dark-logo">
-                <img src="https://academixsuite.com/tenant/assets/images/logo-icon.png" alt="site logo" class="logo-icon">
+            <a href="index.php" class="school-brand-link">
+                <img src="<?php echo htmlspecialchars($schoolLogo); ?>" alt="<?php echo htmlspecialchars($schoolName); ?> logo" class="light-logo school-brand-logo">
+                <img src="<?php echo htmlspecialchars($schoolLogo); ?>" alt="<?php echo htmlspecialchars($schoolName); ?> logo" class="dark-logo school-brand-logo">
+                <img src="<?php echo htmlspecialchars($schoolLogo); ?>" alt="<?php echo htmlspecialchars($schoolName); ?> logo" class="logo-icon school-brand-logo-icon">
+                <span class="school-brand-name"><?php echo htmlspecialchars($schoolName); ?></span>
             </a>
             <button type="button" class="text-xxl d-xl-flex d-none line-height-1 sidebar-toggle text-neutral-500" aria-label="Collapse Sidebar">
                 <i class="ri-contract-left-line"></i>
@@ -29,13 +112,10 @@ if (!isset($currentPage)) {
         <div class="dropdown profile-dropdown">
             <button type="button" class="profile-dropdown__button d-flex align-items-center justify-content-between p-10 w-100 overflow-hidden bg-neutral-50 radius-12" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                 <span class="d-flex align-items-start gap-10">
-                    <?php
-                    $avatarPath = $adminUser['avatar'] ?? 'https://academixsuite.com/tenant/assets/images/thumbs/leave-request-img2.png';
-                    ?>
-                    <img src="<?php echo htmlspecialchars($avatarPath); ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
+                    <img src="<?php echo htmlspecialchars($adminAvatar); ?>" alt="<?php echo htmlspecialchars($adminName); ?>" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
                     <span class="profile-dropdown__contents">
-                        <span class="h6 mb-0 text-md d-block text-primary-light"><?php echo htmlspecialchars($adminUser['name'] ?? 'Admin User'); ?></span>
-                        <span class="text-secondary-light text-sm mb-0 d-block"><?php echo htmlspecialchars($adminUser['role_name'] ?? 'Administrator'); ?></span>
+                        <span class="h6 mb-0 text-md d-block text-primary-light"><?php echo htmlspecialchars($adminName); ?></span>
+                        <span class="text-secondary-light text-sm mb-0 d-block"><?php echo htmlspecialchars($adminRole); ?></span>
                     </span>
                 </span>
                 <span class="profile-dropdown__icon pe-8 text-xl d-flex line-height-1">

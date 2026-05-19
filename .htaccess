@@ -33,6 +33,10 @@ RewriteRule ^(assets/uploads|uploads|tenant/[^/]+/uploads)/.*\.(ph(p[3457]?|t|ar
 # -----------------------------------------------------------------------------
 RewriteCond %{HTTP_HOST} ^([a-z0-9-]+)\.academixsuite\.com$ [NC]
 RewriteCond %1 !^(www|app|admin|platform|api|mail|webmail|cpanel|whm|ftp|autodiscover)$ [NC]
+RewriteRule ^assets/uploads/(.*)$ - [L]
+
+RewriteCond %{HTTP_HOST} ^([a-z0-9-]+)\.academixsuite\.com$ [NC]
+RewriteCond %1 !^(www|app|admin|platform|api|mail|webmail|cpanel|whm|ftp|autodiscover)$ [NC]
 RewriteRule ^assets/(.*)$ tenant/assets/$1 [L,QSA]
 
 RewriteCond %{HTTP_HOST} ^([a-z0-9-]+)\.academixsuite\.com$ [NC]
@@ -89,7 +93,13 @@ RewriteRule ^platform/(.*)$ platform/index.php?path=$1 [L,QSA]
 RewriteRule ^login/?$ tenant/login.php [L]
 
 # -----------------------------------------------------------------------------
-# 5. DEFAULT PUBLIC ROUTING
+# 5. ROUTE /register and /request-demo
+# -----------------------------------------------------------------------------
+RewriteRule ^register/?$ public/register.php?tab=register [L,QSA]
+RewriteRule ^(request-demo|demo-request)/?$ public/register.php?tab=demo [L,QSA]
+
+# -----------------------------------------------------------------------------
+# 6. DEFAULT PUBLIC ROUTING
 # -----------------------------------------------------------------------------
 RewriteRule ^(.*)$ /public/$1 [L]
 
@@ -106,6 +116,12 @@ RewriteRule ^(.*)$ /public/$1 [L]
     # *.academixsuite.com is installed and trusted for every school subdomain.
     Header always set Strict-Transport-Security "max-age=300"
 </IfModule>
+
+<FilesMatch "\.(eot|otf|ttf|woff|woff2|svg)$">
+    <IfModule mod_headers.c>
+        Header set Access-Control-Allow-Origin "*"
+    </IfModule>
+</FilesMatch>
 
 # Set default index files
 DirectoryIndex index.php index.html index.htm

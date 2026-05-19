@@ -764,7 +764,7 @@
                                             <div
                                                 class="wdt-button-holder wdt-template-filled wdt-button-link wdt-button-style-default wdt-button-size-nm wdt-animation- wdt-button-icon-after"
                                                 id="wdt-button-2ed1bc24">
-                                                <a class="wdt-button" href="request-demo/" data-tooltip="Request Demo">
+                                                <a class="wdt-button" href="/request-demo" data-tooltip="Request Demo">
                                                     <div class="wdt-button-text">
                                                         <span>Request Demo</span><span>Request Demo</span>
                                                     </div>

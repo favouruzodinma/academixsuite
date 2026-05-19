@@ -397,12 +397,27 @@ try {
     <div class="w-full max-w-md animate-fadeInUp">
         
         <div class="flex flex-col items-center mb-8">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-200 mb-4 relative z-10">
-                <i class="fas fa-school text-white text-2xl"></i>
-                <div class="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl school-pulse -z-10"></div>
-            </div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight">School Portal</h1>
-            <p class="text-slate-500 text-sm mt-1 font-medium">Secure Access Gateway</p>
+            <?php
+                // Resolve a logo to render. Prefer the school's uploaded logo
+                // (from the platform DB), fall back to the AcademixSuite logo
+                // so the layout never has a missing image or empty space.
+                $loginLogoUrl = function_exists('school_logo_url')
+                    ? school_logo_url($school)
+                    : (!empty($school['logo_path']) ? '/' . ltrim((string) $school['logo_path'], '/') : '/tenant/assets/images/logo.png');
+                $loginLogoAlt = !empty($school['name']) ? ($school['name'] . ' logo') : 'AcademixSuite';
+            ?>
+            <?php if (!empty($school)): ?>
+                <img src="<?php echo htmlspecialchars($loginLogoUrl); ?>" alt="<?php echo htmlspecialchars($loginLogoAlt); ?>" class="h-20 w-auto mb-4 rounded-xl">
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight"><?php echo htmlspecialchars($school['name'] ?? 'School Portal'); ?></h1>
+                <p class="text-slate-500 text-sm mt-1 font-medium">School Portal</p>
+            <?php else: ?>
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-200 mb-4 relative z-10">
+                    <i class="fas fa-school text-white text-2xl"></i>
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl school-pulse -z-10"></div>
+                </div>
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">School Portal</h1>
+                <p class="text-slate-500 text-sm mt-1 font-medium">Secure Access Gateway</p>
+            <?php endif; ?>
         </div>
 
         <div class="login-glass p-8 rounded-[2rem]">

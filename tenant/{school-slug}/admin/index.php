@@ -761,15 +761,15 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
     <meta name="robots" content="INDEX,FOLLOW">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($school['name']); ?> | <?php echo defined('APP_NAME') ? APP_NAME : 'School Management'; ?></title>
-    <link rel="icon" type="image/png" href="https://academixsuite.com/tenant/assets/images/favicon.png" sizes="16x16">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/remixicon.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/bootstrap.min.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/apexcharts.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/dataTables.min.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/flatpickr.min.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/full-calendar.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/calendar.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/style.css">
+    <link rel="icon" type="image/png" href="/tenant/assets/images/favicon.png" sizes="16x16">
+    <link rel="stylesheet" href="/tenant/assets/css/remixicon.css">
+    <link rel="stylesheet" href="/tenant/assets/css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="/tenant/assets/css/lib/apexcharts.css">
+    <link rel="stylesheet" href="/tenant/assets/css/lib/dataTables.min.css">
+    <link rel="stylesheet" href="/tenant/assets/css/lib/flatpickr.min.css">
+    <link rel="stylesheet" href="/tenant/assets/css/lib/full-calendar.css">
+    <link rel="stylesheet" href="/tenant/assets/css/lib/calendar.css">
+    <link rel="stylesheet" href="/tenant/assets/css/style.css">
 </head>
 
 <body>
@@ -830,57 +830,6 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
     <main class="dashboard-main">
 
         <?php include_once('includes/header.php'); ?>
-        </div>
-        <div class="col-auto">
-            <div class="d-flex flex-wrap align-items-center gap-3">
-                <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-                <div class="dropdown">
-                    <button class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative" type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
-                        <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
-                        <?php if (count($announcements) > 0): ?>
-                            <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
-                        <?php endif; ?>
-                    </button>
-                    <div class="dropdown-menu to-top dropdown-menu-lg p-0">
-                        <div class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
-                            <div>
-                                <h6 class="text-lg text-primary-light fw-semibold mb-0">Notifications</h6>
-                            </div>
-                            <span class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center"><?php echo count($announcements); ?></span>
-                        </div>
-                        <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
-                            <?php if (!empty($announcements)): ?>
-                                <?php foreach ($announcements as $announcement): ?>
-                                    <a href="notice-board.php?id=<?php echo $announcement['id']; ?>" class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                                        <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                                            <span class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                                                <iconify-icon icon="bitcoin-icons:verify-outline" class="icon text-xxl"></iconify-icon>
-                                            </span>
-                                            <div>
-                                                <h6 class="text-md fw-semibold mb-4"><?php echo htmlspecialchars($announcement['title']); ?></h6>
-                                                <p class="mb-0 text-sm text-secondary-light text-w-200-px"><?php echo htmlspecialchars(substr($announcement['content'] ?? '', 0, 50)) . '...'; ?></p>
-                                            </div>
-                                        </div>
-                                        <span class="text-sm text-secondary-light flex-shrink-0">
-                                            <?php echo date('M d', strtotime($announcement['created_at'])); ?>
-                                        </span>
-                                    </a>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="text-center py-20">
-                                    <p class="text-secondary-light">No new notifications</p>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                        <div class="text-center py-12 px-16">
-                            <a href="notice-board.php" class="text-primary-600 fw-semibold text-md hover-underline">See All Notifications</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        </div>
-        </div>
 
         <div class="dashboard-main-body">
             <div class="breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
@@ -911,7 +860,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                     <div class="card-body p-20">
                                         <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
                                             <div class="w-44-px h-44-px bg-warning-600 rounded-circle d-flex justify-content-center align-items-center">
-                                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon1.png" alt="Icon">
+                                                <img src="/tenant/assets/images/icons/dashboard-icon1.png" alt="Icon">
                                             </div>
                                             <p class="fw-medium text-primary-light mb-1">Total Students</p>
                                         </div>
@@ -920,7 +869,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                             <?php if ($attendanceRate > 0): ?>
                                                 <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
                                                     <?php echo $attendanceRate; ?>%
-                                                    <iconify-icon icon="bxs:up-arrow" class="text-xs"></iconify-icon>
+                                                    <i class="ri-arrow-up-line text-xs"></i>
                                                 </span>
                                                 Attendance Rate Today
                                             <?php endif; ?>
@@ -933,7 +882,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                     <div class="card-body p-20">
                                         <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
                                             <div class="w-44-px h-44-px bg-blue-600 rounded-circle d-flex justify-content-center align-items-center">
-                                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon2.png" alt="Icon">
+                                                <img src="/tenant/assets/images/icons/dashboard-icon2.png" alt="Icon">
                                             </div>
                                             <p class="fw-medium text-primary-light mb-1">Total Teachers</p>
                                         </div>
@@ -954,7 +903,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                     <div class="card-body p-20">
                                         <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
                                             <div class="w-44-px h-44-px bg-purple-600 rounded-circle d-flex justify-content-center align-items-center">
-                                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon3.png" alt="Icon">
+                                                <img src="/tenant/assets/images/icons/dashboard-icon3.png" alt="Icon">
                                             </div>
                                             <p class="fw-medium text-primary-light mb-1">Total Revenue</p>
                                         </div>
@@ -973,7 +922,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                     <div class="card-body p-20">
                                         <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
                                             <div class="w-44-px h-44-px bg-primary-600 rounded-circle d-flex justify-content-center align-items-center">
-                                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon4.png" alt="Icon">
+                                                <img src="/tenant/assets/images/icons/dashboard-icon4.png" alt="Icon">
                                             </div>
                                             <p class="fw-medium text-primary-light mb-1">Pending Payments</p>
                                         </div>
@@ -992,7 +941,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                     <div class="card-body p-20">
                                         <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
                                             <div class="w-44-px h-44-px bg-success-600 rounded-circle d-flex justify-content-center align-items-center">
-                                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon5.png" alt="Icon">
+                                                <img src="/tenant/assets/images/icons/dashboard-icon5.png" alt="Icon">
                                             </div>
                                             <p class="fw-medium text-primary-light mb-1">Active Classes</p>
                                         </div>
@@ -1011,7 +960,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                     <div class="card-body p-20">
                                         <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
                                             <div class="w-44-px h-44-px bg-cyan-600 rounded-circle d-flex justify-content-center align-items-center">
-                                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon6.png" alt="Icon">
+                                                <img src="/tenant/assets/images/icons/dashboard-icon6.png" alt="Icon">
                                             </div>
                                             <p class="fw-medium text-primary-light mb-1">Fee Collection</p>
                                         </div>
@@ -1124,7 +1073,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                                         <?php if (!empty($announcements)): ?>
                                                             <?php foreach ($announcements as $notice): ?>
                                                                 <div class="d-flex align-items-start gap-16">
-                                                                    <img src="<?php echo $notice['created_by_avatar'] ?? 'https://academixsuite.com/tenant/assets/images/thumbs/notice-board-img1.png'; ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
+                                                                    <img src="<?php echo $notice['created_by_avatar'] ?? '/tenant/assets/images/thumbs/notice-board-img1.png'; ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
                                                                     <div class="">
                                                                         <h6 class="mb-4 text-lg"><?php echo htmlspecialchars($notice['created_by_name'] ?? 'Admin'); ?></h6>
                                                                         <p class="text-secondary-light text-sm mb-0"><?php echo htmlspecialchars($notice['content']); ?></p>
@@ -1157,7 +1106,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                                             <?php foreach ($leaveRequests as $leave): ?>
                                                                 <div class="d-flex align-items-center justify-content-between gap-16">
                                                                     <div class="d-flex align-items-start gap-16">
-                                                                        <img src="<?php echo $leave['avatar'] ?? 'https://academixsuite.com/tenant/assets/images/thumbs/leave-request-img1.png'; ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
+                                                                        <img src="<?php echo $leave['avatar'] ?? '/tenant/assets/images/thumbs/leave-request-img1.png'; ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
                                                                         <div class="">
                                                                             <h6 class="mb-0 text-lg"><?php echo htmlspecialchars($leave['user_name']); ?></h6>
                                                                             <span class="text-secondary-light text-sm mb-0"><?php echo htmlspecialchars($leave['user_type']); ?></span>
@@ -1263,15 +1212,15 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                         ?>
                                         <div class="mt-40 mb-24 pe-110 position-relative max-w-288-px mx-auto">
                                             <div class="w-170-px h-170-px rounded-circle z-1 position-relative d-inline-flex justify-content-center align-items-center">
-                                                <img src="https://academixsuite.com/tenant/assets/images/icons/radial-bg1.png" alt="Image" class="position-absolute top-0 start-0 z-n1 w-100 h-100 object-fit-cover">
+                                                <img src="/tenant/assets/images/icons/radial-bg1.png" alt="Image" class="position-absolute top-0 start-0 z-n1 w-100 h-100 object-fit-cover">
                                                 <h5 class="text-white"><?php echo $studentPercent; ?>%</h5>
                                             </div>
                                             <div class="w-144-px h-144-px rounded-circle z-1 position-relative d-inline-flex justify-content-center align-items-center position-absolute top-0 end-0 mt--36">
-                                                <img src="https://academixsuite.com/tenant/assets/images/icons/radial-bg2.png" alt="Image" class="position-absolute top-0 start-0 z-n1 w-100 h-100 object-fit-cover">
+                                                <img src="/tenant/assets/images/icons/radial-bg2.png" alt="Image" class="position-absolute top-0 start-0 z-n1 w-100 h-100 object-fit-cover">
                                                 <h5 class="text-white"><?php echo $teacherPercent; ?>%</h5>
                                             </div>
                                             <div class="w-110-px h-110-px rounded-circle z-1 position-relative d-inline-flex justify-content-center align-items-center position-absolute bottom-0 start-50 translate-middle-x ms-48">
-                                                <img src="https://academixsuite.com/tenant/assets/images/icons/radial-bg3.png" alt="Image" class="position-absolute top-0 start-0 z-n1 w-100 h-100 object-fit-cover">
+                                                <img src="/tenant/assets/images/icons/radial-bg3.png" alt="Image" class="position-absolute top-0 start-0 z-n1 w-100 h-100 object-fit-cover">
                                                 <h5 class="text-white"><?php echo $staffPercent; ?>%</h5>
                                             </div>
                                         </div>
@@ -1348,7 +1297,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                             <?php foreach ($topTeachers as $teacher): ?>
                                                 <div class="d-flex align-items-center justify-content-between gap-16">
                                                     <div class="d-flex align-items-start gap-16">
-                                                        <img src="<?php echo $teacher['avatar'] ?? 'https://academixsuite.com/tenant/assets/images/thumbs/top-teacher-img1.png'; ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
+                                                        <img src="<?php echo $teacher['avatar'] ?? '/tenant/assets/images/thumbs/top-teacher-img1.png'; ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
                                                         <div class="">
                                                             <h6 class="mb-0 text-lg"><?php echo htmlspecialchars($teacher['name']); ?></h6>
                                                             <span class="text-secondary-light text-sm mb-0"><?php echo htmlspecialchars($teacher['email']); ?></span>
@@ -1537,7 +1486,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                             <div class="d-flex align-items-center justify-content-between gap-10">
                                                 <div class="d-flex align-items-center gap-12">
                                                     <span class="w-44-px h-44-px rounded-circle d-flex justify-content-center align-items-center">
-                                                        <img src="<?php echo $student['avatar'] ?? 'https://academixsuite.com/tenant/assets/images/thumbs/avatar-img' . ($index + 1) . '.png'; ?>" class="w-44-px h-44-px object-fit-cover rounded-circle" alt="Icon">
+                                                        <img src="<?php echo $student['avatar'] ?? '/tenant/assets/images/thumbs/avatar-img' . ($index + 1) . '.png'; ?>" class="w-44-px h-44-px object-fit-cover rounded-circle" alt="Icon">
                                                     </span>
                                                     <div class="">
                                                         <h6 class="text-sm mb-2"><?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name']); ?></h6>
@@ -1576,13 +1525,13 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
         </footer>
     </main>
 
-    <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/apexcharts.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/iconify-icon.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/dataTables.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-ui.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/app.js"></script>
+    <script src="/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
+    <script src="/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
+    <script src="/tenant/assets/js/lib/apexcharts.min.js"></script>
+    <script src="/tenant/assets/js/lib/iconify-icon.min.js"></script>
+    <script src="/tenant/assets/js/lib/dataTables.min.js"></script>
+    <script src="/tenant/assets/js/lib/jquery-ui.min.js"></script>
+    <script src="/tenant/assets/js/app.js"></script>
 
     <script>
         // Revenue Statistics Chart

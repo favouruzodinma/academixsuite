@@ -9,6 +9,29 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../../../logs/school_management.log');
 
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if (!$error) {
+        return;
+    }
+
+    $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
+    if (!in_array($error['type'], $fatalTypes, true)) {
+        return;
+    }
+
+    $message = sprintf(
+        "[%s] GENERAL_FATAL: %s in %s on line %s\n",
+        date('Y-m-d H:i:s'),
+        $error['message'] ?? 'Unknown fatal error',
+        $error['file'] ?? 'unknown file',
+        $error['line'] ?? 'unknown'
+    );
+
+    error_log(trim($message));
+    @file_put_contents(__DIR__ . '/../../../logs/general_fatal.log', $message, FILE_APPEND);
+});
+
 error_log("=== SCHOOL MANAGEMENT HUB START ===");
 
 // Start session safely
@@ -74,8 +97,13 @@ try {
 // Try to load SchoolActionManager, create fallback if not exists
 $actionManagerPath = __DIR__ . '/../../../includes/SchoolActionManager.php';
 if (file_exists($actionManagerPath)) {
-    require_once $actionManagerPath;
-    $actionManagerExists = class_exists('SchoolActionManager');
+    try {
+        require_once $actionManagerPath;
+        $actionManagerExists = class_exists('SchoolActionManager');
+    } catch (Throwable $e) {
+        $actionManagerExists = false;
+        error_log("SchoolActionManager failed to load: " . $e->getMessage());
+    }
 } else {
     $actionManagerExists = false;
     error_log("SchoolActionManager.php not found at: " . $actionManagerPath);
@@ -112,7 +140,7 @@ if (!$actionManagerExists) {
         private $schoolId;
         private $schoolSlug;
         
-        public function __construct($platformDb, $schoolDb, $schoolId, $schoolSlug) {
+        public function __construct($platformDb, $schoolDb, $schoolId, $schoolSlug, $userId = null) {
             $this->platformDb = $platformDb;
             $this->schoolDb = $schoolDb;
             $this->schoolId = $schoolId;
@@ -300,8 +328,14 @@ if (!$actionManagerExists) {
 
 // Initialize action manager
 try {
-    $actionManager = new SchoolActionManager($platformDb, $schoolDb, $school['id'], $schoolSlug);
-} catch (Exception $e) {
+    $managerReflection = new ReflectionClass('SchoolActionManager');
+    $constructor = $managerReflection->getConstructor();
+    if ($constructor && $constructor->getNumberOfParameters() >= 5) {
+        $actionManager = new SchoolActionManager($platformDb, $schoolDb, $school['id'], $schoolSlug, $userId);
+    } else {
+        $actionManager = new SchoolActionManager($platformDb, $schoolDb, $school['id'], $schoolSlug);
+    }
+} catch (Throwable $e) {
     error_log("Failed to initialize SchoolActionManager: " . $e->getMessage());
     $actionManager = null;
 }
@@ -363,6 +397,12 @@ try {
     }
     if (!empty($schoolDetails['plan_features'])) {
         $schoolDetails['plan_features'] = json_decode($schoolDetails['plan_features'], true) ?: [];
+    }
+    if (!empty($schoolDetails['landing_programs'])) {
+        $schoolDetails['landing_programs'] = json_decode($schoolDetails['landing_programs'], true) ?: [];
+    }
+    if (!empty($schoolDetails['landing_testimonials'])) {
+        $schoolDetails['landing_testimonials'] = json_decode($schoolDetails['landing_testimonials'], true) ?: [];
     }
     
     // Fetch subscription info
@@ -540,7 +580,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception("Year name, start date, and end date are required");
                 }
                 
-                $result = $actionManager->setAcademicYear($yearData, $userId);
+                if (method_exists($actionManager, 'setAcademicYear')) {
+                    $result = $actionManager->setAcademicYear($yearData, $userId);
+                } elseif (method_exists($actionManager, 'createAcademicYear')) {
+                    $result = $actionManager->createAcademicYear($yearData);
+                } else {
+                    throw new Exception("Academic year creation is not available");
+                }
                 break;
                 
             case 'create_announcement':
@@ -587,12 +633,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception("Password must be at least 8 characters long");
                 }
                 
-                $result = $actionManager->changePassword(
-                    $userId,
-                    $_POST['new_password'],
-                    'admin',
-                    $userId
-                );
+                if (method_exists($actionManager, 'changePassword')) {
+                    $result = $actionManager->changePassword(
+                        $userId,
+                        $_POST['new_password'],
+                        'admin',
+                        $userId
+                    );
+                } else {
+                    $result = changeAdminPasswordDirectly($schoolDb, $school['id'], $userId, $_POST['new_password']);
+                }
                 break;
                 
             default:
@@ -629,7 +679,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         $error = "Error processing request: " . $e->getMessage();
         error_log("Management hub error: " . $e->getMessage());
     }
@@ -669,6 +719,28 @@ function handleGeneralSettingsUpdate($post, $files, $platformDb, $schoolDb, $sch
             'currency' => $post['currency'] ?? $school['currency'] ?? 'NGN',
             'language' => $post['language'] ?? $school['language'] ?? 'en'
         ];
+
+        $landingPrograms = parseLandingRows($post['landing_programs'] ?? '', ['title', 'description']);
+        $landingTestimonials = parseLandingRows($post['landing_testimonials'] ?? '', ['name', 'role', 'quote']);
+
+        $landingData = [
+            'landing_badge_text' => $post['landing_badge_text'] ?? $school['landing_badge_text'] ?? '',
+            'landing_headline' => $post['landing_headline'] ?? $school['landing_headline'] ?? '',
+            'landing_subheadline' => $post['landing_subheadline'] ?? $school['landing_subheadline'] ?? '',
+            'landing_primary_cta_text' => $post['landing_primary_cta_text'] ?? $school['landing_primary_cta_text'] ?? '',
+            'landing_secondary_cta_text' => $post['landing_secondary_cta_text'] ?? $school['landing_secondary_cta_text'] ?? '',
+            'landing_intro_title' => $post['landing_intro_title'] ?? $school['landing_intro_title'] ?? '',
+            'landing_intro_text' => $post['landing_intro_text'] ?? $school['landing_intro_text'] ?? '',
+            'landing_highlight_title' => $post['landing_highlight_title'] ?? $school['landing_highlight_title'] ?? '',
+            'landing_highlight_text' => $post['landing_highlight_text'] ?? $school['landing_highlight_text'] ?? '',
+            'landing_cta_title' => $post['landing_cta_title'] ?? $school['landing_cta_title'] ?? '',
+            'landing_cta_text' => $post['landing_cta_text'] ?? $school['landing_cta_text'] ?? '',
+            'landing_programs' => json_encode($landingPrograms),
+            'landing_testimonials' => json_encode($landingTestimonials),
+            'landing_updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $updateData = array_merge($updateData, $landingData);
         
         // Handle social links
         $socialLinks = [
@@ -687,23 +759,48 @@ function handleGeneralSettingsUpdate($post, $files, $platformDb, $schoolDb, $sch
         if (!empty($uploadResult['favicon'])) {
             $updateData['favicon_path'] = $uploadResult['favicon'];
         }
+        if (!empty($uploadResult['landing_hero_image'])) {
+            $updateData['landing_hero_image'] = $uploadResult['landing_hero_image'];
+        }
+        if (!empty($uploadResult['landing_feature_image'])) {
+            $updateData['landing_feature_image'] = $uploadResult['landing_feature_image'];
+        }
+
+        $schoolColumns = getPlatformTableColumns($platformDb, 'schools');
+        $allowEmptyFields = [
+            'landing_badge_text',
+            'landing_headline',
+            'landing_subheadline',
+            'landing_primary_cta_text',
+            'landing_secondary_cta_text',
+            'landing_intro_title',
+            'landing_intro_text',
+            'landing_highlight_title',
+            'landing_highlight_text',
+            'landing_cta_title',
+            'landing_cta_text'
+        ];
         
         // Build update query
         $updateFields = [];
         $updateParams = [];
         foreach ($updateData as $field => $value) {
-            if ($value !== null && $value !== '') {
+            if (in_array($field, $schoolColumns, true) && $value !== null && ($value !== '' || in_array($field, $allowEmptyFields, true))) {
                 $updateFields[] = "`$field` = ?";
                 $updateParams[] = $value;
             }
         }
         
         // Add social links
-        $updateFields[] = "social_links = ?";
-        $updateParams[] = json_encode($socialLinks);
+        if (in_array('social_links', $schoolColumns, true)) {
+            $updateFields[] = "social_links = ?";
+            $updateParams[] = json_encode($socialLinks);
+        }
         
         // Add updated_at
-        $updateFields[] = "updated_at = NOW()";
+        if (in_array('updated_at', $schoolColumns, true)) {
+            $updateFields[] = "updated_at = NOW()";
+        }
         
         // Add school ID at the end
         $updateParams[] = $school['id'];
@@ -756,7 +853,7 @@ function handleGeneralSettingsUpdate($post, $files, $platformDb, $schoolDb, $sch
 }
 
 function handleFileUploads($files, $schoolId) {
-    $result = ['logo' => null, 'favicon' => null];
+    $result = ['logo' => null, 'favicon' => null, 'landing_hero_image' => null, 'landing_feature_image' => null];
     $uploadBaseDir = __DIR__ . '/../../../assets/uploads/schools/' . $schoolId . '/';
     
     if (!is_dir($uploadBaseDir)) {
@@ -803,8 +900,97 @@ function handleFileUploads($files, $schoolId) {
             error_log("Invalid file type for favicon: " . $fileExtension);
         }
     }
+
+    foreach ([
+        'landing_hero_image' => 'landing_hero_' . time(),
+        'landing_feature_image' => 'landing_feature_' . time()
+    ] as $field => $prefix) {
+        if (isset($files[$field]) && $files[$field]['error'] === UPLOAD_ERR_OK) {
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+            $fileExtension = strtolower(pathinfo($files[$field]['name'], PATHINFO_EXTENSION));
+
+            if (in_array($fileExtension, $allowedExtensions, true) && ($files[$field]['size'] ?? 0) <= 5 * 1024 * 1024) {
+                $fileName = $prefix . '.' . $fileExtension;
+                $uploadPath = $uploadBaseDir . $fileName;
+
+                if (move_uploaded_file($files[$field]['tmp_name'], $uploadPath)) {
+                    $result[$field] = 'assets/uploads/schools/' . $schoolId . '/' . $fileName;
+                } else {
+                    error_log("Failed to move uploaded {$field} file");
+                }
+            } else {
+                error_log("Invalid file type or size for {$field}");
+            }
+        }
+    }
     
     return $result;
+}
+
+function getPlatformTableColumns($db, $table) {
+    try {
+        $safeTable = str_replace('`', '', $table);
+        return $db->query("SHOW COLUMNS FROM `{$safeTable}`")->fetchAll(PDO::FETCH_COLUMN, 0);
+    } catch (Exception $e) {
+        error_log("Could not read columns for {$table}: " . $e->getMessage());
+        return [];
+    }
+}
+
+function parseLandingRows($text, array $keys) {
+    $rows = [];
+    $lines = preg_split('/\r\n|\r|\n/', trim((string) $text));
+
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '') {
+            continue;
+        }
+
+        $parts = array_map('trim', explode('|', $line));
+        $row = [];
+        foreach ($keys as $index => $key) {
+            $row[$key] = $parts[$index] ?? '';
+        }
+
+        if (array_filter($row, static function ($value) {
+            return $value !== '';
+        })) {
+            $rows[] = $row;
+        }
+    }
+
+    return $rows;
+}
+
+function changeAdminPasswordDirectly($schoolDb, $schoolId, $userId, $newPassword) {
+    try {
+        if (!$schoolDb) {
+            throw new Exception("School database not connected");
+        }
+
+        $stmt = $schoolDb->prepare("
+            UPDATE users
+            SET password = ?, updated_at = NOW()
+            WHERE id = ? AND school_id = ?
+        ");
+        $stmt->execute([
+            password_hash($newPassword, PASSWORD_DEFAULT),
+            $userId,
+            $schoolId
+        ]);
+
+        return [
+            'success' => true,
+            'message' => 'Password changed successfully'
+        ];
+    } catch (Throwable $e) {
+        error_log("Direct password change failed: " . $e->getMessage());
+        return [
+            'success' => false,
+            'message' => 'Failed to change password: ' . $e->getMessage()
+        ];
+    }
 }
 
 function updateSchoolSettings($schoolDb, $schoolId, $data) {
@@ -1063,15 +1249,15 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
     <title>School Management - <?php echo htmlspecialchars($school['name'] ?? 'School'); ?></title>
     
     <!-- Styles -->
-    <link rel="icon" type="image/png" href="https://academixsuite.com/tenant/assets/images/favicon.png" sizes="16x16">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/remixicon.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/bootstrap.min.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/apexcharts.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/dataTables.min.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/flatpickr.min.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/full-calendar.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/calendar.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/style.css">
+    <link rel="icon" type="image/png" href="/tenant/assets/images/favicon.png" sizes="16x16">
+    <link rel="stylesheet" href="/tenant/assets/css/remixicon.css">
+    <link rel="stylesheet" href="/tenant/assets/css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="/tenant/assets/css/lib/apexcharts.css">
+    <link rel="stylesheet" href="/tenant/assets/css/lib/dataTables.min.css">
+    <link rel="stylesheet" href="/tenant/assets/css/lib/flatpickr.min.css">
+    <link rel="stylesheet" href="/tenant/assets/css/lib/full-calendar.css">
+    <link rel="stylesheet" href="/tenant/assets/css/lib/calendar.css">
+    <link rel="stylesheet" href="/tenant/assets/css/style.css">
     
     <style>
         .avatar-preview {
@@ -1273,23 +1459,6 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
 <main class="dashboard-main">
         
         <?php include_once('includes/header.php'); ?>
-</div>
-                <div class="col-auto">
-                    <div class="d-flex flex-wrap align-items-center gap-3">
-                        <button type="button" data-theme-toggle
-                            class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-                        <div class="dropdown">
-                            <button
-                                class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative"
-                                type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
-                                <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
-                                <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
          <div class="dashboard-main-body">
             <!-- Breadcrumb -->
@@ -1861,14 +2030,14 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
     </div>
 
     <!-- Scripts -->
-    <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/apexcharts.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/iconify-icon.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/dataTables.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-ui.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/flatpickr.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/app.js"></script>
+    <script src="/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
+    <script src="/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
+    <script src="/tenant/assets/js/lib/apexcharts.min.js"></script>
+    <script src="/tenant/assets/js/lib/iconify-icon.min.js"></script>
+    <script src="/tenant/assets/js/lib/dataTables.min.js"></script>
+    <script src="/tenant/assets/js/lib/jquery-ui.min.js"></script>
+    <script src="/tenant/assets/js/lib/flatpickr.min.js"></script>
+    <script src="/tenant/assets/js/app.js"></script>
 
     <script>
         // Initialize flatpickr for date inputs

@@ -9,6 +9,8 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/constants.php';
 require_once __DIR__ . '/../config/functions.php';
 require_once __DIR__ . '/Helper/EnvHelper.php';
+require_once __DIR__ . '/Helper/notifications.php';
+require_once __DIR__ . '/Helper/logos.php';
 require_once __DIR__ . '/session_config.php';
 
 // Load environment variables

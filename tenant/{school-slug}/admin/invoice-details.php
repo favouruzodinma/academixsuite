@@ -308,7 +308,11 @@ error_log("=== INVOICE VIEW PAGE END ===");
     <!-- Print Header (only visible when printing) -->
     <div class="print-only">
         <div class="text-center mb-4">
-            <img src="https://academixsuite.com/tenant/assets/images/logo.png" alt="AcademixSuite" height="60">
+            <?php if (!empty($school['logo_path'])): ?>
+                <img src="<?php echo htmlspecialchars($school['logo_path']); ?>" alt="<?php echo htmlspecialchars($school['name']); ?> logo" height="60">
+            <?php else: ?>
+                <img src="https://academixsuite.com/tenant/assets/images/logo.png" alt="AcademixSuite" height="60">
+            <?php endif; ?>
             <h2 class="mt-3">Invoice #<?php echo htmlspecialchars($invoice['invoice_number']); ?></h2>
             <p><?php echo htmlspecialchars($school['name']); ?></p>
             <hr>

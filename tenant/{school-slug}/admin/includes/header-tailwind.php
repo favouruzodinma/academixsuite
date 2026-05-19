@@ -11,3 +11,6 @@
         <?php echo $headerActions ?? ''; ?>
     </div>
 </header>
+
+<?php /* Toast/Modal library — emits CSS+JS and bootstraps any flashes. */ ?>
+<?php if (function_exists('flash_render')) { flash_render(); } ?>

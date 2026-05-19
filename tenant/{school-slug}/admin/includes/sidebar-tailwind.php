@@ -10,12 +10,20 @@ $baseUrl = $baseUrl ?? $GLOBALS['BASE_URL'] ?? ('/tenant/' . $schoolSlug . '/adm
     <!-- School Header -->
     <div class="h-20 flex items-center px-6 border-b border-gray-200">
         <div class="flex items-center gap-3">
-            <div class="relative">
+            <?php
+                // Render the actual school logo from the platform DB
+                // (schools.logo_path). Falls back to the AcademixSuite mark.
+                $sidebarLogoUrl = function_exists('school_logo_url') ? school_logo_url($school) : '';
+            ?>
+            <?php if ($sidebarLogoUrl): ?>
+                <img src="<?php echo htmlspecialchars($sidebarLogoUrl); ?>"
+                     alt="<?php echo htmlspecialchars(($school['name'] ?? 'School') . ' logo'); ?>"
+                     class="w-10 h-10 rounded-xl object-contain bg-white border border-slate-200 p-1">
+            <?php else: ?>
                 <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
                     <i class="fas fa-school text-white text-lg"></i>
                 </div>
-                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-            </div>
+            <?php endif; ?>
             <div>
                 <span class="text-xl font-bold text-slate-900"><?php echo htmlspecialchars($school['name'] ?? 'School'); ?></span>
                 <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mt-0.5">SCHOOL ADMIN</p>

@@ -226,6 +226,9 @@ $navPages = $pages;
     <div class="shell">
         <aside class="sidebar">
             <div class="brand">
+                <?php if (!empty($school['logo_path'])): ?>
+                    <img src="<?php echo h($school['logo_path']); ?>" alt="<?php echo h($schoolName); ?> logo" class="sidebar-logo" style="max-width:100%;height:auto;margin-bottom:8px;">
+                <?php endif; ?>
                 <h1><?php echo h($schoolName); ?></h1>
                 <p><?php echo h($roleConfig['label']); ?><?php echo $staffRole ? ' - ' . h(ucfirst($staffRole)) : ''; ?></p>
             </div>

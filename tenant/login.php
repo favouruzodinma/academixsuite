@@ -449,7 +449,7 @@ $selectedUserType = $_POST['user_type'] ?? 'admin';
         <div class="lg-w-50 px-24 py-32 d-flex justify-content-center align-items-center">
             <div class="max-w-540-px mx-auto">
                 <a href="./" class="">
-                    <img src="./assets/images/logo.png" alt="Logo" width="150">
+                    <img src="<?php echo htmlspecialchars(function_exists('academix_logo_url') ? academix_logo_url() : '/tenant/assets/images/logo.png'); ?>" alt="AcademixSuite" width="150">
                 </a>
                 <div class="mt-32 mb-32">
                     <h1 class="h6 fw-bold text-primary-light mb-8">
@@ -613,7 +613,7 @@ $selectedUserType = $_POST['user_type'] ?? 'admin';
 
                 <div class="mt-32 text-center text-sm">
                     Don't have an account?
-                    <a href="register.php" class="text-primary-600 fw-semibold text-decoration-underline">
+                    <a href="/register" class="text-primary-600 fw-semibold text-decoration-underline">
                         Create an account
                     </a>
                 </div>

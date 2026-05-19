@@ -191,7 +191,9 @@ $allowedPages = [
         'add-new-student.php',
         'edit.php',
         'delete.php',
-        'manage.php'
+        'manage.php',
+        // Public-profile editor — admins customise their school landing page.
+        'school-profile.php'
     ],
     'teacher' => [
         'dashboard.php',
