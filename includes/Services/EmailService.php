@@ -59,6 +59,7 @@ class EmailService {
      */
     public function sendEmail($to, $subject, $htmlContent, $textContent = null, array $options = []) {
         $mail = null;
+        $htmlContent = $this->ensureAcademixLogo($htmlContent);
         
         try {
             $this->ensurePHPMailerLoaded();
@@ -147,6 +148,8 @@ class EmailService {
      */
     private function sendFallbackEmail($to, $subject, $htmlContent, $textContent = null, array $options = []) {
         try {
+            $htmlContent = $this->ensureAcademixLogo($htmlContent);
+
             // Create text version from HTML if not provided
             if (!$textContent) {
                 $textContent = strip_tags($htmlContent);
@@ -179,6 +182,35 @@ class EmailService {
                 'error' => $e->getMessage()
             ];
         }
+    }
+
+    private function ensureAcademixLogo($htmlContent): string {
+        $htmlContent = (string)$htmlContent;
+
+        if (stripos($htmlContent, 'tenant/assets/images/logo.png') !== false) {
+            return $htmlContent;
+        }
+
+        $logoUrl = $this->academixLogoUrl();
+        $brand = defined('APP_NAME') ? APP_NAME : 'AcademixSuite';
+        $header = '<div style="background:#0f172a;padding:18px 22px;margin:0 0 24px 0;text-align:left;">'
+            . '<img src="' . htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($brand, ENT_QUOTES, 'UTF-8') . '" style="height:36px;width:auto;display:block;">'
+            . '</div>';
+
+        if (preg_match('/<body\b[^>]*>/i', $htmlContent)) {
+            return preg_replace('/<body\b[^>]*>/i', '$0' . $header, $htmlContent, 1);
+        }
+
+        return $header . $htmlContent;
+    }
+
+    private function academixLogoUrl(): string {
+        if (function_exists('academix_logo_url')) {
+            return academix_logo_url(true);
+        }
+
+        $baseUrl = defined('APP_URL') ? constant('APP_URL') : 'https://www.academixsuite.com';
+        return rtrim((string)$baseUrl, '/') . '/tenant/assets/images/logo.png';
     }
 
     

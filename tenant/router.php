@@ -114,7 +114,7 @@ if ($extension === '') {
     $extension = 'php';
 }
 
-if (!in_array($extension, ['php', 'php', 'htm'], true)) {
+if (!in_array($extension, ['php', 'htm', 'html'], true)) {
     error_log("Invalid page extension: {$page}");
     http_response_code(400);
     die("Invalid page request.");
@@ -270,6 +270,41 @@ $allowedPages = [
         'reset-password.php'
     ]
 ];
+
+// Keep the whitelist in sync with the actual shared admin templates.
+// Several sidebar links resolve through aliases (for example teachers.php ->
+// teacher-list.php); the security check must therefore allow the real target
+// filenames too.
+$sharedAdminDir = __DIR__ . '/{school-slug}/admin';
+if (is_dir($sharedAdminDir)) {
+    $adminTemplateFiles = glob($sharedAdminDir . '/*.php') ?: [];
+    $adminInternalFiles = [
+        'payroll_common.php',
+    ];
+
+    foreach ($adminTemplateFiles as $templateFile) {
+        $templateName = basename($templateFile);
+        if (!in_array($templateName, $adminInternalFiles, true)) {
+            $allowedPages['admin'][] = $templateName;
+        }
+    }
+}
+
+foreach ([
+    __DIR__ . '/{school-slug}/admin/ajax',
+] as $adminAjaxDir) {
+    if (!is_dir($adminAjaxDir)) {
+        continue;
+    }
+
+    foreach (glob($adminAjaxDir . '/*.php') ?: [] as $ajaxFile) {
+        $allowedPages['admin'][] = basename($ajaxFile);
+    }
+}
+
+foreach ($allowedPages as $role => $pages) {
+    $allowedPages[$role] = array_values(array_unique($pages));
+}
 
 // Public pages that don't require authentication
 $publicPages = [

@@ -195,6 +195,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Find a School | AcademixSuite</title>
     <meta name="description" content="Browse verified schools across Nigeria. Compare fees, read parent reviews, and find the perfect school for your child.">
+    <link rel="icon" type="image/png" href="<?php echo htmlspecialchars(function_exists('academix_logo_url') ? academix_logo_url() : '/tenant/assets/images/logo.png'); ?>">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -887,11 +888,15 @@ try {
                             $avgFee = ($feeFrom + $feeTo) / 2;
 
                             $schoolInitial = substr($school['name'], 0, 1);
+                            $schoolLogoPath = trim((string)($school['logo_path'] ?? ''));
+                            $schoolCardLogo = $schoolLogoPath !== ''
+                                ? (function_exists('school_logo_url') ? school_logo_url($school) : '/' . ltrim($schoolLogoPath, '/'))
+                                : '';
                         ?>
                             <div class="school-card" data-aos="fade-up" data-aos-delay="<?php echo min(($loopIndex ?? 0) * 50, 300); ?>">
                                 <div class="card-image-wrap">
-                                    <?php if ($school['logo_path']): ?>
-                                        <img src="<?php echo htmlspecialchars($school['logo_path']); ?>" alt="<?php echo htmlspecialchars($school['name']); ?>" loading="lazy">
+                                    <?php if ($schoolCardLogo !== ''): ?>
+                                        <img src="<?php echo htmlspecialchars($schoolCardLogo); ?>" alt="<?php echo htmlspecialchars($school['name']); ?>" loading="lazy">
                                     <?php else: ?>
                                         <div class="card-image-placeholder">
                                             <span class="text-5xl font-bold text-primary/20"><?php echo htmlspecialchars($schoolInitial); ?></span>

@@ -234,7 +234,7 @@ class EmailTemplate
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border:1px solid #dbe3ef;border-radius:10px;overflow:hidden;">
                     <tr>
                         <td style="background:#0f172a;padding:20px 32px;">
-                            <img src="' . $this->escape(function_exists('academix_logo_url') ? academix_logo_url(true) : ($this->appUrl . '/tenant/assets/images/logo.png')) . '" alt="' . $this->escape($this->brandName) . '" style="height:36px;width:auto;display:block;">
+                            <img src="' . $this->escape($this->academixLogoUrl()) . '" alt="' . $this->escape($this->brandName) . '" style="height:36px;width:auto;display:block;">
                             <div style="font-size:13px;line-height:20px;color:#cbd5e1;margin-top:8px;">School operations, billing, and communication platform</div>
                         </td>
                     </tr>
@@ -300,6 +300,15 @@ class EmailTemplate
         }
 
         return '<div style="display:inline-block;background:' . $background . ';color:' . $color . ';font-size:12px;line-height:18px;font-weight:800;border-radius:999px;padding:5px 11px;margin-bottom:16px;">' . $this->escape($status) . '</div>';
+    }
+
+    private function academixLogoUrl(): string
+    {
+        if (function_exists('academix_logo_url')) {
+            return academix_logo_url(true);
+        }
+
+        return rtrim($this->appUrl ?: 'https://www.academixsuite.com', '/') . '/tenant/assets/images/logo.png';
     }
 
     private function escape($value): string

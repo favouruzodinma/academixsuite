@@ -26,6 +26,9 @@ if (!isset($pages[$canonicalPage])) {
 
 $page = $pages[$canonicalPage];
 $schoolName = $school['name'] ?? ($auth['school_name'] ?? 'School Portal');
+$portalSchoolLogo = function_exists('school_logo_url')
+    ? school_logo_url($school)
+    : (!empty($school['logo_path']) ? '/' . ltrim((string) $school['logo_path'], '/') : '');
 $userName = $auth['user_name'] ?? 'User';
 $staffRole = $auth['staff_role'] ?? '';
 
@@ -172,6 +175,9 @@ $navPages = $pages;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo h($page['title']); ?> - <?php echo h($schoolName); ?></title>
+    <?php if ($portalSchoolLogo !== ''): ?>
+        <link rel="icon" type="image/png" href="<?php echo h($portalSchoolLogo); ?>">
+    <?php endif; ?>
     <style>
         :root { --accent: <?php echo h($roleConfig['accent']); ?>; }
         * { box-sizing: border-box; }
@@ -226,8 +232,8 @@ $navPages = $pages;
     <div class="shell">
         <aside class="sidebar">
             <div class="brand">
-                <?php if (!empty($school['logo_path'])): ?>
-                    <img src="<?php echo h($school['logo_path']); ?>" alt="<?php echo h($schoolName); ?> logo" class="sidebar-logo" style="max-width:100%;height:auto;margin-bottom:8px;">
+                <?php if ($portalSchoolLogo !== ''): ?>
+                    <img src="<?php echo h($portalSchoolLogo); ?>" alt="<?php echo h($schoolName); ?> logo" class="sidebar-logo" style="max-width:100%;height:auto;margin-bottom:8px;">
                 <?php endif; ?>
                 <h1><?php echo h($schoolName); ?></h1>
                 <p><?php echo h($roleConfig['label']); ?><?php echo $staffRole ? ' - ' . h(ucfirst($staffRole)) : ''; ?></p>

@@ -336,6 +336,9 @@ class Mailer {
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background:#0f172a;padding:18px 22px;margin-bottom:24px;">
+            <img src="{{APP_LOGO}}" alt="{{APP_NAME}}" style="height:36px;width:auto;display:block;">
+        </div>
         <h1>Invoice {{INVOICE_NUMBER}} Issued</h1>
         <p>Dear {{PARENT_NAME}},</p>
         <p>An invoice has been issued for {{STUDENT_NAME}}.</p>
@@ -374,6 +377,9 @@ class Mailer {
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background:#0f172a;padding:18px 22px;margin-bottom:24px;">
+            <img src="{{APP_LOGO}}" alt="{{APP_NAME}}" style="height:36px;width:auto;display:block;">
+        </div>
         <h1 style="color: #27ae60;">Payment Receipt</h1>
         <p>Dear {{PARENT_NAME}},</p>
         <p>Thank you for your payment. Here is your receipt:</p>
@@ -427,6 +433,7 @@ class Mailer {
         $commonVars = [
             '{{APP_NAME}}' => defined('APP_NAME') ? APP_NAME : 'AcademixSuite',
             '{{APP_URL}}' => defined('APP_URL') ? APP_URL : 'https://academixsuite.com',
+            '{{APP_LOGO}}' => $this->academixLogoUrl(),
             '{{CURRENT_YEAR}}' => date('Y'),
             '{{CURRENT_DATE}}' => date('Y-m-d'),
             '{{SUPPORT_EMAIL}}' => defined('SUPPORT_EMAIL') ? SUPPORT_EMAIL : 'support@academixsuite.com'
@@ -435,6 +442,15 @@ class Mailer {
         $content = str_replace(array_keys($commonVars), array_values($commonVars), $content);
         
         return $content;
+    }
+
+    private function academixLogoUrl(): string {
+        if (function_exists('\\academix_logo_url')) {
+            return \academix_logo_url(true);
+        }
+
+        $appUrl = defined('APP_URL') ? constant('APP_URL') : 'https://www.academixsuite.com';
+        return rtrim((string) $appUrl, '/') . '/tenant/assets/images/logo.png';
     }
     
     /**

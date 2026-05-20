@@ -5,6 +5,8 @@
  */
 namespace AcademixSuite\Services;
 
+require_once __DIR__ . '/WhatsAppService.php';
+
 class InvoiceService {
     
     private $db;
@@ -65,6 +67,13 @@ class InvoiceService {
             // Send notification if requested
             if ($data['send_notification'] ?? false) {
                 $this->sendInvoiceNotification($invoiceId);
+                $invoice = $this->getInvoice($invoiceId);
+                if ($invoice) {
+                    $parent = $this->getParentForStudent((int)$invoice['invoice']['student_id']);
+                    if ($parent) {
+                        $this->sendWhatsAppReminder($invoice, $parent, 'created');
+                    }
+                }
             }
             
             return [
@@ -281,11 +290,20 @@ class InvoiceService {
                 case 'sms':
                     $this->sendSmsReminder($invoice, $parent);
                     break;
+
+                case 'whatsapp':
+                    $this->sendWhatsAppReminder($invoice, $parent);
+                    break;
                     
                 case 'both':
                     $this->sendEmailReminder($invoice, $parent);
                     $this->sendSmsReminder($invoice, $parent);
+                    $this->sendWhatsAppReminder($invoice, $parent);
                     break;
+            }
+
+            if (!in_array($type, ['whatsapp', 'both'], true)) {
+                $this->sendWhatsAppReminder($invoice, $parent);
             }
             
             // Log the reminder
@@ -595,16 +613,38 @@ class InvoiceService {
      * Get parent for student
      */
     private function getParentForStudent(int $studentId): ?array {
-        $sql = "SELECT p.* FROM parents p
-                JOIN guardians g ON p.id = g.user_id
-                WHERE g.student_id = ? AND g.is_primary = 1
-                LIMIT 1";
-        
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$studentId]);
-        $result = $stmt->fetch();
-        
-        return $result ?: null;
+        try {
+            $sql = "SELECT u.* FROM users u
+                    INNER JOIN guardians g ON u.id = g.user_id
+                    WHERE g.student_id = ? AND u.is_active = 1
+                    LIMIT 1";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$studentId]);
+            $result = $stmt->fetch();
+
+            if ($result) {
+                return $result;
+            }
+        } catch (\Throwable $e) {
+            error_log('Invoice parent lookup via users failed: ' . $e->getMessage());
+        }
+
+        try {
+            $sql = "SELECT p.* FROM parents p
+                    JOIN guardians g ON p.id = g.user_id
+                    WHERE g.student_id = ?
+                    LIMIT 1";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$studentId]);
+            $result = $stmt->fetch();
+
+            return $result ?: null;
+        } catch (\Throwable $e) {
+            error_log('Invoice parent lookup failed: ' . $e->getMessage());
+            return null;
+        }
     }
     
     /**
@@ -642,6 +682,51 @@ class InvoiceService {
         
         $sms->send($parent['phone'], $message);
     }
+
+    /**
+     * Send WhatsApp invoice notification or reminder.
+     */
+    private function sendWhatsAppReminder(array $invoice, array $parent, string $context = 'reminder'): void {
+        if (empty($parent['phone']) || !class_exists('\\WhatsAppService')) {
+            return;
+        }
+
+        try {
+            $invoiceRow = $invoice['invoice'];
+            $school = $this->getSchoolForInvoice($invoiceRow);
+            $whatsappDb = $this->getWhatsAppDatabase($school);
+            if (!$whatsappDb || !\WhatsAppService::featureEnabled($whatsappDb, (int)$invoiceRow['school_id'], 'fees', true)) {
+                return;
+            }
+
+            $service = new \WhatsAppService($whatsappDb, $school);
+            $student = $invoice['student'] ?? [];
+            $studentName = trim(($student['first_name'] ?? '') . ' ' . ($student['last_name'] ?? '')) ?: 'your child';
+            $balance = number_format((float)($invoiceRow['balance_amount'] ?? $invoiceRow['total_amount'] ?? 0), 2);
+            $invoiceNumber = $invoiceRow['invoice_number'] ?? ('#' . ($invoiceRow['id'] ?? ''));
+            $dueDate = !empty($invoiceRow['due_date']) ? date('F j, Y', strtotime($invoiceRow['due_date'])) : 'the due date';
+            $paymentUrl = $this->generatePaymentLink((int)$invoiceRow['id']);
+            $title = $context === 'created' ? 'New Fee Invoice' : 'Fee Payment Reminder';
+            $description = "Invoice {$invoiceNumber} for {$studentName} has an outstanding balance of {$balance}, due on {$dueDate}. Pay online: {$paymentUrl}";
+
+            $service->sendDirectNotification(
+                'fee',
+                (int)$invoiceRow['id'],
+                [
+                    'user_id' => (int)($parent['id'] ?? $parent['user_id'] ?? 0),
+                    'name' => $parent['name'] ?? $parent['full_name'] ?? 'Parent',
+                    'phone' => $parent['phone'],
+                    'recipient_type' => 'parent',
+                    'portal_url' => $paymentUrl,
+                ],
+                $title,
+                $description,
+                'parent/dashboard.php'
+            );
+        } catch (\Throwable $e) {
+            error_log('Invoice WhatsApp reminder failed: ' . $e->getMessage());
+        }
+    }
     
     /**
      * Send payment receipt
@@ -674,5 +759,51 @@ class InvoiceService {
             'type' => $type,
             'sent_at' => date('Y-m-d H:i:s')
         ]);
+    }
+
+    private function getSchoolForInvoice(array $invoice): array {
+        $schoolId = (int)($invoice['school_id'] ?? 0);
+        $school = ['id' => $schoolId, 'name' => 'School'];
+
+        try {
+            if ($this->tableExists('schools')) {
+                $stmt = $this->db->prepare('SELECT * FROM schools WHERE id = ? LIMIT 1');
+                $stmt->execute([$schoolId]);
+                $row = $stmt->fetch();
+                if ($row) {
+                    return array_merge($school, $row);
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('Invoice school lookup failed: ' . $e->getMessage());
+        }
+
+        return $school;
+    }
+
+    private function getWhatsAppDatabase(array $school): ?\PDO {
+        try {
+            if (!empty($school['database_name'])) {
+                return \Database::getSchoolConnection($school['database_name']);
+            }
+        } catch (\Throwable $e) {
+            error_log('Invoice WhatsApp school database unavailable: ' . $e->getMessage());
+        }
+
+        return $this->db instanceof \PDO ? $this->db : null;
+    }
+
+    private function tableExists(string $table): bool {
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+            return false;
+        }
+
+        try {
+            $stmt = $this->db->prepare('SHOW TABLES LIKE ?');
+            $stmt->execute([$table]);
+            return (bool)$stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 }

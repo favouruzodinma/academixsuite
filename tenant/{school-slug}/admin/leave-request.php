@@ -1,20 +1,204 @@
-<?php $currentPage = basename(__FILE__); ?>
-<!-- meta tags and other links -->
+<?php
+/**
+ * Leave Requests Management Page
+ * List, view, update status, and delete leave requests.
+ */
+
+// Enable error logging
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../../../logs/leave_requests.log');
+
+error_log("=== LEAVE REQUESTS PAGE START ===");
+error_log("Request URI: " . ($_SERVER['REQUEST_URI'] ?? 'N/A'));
+
+// Define constants if not defined
+defined('APP_NAME') or define('APP_NAME', 'AcademixSuite');
+
+// Start session safely
+try {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start([
+            'cookie_lifetime' => 86400,
+            'read_and_close'  => false,
+        ]);
+    }
+} catch (Exception $e) {
+    error_log("Session error: " . $e->getMessage());
+}
+
+// Get school slug from GLOBALS (set by router.php)
+$schoolSlug = $GLOBALS['SCHOOL_SLUG'] ?? '';
+$userType = $GLOBALS['USER_TYPE'] ?? 'admin';
+$schoolData = $GLOBALS['SCHOOL_DATA'] ?? [];
+
+if (empty($schoolSlug)) {
+    error_log("ERROR: Empty school slug from router");
+    header('HTTP/1.1 400 Bad Request');
+    echo json_encode(['error' => 'School identifier missing']);
+    exit;
+}
+
+// Get school info from session or GLOBALS
+$school = $schoolData;
+if (empty($school) && isset($_SESSION['school_info'][$schoolSlug])) {
+    $school = $_SESSION['school_info'][$schoolSlug];
+}
+
+if (empty($school)) {
+    error_log("ERROR: School data not found for slug: " . $schoolSlug);
+    header("Location: ../../login.php?school_slug=" . urlencode($schoolSlug));
+    exit;
+}
+
+// Check authentication
+$isAuthenticated = false;
+if (isset($_SESSION['school_auth']) && is_array($_SESSION['school_auth'])) {
+    if (($_SESSION['school_auth']['school_slug'] ?? '') === $schoolSlug) {
+        $isAuthenticated = true;
+    }
+}
+
+if (!$isAuthenticated) {
+    error_log("User not authenticated, redirecting to login");
+    header('Location: ../../login.php?school_slug=' . urlencode($schoolSlug));
+    exit;
+}
+
+// Get user info from session
+$schoolAuth = $_SESSION['school_auth'];
+$userId = (int)($schoolAuth['user_id'] ?? 0);
+$userType = $schoolAuth['user_type'] ?? '';
+
+// Verify access (admin, teacher, parent, etc. - adjust as needed)
+if (!in_array($userType, ['admin', 'teacher', 'parent'])) {
+    error_log("ERROR: User does not have access to leave requests");
+    header('HTTP/1.1 403 Forbidden');
+    echo "Access denied.";
+    exit;
+}
+
+// Load configuration and autoload
+try {
+    $autoloadPath = __DIR__ . '/../../../includes/autoload.php';
+    if (!file_exists($autoloadPath)) {
+        throw new Exception("Autoload file not found at: " . $autoloadPath);
+    }
+    require_once $autoloadPath;
+
+    if (!class_exists('Database')) {
+        throw new Exception("Database class not found");
+    }
+} catch (Exception $e) {
+    error_log("Error loading files: " . $e->getMessage());
+    http_response_code(500);
+    die("Configuration loading failed: " . $e->getMessage());
+}
+
+// Connect to school database
+$schoolDb = null;
+try {
+    if (!empty($school['database_name'])) {
+        $schoolDb = Database::getSchoolConnection($school['database_name']);
+        error_log("School database connection successful");
+    } else {
+        throw new Exception("School database name not found");
+    }
+} catch (Exception $e) {
+    error_log("ERROR connecting to school database: " . $e->getMessage());
+    $schoolDb = null;
+}
+
+// Load LeaveRequestManager
+require_once __DIR__ . '/../../../includes/LeaveRequestManager.php';
+$manager = new LeaveRequestManager($schoolDb, $school['id']);
+
+// Helper function for CSRF token
+if (!function_exists('generateCsrfToken')) {
+    function generateCsrfToken() {
+        if (!isset($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
+    }
+}
+if (!function_exists('validateCsrfToken')) {
+    function validateCsrfToken($token) {
+        return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+    }
+}
+
+// Handle AJAX requests (view, update status, delete)
+if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+    header('Content-Type: application/json');
+
+    $csrfToken = $_POST['csrf_token'] ?? '';
+    if (!validateCsrfToken($csrfToken)) {
+        echo json_encode(['success' => false, 'message' => 'Invalid security token.']);
+        exit;
+    }
+
+    $action = $_POST['action'] ?? '';
+    $response = ['success' => false, 'message' => 'Invalid action.'];
+
+    switch ($action) {
+        case 'view':
+            $id = (int)($_POST['id'] ?? 0);
+            if (!$id) {
+                $response = ['success' => false, 'message' => 'Invalid ID.'];
+            } else {
+                $data = $manager->getById($id);
+                if ($data) {
+                    $response = ['success' => true, 'data' => $data];
+                } else {
+                    $response = ['success' => false, 'message' => 'Leave request not found.'];
+                }
+            }
+            break;
+
+        case 'update_status':
+            $id = (int)($_POST['id'] ?? 0);
+            $status = $_POST['status'] ?? '';
+            $note = trim($_POST['note'] ?? '');
+            if (!$id || !in_array($status, ['pending', 'approved', 'rejected'])) {
+                $response = ['success' => false, 'message' => 'Invalid parameters.'];
+            } else {
+                $response = $manager->updateStatus($id, $status, $note, $userId);
+            }
+            break;
+
+        case 'delete':
+            $id = (int)($_POST['id'] ?? 0);
+            if (!$id) {
+                $response = ['success' => false, 'message' => 'Invalid ID.'];
+            } else {
+                $response = $manager->delete($id);
+            }
+            break;
+    }
+
+    echo json_encode($response);
+    exit;
+}
+
+// Fetch all leave requests (filtered by user type)
+$leaveRequests = $manager->getAll($userType, $userId);
+
+// Generate CSRF token
+$csrfToken = generateCsrfToken();
+
+error_log("=== LEAVE REQUESTS PAGE END ===");
+?>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
-
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description"
-    content="Modern Education Admin Dashboard for schools, colleges, universities, and eLearning platforms. Includes student and course management, attendance, exams, payments, analytics, and a fully responsive clean UI—ideal for LMS, coaching centers, and academic admin systems.">
-  <meta name="keywords"
-    content="Education Admin Dashboard, School Admin Panel, College Dashboard, University Dashboard, LMS Dashboard, eLearning Admin Template, Student Management System, Course Management, Education Template, Study Dashboard, Online Learning Dashboard, Academic Admin Panel, Bootstrap Dashboard, React Education Dashboard, Next.js Education Template">
-  <meta name="robots" content="INDEX,FOLLOW">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Title -->
-  <title> <?php echo htmlspecialchars($school['name']); ?> | <?php echo defined('APP_NAME') ? APP_NAME : 'School Management'; ?></title>
-  <link rel="icon" type="image/png" href="https://academixsuite.com/tenant/assets/images/favicon.png" sizes="16x16">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Leave Requests - School Management System">
+    <meta name="keywords" content="Leave Requests, School Management">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave Requests - <?php echo htmlspecialchars($school['name']); ?></title>
+    <link rel="icon" type="image/png" href="https://academixsuite.com/tenant/assets/images/favicon.png" sizes="16x16">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/remixicon.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/bootstrap.min.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/apexcharts.css">
@@ -23,352 +207,116 @@
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/full-calendar.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/calendar.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/style.css">
+    <style>
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        .toast {
+            min-width: 300px;
+            background: white;
+            border-left: 4px solid;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+            animation: slideIn 0.3s ease;
+        }
+        .toast.success {
+            border-left-color: #28a745;
+        }
+        .toast.success .toast-header {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .toast.error {
+            border-left-color: #dc3545;
+        }
+        .toast.error .toast-header {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        /* Ensure modals appear above overlay */
+        .modal {
+            z-index: 1050;
+        }
+        .modal-backdrop {
+            z-index: 1040;
+        }
+        /* Responsive table wrapper */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
 </head>
-
 <body>
 
-  <!-- Theme Customization Structure Start -->
-<div class="body-overlay"></div>
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
 
+<!-- Theme Customization Structure (unchanged) -->
+<div class="body-overlay"></div>
 <button type="button"
     class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
     <i class="ri-settings-3-line animate-spin"></i>
 </button>
-<div class="theme-customization-sidebar w-100 bg-base h-100vh overflow-y-auto position-fixed end-0 top-0">
-    <div class="d-flex align-items-center gap-3 py-16 px-24 justify-content-between border-bottom">
-        <div>
-            <h6 class="text-sm dark:text-white">Theme Settings</h6>
-            <p class="text-xs mb-0 text-neutral-500 dark:text-neutral-200">Customize and preview instantly</p>
-        </div>
-        <button data-slot="button"
-            class="theme-customization-sidebar__close text-neutral-900 bg-transparent text-hover-primary-600 d-flex text-xl">
-            <i class="ri-close-fill"></i>
-        </button>
-    </div>
 
-    <div class="d-flex flex-column gap-48 p-24 overflow-y-auto flex-grow-1">
+<div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
 
-        <div class="theme-setting-item">
-            <h6 class="fw-medium text-primary-light text-md mb-3">Theme Mode</h6>
-            <div class="d-grid grid-cols-3 gap-3 dark-light-mode">
-                <button type="button"
-                    class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl active"
-                    data-theme="light" aria-label="light">
-                    <i class="ri-sun-line"></i>
-                </button>
-                <button type="button"
-                    class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl"
-                    data-theme="dark" aria-label="dark">
-                    <i class="ri-moon-line"></i>
-                </button>
-                <button type="button"
-                    class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl"
-                    data-theme="system" aria-label="system">
-                    <i class="ri-computer-line"></i>
-                </button>
-            </div>
-        </div>
+<!-- Sidebar (include your dynamic sidebar) -->
+<?php include_once('includes/sidebar.php'); ?>
 
-        <div class="theme-setting-item">
-            <h6 class="fw-medium text-primary-light text-md mb-3">Page Direction</h6>
-            <div class="d-grid grid-cols-2 gap-3">
-                <button type="button"
-                    class="theme-setting-item__btn ltr-mode-btn d-flex align-items-center justify-content-center gap-2 h-56-px rounded-3 text-xl" aria-label="LTR">
-                    <span><i class="ri-align-item-left-line"></i></span>
-                    <span class="h6 text-sm font-medium mb-0">LTR</span>
-                </button>
-
-                <button type="button"
-                    class="theme-setting-item__btn rtl-mode-btn d-flex align-items-center justify-content-center gap-2 h-56-px rounded-3 text-xl" aria-label="RTL">
-                    <span class="h6 text-sm font-medium mb-0">RTL</span>
-                    <span><i class="ri-align-item-right-line"></i></span>
-                </button>
-            </div>
-        </div>
-
-        <div class="theme-setting-item">
-            <h6 class="fw-medium text-primary-light text-md mb-3">Color Schema</h6>
-            <div class="d-grid grid-cols-3 gap-3">
-                <button type="button"
-                    class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                    data-color="base" aria-label="Base">
-                    <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                        style="background-color: #25A194;"></span>
-                    <span class="fw-medium mt-1" style="color: #25A194;">Base</span>
-                </button>
-                <button type="button"
-                    class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                    data-color="red" aria-label="Red">
-                    <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                        style="background-color: #dc2626;"></span>
-                    <span class="fw-medium mt-1" style="color: #dc2626;">Red</span>
-                </button>
-                <button type="button"
-                    class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                    data-color="blue" aria-label="Blue">
-                    <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                        style="background-color: #2563eb;"></span>
-                    <span class="fw-medium mt-1" style="color: #2563eb;">Blue</span>
-                </button>
-                <button type="button"
-                    class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                    data-color="yellow" aria-label="Yellow">
-                    <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                        style="background-color: #ff9f29;"></span>
-                    <span class="fw-medium mt-1" style="color: #ff9f29;">Yellow</span>
-                </button>
-                <button type="button"
-                    class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                    data-color="cyan" aria-label="Cyan">
-                    <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                        style="background-color: #00b8f2;"></span>
-                    <span class="fw-medium mt-1" style="color: #00b8f2;">Cyan</span>
-                </button>
-                <button type="button"
-                    class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                    data-color="violet" aria-label="Violet">
-                    <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                        style="background-color: #7c3aed;"></span>
-                    <span class="fw-medium mt-1" style="color: #7c3aed;">Violet</span>
-                </button>
-            </div>
-        </div>
-
-    </div>
-</div>
-<!-- Theme Customization Structure End -->
-
-  <div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300">
-  </div>
-    <?php include_once('includes/sidebar.php'); ?>
 <main class="dashboard-main">
-    
-        <?php include_once('includes/header.php'); ?>
-</div>
-    <div class="col-auto">
-      <div class="d-flex flex-wrap align-items-center gap-3">
-        <button type="button" data-theme-toggle
-          class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-        <div class="dropdown d-inline-block">
-          <button
-            class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center"
-            type="button" data-bs-toggle="dropdown" aria-label="Language Change Button">
-            <img src="https://academixsuite.com/tenant/assets/images/flags/flag1.png" alt="image" class="w-24 h-24 object-fit-cover rounded-circle">
-          </button>
-          <div class="dropdown-menu to-top dropdown-menu-sm">
-            <div
-              class="py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
-              <div>
-                <h6 class="text-lg text-primary-light fw-semibold mb-0">Choose Your Language</h6>
-              </div>
-            </div>
-
-            <div class="max-h-400-px overflow-y-auto scroll-sm pe-8">
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="english">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag1.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">English</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="english">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="japan">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag2.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Japan</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="japan">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="france">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag3.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">France</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="france">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="germany">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag4.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Germany</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="germany">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="korea">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag5.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">South Korea</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="korea">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="bangladesh">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag6.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Bangladesh</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="bangladesh">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="india">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag7.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">India</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="india">
-              </div>
-              <div class="form-check style-check d-flex align-items-center justify-content-between">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="canada">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag8.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Canada</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="canada">
-              </div>
-            </div>
-          </div>
-        </div><!-- Language dropdown end -->
-
-        <div class="dropdown">
-          <button
-            class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative"
-            type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
-            <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
-            <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
-          </button>
-          <div class="dropdown-menu to-top dropdown-menu-lg p-0">
-            <div
-              class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
-              <div>
-                <h6 class="text-lg text-primary-light fw-semibold mb-0">Notifications</h6>
-              </div>
-              <span
-                class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center">05</span>
-            </div>
-
-            <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    <iconify-icon icon="bitcoin-icons:verify-outline" class="icon text-xxl"></iconify-icon>
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Congratulations</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Your profile has been Verified. Your
-                      profile has been Verified</p>
-                  </div>
+    <div class="navbar-header shadow-1">
+        <!-- Navbar unchanged (you can update user info dynamically) -->
+        <div class="row align-items-center justify-content-between">
+            <div class="col-auto">
+                <div class="d-flex flex-wrap align-items-center gap-4">
+                    <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
+                        <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
+                    </button>
+                    <form class="navbar-search">
+                        <input type="text" class="bg-transparent" name="search" placeholder="Search">
+                        <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                    </form>
                 </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    <img src="https://academixsuite.com/tenant/assets/images/notification/profile-1.png" alt="Image">
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Ronald Richards</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">You can stitch between artboards</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-info-subtle text-info-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    AM
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Arlene McCoy</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Invite you to prototyping</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    <img src="https://academixsuite.com/tenant/assets/images/notification/profile-2.png" alt="Image">
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Robiul Hasan</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Invite you to prototyping</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-info-subtle text-info-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    DR
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Darlene Robertson</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Invite you to prototyping</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
             </div>
-
-            <div class="text-center py-12 px-16">
-              <a href="javascript:void(0)" class="text-primary-600 fw-semibold text-md hover-underline">See All Notification</a>
+            <div class="col-auto">
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
+                    <div class="dropdown">
+                        <button class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative" type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
+                            <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
+                        </button>
+                        <div class="dropdown-menu to-top dropdown-menu-lg p-0">
+                            <div class="text-center py-20">
+                                <p class="text-secondary-light">No new notifications</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-          </div>
-        </div><!-- Notification dropdown end -->
-
-      </div>
+        </div>
     </div>
-  </div>
-</div>
 
     <div class="dashboard-main-body">
-
         <div class="breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
             <div class="">
-                <h1 class="fw-semibold mb-4 h6 text-primary-light">Leave Request</h1>
+                <h1 class="fw-semibold mb-4 h6 text-primary-light">Leave Requests</h1>
                 <div class="">
-                    <a href="index.html" class="text-secondary-light hover-text-primary hover-underline">Dashboard </a>
-                    <span class="text-secondary-light">/ Leave Request</span>
+                    <a href="index.php" class="text-secondary-light hover-text-primary hover-underline">Dashboard</a>
+                    <span class="text-secondary-light"> / Leave Requests</span>
                 </div>
             </div>
         </div>
@@ -376,54 +324,30 @@
         <div class="mt-24">
             <div class="card h-100">
                 <div class="card-body p-0 dataTable-wrapper">
-
-                    <div
-                        class="d-flex align-items-center justify-content-between flex-wrap gap-16 px-20 py-12 border-bottom border-neutral-200">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-16 px-20 py-12 border-bottom border-neutral-200">
                         <div class="d-flex flex-wrap align-items-center gap-16">
                             <div class="dropdown">
-                                <button type="button"
-                                    class="px-12 py-5-px border border-neutral-300 radius-8 d-flex align-items-center gap-20 "
-                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <button type="button" class="px-12 py-5-px border border-neutral-300 radius-8 d-flex align-items-center gap-20" data-bs-toggle="dropdown" aria-expanded="false">
                                     <span class="d-flex align-items-center gap-1 text-secondary-light text-sm">
                                         <i class="ri-file-upload-line text-md line-height-1"></i>
                                         Export
                                     </span>
-                                    <span class="">
-                                        <i class="ri-arrow-down-s-line"></i>
-                                    </span>
+                                    <span class=""><i class="ri-arrow-down-s-line"></i></span>
                                 </button>
                                 <ul class="dropdown-menu p-12 border bg-base shadow">
-                                    <li>
-                                        <button type="button"
-                                            class="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-10"
-                                            data-bs-toggle="modal" data-bs-target="#exampleModalView">
-                                            <i class="ri-file-3-line"></i>
-                                            PDF
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button type="button"
-                                            class="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-10"
-                                            data-bs-toggle="modal" data-bs-target="#exampleModalEdit">
-                                            <i class="ri-file-excel-line"></i>
-                                            Excel
-                                        </button>
-                                    </li>
+                                    <li><button type="button" class="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-10" onclick="exportTable('pdf')"><i class="ri-file-3-line"></i>PDF</button></li>
+                                    <li><button type="button" class="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-10" onclick="exportTable('excel')"><i class="ri-file-excel-line"></i>Excel</button></li>
                                 </ul>
                             </div>
                             <form class="navbar-search dt-search m-0">
-                                <input type="text" class="dt-input bg-transparent radius-4" aria-controls="dataTable"
-                                    name="search" placeholder="Search...">
+                                <input type="text" class="dt-input bg-transparent radius-4" id="searchInput" placeholder="Search...">
                                 <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
                             </form>
                         </div>
                         <div class="d-flex align-items-center gap-8 text-secondary-light">
-                            <span class="">
-                                Rows per page:
-                            </span>
+                            <span>Rows per page:</span>
                             <div class="dt-length">
-                                <select name="dataTable_length" aria-controls="dataTable"
-                                    class="dt-input form-control form-select">
+                                <select id="pageLength" class="dt-input form-control form-select">
                                     <option value="5">5</option>
                                     <option value="10" selected>10</option>
                                     <option value="25">25</option>
@@ -434,14 +358,15 @@
                         </div>
                     </div>
 
-                    <div class="p-0">
-                        <table class="table bordered-table mb-0 data-table" id="dataTable" data-page-length='10'>
+                    <!-- Responsive table wrapper -->
+                    <div class="table-responsive">
+                        <table class="table bordered-table mb-0 data-table" id="leaveRequestsTable">
                             <thead>
                                 <tr>
-                                    <th scope="col">S.L</th>
+                                    <th scope="col">#</th>
                                     <th scope="col">Apply Date</th>
                                     <th scope="col">Name</th>
-                                    <th scope="col">User type</th>
+                                    <th scope="col">User Type</th>
                                     <th scope="col">Leave Type</th>
                                     <th scope="col">Date</th>
                                     <th scope="col">Duration</th>
@@ -449,408 +374,98 @@
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td>01</td>
-                                    <td>07 May 2025</td>
-                                    <td>Jerome Bell</td>
-                                    <td>Teacher</td>
-                                    <td><i class="ri-hospital-line me-1"></i> Medical Leave</td>
-                                    <td>07 May 2025 - 08 May 2025</td>
-                                    <td>1</td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Approved</span>
+                            <tbody id="tableBody">
+                                <?php foreach ($leaveRequests as $index => $request): ?>
+                                <tr data-id="<?php echo $request['id']; ?>">
+                                    <td><?php echo $index + 1; ?></td>
+                                    <td><?php echo date('d M Y', strtotime($request['applied_on'])); ?></td>
+                                    <td><?php echo htmlspecialchars($request['user_name'] ?? 'N/A'); ?></td>
+                                    <td><?php echo ucfirst($request['user_type'] ?? 'N/A'); ?></td>
+                                    <td>
+                                        <?php 
+                                        $icon = '';
+                                        switch($request['leave_type_name'] ?? '') {
+                                            case 'Medical Leave': $icon = 'ri-hospital-line'; break;
+                                            case 'Casual Leave': $icon = 'ri-sun-line'; break;
+                                            case 'Half Day Leave': $icon = 'ri-time-line'; break;
+                                            case 'Vacation Leave': $icon = 'ri-flight-takeoff-line'; break;
+                                            case 'Study Leave': $icon = 'ri-book-open-line'; break;
+                                            case 'Paid Leave': $icon = 'ri-money-dollar-circle-line'; break;
+                                            case 'Emergency Leave': $icon = 'ri-alarm-warning-line'; break;
+                                            case 'Maternity Leave': $icon = 'ri-parent-line'; break;
+                                            case 'Paternity Leave': $icon = 'ri-user-heart-line'; break;
+                                            case 'Unpaid Leave': $icon = 'ri-close-circle-line'; break;
+                                            default: $icon = 'ri-calendar-line';
+                                        }
+                                        ?>
+                                        <i class="<?php echo $icon; ?> me-1"></i>
+                                        <?php echo htmlspecialchars($request['leave_type_name'] ?? 'N/A'); ?>
+                                    </td>
+                                    <td>
+                                        <?php 
+                                        $start = date('d M Y', strtotime($request['start_date']));
+                                        $end = date('d M Y', strtotime($request['end_date']));
+                                        echo $start . ($start != $end ? ' - ' . $end : '');
+                                        ?>
+                                    </td>
+                                    <td><?php echo $request['duration']; ?></td>
+                                    <td>
+                                        <?php
+                                        $statusClass = '';
+                                        switch($request['status']) {
+                                            case 'approved':
+                                                $statusClass = 'bg-success-100 text-success-600';
+                                                break;
+                                            case 'pending':
+                                                $statusClass = 'bg-warning-100 text-warning-600';
+                                                break;
+                                            case 'rejected':
+                                                $statusClass = 'bg-danger-100 text-danger-600';
+                                                break;
+                                            default:
+                                                $statusClass = 'bg-secondary-100 text-secondary-600';
+                                        }
+                                        ?>
+                                        <span class="<?php echo $statusClass; ?> px-24 py-4 radius-4 fw-medium text-sm">
+                                            <?php echo ucfirst($request['status']); ?>
+                                        </span>
                                     </td>
                                     <td>
                                         <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
+                                            <button type="button" class="text-primary-light text-xl" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
                                                 <li>
-                                                    <button type="button"
-                                                        class="my-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-eye-line"></i>
-                                                        View Request
+                                                    <button type="button" class="view-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6" data-id="<?php echo $request['id']; ?>">
+                                                        <i class="ri-eye-line"></i> View Request
                                                     </button>
                                                 </li>
+                                                <?php if ($userType === 'admin'): ?>
                                                 <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
+                                                    <button type="button" class="update-status-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6" data-id="<?php echo $request['id']; ?>" data-status="<?php echo $request['status']; ?>">
+                                                        <i class="ri-pencil-line"></i> Update Status
+                                                    </button>
+                                                </li>
+                                                <?php endif; ?>
+                                                <li>
+                                                    <button type="button" class="delete-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6" data-id="<?php echo $request['id']; ?>">
+                                                        <i class="ri-delete-bin-6-line"></i> Delete
                                                     </button>
                                                 </li>
                                             </ul>
                                         </div>
                                     </td>
                                 </tr>
-
+                                <?php endforeach; ?>
+                                <?php if (empty($leaveRequests)): ?>
                                 <tr>
-                                    <td>02</td>
-                                    <td>10 May 2025</td>
-                                    <td>Jane Cooper</td>
-                                    <td>Student</td>
-                                    <td><i class="ri-sun-line me-1"></i> Casual Leave</td>
-                                    <td>10 May 2025 - 12 May 2025</td>
-                                    <td>2</td>
-                                    <td><span
-                                            class="bg-warning-100 text-warning-600 px-24 py-4 radius-4 fw-medium text-sm">Pending</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="my-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-eye-line"></i>
-                                                        View Request
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
+                                    <td colspan="9" class="text-center py-20 text-secondary-light">
+                                        No leave requests found.
                                     </td>
                                 </tr>
-
-                                <tr>
-                                    <td>03</td>
-                                    <td>12 May 2025</td>
-                                    <td>Devon Lane</td>
-                                    <td>Teacher</td>
-                                    <td><i class="ri-time-line me-1"></i> Half Day Leave</td>
-                                    <td>12 May 2025</td>
-                                    <td>0.5</td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Rejected</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="my-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-eye-line"></i>
-                                                        View Request
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>04</td>
-                                    <td>13 May 2025</td>
-                                    <td>Cody Fisher</td>
-                                    <td>Admin</td>
-                                    <td><i class="ri-flight-takeoff-line me-1"></i> Vacation Leave</td>
-                                    <td>13 May 2025 - 20 May 2025</td>
-                                    <td>7</td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Approved</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="my-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-eye-line"></i>
-                                                        View Request
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>05</td>
-                                    <td>14 May 2025</td>
-                                    <td>Theresa Webb</td>
-                                    <td>Teacher</td>
-                                    <td><i class="ri-book-open-line me-1"></i> Study Leave</td>
-                                    <td>14 May 2025 - 16 May 2025</td>
-                                    <td>2</td>
-                                    <td><span
-                                            class="bg-warning-100 text-warning-600 px-24 py-4 radius-4 fw-medium text-sm">Pending</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="my-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-eye-line"></i>
-                                                        View Request
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>06</td>
-                                    <td>15 May 2025</td>
-                                    <td>Darrell Steward</td>
-                                    <td>Student</td>
-                                    <td><i class="ri-money-dollar-circle-line me-1"></i> Paid Leave</td>
-                                    <td>15 May 2025 - 17 May 2025</td>
-                                    <td>2</td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Approved</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="my-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-eye-line"></i>
-                                                        View Request
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>07</td>
-                                    <td>17 May 2025</td>
-                                    <td>Leslie Alexander</td>
-                                    <td>Teacher</td>
-                                    <td><i class="ri-alarm-warning-line me-1"></i> Emergency Leave</td>
-                                    <td>17 May 2025 - 18 May 2025</td>
-                                    <td>1</td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Rejected</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="my-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-eye-line"></i>
-                                                        View Request
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>08</td>
-                                    <td>18 May 2025</td>
-                                    <td>Guy Hawkins</td>
-                                    <td>Admin</td>
-                                    <td><i class="ri-parent-line me-1"></i> Maternity Leave</td>
-                                    <td>18 May 2025 - 28 May 2025</td>
-                                    <td>10</td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Approved</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="my-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-eye-line"></i>
-                                                        View Request
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>09</td>
-                                    <td>19 May 2025</td>
-                                    <td>Brooklyn Simmons</td>
-                                    <td>Teacher</td>
-                                    <td><i class="ri-user-heart-line me-1"></i> Paternity Leave</td>
-                                    <td>19 May 2025 - 24 May 2025</td>
-                                    <td>5</td>
-                                    <td><span
-                                            class="bg-warning-100 text-warning-600 px-24 py-4 radius-4 fw-medium text-sm">Pending</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="my-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-eye-line"></i>
-                                                        View Request
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>10</td>
-                                    <td>20 May 2025</td>
-                                    <td>Kristin Watson</td>
-                                    <td>Student</td>
-                                    <td><i class="ri-close-circle-line me-1"></i> Unpaid Leave</td>
-                                    <td>20 May 2025 - 21 May 2025</td>
-                                    <td>1</td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Rejected</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="my-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-eye-line"></i>
-                                                        View Request
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <?php endif; ?>
                             </tbody>
-
                         </table>
                     </div>
                 </div>
@@ -859,181 +474,240 @@
     </div>
 
     <footer class="d-footer">
-  <div class="">
-    <p class="mb-0 text-center"> &copy; <span class="current-year"></span> Made With ❤️ by Wowtheme7.</p>
-  </div>
-</footer>
+        <div class="">
+            <p class="mb-0 text-center"> &copy; <span class="current-year"></span> <?php echo htmlspecialchars($school['name']); ?> | Made With ❤️ by AcademixSuite.</p>
+        </div>
+    </footer>
 </main>
 
-<!-- Add sidebar start -->
-<div
-    class="my-sidebar bg-white position-fixed end-0 top-0 h-100vh overflow-y-auto z-99 max-w-700-px w-100 translate-x-full duration-300 active-translate-0">
+<!-- View/Update Sidebar -->
+<div class="my-sidebar bg-white position-fixed end-0 top-0 h-100vh overflow-y-auto z-99 max-w-700-px w-100 translate-x-full duration-300 active-translate-0" id="viewSidebar">
     <div class="px-20 py-12 border-bottom d-flex align-items-center justify-content-between gap-20">
-        <h5 class="text-lg mb-0">View Leave Request</h5>
+        <h5 class="text-lg mb-0">Leave Request Details</h5>
         <button type="button" class="close-my-sidebar text-danger-600 text-lg d-flex">
             <i class="ri-close-large-line"></i>
         </button>
     </div>
-    <div class="p-20">
-        <div class="d-flex flex-column gap-28">
-            <div class="d-flex flex-column gap-8">
-                <div class="d-flex gap-4">
-                    <span class="fw-semibold text-sm text-secondary-light w-110-px">Apply Date</span>
-                    <span class="fw-normal text-sm text-primary-light">: 07 May 2025</span>
-                </div>
-                <div class="d-flex gap-4">
-                    <span class="fw-semibold text-sm text-secondary-light w-110-px">Name</span>
-                    <span class="fw-normal text-sm text-primary-light">: Jerome Bell</span>
-                </div>
-                <div class="d-flex gap-4">
-                    <span class="fw-semibold text-sm text-secondary-light w-110-px">User type</span>
-                    <span class="fw-normal text-sm text-primary-light">: Teacher</span>
-                </div>
-                <div class="d-flex gap-4">
-                    <span class="fw-semibold text-sm text-secondary-light w-110-px">Leave Type</span>
-                    <span class="fw-normal text-sm text-primary-light">: Medical Leave</span>
-                </div>
-                <div class="d-flex gap-4">
-                    <span class="fw-semibold text-sm text-secondary-light w-110-px">Date</span>
-                    <span class="fw-normal text-sm text-primary-light">: 07 May 2025 - 08 may 2025</span>
-                </div>
-                <div class="d-flex gap-4">
-                    <span class="fw-semibold text-sm text-secondary-light w-110-px">Duration</span>
-                    <span class="fw-normal text-sm text-primary-light">: 1</span>
-                </div>
-                <div class="d-flex gap-4">
-                    <span class="fw-semibold text-sm text-secondary-light w-110-px">Reasons</span>
-                    <span class="fw-normal text-sm text-primary-light">: Doctor or hospital visits</span>
-                </div>
-            </div>
-            <div class="">
-                <h5 class="text-md mb-0">Update Status</h5>
-                <div class="d-flex align-items-center flex-wrap gap-28 mt-16">
-                    <div class="form-check checked-primary d-flex align-items-center gap-2">
-                        <input class="form-check-input" type="radio" name="radio1" id="p1">
-                        <label class="form-check-label" for="p1">Pending</label>
-                    </div>
-                    <div class="form-check checked-primary d-flex align-items-center gap-2">
-                        <input class="form-check-input" type="radio" name="radio1" id="l1">
-                        <label class="form-check-label" for="l1">Approved</label>
-                    </div>
-                    <div class="form-check checked-primary d-flex align-items-center gap-2">
-                        <input class="form-check-input" type="radio" name="radio1" id="a1">
-                        <label class="form-check-label" for="a1">Rejected</label>
-                    </div>
-                </div>
-            </div>
-            <form action="#" class="">
-                <div class="">
-                    <label for="notee" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Leave
-                        Note
-                    </label>
-                    <textarea class="form-control" id="notee" placeholder="Enter note..."></textarea>
-                </div>
-                <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                    <button type="reset"
-                        class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8">
-                        Cancel
-                    </button>
-                    <button type="submit"
-                        class="btn btn-primary-600 border border-primary-600 text-md px-28 py-12 radius-8 max-w-156-px w-100">
-                        Save
-                    </button>
-                </div>
-            </form>
-        </div>
+    <div class="p-20" id="sidebarContent">
+        <!-- Dynamic content will be loaded here -->
     </div>
 </div>
-<!-- Add sidebar end -->
 
-
-<!-- Modal Delete Event start -->
-<div class="modal fade" id="exampleModalDelete" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog modal-dialog-centered max-w-340-px">
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content radius-16 bg-base">
             <div class="modal-body pt-32 px-36 pb-24 text-center">
                 <span class="mb-16 fs-1 line-height-1 text-danger">
-                    <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
+                    <iconify-icon icon="fluent:delete-24-regular"></iconify-icon>
                 </span>
-                <h6 class="text-lg fw-semibold text-primary-light mb-0">Are your sure you want to Suspend this teacher
-                </h6>
+                <h6 class="text-lg fw-semibold text-primary-light mb-0" id="deleteConfirmMessage">Are you sure you want to delete this leave request?</h6>
                 <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                    <button type="reset"
-                        class="flex-grow-1 border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-24 py-11 radius-8" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button type="button"
-                        class="flex-grow-1 btn btn-primary-600 border border-primary-600 text-md px-16 py-12 radius-8">
-                        Yes, Suspend
-                    </button>
+                    <button type="button" class="flex-grow-1 border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-24 py-11 radius-8" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="flex-grow-1 btn btn-primary-600 border border-primary-600 text-md px-16 py-12 radius-8" id="confirmDeleteBtn">Yes, Delete</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- Modal Delete Event end -->
 
-  <!-- jQuery library js -->
-  <script src="assets/js/lib/jquery-3.7.1.min.js"></script>
-  <!-- Bootstrap js -->
-  <script src="assets/js/lib/bootstrap.bundle.min.js"></script>
-  <!-- Apex Chart js -->
-  <script src="assets/js/lib/apexcharts.min.js"></script>
-  <!-- Iconify Font js -->
-  <script src="assets/js/lib/iconify-icon.min.js"></script>
-  <!-- Data Table js -->
-  <script src="assets/js/lib/dataTables.min.js"></script>
-  
-  <!-- jQuery UI js -->
-  <script src="assets/js/lib/jquery-ui.min.js"></script>
-  
-  <!-- main js -->
-  <script src="assets/js/app.js"></script>
+<!-- Scripts -->
+<script src="https://academixsuite.com/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
+<script src="https://academixsuite.com/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
+<script src="https://academixsuite.com/tenant/assets/js/lib/iconify-icon.min.js"></script>
+<script src="https://academixsuite.com/tenant/assets/js/lib/dataTables.min.js"></script>
+<script src="https://academixsuite.com/tenant/assets/js/app.js"></script>
 
 <script>
-    let table = new DataTable('#dataTable');
-
-    // ✅ Data Table start
-    $('.data-table').each(function () {
-        const $table = $(this);
-        const tableInstance = new DataTable(this);
-
-        // Handle search input (inside same wrapper)
-        $table.closest('.dataTable-wrapper').find('.dt-search .dt-input').on('keyup', function () {
-            tableInstance.search(this.value).draw();
-        });
-
-        // Handle page length change (inside same wrapper)
-        $table.closest('.dataTable-wrapper').find('.dt-length .dt-input').on('change', function () {
-            const value = $(this).val();
-            tableInstance.page.len(value).draw();
-        });
+$(document).ready(function() {
+    // DataTable initialization
+    let table = new DataTable('#leaveRequestsTable', {
+        pageLength: 10,
+        lengthMenu: [5, 10, 25, 50, 100],
+        searching: true,
+        ordering: true,
+        info: true,
+        paging: true,
+        dom: 'rtip',
     });
-    // ✅ Data Table end
 
-    // Sidebar js start
-    $('.my-sidebar-btn').on('click', function () {
-        $('.my-sidebar').addClass('active');
-        $('.overlay').addClass('active');
+    // Bind external search
+    $('#searchInput').on('keyup', function() {
+        table.search(this.value).draw();
     });
-    $('.close-my-sidebar, .overlay').on('click', function () {
+
+    // Bind external page length
+    $('#pageLength').on('change', function() {
+        table.page.len(parseInt($(this).val())).draw();
+    });
+
+    // Toast function
+    function showToast(message, type = 'success') {
+        const toastHtml = `
+            <div class="toast ${type} show" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="true" data-delay="5000">
+                <div class="toast-header">
+                    <i class="ri-${type === 'success' ? 'checkbox-circle' : 'error-warning'}-line me-2"></i>
+                    <strong class="me-auto">${type === 'success' ? 'Success' : 'Error'}</strong>
+                    <small>just now</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        $('#toastContainer').append(toastHtml);
+        $('.toast').toast('show');
+        setTimeout(() => {
+            $('.toast').first().remove();
+        }, 5000);
+    }
+
+    // Sidebar open/close
+    $('.close-my-sidebar, .overlay').on('click', function() {
         $('.my-sidebar').removeClass('active');
         $('.overlay').removeClass('active');
     });
 
+    // View button click
+    $(document).on('click', '.view-btn', function() {
+        const id = $(this).data('id');
+        $.post(window.location.href, {
+            action: 'view',
+            id: id,
+            csrf_token: '<?php echo $csrfToken; ?>'
+        }, function(response) {
+            if (response.success) {
+                const d = response.data;
+                let html = `
+                    <div class="d-flex flex-column gap-28">
+                        <div class="d-flex flex-column gap-8">
+                            <div class="d-flex gap-4">
+                                <span class="fw-semibold text-sm text-secondary-light w-110-px">Apply Date</span>
+                                <span class="fw-normal text-sm text-primary-light">: ${new Date(d.applied_on).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})}</span>
+                            </div>
+                            <div class="d-flex gap-4">
+                                <span class="fw-semibold text-sm text-secondary-light w-110-px">Name</span>
+                                <span class="fw-normal text-sm text-primary-light">: ${d.user_name || 'N/A'}</span>
+                            </div>
+                            <div class="d-flex gap-4">
+                                <span class="fw-semibold text-sm text-secondary-light w-110-px">User Type</span>
+                                <span class="fw-normal text-sm text-primary-light">: ${d.user_type ? d.user_type.charAt(0).toUpperCase() + d.user_type.slice(1) : 'N/A'}</span>
+                            </div>
+                            <div class="d-flex gap-4">
+                                <span class="fw-semibold text-sm text-secondary-light w-110-px">Leave Type</span>
+                                <span class="fw-normal text-sm text-primary-light">: ${d.leave_type_name || 'N/A'}</span>
+                            </div>
+                            <div class="d-flex gap-4">
+                                <span class="fw-semibold text-sm text-secondary-light w-110-px">Date</span>
+                                <span class="fw-normal text-sm text-primary-light">: ${new Date(d.start_date).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})} - ${new Date(d.end_date).toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})}</span>
+                            </div>
+                            <div class="d-flex gap-4">
+                                <span class="fw-semibold text-sm text-secondary-light w-110-px">Duration</span>
+                                <span class="fw-normal text-sm text-primary-light">: ${d.duration} day(s)</span>
+                            </div>
+                            <div class="d-flex gap-4">
+                                <span class="fw-semibold text-sm text-secondary-light w-110-px">Reason</span>
+                                <span class="fw-normal text-sm text-primary-light">: ${d.reason || 'N/A'}</span>
+                            </div>
+                        </div>
+                `;
+                // Only show status update if user is admin
+                <?php if ($userType === 'admin'): ?>
+                html += `
+                        <div class="">
+                            <h5 class="text-md mb-0">Update Status</h5>
+                            <form id="statusUpdateForm">
+                                <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                                <input type="hidden" name="action" value="update_status">
+                                <input type="hidden" name="id" value="${d.id}">
+                                <div class="d-flex align-items-center flex-wrap gap-28 mt-16">
+                                    <div class="form-check checked-primary d-flex align-items-center gap-2">
+                                        <input class="form-check-input" type="radio" name="status" value="pending" id="statusPending" ${d.status === 'pending' ? 'checked' : ''}>
+                                        <label class="form-check-label" for="statusPending">Pending</label>
+                                    </div>
+                                    <div class="form-check checked-primary d-flex align-items-center gap-2">
+                                        <input class="form-check-input" type="radio" name="status" value="approved" id="statusApproved" ${d.status === 'approved' ? 'checked' : ''}>
+                                        <label class="form-check-label" for="statusApproved">Approved</label>
+                                    </div>
+                                    <div class="form-check checked-primary d-flex align-items-center gap-2">
+                                        <input class="form-check-input" type="radio" name="status" value="rejected" id="statusRejected" ${d.status === 'rejected' ? 'checked' : ''}>
+                                        <label class="form-check-label" for="statusRejected">Rejected</label>
+                                    </div>
+                                </div>
+                                <div class="mt-16">
+                                    <label for="statusNote" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Note (optional)</label>
+                                    <textarea class="form-control" id="statusNote" name="note" placeholder="Enter note...">${d.rejection_reason || ''}</textarea>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
+                                    <button type="reset" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8">Cancel</button>
+                                    <button type="submit" class="btn btn-primary-600 border border-primary-600 text-md px-28 py-12 radius-8 max-w-156-px w-100">Update</button>
+                                </div>
+                            </form>
+                        </div>
+                `;
+                <?php endif; ?>
+                html += `</div>`;
+                $('#sidebarContent').html(html);
+                $('.my-sidebar').addClass('active');
+                $('.overlay').addClass('active');
 
-    $('.edit-sidebar-btn').on('click', function () {
-        $('.edit-sidebar').addClass('active');
-        $('.overlay').addClass('active');
+                // Handle status update form submission
+                $('#statusUpdateForm').on('submit', function(e) {
+                    e.preventDefault();
+                    const formData = $(this).serialize();
+                    $.post(window.location.href, formData, function(response) {
+                        if (response.success) {
+                            showToast(response.message, 'success');
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            showToast(response.message, 'error');
+                        }
+                    }, 'json').fail(function() {
+                        showToast('Request failed.', 'error');
+                    });
+                });
+            } else {
+                showToast(response.message, 'error');
+            }
+        }, 'json').fail(function() {
+            showToast('Failed to fetch request details.', 'error');
+        });
     });
-    $('.close-edit-sidebar, .overlay').on('click', function () {
-        $('.edit-sidebar').removeClass('active');
-        $('.overlay').removeClass('active');
-    });
-    // Sidebar js end
 
+    // Delete button click
+    let deleteId = null;
+    $(document).on('click', '.delete-btn', function() {
+        deleteId = $(this).data('id');
+        $('#deleteConfirmMessage').text('Are you sure you want to delete this leave request?');
+        $('#deleteModal').modal('show');
+    });
+
+    // Confirm delete
+    $('#confirmDeleteBtn').on('click', function() {
+        if (!deleteId) return;
+        $.post(window.location.href, {
+            action: 'delete',
+            id: deleteId,
+            csrf_token: '<?php echo $csrfToken; ?>'
+        }, function(response) {
+            $('#deleteModal').modal('hide');
+            if (response.success) {
+                showToast(response.message, 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast(response.message, 'error');
+            }
+        }, 'json').fail(function() {
+            showToast('Request failed.', 'error');
+        });
+    });
+
+    // Export placeholder
+    window.exportTable = function(format) {
+        showToast(`Export as ${format.toUpperCase()} coming soon.`, 'info');
+    };
+});
 </script>
-
 </body>
-
 </html>

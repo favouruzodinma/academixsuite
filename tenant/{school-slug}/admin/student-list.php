@@ -1,8 +1,10 @@
 <?php
-
 /**
- * School Student List Page - VIRTUAL VERSION
- * This file displays all students from the school database
+ * School Student List Page
+ * Displays all students from the school database with proper relationships
+ * 
+ * @package AcademixSuite
+ * @version 2.0
  */
 
 // Enable error reporting
@@ -15,8 +17,8 @@ error_log("Request URI: " . ($_SERVER['REQUEST_URI'] ?? 'N/A'));
 error_log("Script: " . __FILE__);
 
 // Define constants if not defined
-if (!defined('APP_NAME')) define('APP_NAME', 'AcademixSuite');
-// IS_LOCAL is self-defining via config/constants.php (security: do not force true).
+defined('APP_NAME') or define('APP_NAME', 'AcademixSuite');
+defined('IS_LOCAL') or define('IS_LOCAL', true);
 
 // Start session safely
 try {
@@ -59,7 +61,7 @@ if (empty($school)) {
 // Check authentication
 $isAuthenticated = false;
 if (isset($_SESSION['school_auth']) && is_array($_SESSION['school_auth'])) {
-    if ($_SESSION['school_auth']['school_slug'] === $schoolSlug) {
+    if (($_SESSION['school_auth']['school_slug'] ?? '') === $schoolSlug) {
         $isAuthenticated = true;
     }
 }
@@ -72,10 +74,8 @@ if (!$isAuthenticated) {
 
 // Get user info from session
 $schoolAuth = $_SESSION['school_auth'];
-$userId = $schoolAuth['user_id'] ?? 0;
+$userId = (int)($schoolAuth['user_id'] ?? 0);
 $userType = $schoolAuth['user_type'] ?? '';
-
-$currentPage = basename(__FILE__);
 
 // Verify access (admin or teacher can view)
 if (!in_array($userType, ['admin', 'teacher'])) {
@@ -114,11 +114,34 @@ try {
     $schoolDb = null;
 }
 
+// Initialize notification variables
+$notificationCount = 0;
+$notifications = [];
+
+// Include GuardianManager for notifications if available
+$guardianManagerPath = __DIR__ . '/../../../includes/GuardianManager.php';
+if (file_exists($guardianManagerPath) && $schoolDb) {
+    require_once $guardianManagerPath;
+    try {
+        $guardianManager = new GuardianManager($schoolDb, $school['id'], $userId, $userType, $school);
+        
+        if (method_exists($guardianManager, 'getNotificationCount')) {
+            $notificationCount = $guardianManager->getNotificationCount();
+        }
+        
+        if (method_exists($guardianManager, 'getNotifications')) {
+            $notifications = $guardianManager->getNotifications(5);
+        }
+    } catch (Exception $e) {
+        error_log("ERROR initializing GuardianManager: " . $e->getMessage());
+    }
+}
+
 // Initialize variables
 $students = [];
 $classes = [];
 $sections = [];
-$categories = [];
+$guardians = [];
 $totalStudents = 0;
 $settings = [];
 $adminUser = ['name' => 'Admin User', 'role_name' => 'Administrator'];
@@ -127,20 +150,21 @@ $adminUser = ['name' => 'Admin User', 'role_name' => 'Administrator'];
 if ($schoolDb) {
     try {
         // Get school settings
-        $settingsStmt = $schoolDb->prepare("SELECT * FROM settings WHERE school_id = ?");
+        $settingsStmt = $schoolDb->prepare("SELECT `key`, `value` FROM settings WHERE school_id = ?");
         if ($settingsStmt) {
             $settingsStmt->execute([$school['id']]);
-            $settingsRows = $settingsStmt->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($settingsRows as $row) {
-                $settings[$row['setting_key']] = $row['setting_value'];
+            while ($row = $settingsStmt->fetch(PDO::FETCH_ASSOC)) {
+                $settings[$row['key']] = $row['value'];
             }
+            error_log("Loaded " . count($settings) . " settings records");
         }
 
         // Get logged in user details
         $userStmt = $schoolDb->prepare("
             SELECT u.*, r.name as role_name 
             FROM users u 
-            LEFT JOIN roles r ON u.role_id = r.id 
+            LEFT JOIN user_roles ur ON u.id = ur.user_id
+            LEFT JOIN roles r ON ur.role_id = r.id
             WHERE u.id = ? AND u.school_id = ?
         ");
         if ($userStmt) {
@@ -148,6 +172,7 @@ if ($schoolDb) {
             $adminUserData = $userStmt->fetch(PDO::FETCH_ASSOC);
             if ($adminUserData) {
                 $adminUser = $adminUserData;
+                error_log("Loaded user data for ID: " . $userId);
             } elseif (isset($_SESSION['school_user']['name'])) {
                 $adminUser = [
                     'name' => $_SESSION['school_user']['name'],
@@ -158,7 +183,7 @@ if ($schoolDb) {
 
         // Get all classes for filter
         $classStmt = $schoolDb->prepare("
-            SELECT id, name, section 
+            SELECT id, name, code 
             FROM classes 
             WHERE school_id = ? AND is_active = 1 
             ORDER BY name
@@ -166,31 +191,47 @@ if ($schoolDb) {
         if ($classStmt) {
             $classStmt->execute([$school['id']]);
             $classes = $classStmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Loaded " . count($classes) . " classes");
         }
 
-        // Get student categories
-        $catStmt = $schoolDb->prepare("
-            SELECT id, name 
-            FROM student_categories 
-            WHERE school_id = ? 
-            ORDER BY name
+        // Get sections
+        $sectionStmt = $schoolDb->prepare("
+            SELECT s.*, c.name as class_name 
+            FROM sections s
+            LEFT JOIN classes c ON s.class_id = c.id
+            WHERE s.school_id = ? AND s.is_active = 1
+            ORDER BY c.name, s.name
         ");
-        if ($catStmt) {
-            $catStmt->execute([$school['id']]);
-            $categories = $catStmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($sectionStmt) {
+            $sectionStmt->execute([$school['id']]);
+            $sections = $sectionStmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Loaded " . count($sections) . " sections");
         }
 
         // Get all students with related data
         $studentStmt = $schoolDb->prepare("
             SELECT 
                 s.*,
+                u.name as user_name,
+                u.email as user_email,
+                u.phone as user_phone,
+                u.profile_photo as avatar,
+                u.gender as user_gender,
+                u.date_of_birth as user_dob,
                 c.name as class_name,
-                c.section as class_section,
-                sc.name as category_name,
-                CONCAT(c.name, ' (', c.section, ')') as class_display
+                c.code as class_code,
+                sec.name as section_name,
+                CONCAT(c.name, ' - ', sec.name) as class_display,
+                (
+                    SELECT GROUP_CONCAT(CONCAT(g.relationship, ':', gu.name) SEPARATOR '|')
+                    FROM guardians g
+                    LEFT JOIN users gu ON g.user_id = gu.id
+                    WHERE g.student_id = s.id AND g.school_id = s.school_id
+                ) as guardians_info
             FROM students s
-            LEFT JOIN classes c ON s.class_id = c.id
-            LEFT JOIN student_categories sc ON s.category_id = sc.id
+            LEFT JOIN users u ON s.user_id = u.id AND u.school_id = s.school_id
+            LEFT JOIN classes c ON s.class_id = c.id AND c.school_id = s.school_id
+            LEFT JOIN sections sec ON s.section_id = sec.id AND sec.school_id = s.school_id
             WHERE s.school_id = ?
             ORDER BY s.created_at DESC
         ");
@@ -199,12 +240,28 @@ if ($schoolDb) {
             $studentStmt->execute([$school['id']]);
             $students = $studentStmt->fetchAll(PDO::FETCH_ASSOC);
             $totalStudents = count($students);
-            error_log("Fetched " . $totalStudents . " students");
+            error_log("Fetched " . $totalStudents . " students from database");
+            
+            // Debug first student to verify data
+            if ($totalStudents > 0) {
+                error_log("Sample student data: " . json_encode([
+                    'id' => $students[0]['id'],
+                    'first_name' => $students[0]['first_name'],
+                    'last_name' => $students[0]['last_name'],
+                    'class_name' => $students[0]['class_name'] ?? 'null',
+                    'section_name' => $students[0]['section_name'] ?? 'null'
+                ]));
+            }
         }
 
     } catch (Exception $e) {
         error_log("Error fetching student data: " . $e->getMessage());
+        error_log("Stack trace: " . $e->getTraceAsString());
+        $_SESSION['toast_error'] = "Error loading student data. Please refresh the page.";
     }
+} else {
+    error_log("WARNING: School database not available, cannot fetch students");
+    $_SESSION['toast_error'] = "Database connection failed. Please try again later.";
 }
 
 // Handle search and filters
@@ -212,33 +269,36 @@ $searchTerm = $_GET['search'] ?? '';
 $classFilter = $_GET['class'] ?? '';
 $genderFilter = $_GET['gender'] ?? '';
 $statusFilter = $_GET['status'] ?? '';
-$categoryFilter = $_GET['category'] ?? '';
 
 // Filter students if needed
-if (!empty($searchTerm) || !empty($classFilter) || !empty($genderFilter) || !empty($statusFilter) || !empty($categoryFilter)) {
+if (!empty($searchTerm) || !empty($classFilter) || !empty($genderFilter) || !empty($statusFilter)) {
     $filteredStudents = [];
     foreach ($students as $student) {
         $match = true;
         
         if (!empty($searchTerm)) {
             $searchLower = strtolower($searchTerm);
+            $fullName = strtolower(($student['first_name'] ?? '') . ' ' . ($student['last_name'] ?? ''));
             $studentMatch = 
-                strpos(strtolower($student['first_name'] . ' ' . $student['last_name']), $searchLower) !== false ||
+                strpos($fullName, $searchLower) !== false ||
                 strpos(strtolower($student['admission_number'] ?? ''), $searchLower) !== false ||
                 strpos(strtolower($student['roll_number'] ?? ''), $searchLower) !== false ||
-                strpos(strtolower($student['mobile'] ?? ''), $searchLower) !== false;
+                strpos(strtolower($student['user_phone'] ?? ''), $searchLower) !== false;
             
             if (!$studentMatch) {
                 $match = false;
             }
         }
         
-        if (!empty($classFilter) && $student['class_id'] != $classFilter) {
+        if (!empty($classFilter) && ($student['class_id'] ?? 0) != $classFilter) {
             $match = false;
         }
         
-        if (!empty($genderFilter) && strtolower($student['gender'] ?? '') != strtolower($genderFilter)) {
-            $match = false;
+        if (!empty($genderFilter)) {
+            $gender = strtolower($student['gender'] ?? $student['user_gender'] ?? '');
+            if ($gender != strtolower($genderFilter)) {
+                $match = false;
+            }
         }
         
         if (!empty($statusFilter)) {
@@ -250,27 +310,43 @@ if (!empty($searchTerm) || !empty($classFilter) || !empty($genderFilter) || !emp
             }
         }
         
-        if (!empty($categoryFilter) && ($student['category_id'] ?? 0) != $categoryFilter) {
-            $match = false;
-        }
-        
         if ($match) {
             $filteredStudents[] = $student;
         }
     }
     $students = $filteredStudents;
+    error_log("After filtering: " . count($students) . " students remain");
 }
+
+// Collect toast messages from session
+$toastSuccess = $_SESSION['toast_success'] ?? '';
+$toastError = $_SESSION['toast_error'] ?? '';
+$toastWarning = $_SESSION['toast_warning'] ?? '';
+$toastInfo = $_SESSION['toast_info'] ?? '';
+
+// Clear session toasts
+unset($_SESSION['toast_success'], $_SESSION['toast_error'], $_SESSION['toast_warning'], $_SESSION['toast_info']);
 
 // Format currency symbol
 $currencySymbol = $settings['currency_symbol'] ?? '₦';
 
+// Generate CSRF token
+if (!function_exists('generateCsrfToken')) {
+    function generateCsrfToken() {
+        if (!isset($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
+    }
+}
+$csrfToken = generateCsrfToken();
+
 error_log("=== STUDENT LIST PAGE END ===");
+error_log("Total students displayed: " . count($students));
 ?>
 
-<!-- meta tags and other links -->
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -278,7 +354,7 @@ error_log("=== STUDENT LIST PAGE END ===");
     <meta name="keywords" content="Student List, School Management">
     <meta name="robots" content="INDEX,FOLLOW">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student List - <?php echo htmlspecialchars($school['name']); ?></title>
+    <title>Student List - <?php echo htmlspecialchars($school['name'] ?? 'School'); ?></title>
     <link rel="icon" type="image/png" href="https://academixsuite.com/tenant/assets/images/favicon.png" sizes="16x16">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/remixicon.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/bootstrap.min.css">
@@ -288,159 +364,351 @@ error_log("=== STUDENT LIST PAGE END ===");
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/full-calendar.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/calendar.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/style.css">
+    <style>
+        /* Toast container */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        .toast {
+            min-width: 300px;
+            background: white;
+            border-left: 4px solid;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+            animation: slideIn 0.3s ease;
+        }
+        .toast.success {
+            border-left-color: #28a745;
+        }
+        .toast.success .toast-header {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .toast.error {
+            border-left-color: #dc3545;
+        }
+        .toast.error .toast-header {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Status badges - matching subject list style */
+        .badge-active {
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-inactive {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Avatar styles */
+        .avatar-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #25A194, #1a7a6f);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        /* Student info styles */
+        .student-avatar-sm {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: #e6f7f5;
+            color: #25A194;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        /* Table styles matching subject list */
+        .table thead th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            font-size: 14px;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .table td {
+            vertical-align: middle;
+            padding: 12px;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .badge-info {
+            background-color: #cce5ff;
+            color: #004085;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            background: #e6f7f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #25A194;
+            font-size: 1rem;
+        }
+        
+        /* DataTable custom styles */
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-left: 8px;
+        }
+        
+        .dataTables_wrapper .dataTables_length select {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 0 8px;
+        }
+        
+        .pagination-wrapper {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        /* Gender badges */
+        .gender-male {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .gender-female {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+        .gender-other {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+    </style>
 </head>
-
 <body>
 
-    <!-- Theme Customization Structure Start -->
-    <div class="body-overlay"></div>
-    <button type="button" class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
-        <i class="ri-settings-3-line animate-spin"></i>
-    </button>
-    <div class="theme-customization-sidebar w-100 bg-base h-100vh overflow-y-auto position-fixed end-0 top-0">
-        <div class="d-flex align-items-center gap-3 py-16 px-24 justify-content-between border-bottom">
-            <div>
-                <h6 class="text-sm dark:text-white">Theme Settings</h6>
-                <p class="text-xs mb-0 text-neutral-500 dark:text-neutral-200">Customize and preview instantly</p>
-            </div>
-            <button data-slot="button" class="theme-customization-sidebar__close text-neutral-900 bg-transparent text-hover-primary-600 d-flex text-xl">
-                <i class="ri-close-fill"></i>
-            </button>
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer">
+    <?php if (!empty($toastSuccess)): ?>
+    <div class="toast success show" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="true" data-delay="5000">
+        <div class="toast-header">
+            <i class="ri-checkbox-circle-line me-2"></i>
+            <strong class="me-auto">Success</strong>
+            <small>just now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
-        <div class="d-flex flex-column gap-48 p-24 overflow-y-auto flex-grow-1">
-            <div class="theme-setting-item">
-                <h6 class="fw-medium text-primary-light text-md mb-3">Theme Mode</h6>
-                <div class="d-grid grid-cols-3 gap-3 dark-light-mode">
-                    <button type="button" class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl active" data-theme="light" aria-label="light">
-                        <i class="ri-sun-line"></i>
-                    </button>
-                    <button type="button" class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl" data-theme="dark" aria-label="dark">
-                        <i class="ri-moon-line"></i>
-                    </button>
-                    <button type="button" class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl" data-theme="system" aria-label="system">
-                        <i class="ri-computer-line"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="theme-setting-item">
-                <h6 class="fw-medium text-primary-light text-md mb-3">Color Schema</h6>
-                <div class="d-grid grid-cols-3 gap-3">
-                    <button type="button" class="color-picker-btn d-flex flex-column justify-content-center align-items-center" data-color="base" aria-label="Base">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3" style="background-color: #25A194;"></span>
-                        <span class="fw-medium mt-1" style="color: #25A194;">Base</span>
-                    </button>
-                    <button type="button" class="color-picker-btn d-flex flex-column justify-content-center align-items-center" data-color="red" aria-label="Red">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3" style="background-color: #dc2626;"></span>
-                        <span class="fw-medium mt-1" style="color: #dc2626;">Red</span>
-                    </button>
-                    <button type="button" class="color-picker-btn d-flex flex-column justify-content-center align-items-center" data-color="blue" aria-label="Blue">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3" style="background-color: #2563eb;"></span>
-                        <span class="fw-medium mt-1" style="color: #2563eb;">Blue</span>
-                    </button>
-                </div>
-            </div>
+        <div class="toast-body">
+            <?php echo htmlspecialchars($toastSuccess); ?>
         </div>
     </div>
-    <!-- Theme Customization Structure End -->
+    <?php endif; ?>
 
-    <div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
-    <?php include_once('includes/sidebar.php'); ?>
-<main class="dashboard-main">
-        
-        <?php include_once('includes/header.php'); ?>
+    <?php if (!empty($toastError)): ?>
+    <div class="toast error show" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="true" data-delay="5000">
+        <div class="toast-header">
+            <i class="ri-error-warning-line me-2"></i>
+            <strong class="me-auto">Error</strong>
+            <small>just now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            <?php echo htmlspecialchars($toastError); ?>
+        </div>
+    </div>
+    <?php endif; ?>
 </div>
-                <div class="col-auto">
-                    <div class="d-flex flex-wrap align-items-center gap-3">
-                        <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-                        <div class="dropdown">
-                            <button class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative" type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
-                                <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
-                            </button>
-                            <div class="dropdown-menu to-top dropdown-menu-lg p-0">
-                                <div class="text-center py-20">
-                                    <p class="text-secondary-light">No new notifications</p>
+
+<!-- Theme Customization Structure -->
+<div class="body-overlay"></div>
+<button type="button" class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
+    <i class="ri-settings-3-line animate-spin"></i>
+</button>
+
+<div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
+
+<!-- Sidebar -->
+<?php include_once('includes/sidebar.php') ?>
+
+<main class="dashboard-main">
+    <div class="navbar-header shadow-1">
+        <div class="row align-items-center justify-content-between">
+            <div class="col-auto">
+                <div class="d-flex flex-wrap align-items-center gap-4">
+                    <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
+                        <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
+                    </button>
+                    <form class="navbar-search" method="GET" action="">
+                        <input type="text" class="bg-transparent" name="search" placeholder="Search students..." value="<?php echo htmlspecialchars($searchTerm); ?>">
+                        <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                    </form>
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
+                    <div class="dropdown d-inline-block">
+                        <button class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative" type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
+                            <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
+                            <?php if ($notificationCount > 0): ?>
+                            <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
+                            <?php endif; ?>
+                        </button>
+                        <div class="dropdown-menu to-top dropdown-menu-lg p-0">
+                            <div class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
+                                <div>
+                                    <h6 class="text-lg text-primary-light fw-semibold mb-0">Notifications</h6>
                                 </div>
+                                <span class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center"><?php echo str_pad($notificationCount, 2, '0', STR_PAD_LEFT); ?></span>
+                            </div>
+
+                            <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
+                                <?php if (!empty($notifications)): ?>
+                                    <?php foreach ($notifications as $notification): ?>
+                                    <a href="javascript:void(0)" class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between <?php echo !$notification['is_read'] ? 'bg-neutral-50' : ''; ?>">
+                                        <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
+                                            <span class="w-44-px h-44-px bg-<?php echo $notification['type'] == 'success' ? 'success' : ($notification['type'] == 'error' ? 'danger' : 'info'); ?>-subtle text-<?php echo $notification['type'] == 'success' ? 'success' : ($notification['type'] == 'error' ? 'danger' : 'info'); ?>-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
+                                                <i class="ri-<?php echo $notification['icon'] ?? 'notification-line'; ?> text-xl"></i>
+                                            </span>
+                                            <div>
+                                                <h6 class="text-md fw-semibold mb-4"><?php echo htmlspecialchars($notification['title']); ?></h6>
+                                                <p class="mb-0 text-sm text-secondary-light text-w-200-px"><?php echo htmlspecialchars($notification['message']); ?></p>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm text-secondary-light flex-shrink-0"><?php echo date('d M', strtotime($notification['created_at'])); ?></span>
+                                    </a>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="text-center py-20">
+                                        <p class="text-secondary-light">No notifications</p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="text-center py-12 px-16">
+                                <a href="notifications.php" class="text-primary-600 fw-semibold text-md hover-underline">See All Notifications</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="dashboard-main-body">
-            <div class="breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+    <div class="dashboard-main-body">
+        <div class="breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+            <div class="">
+                <h1 class="fw-semibold mb-4 h6 text-primary-light">Student List</h1>
                 <div class="">
-                    <h1 class="fw-semibold mb-4 h6 text-primary-light">Student List</h1>
-                    <div class="">
-                        <a href="index.php" class="text-secondary-light hover-text-primary hover-underline">Dashboard</a>
-                        <span class="text-secondary-light"> / Student List</span>
-                    </div>
+                    <a href="index.php" class="text-secondary-light hover-text-primary hover-underline">Dashboard</a>
+                    <span class="text-secondary-light"> / Student List</span>
                 </div>
-                <a href="add-new-student.php" class="btn btn-primary-600 d-flex align-items-center gap-6">
-                    <span class="d-flex text-md">
-                        <i class="ri-add-large-line"></i>
-                    </span>
-                    Add Student
-                </a>
             </div>
+            <a href="add-new-student.php" class="btn btn-primary-600 d-flex align-items-center gap-6">
+                <span class="d-flex text-md">
+                    <i class="ri-add-large-line"></i>
+                </span>
+                Add Student
+            </a>
+        </div>
 
-            <div class="mt-24">
-                <div class="card h-100">
-                    <div class="card-body p-0 dataTable-wrapper">
-                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-16 px-20 py-12 border-bottom border-neutral-200">
-                            <div class="d-flex flex-wrap align-items-center gap-16">
-                                <div class="dropdown">
-                                    <button type="button" class="px-12 py-5-px border border-neutral-300 radius-8 d-flex align-items-center gap-20" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <span class="d-flex align-items-center gap-1 text-secondary-light text-sm">
-                                            <i class="ri-file-upload-line text-md line-height-1"></i>
-                                            Export
-                                        </span>
-                                        <span class=""><i class="ri-arrow-down-s-line"></i></span>
-                                    </button>
-                                    <ul class="dropdown-menu p-12 border bg-base shadow">
-                                        <li>
-                                            <a href="export-students.php?format=pdf" class="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-10">
-                                                <i class="ri-file-pdf-line"></i>
-                                                PDF
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="export-students.php?format=excel" class="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-10">
-                                                <i class="ri-file-excel-line"></i>
-                                                Excel
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                                
-                                <div class="dropdown">
-                                    <button type="button" class="px-12 py-5-px border border-neutral-300 radius-8 d-flex align-items-center gap-20" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <span class="d-flex align-items-center gap-1 text-secondary-light text-sm">
-                                            <i class="ri-filter-line"></i>
-                                            Filter
-                                        </span>
-                                        <span class=""><i class="ri-arrow-down-s-line"></i></span>
-                                    </button>
-                                    <div class="dropdown-menu border bg-base shadow dropdown-menu-lg p-0">
-                                        <div class="d-flex align-items-center justify-content-between border-bottom py-8 px-16">
-                                            <span class="fw-semibold text-lg text-primary-light">Filter Students</span>
-                                            <button type="button" onclick="clearFilters()">
-                                                <i class="ri-close-large-line"></i>
-                                            </button>
-                                        </div>
-                                        <form method="GET" action="" class="p-16 d-grid grid-cols-2 gap-16">
-                                            <div class="">
+        <div class="mt-24">
+            <div class="card h-100">
+                <div class="card-body p-0 dataTable-wrapper">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-16 px-20 py-12 border-bottom border-neutral-200">
+                        <div class="d-flex flex-wrap align-items-center gap-16">
+                            <div class="dropdown">
+                                <button type="button" class="px-12 py-5-px border border-neutral-300 radius-8 d-flex align-items-center gap-20" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="d-flex align-items-center gap-1 text-secondary-light text-sm">
+                                        <i class="ri-file-upload-line text-md line-height-1"></i>
+                                        Export
+                                    </span>
+                                    <span class=""><i class="ri-arrow-down-s-line"></i></span>
+                                </button>
+                                <ul class="dropdown-menu p-12 border bg-base shadow">
+                                    <li>
+                                        <a href="export-students.php?format=pdf" class="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-10">
+                                            <i class="ri-file-pdf-line"></i>
+                                            PDF
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="export-students.php?format=excel" class="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-10">
+                                            <i class="ri-file-excel-line"></i>
+                                            Excel
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            
+                            <div class="dropdown">
+                                <button type="button" class="px-12 py-5-px border border-neutral-300 radius-8 d-flex align-items-center gap-20" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="d-flex align-items-center gap-1 text-secondary-light text-sm">
+                                        <i class="ri-filter-line"></i>
+                                        Filter
+                                    </span>
+                                    <span class=""><i class="ri-arrow-down-s-line"></i></span>
+                                </button>
+                                <div class="dropdown-menu border bg-base shadow dropdown-menu-lg p-0">
+                                    <div class="d-flex align-items-center justify-content-between border-bottom py-8 px-16">
+                                        <span class="fw-semibold text-lg text-primary-light">Filter Students</span>
+                                        <button type="button" onclick="clearFilters()">
+                                            <i class="ri-close-large-line"></i>
+                                        </button>
+                                    </div>
+                                    <form method="GET" action="" class="p-16">
+                                        <div class="row g-3">
+                                            <div class="col-6">
                                                 <label for="class" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Class</label>
                                                 <select id="class" name="class" class="form-control form-select">
                                                     <option value="">All Classes</option>
                                                     <?php foreach ($classes as $class): ?>
                                                     <option value="<?php echo $class['id']; ?>" <?php echo $classFilter == $class['id'] ? 'selected' : ''; ?>>
-                                                        <?php echo htmlspecialchars($class['name'] . ' (' . ($class['section'] ?? 'No Section') . ')'); ?>
+                                                        <?php echo htmlspecialchars($class['name']); ?>
                                                     </option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
-                                            <div class="">
+                                            <div class="col-6">
                                                 <label for="gender" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Gender</label>
                                                 <select id="gender" name="gender" class="form-control form-select">
                                                     <option value="">All Genders</option>
@@ -449,18 +717,7 @@ error_log("=== STUDENT LIST PAGE END ===");
                                                     <option value="other" <?php echo $genderFilter == 'other' ? 'selected' : ''; ?>>Other</option>
                                                 </select>
                                             </div>
-                                            <div class="">
-                                                <label for="category" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Category</label>
-                                                <select id="category" name="category" class="form-control form-select">
-                                                    <option value="">All Categories</option>
-                                                    <?php foreach ($categories as $category): ?>
-                                                    <option value="<?php echo $category['id']; ?>" <?php echo $categoryFilter == $category['id'] ? 'selected' : ''; ?>>
-                                                        <?php echo htmlspecialchars($category['name']); ?>
-                                                    </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
-                                            <div class="">
+                                            <div class="col-6">
                                                 <label for="status" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Status</label>
                                                 <select id="status" name="status" class="form-control form-select">
                                                     <option value="">All Status</option>
@@ -468,255 +725,372 @@ error_log("=== STUDENT LIST PAGE END ===");
                                                     <option value="inactive" <?php echo $statusFilter == 'inactive' ? 'selected' : ''; ?>>Inactive</option>
                                                 </select>
                                             </div>
-                                            <div class="">
-                                                <button type="reset" class="btn btn-danger-200 text-danger-600 w-100" onclick="resetForm()">Reset</button>
+                                            <div class="col-12 d-flex gap-3">
+                                                <button type="reset" class="btn btn-danger-200 text-danger-600 flex-grow-1" onclick="resetForm()">Reset</button>
+                                                <button type="submit" class="btn btn-primary-600 flex-grow-1">Apply Filter</button>
                                             </div>
-                                            <div class="">
-                                                <button type="submit" class="btn btn-primary-600 w-100">Apply Filter</button>
-                                            </div>
-                                        </form>
-                                    </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
-                            <div class="d-flex align-items-center gap-8 text-secondary-light">
-                                <span class="">Total Students: <strong><?php echo count($students); ?></strong></span>
+                            
+                            <form class="navbar-search dt-search m-0">
+                                <input type="text" class="dt-input bg-transparent radius-4" aria-controls="dataTable" name="search" placeholder="Search...">
+                                <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                            </form>
+                        </div>
+                        <div class="d-flex align-items-center gap-8 text-secondary-light">
+                            <span class="">Rows per page:</span>
+                            <div class="dt-length">
+                                <select name="dataTable_length" aria-controls="dataTable" class="dt-input form-control form-select">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
                             </div>
                         </div>
-
-                        <div class="p-0">
-                            <table class="table bordered-table mb-0 data-table" id="dataTable">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Admission No</th>
-                                        <th scope="col">Student Name</th>
-                                        <th scope="col">Class</th>
-                                        <th scope="col">Roll No</th>
-                                        <th scope="col">Date of Birth</th>
-                                        <th scope="col">Gender</th>
-                                        <th scope="col">Mobile</th>
-                                        <th scope="col">Category</th>
-                                        <th scope="col">Status</th>
-                                        <th scope="col">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (!empty($students)): ?>
-                                        <?php $count = 1; ?>
-                                        <?php foreach ($students as $student): ?>
-                                        <tr>
-                                            <td><?php echo $count++; ?></td>
-                                            <td>
-                                                <span class="text-primary-600"><?php echo htmlspecialchars($student['admission_number'] ?? 'N/A'); ?></span>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <?php 
-                                                    $studentAvatar = $student['avatar'] ?? 'https://academixsuite.com/tenant/assets/images/thumbs/avatar-img' . (($count % 7) + 1) . '.png';
-                                                    ?>
-                                                    <img src="<?php echo htmlspecialchars($studentAvatar); ?>" alt="Student" class="flex-shrink-0 me-12 radius-8" style="width: 40px; height: 40px; object-fit: cover;">
-                                                    <div class="">
-                                                        <h6 class="text-md mb-0 fw-medium flex-grow-1">
-                                                            <?php echo htmlspecialchars(($student['first_name'] ?? '') . ' ' . ($student['last_name'] ?? '')); ?>
-                                                        </h6>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td><?php echo htmlspecialchars($student['class_display'] ?? 'Not Assigned'); ?></td>
-                                            <td><?php echo htmlspecialchars($student['roll_number'] ?? 'N/A'); ?></td>
-                                            <td>
-                                                <?php 
-                                                if (!empty($student['date_of_birth'])) {
-                                                    echo date('d M Y', strtotime($student['date_of_birth']));
-                                                } else {
-                                                    echo 'N/A';
-                                                }
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <?php 
-                                                $gender = $student['gender'] ?? 'Not Specified';
-                                                $genderClass = strtolower($gender) == 'male' ? 'primary' : (strtolower($gender) == 'female' ? 'warning' : 'secondary');
-                                                echo ucfirst($gender); 
-                                                ?>
-                                            </td>
-                                            <td><?php echo htmlspecialchars($student['mobile'] ?? $student['phone'] ?? 'N/A'); ?></td>
-                                            <td><?php echo htmlspecialchars($student['category_name'] ?? 'General'); ?></td>
-                                            <td>
-                                                <?php 
-                                                $status = strtolower($student['status'] ?? 'active');
-                                                if ($status == 'active'): 
-                                                ?>
-                                                <span class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Active</span>
-                                                <?php else: ?>
-                                                <span class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td>
-                                                <div class="btn-group">
-                                                    <button type="button" class="text-primary-light text-xl" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                                                        <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                        <li>
-                                                            <a href="student-details.php?id=<?php echo $student['id']; ?>" class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                                <i class="ri-user-3-line"></i>
-                                                                View Details
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="edit-student.php?id=<?php echo $student['id']; ?>" class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                                <i class="ri-edit-2-line"></i>
-                                                                Edit
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="fees-collect.php?student_id=<?php echo $student['id']; ?>" class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                                <i class="ri-money-dollar-box-line"></i>
-                                                                Collect Fees
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <button onclick="toggleStatus(<?php echo $student['id']; ?>, '<?php echo $status; ?>')" class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                                <i class="ri-error-warning-line"></i>
-                                                                <?php echo $status == 'active' ? 'Deactivate' : 'Activate'; ?>
-                                                            </button>
-                                                        </li>
-                                                        <li>
-                                                            <button onclick="confirmDelete(<?php echo $student['id']; ?>)" class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                                                <i class="ri-delete-bin-6-line"></i>
-                                                                Delete
-                                                            </button>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <tr>
-                                            <td colspan="11" class="text-center py-20">
-                                                <p class="text-secondary-light">No students found</p>
-                                            </td>
-                                        </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <footer class="d-footer">
-            <div class="">
-                <p class="mb-0 text-center"> &copy; <span class="current-year"></span> <?php echo htmlspecialchars($school['name']); ?> | Made With ❤️ by AcademixSuite.</p>
-            </div>
-        </footer>
-    </main>
-
-    <!-- Delete Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-sm modal-dialog modal-dialog-centered max-w-340-px">
-            <div class="modal-content radius-16 bg-base">
-                <div class="modal-body pt-32 px-36 pb-24 text-center">
-                    <span class="mb-16 fs-1 line-height-1 text-danger">
-                        <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
-                    </span>
-                    <h6 class="text-lg fw-semibold text-primary-light mb-0">Are you sure you want to delete this student?</h6>
-                    <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                        <button type="button" class="flex-grow-1 border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-24 py-11 radius-8" data-bs-dismiss="modal">
-                            Cancel
-                        </button>
-                        <button type="button" id="confirmDeleteBtn" class="flex-grow-1 btn btn-primary-600 border border-primary-600 text-md px-16 py-12 radius-8">
-                            Yes, Delete
-                        </button>
+                    <div class="table-responsive">
+                        <table class="table bordered-table mb-0 data-table" id="studentTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col" width="50">S.L</th>
+                                    <th scope="col">Student Info</th>
+                                    <th scope="col">Admission No</th>
+                                    <th scope="col">Class - Section</th>
+                                    <th scope="col">Roll No</th>
+                                    <th scope="col">Date of Birth</th>
+                                    <th scope="col">Gender</th>
+                                    <th scope="col">Contact</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col" width="100">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($students)): ?>
+                                    <?php $count = 1; ?>
+                                    <?php foreach ($students as $student): ?>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check style-check d-flex align-items-center">
+                                                <input class="form-check-input" type="checkbox" value="<?php echo $student['id']; ?>">
+                                                <label class="form-check-label">
+                                                    <?php echo str_pad($count++, 2, '0', STR_PAD_LEFT); ?>
+                                                </label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-10">
+                                                <?php 
+                                                // Get initials for avatar
+                                                $firstName = $student['first_name'] ?? '';
+                                                $lastName = $student['last_name'] ?? '';
+                                                $initials = strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1));
+                                                if (empty(trim($initials))) {
+                                                    $initials = 'ST';
+                                                }
+                                                $fullName = trim($firstName . ' ' . $lastName);
+                                                if (empty($fullName)) {
+                                                    $fullName = $student['user_name'] ?? 'Unknown';
+                                                }
+                                                
+                                                // Check for avatar
+                                                $avatar = $student['avatar'] ?? '';
+                                                if (!empty($avatar)):
+                                                ?>
+                                                <img src="<?php echo htmlspecialchars($avatar); ?>" alt="Student" class="w-44-px h-44-px rounded-circle object-fit-cover">
+                                                <?php else: ?>
+                                                <div class="student-avatar-sm">
+                                                    <?php echo $initials; ?>
+                                                </div>
+                                                <?php endif; ?>
+                                                <div class="">
+                                                    <h6 class="text-md fw-semibold mb-0">
+                                                        <?php echo htmlspecialchars($fullName); ?>
+                                                    </h6>
+                                                    <?php if (!empty($student['user_email'])): ?>
+                                                    <span class="text-xs text-secondary-light"><?php echo htmlspecialchars($student['user_email']); ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info"><?php echo htmlspecialchars($student['admission_number'] ?? 'N/A'); ?></span>
+                                        </td>
+                                        <td>
+                                            <?php 
+                                            $classDisplay = '';
+                                            if (!empty($student['class_name'])) {
+                                                $classDisplay .= $student['class_name'];
+                                                if (!empty($student['section_name'])) {
+                                                    $classDisplay .= ' - ' . $student['section_name'];
+                                                }
+                                            } else {
+                                                $classDisplay = '<span class="text-muted">Not Assigned</span>';
+                                            }
+                                            echo $classDisplay;
+                                            ?>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($student['roll_number'] ?? 'N/A'); ?></td>
+                                        <td>
+                                            <?php 
+                                            $dob = $student['date_of_birth'] ?? $student['user_dob'] ?? null;
+                                            if (!empty($dob)) {
+                                                echo date('d M Y', strtotime($dob));
+                                            } else {
+                                                echo 'N/A';
+                                            }
+                                            ?>
+                                        </td>
+                                        <td>
+                                            <?php 
+                                            $gender = $student['gender'] ?? $student['user_gender'] ?? 'Not Specified';
+                                            $genderClass = 'gender-other';
+                                            if (strtolower($gender) == 'male') {
+                                                $genderClass = 'gender-male';
+                                            } elseif (strtolower($gender) == 'female') {
+                                                $genderClass = 'gender-female';
+                                            }
+                                            ?>
+                                            <span class="badge <?php echo $genderClass; ?>">
+                                                <?php echo ucfirst($gender); ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <?php 
+                                            $phone = $student['student_phone'] ?? $student['user_phone'] ?? 'N/A';
+                                            if (!empty($phone) && $phone != 'N/A'):
+                                            ?>
+                                            <span class="d-flex align-items-center gap-1">
+                                                <i class="ri-phone-line text-primary"></i>
+                                                <?php echo htmlspecialchars($phone); ?>
+                                            </span>
+                                            <?php else: ?>
+                                            <span class="text-muted">N/A</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php 
+                                            $status = strtolower($student['status'] ?? 'active');
+                                            ?>
+                                            <span class="badge <?php echo $status == 'active' ? 'badge-active' : 'badge-inactive'; ?>">
+                                                <?php echo ucfirst($status); ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button type="button" class="text-primary-light text-xl" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                                                    <i class="ri-more-2-fill"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
+                                                    <li>
+                                                        <a href="student-details.php?id=<?php echo $student['id']; ?>" class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
+                                                            <i class="ri-eye-line"></i>
+                                                            View Details
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="edit-student.php?id=<?php echo $student['id']; ?>" class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
+                                                            <i class="ri-edit-2-line"></i>
+                                                            Edit
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="fees-collect.php?student_id=<?php echo $student['id']; ?>" class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
+                                                            <i class="ri-money-dollar-box-line"></i>
+                                                            Collect Fees
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <hr class="dropdown-divider">
+                                                    </li>
+                                                    <li>
+                                                        <button onclick="toggleStatus(<?php echo $student['id']; ?>, '<?php echo $status; ?>')" class="dropdown-item rounded text-warning bg-hover-neutral-200 text-hover-warning d-flex align-items-center gap-2 py-6">
+                                                            <i class="ri-error-warning-line"></i>
+                                                            <?php echo $status == 'active' ? 'Deactivate' : 'Activate'; ?>
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button onclick="confirmDelete(<?php echo $student['id']; ?>)" class="dropdown-item rounded text-danger bg-hover-neutral-200 text-hover-danger d-flex align-items-center gap-2 py-6">
+                                                            <i class="ri-delete-bin-6-line"></i>
+                                                            Delete
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="10" class="text-center py-20">
+                                            <div class="text-center">
+                                                <i class="ri-user-search-line fs-1 text-secondary-light mb-3 d-block" style="font-size: 3rem;"></i>
+                                                <p class="text-secondary-light mt-16 mb-0">No students found</p>
+                                                <a href="add-new-student.php" class="btn btn-primary-600 mt-16">
+                                                    <i class="ri-add-line me-2"></i>Add Your First Student
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/apexcharts.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/iconify-icon.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/dataTables.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-ui.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/app.js"></script>
+    <footer class="d-footer">
+        <div class="">
+            <p class="mb-0 text-center"> &copy; <span class="current-year"></span> <?php echo htmlspecialchars($school['name'] ?? 'School'); ?> | Made With ❤️ by AcademixSuite.</p>
+        </div>
+    </footer>
+</main>
 
-    <script>
-        // Initialize DataTable
-        let table = new DataTable('#dataTable', {
-            pageLength: 10,
-            lengthMenu: [5, 10, 25, 50, 100],
-            language: {
-                search: "",
-                searchPlaceholder: "Search...",
-                lengthMenu: "Show _MENU_ entries",
-                info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                paginate: {
-                    first: "First",
-                    last: "Last",
-                    next: "Next",
-                    previous: "Previous"
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog modal-dialog-centered">
+        <div class="modal-content radius-16 bg-base">
+            <div class="modal-body pt-32 px-36 pb-24 text-center">
+                <span class="mb-16 fs-1 line-height-1 text-danger">
+                    <i class="ri-delete-bin-line" style="font-size: 48px;"></i>
+                </span>
+                <h6 class="text-lg fw-semibold text-primary-light mb-0">Delete Student</h6>
+                <p class="text-secondary-light text-sm mt-8">Are you sure you want to delete this student? This action cannot be undone.</p>
+                <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
+                    <button type="button" class="flex-grow-1 border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-24 py-11 radius-8" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="button" id="confirmDeleteBtn" class="flex-grow-1 btn btn-danger-600 border border-danger-600 text-md px-16 py-12 radius-8">
+                        Yes, Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://academixsuite.com/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
+<script src="https://academixsuite.com/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
+<script src="https://academixsuite.com/tenant/assets/js/lib/iconify-icon.min.js"></script>
+<script src="https://academixsuite.com/tenant/assets/js/lib/dataTables.min.js"></script>
+<script src="https://academixsuite.com/tenant/assets/js/app.js"></script>
+
+<script>
+$(document).ready(function() {
+    console.log('Document ready - Student List initialized');
+    
+    // Initialize Bootstrap toasts
+    $('.toast').toast({
+        autohide: true,
+        delay: 5000
+    });
+    $('.toast').toast('show');
+    
+    // Initialize DataTable with subject list styling
+    let table = $('#studentTable').DataTable({
+        pageLength: 10,
+        lengthMenu: [5, 10, 25, 50, 100],
+        order: [[0, 'asc']],
+        language: {
+            search: "",
+            searchPlaceholder: "Search...",
+            lengthMenu: "Show _MENU_ entries",
+            info: "Showing _START_ to _END_ of _TOTAL_ entries",
+            infoEmpty: "Showing 0 to 0 of 0 entries",
+            infoFiltered: "(filtered from _MAX_ total entries)",
+            paginate: {
+                first: "First",
+                last: "Last",
+                next: "Next",
+                previous: "Previous"
+            }
+        },
+        dom: 'rt<"d-flex align-items-center justify-content-between flex-wrap gap-16 px-20 py-12 border-top border-neutral-200"<"text-secondary-light"i><"pagination-wrapper"p>>',
+        initComplete: function() {
+            // Move the search input to the navbar search
+            $('.dataTables_filter').hide();
+        },
+        columnDefs: [
+            { orderable: false, targets: [0, 9] }
+        ]
+    });
+
+    // Custom search input for DataTable
+    $('.dt-search .dt-input').on('keyup', function() {
+        table.search(this.value).draw();
+    });
+
+    // Handle page length change
+    $('.dt-length select').on('change', function() {
+        const value = $(this).val();
+        table.page.len(value).draw();
+    });
+
+    // Navbar search sync with DataTable
+    $('.navbar-search input').on('keyup', function() {
+        table.search(this.value).draw();
+    });
+
+    // Delete functionality
+    let studentToDelete = null;
+
+    window.confirmDelete = function(studentId) {
+        studentToDelete = studentId;
+        $('#deleteModal').modal('show');
+    };
+
+    $('#confirmDeleteBtn').on('click', function() {
+        if (studentToDelete) {
+            window.location.href = 'delete-student.php?id=' + studentToDelete + '&csrf_token=<?php echo $csrfToken; ?>';
+        }
+    });
+
+    // Toggle status
+    window.toggleStatus = function(studentId, currentStatus) {
+        const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+        if (confirm('Are you sure you want to change this student\'s status to ' + newStatus + '?')) {
+            $.ajax({
+                url: 'toggle-student-status.php',
+                method: 'POST',
+                data: {
+                    id: studentId,
+                    status: newStatus,
+                    csrf_token: '<?php echo $csrfToken; ?>'
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('An error occurred. Please try again.');
                 }
-            }
-        });
-
-        // Custom search input
-        $('.navbar-search input').on('keyup', function() {
-            table.search(this.value).draw();
-        });
-
-        // Handle page length change
-        $('.dt-length select').on('change', function() {
-            const value = $(this).val();
-            table.page.len(value).draw();
-        });
-
-        // Delete functionality
-        let studentToDelete = null;
-
-        function confirmDelete(studentId) {
-            studentToDelete = studentId;
-            $('#deleteModal').modal('show');
+            });
         }
+    };
 
-        $('#confirmDeleteBtn').on('click', function() {
-            if (studentToDelete) {
-                window.location.href = 'delete-student.php?id=' + studentToDelete;
-            }
-        });
+    // Clear filters
+    window.clearFilters = function() {
+        window.location.href = 'student-list.php';
+    };
 
-        // Toggle status
-        function toggleStatus(studentId, currentStatus) {
-            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-            if (confirm('Are you sure you want to change this student\'s status?')) {
-                window.location.href = 'toggle-student-status.php?id=' + studentId + '&status=' + newStatus;
-            }
-        }
+    // Reset form
+    window.resetForm = function() {
+        document.querySelector('form').reset();
+    };
 
-        // Clear filters
-        function clearFilters() {
-            window.location.href = 'student-list.php';
-        }
-
-        // Reset form
-        function resetForm() {
-            document.querySelector('form').reset();
-        }
-
-        // Export functionality
-        $('.dropdown-item:contains("PDF")').on('click', function(e) {
-            e.preventDefault();
-            window.location.href = 'export-students.php?format=pdf' + window.location.search;
-        });
-
-        $('.dropdown-item:contains("Excel")').on('click', function(e) {
-            e.preventDefault();
-            window.location.href = 'export-students.php?format=excel' + window.location.search;
-        });
-    </script>
+    // Set current year in footer
+    $('.current-year').text(new Date().getFullYear());
+});
+</script>
 </body>
 </html>

@@ -7,6 +7,8 @@
  * @version 2.0
  */
 
+require_once __DIR__ . '/Services/WhatsAppService.php';
+
 class EventManager {
     private $schoolDb;
     private $platformDb;
@@ -156,28 +158,37 @@ class EventManager {
                 $this->schoolDb->beginTransaction();
             }
 
-            // Insert event
-            $stmt = $this->schoolDb->prepare("
-                INSERT INTO events (
-                    school_id, title, description, type,
-                    start_date, end_date, start_time, end_time,
-                    venue, is_public, created_by, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-            ");
+            $columns = [
+                'school_id' => $this->schoolId,
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+                'type' => $data['type'],
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'start_time' => $data['start_time'] ?? null,
+                'end_time' => $data['end_time'] ?? null,
+                'venue' => $data['venue'] ?? null,
+                'is_public' => isset($data['is_public']) ? (int)$data['is_public'] : 1,
+                'created_by' => $this->userId,
+            ];
 
-            $stmt->execute([
-                $this->schoolId,
-                $data['title'],
-                $data['description'] ?? null,
-                $data['type'],
-                $startDate,
-                $endDate,
-                $data['start_time'] ?? null,
-                $data['end_time'] ?? null,
-                $data['venue'] ?? null,
-                isset($data['is_public']) ? 1 : 1,
-                $this->userId
-            ]);
+            if ($this->columnExists('events', 'campus_id')) {
+                $columns = ['school_id' => $this->schoolId, 'campus_id' => $this->defaultCampusId()] + array_slice($columns, 1, null, true);
+            }
+
+            $fieldSql = array_map(fn($field) => "`{$field}`", array_keys($columns));
+            $placeholders = array_fill(0, count($columns), '?');
+            $params = array_values($columns);
+
+            if ($this->columnExists('events', 'created_at')) {
+                $fieldSql[] = '`created_at`';
+                $placeholders[] = 'NOW()';
+            }
+
+            $stmt = $this->schoolDb->prepare(
+                'INSERT INTO events (' . implode(', ', $fieldSql) . ') VALUES (' . implode(', ', $placeholders) . ')'
+            );
+            $stmt->execute($params);
 
             $eventId = $this->schoolDb->lastInsertId();
 
@@ -196,6 +207,10 @@ class EventManager {
             // Send email notifications if requested
             if ($sendNotification) {
                 $this->sendEventNotifications($eventId, 'created');
+            }
+
+            if ($this->shouldSendWhatsApp($data)) {
+                $this->sendEventWhatsAppNotifications($eventId, 'created');
             }
 
             if (!$inTransaction) {
@@ -261,7 +276,7 @@ class EventManager {
             
             foreach ($allowedFields as $field) {
                 if (isset($data[$field])) {
-                    $updateFields[] = "$field = ?";
+                    $updateFields[] = "`$field` = ?";
                     $params[] = $data[$field];
                 }
             }
@@ -273,8 +288,11 @@ class EventManager {
             $params[] = $eventId;
             $params[] = $this->schoolId;
             
-            $sql = "UPDATE events SET " . implode(', ', $updateFields) . ", updated_at = NOW() 
-                    WHERE id = ? AND school_id = ?";
+            if ($this->columnExists('events', 'updated_at')) {
+                $updateFields[] = "`updated_at` = NOW()";
+            }
+
+            $sql = "UPDATE events SET " . implode(', ', $updateFields) . " WHERE id = ? AND school_id = ?";
             
             $stmt = $this->schoolDb->prepare($sql);
             $stmt->execute($params);
@@ -291,6 +309,10 @@ class EventManager {
             // Send email notifications if requested
             if ($sendNotification) {
                 $this->sendEventNotifications($eventId, 'updated');
+            }
+
+            if ($this->shouldSendWhatsApp($data)) {
+                $this->sendEventWhatsAppNotifications($eventId, 'updated');
             }
 
             if (!$inTransaction) {
@@ -353,6 +375,10 @@ class EventManager {
             // Send email notifications if requested
             if ($sendNotification) {
                 $this->sendEventNotifications($eventId, 'deleted', $eventData);
+            }
+
+            if ($this->shouldSendWhatsApp()) {
+                $this->sendEventWhatsAppNotifications($eventId, 'deleted', $eventData);
             }
 
             if (!$inTransaction) {
@@ -565,6 +591,59 @@ class EventManager {
         }
     }
 
+    private function sendEventWhatsAppNotifications($eventId, $action, $eventData = null) {
+        try {
+            if (!class_exists('WhatsAppService') || !WhatsAppService::featureEnabled($this->schoolDb, (int)$this->schoolId, 'events', true)) {
+                return false;
+            }
+
+            $event = ($action === 'deleted' && $eventData) ? $eventData : $this->getEventById($eventId);
+            if (!$event) {
+                return false;
+            }
+
+            $service = new WhatsAppService($this->schoolDb, array_merge($this->schoolData ?: [], ['id' => $this->schoolId]));
+            $recipients = $service->resolveAnnouncementRecipients('all', null, null, ['parents', 'teachers']);
+            if (empty($recipients)) {
+                return false;
+            }
+
+            $actionLabels = [
+                'created' => 'New School Event',
+                'updated' => 'School Event Updated',
+                'deleted' => 'School Event Cancelled',
+            ];
+
+            $dateText = $this->formatEventDate($event);
+            $details = trim(($event['description'] ?? '') ?: 'Please check your school portal for event details.');
+            $venue = trim((string)($event['venue'] ?? ''));
+            if ($venue !== '') {
+                $details .= ' Venue: ' . $venue . '.';
+            }
+            $details .= ' Date: ' . $dateText . '.';
+
+            $title = ($actionLabels[$action] ?? 'School Event') . ': ' . ($event['title'] ?? 'Event');
+            $path = 'admin/event.php?id=' . (int)($event['id'] ?? $eventId);
+            $sent = 0;
+            $failed = 0;
+
+            foreach (array_slice($recipients, 0, 200) as $recipient) {
+                $result = $service->sendDirectNotification('event', (int)$eventId, $recipient, $title, $details, $path);
+                if (!empty($result['success'])) {
+                    $sent++;
+                } else {
+                    $failed++;
+                }
+            }
+
+            error_log("Event WhatsApp notifications for event {$eventId}: {$sent} sent, {$failed} not sent");
+            return $sent > 0;
+        } catch (Throwable $e) {
+            error_log('Event WhatsApp notification error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     /**
      * Build email body for event notification
      */
@@ -739,6 +818,48 @@ class EventManager {
         } catch (Exception $e) {
             error_log("Error creating audit log: " . $e->getMessage());
         }
+    }
+
+    private function shouldSendWhatsApp(array $data = []): bool {
+        if (array_key_exists('send_whatsapp', $data)) {
+            return !empty($data['send_whatsapp']);
+        }
+
+        return class_exists('WhatsAppService')
+            && WhatsAppService::featureEnabled($this->schoolDb, (int)$this->schoolId, 'events', true);
+    }
+
+    private function formatEventDate(array $event): string {
+        $startDate = !empty($event['start_date']) ? date('l, F j, Y', strtotime($event['start_date'])) : 'the scheduled date';
+        $endDate = !empty($event['end_date']) ? date('l, F j, Y', strtotime($event['end_date'])) : $startDate;
+        $dateText = $startDate === $endDate ? $startDate : "{$startDate} to {$endDate}";
+
+        if (!empty($event['start_time'])) {
+            $dateText .= ' at ' . date('g:i A', strtotime($event['start_time']));
+            if (!empty($event['end_time'])) {
+                $dateText .= ' - ' . date('g:i A', strtotime($event['end_time']));
+            }
+        }
+
+        return $dateText;
+    }
+
+    private function columnExists(string $table, string $column): bool {
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table) || !preg_match('/^[a-zA-Z0-9_]+$/', $column)) {
+            return false;
+        }
+
+        try {
+            $stmt = $this->schoolDb->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
+            $stmt->execute([$column]);
+            return (bool)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    private function defaultCampusId(): int {
+        return max(1, (int)($this->schoolData['campus_id'] ?? $this->schoolData['default_campus_id'] ?? 1));
     }
 
     /**

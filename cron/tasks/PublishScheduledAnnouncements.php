@@ -215,6 +215,11 @@ class PublishAnnouncements extends CronTask {
      * Create notification email
      */
     private function createNotificationEmail($announcement, $school) {
+        $logoUrl = function_exists('academix_logo_url')
+            ? academix_logo_url(true)
+            : ((defined('APP_URL') ? rtrim(APP_URL, '/') : 'https://www.academixsuite.com') . '/tenant/assets/images/logo.png');
+        $logoUrl = htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8');
+
         return "
             <html>
             <head>
@@ -230,6 +235,7 @@ class PublishAnnouncements extends CronTask {
             <body>
                 <div class='container'>
                     <div class='header'>
+                        <img src='{$logoUrl}' alt='AcademixSuite' style='height:36px;width:auto;display:block;margin:0 auto 12px;'>
                         <h1>New Announcement</h1>
                     </div>
                     <div class='content'>

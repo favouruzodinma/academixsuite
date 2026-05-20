@@ -1146,4 +1146,79 @@ public function getTeacher($teacherId) {
             return [];
         }
     }
+
+    // ── Welcome email ─────────────────────────────────────────────────────────
+
+    /**
+     * Send a school-branded welcome email to a newly created teacher.
+     *
+     * Call this after addTeacher() returns [true, ...]. The plain password
+     * must still be in $_SESSION['temp_passwords'][$teacherUserId].
+     *
+     * @param  int    $teacherUserId  users.id of the teacher
+     * @return bool   true = email dispatched successfully
+     */
+    public function sendWelcomeEmail(int $teacherUserId): bool
+    {
+        try {
+            // Fetch the teacher's user record
+            $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
+            $stmt->execute([$teacherUserId]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$user || empty($user['email'])) {
+                error_log("TeacherManager::sendWelcomeEmail — no email for user ID {$teacherUserId}");
+                return false;
+            }
+
+            if (!isset($_SESSION['temp_passwords'][$teacherUserId])) {
+                error_log("TeacherManager::sendWelcomeEmail — no temp password for user ID {$teacherUserId}");
+                return false;
+            }
+
+            $password = $_SESSION['temp_passwords'][$teacherUserId];
+
+            // Use school-branded mailer if available
+            $svcPath = __DIR__ . '/Services/WelcomeEmailService.php';
+            if (file_exists($svcPath)) {
+                require_once $svcPath;
+            }
+
+            $ok = false;
+            if (class_exists('WelcomeEmailService')) {
+                $svc = new WelcomeEmailService($this->schoolData);
+                $ok  = $svc->send('teacher', [
+                    'name'     => $user['name'],
+                    'email'    => $user['email'],
+                    'username' => $user['username'] ?? $user['email'],
+                    'password' => $password,
+                ]);
+            } else {
+                // Raw-mail fallback
+                $schoolName = $this->schoolData['name'] ?? 'School';
+                $loginUrl   = defined('APP_URL')
+                    ? rtrim(APP_URL, '/') . '/login.php?school_slug=' . rawurlencode($this->schoolData['slug'] ?? '')
+                    : '#';
+                $subject = "Welcome to {$schoolName} — Your Teacher Portal Access";
+                $body    = "<html><body style='font-family:Arial,sans-serif;'>
+                    <h2 style='color:#25A194;'>Welcome to {$schoolName}</h2>
+                    <p>Dear {$user['name']},</p>
+                    <p>Your teacher account has been created. Login: <strong>{$user['email']}</strong> / Password: <strong>{$password}</strong></p>
+                    <p><a href='{$loginUrl}'>Click here to log in</a></p>
+                    <p style='font-size:12px;color:#666;'>Please change your password after first login.</p>
+                </body></html>";
+                $headers  = "MIME-Version: 1.0\r\nContent-type:text/html;charset=UTF-8\r\n";
+                $headers .= 'From: ' . ($this->schoolData['email'] ?? 'noreply@academixsuite.com') . "\r\n";
+                $ok = (bool) mail($user['email'], $subject, $body, $headers);
+            }
+
+            error_log("TeacherManager::sendWelcomeEmail — " . ($ok ? 'sent' : 'failed') . " to " . $user['email']);
+            unset($_SESSION['temp_passwords'][$teacherUserId]);
+            return $ok;
+
+        } catch (Throwable $e) {
+            error_log("TeacherManager::sendWelcomeEmail exception: " . $e->getMessage());
+            return false;
+        }
+    }
 }

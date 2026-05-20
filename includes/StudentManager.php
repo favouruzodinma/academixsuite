@@ -866,20 +866,29 @@ public function updateStudent($studentId, $data) {
 }
 
     /**
-     * Send login credentials emails
-     * @param int $studentId
-     * @param int $studentUserId
+     * Send school-branded welcome emails to the new student and their parent/guardian.
+     *
+     * @param int      $studentId
+     * @param int      $studentUserId
      * @param int|null $parentUserId
-     * @return array
+     * @return array   List of error strings (empty = all good)
      */
-    private function sendLoginEmails($studentId, $studentUserId, $parentUserId = null) {
+    private function sendLoginEmails($studentId, $studentUserId, $parentUserId = null): array
+    {
         $emailErrors = [];
-        error_log("=== SENDING LOGIN EMAILS ===");
+        error_log("=== SENDING LOGIN EMAILS (WelcomeEmailService) ===");
 
+        // Load the branded mailer (lazy — only when we actually need to send)
+        $welcomeSvcPath = __DIR__ . '/Services/WelcomeEmailService.php';
+        if (file_exists($welcomeSvcPath)) {
+            require_once $welcomeSvcPath;
+        }
+        $canUseSvc = class_exists('WelcomeEmailService');
+
+        /* ── Student ──────────────────────────────────────────── */
         try {
-            // Get student details
             $stmt = $this->db->prepare("
-                SELECT u.*, s.first_name, s.last_name 
+                SELECT u.*, s.first_name, s.last_name
                 FROM users u
                 JOIN students s ON u.id = s.user_id
                 WHERE u.id = ? AND s.id = ?
@@ -887,145 +896,104 @@ public function updateStudent($studentId, $data) {
             $stmt->execute([$studentUserId, $studentId]);
             $student = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Send email to student
             if (!empty($student['email']) && isset($_SESSION['temp_passwords'][$studentUserId])) {
-                error_log("Sending email to student: " . $student['email']);
-                $subject = "Welcome to " . ($this->schoolData['name'] ?? 'School') . " - Your Login Credentials";
-                $body = $this->getEmailTemplate(
-                    $student['first_name'] . ' ' . $student['last_name'],
-                    $student['email'],
-                    $_SESSION['temp_passwords'][$studentUserId],
-                    'Student'
-                );
-                
-                if ($this->sendEmail($student['email'], $subject, $body)) {
-                    error_log("Student email sent successfully");
+                $pwd = $_SESSION['temp_passwords'][$studentUserId];
+                error_log("Sending welcome email to student: " . $student['email']);
+
+                $ok = false;
+                if ($canUseSvc) {
+                    $svc = new WelcomeEmailService($this->schoolData);
+                    $ok  = $svc->send('student', [
+                        'name'     => trim(($student['first_name'] ?? '') . ' ' . ($student['last_name'] ?? '')),
+                        'email'    => $student['email'],
+                        'username' => $student['username'] ?? $student['email'],
+                        'password' => $pwd,
+                    ]);
                 } else {
-                    error_log("Failed to send student email");
-                    $emailErrors[] = "Failed to send email to student";
+                    // Fallback to raw mail() if service file is missing
+                    $ok = $this->sendRawEmail($student['email'], $student['first_name'] . ' ' . $student['last_name'], $student['email'], $pwd, 'Student');
                 }
+
+                $ok
+                    ? error_log("Student welcome email sent successfully")
+                    : ($emailErrors[] = "Failed to send welcome email to student");
+
                 unset($_SESSION['temp_passwords'][$studentUserId]);
             } else {
-                error_log("No student email to send or password not found");
+                error_log("No student email or temp password found — skipping student email");
             }
         } catch (Exception $e) {
-            error_log("Error sending student email: " . $e->getMessage());
+            error_log("Error sending student welcome email: " . $e->getMessage());
             $emailErrors[] = "Error sending student email";
         }
 
+        /* ── Parent / Guardian ───────────────────────────────── */
         try {
-            // Send email to parent
             if ($parentUserId && isset($_SESSION['temp_passwords'][$parentUserId])) {
                 $parentStmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
                 $parentStmt->execute([$parentUserId]);
                 $parent = $parentStmt->fetch(PDO::FETCH_ASSOC);
 
                 if ($parent && !empty($parent['email'])) {
-                    error_log("Sending email to parent: " . $parent['email']);
-                    $subject = "Parent Portal Access - " . ($this->schoolData['name'] ?? 'School');
-                    $body = $this->getEmailTemplate(
-                        $parent['name'],
-                        $parent['email'],
-                        $_SESSION['temp_passwords'][$parentUserId],
-                        'Parent'
-                    );
-                    
-                    if ($this->sendEmail($parent['email'], $subject, $body)) {
-                        error_log("Parent email sent successfully");
+                    $pwd = $_SESSION['temp_passwords'][$parentUserId];
+                    error_log("Sending welcome email to parent: " . $parent['email']);
+
+                    $ok = false;
+                    if ($canUseSvc) {
+                        $svc = new WelcomeEmailService($this->schoolData);
+                        $ok  = $svc->send('parent', [
+                            'name'     => $parent['name'],
+                            'email'    => $parent['email'],
+                            'username' => $parent['username'] ?? $parent['email'],
+                            'password' => $pwd,
+                        ]);
                     } else {
-                        error_log("Failed to send parent email");
-                        $emailErrors[] = "Failed to send email to parent";
+                        $ok = $this->sendRawEmail($parent['email'], $parent['name'], $parent['email'], $pwd, 'Parent');
                     }
+
+                    $ok
+                        ? error_log("Parent welcome email sent successfully")
+                        : ($emailErrors[] = "Failed to send welcome email to parent");
+
                     unset($_SESSION['temp_passwords'][$parentUserId]);
                 } else {
-                    error_log("No parent email found or password not available");
+                    error_log("Parent has no email — skipping parent email");
                 }
             } else {
-                error_log("No parent to email or parent ID not provided");
+                error_log("No parent ID or temp password — skipping parent email");
             }
         } catch (Exception $e) {
-            error_log("Error sending parent email: " . $e->getMessage());
+            error_log("Error sending parent welcome email: " . $e->getMessage());
             $emailErrors[] = "Error sending parent email";
         }
 
-        error_log("Email sending completed with " . count($emailErrors) . " errors");
+        error_log("Login email sending done. Errors: " . count($emailErrors));
         return $emailErrors;
     }
 
     /**
-     * Send email
-     * @param string $to
-     * @param string $subject
-     * @param string $body
-     * @return bool
+     * Minimal raw-mail fallback used only when WelcomeEmailService is unavailable.
      */
-    private function sendEmail($to, $subject, $body) {
-        try {
-            error_log("Attempting to send email to: " . $to);
-            
-            // Headers for HTML email
-            $headers = "MIME-Version: 1.0" . "\r\n";
-            $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-            $headers .= 'From: ' . ($this->schoolData['email'] ?? 'noreply@academixsuite.com') . "\r\n";
-            
-            $result = mail($to, $subject, $body, $headers);
-            
-            if ($result) {
-                error_log("Email sent successfully via mail() function");
-            } else {
-                error_log("mail() function returned false");
-            }
-            
-            return $result;
-        } catch (Exception $e) {
-            error_log("Error sending email: " . $e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Get email HTML template
-     * @param string $name
-     * @param string $username
-     * @param string $password
-     * @param string $userType
-     * @return string
-     */
-    private function getEmailTemplate($name, $username, $password, $userType) {
-        $loginUrl = function_exists('school_portal_url')
-            ? school_portal_url($this->schoolData['slug'] ?? '', 'login.php', true)
-            : ((defined('APP_URL') ? rtrim(APP_URL, '/') : 'https://academixsuite.com') . '/login.php?school_slug=' . ($this->schoolData['slug'] ?? ''));
-        
-        return "
-        <html>
-        <head>
-            <title>Welcome to " . ($this->schoolData['name'] ?? 'School') . "</title>
-        </head>
-        <body style='font-family: Arial, sans-serif;'>
-            <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;'>
-                <h2 style='color: #25A194;'>Welcome to " . ($this->schoolData['name'] ?? 'School') . "!</h2>
-                <p>Dear {$name},</p>
-                <p>Your account has been created successfully. Here are your login credentials:</p>
-                <table style='width: 100%; border-collapse: collapse; margin: 20px 0;'>
-                    <tr>
-                        <td style='padding: 10px; background: #f5f5f5;'><strong>Username:</strong></td>
-                        <td style='padding: 10px;'>{$username}</td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 10px; background: #f5f5f5;'><strong>Password:</strong></td>
-                        <td style='padding: 10px;'>{$password}</td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 10px; background: #f5f5f5;'><strong>User Type:</strong></td>
-                        <td style='padding: 10px;'>{$userType}</td>
-                    </tr>
-                </table>
-                <p>Please login at: <a href='{$loginUrl}'>{$loginUrl}</a></p>
-                <p style='color: #666; font-size: 12px;'>For security reasons, please change your password after first login.</p>
-                <p>Best regards,<br>" . ($this->schoolData['name'] ?? 'School') . " Team</p>
-            </div>
-        </body>
-        </html>
-        ";
+    private function sendRawEmail(string $to, string $name, string $username, string $password, string $userType): bool
+    {
+        $schoolName = $this->schoolData['name'] ?? 'School';
+        $loginUrl   = defined('APP_URL')
+            ? rtrim(APP_URL, '/') . '/login.php?school_slug=' . rawurlencode($this->schoolData['slug'] ?? '')
+            : '#';
+        $subject = "Welcome to {$schoolName} — Your Login Details";
+        $body    = "<html><body style='font-family:Arial,sans-serif;'>
+            <h2 style='color:#25A194;'>Welcome to {$schoolName}</h2>
+            <p>Dear {$name},</p>
+            <p>Your {$userType} account has been created. Login details:</p>
+            <table style='border-collapse:collapse;margin:16px 0;'>
+                <tr><td style='padding:8px 12px;background:#f5f5f5;font-weight:bold;'>Username</td><td style='padding:8px 12px;'>{$username}</td></tr>
+                <tr><td style='padding:8px 12px;background:#f5f5f5;font-weight:bold;'>Password</td><td style='padding:8px 12px;'>{$password}</td></tr>
+            </table>
+            <p><a href='{$loginUrl}'>Click here to log in</a></p>
+            <p style='color:#666;font-size:12px;'>Please change your password after first login.</p>
+        </body></html>";
+        $headers  = "MIME-Version: 1.0\r\nContent-type:text/html;charset=UTF-8\r\n";
+        $headers .= 'From: ' . ($this->schoolData['email'] ?? 'noreply@academixsuite.com') . "\r\n";
+        return (bool) mail($to, $subject, $body, $headers);
     }
 }

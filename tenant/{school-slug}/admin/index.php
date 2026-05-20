@@ -16,7 +16,7 @@ error_log("Script: " . __FILE__);
 
 // Define constants if not defined
 if (!defined('APP_NAME')) define('APP_NAME', 'AcademixSuite');
-// IS_LOCAL is self-defining via config/constants.php (security: do not force true).
+if (!defined('IS_LOCAL')) define('IS_LOCAL', true);
 
 // Start session safely
 try {
@@ -84,8 +84,6 @@ if (!$isAuthenticated) {
 $schoolAuth = $_SESSION['school_auth'];
 $userId = $schoolAuth['user_id'] ?? 0;
 $userType = $schoolAuth['user_type'] ?? '';
-
-$currentPage = basename(__FILE__);
 
 error_log("User ID: " . $userId . ", User Type: " . $userType);
 
@@ -165,6 +163,10 @@ $incomeVsExpense = ['income' => [], 'expense' => []];
 $adminUser = ['name' => 'Admin User', 'role_name' => 'Administrator'];
 $trialWarning = '';
 
+// Notifications
+$notifications = [];
+$unreadCount = 0;
+
 // Check if we have a valid school database connection before querying
 if ($schoolDb) {
     try {
@@ -176,7 +178,11 @@ if ($schoolDb) {
                 $settingsStmt->execute([$school['id']]);
                 $settingsRows = $settingsStmt->fetchAll(PDO::FETCH_ASSOC);
                 foreach ($settingsRows as $row) {
-                    $settings[$row['setting_key']] = $row['setting_value'];
+                    $settingKey = $row['setting_key'] ?? $row['key'] ?? null;
+                    if ($settingKey === null || $settingKey === '') {
+                        continue;
+                    }
+                    $settings[$settingKey] = $row['setting_value'] ?? $row['value'] ?? '';
                 }
                 error_log("Settings fetched: " . count($settings) . " items");
             }
@@ -587,72 +593,219 @@ if ($schoolDb) {
             error_log("Error fetching leave requests: " . $e->getMessage());
         }
 
-        // Get top teachers by performance
+        // ==================== NOTIFICATIONS ====================
         try {
-            $teacherStmt = $schoolDb->prepare("
-                SELECT t.*, u.name, u.email, u.avatar,
-                       COUNT(DISTINCT c.id) as class_count,
-                       AVG(CASE WHEN a.status = 'present' THEN 1.0 ELSE 0 END) * 100 as attendance_rate
-                FROM teachers t
-                LEFT JOIN users u ON t.user_id = u.id
-                LEFT JOIN teacher_classes tc ON t.id = tc.teacher_id
-                LEFT JOIN classes c ON tc.class_id = c.id
-                LEFT JOIN attendance a ON a.user_id = u.id
-                WHERE t.school_id = ? AND t.is_active = 1
-                GROUP BY t.id
-                ORDER BY attendance_rate DESC
-                LIMIT 5
+            // Fetch recent notifications for current user
+            $notifStmt = $schoolDb->prepare("
+                SELECT * FROM notifications
+                WHERE school_id = ? AND user_id = ?
+                  AND (expires_at IS NULL OR expires_at > NOW())
+                ORDER BY created_at DESC
+                LIMIT 10
             ");
-            if ($teacherStmt) {
-                $teacherStmt->execute([$school['id']]);
+            if ($notifStmt) {
+                $notifStmt->execute([$school['id'], $userId]);
+                $notifications = $notifStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            // Count unread notifications
+            $unreadStmt = $schoolDb->prepare("
+                SELECT COUNT(*) as unread FROM notifications
+                WHERE school_id = ? AND user_id = ? AND is_read = 0
+                  AND (expires_at IS NULL OR expires_at > NOW())
+            ");
+            if ($unreadStmt) {
+                $unreadStmt->execute([$school['id'], $userId]);
+                $unreadCount = $unreadStmt->fetch(PDO::FETCH_ASSOC)['unread'] ?? 0;
+            }
+        } catch (Exception $e) {
+            error_log("Error fetching notifications: " . $e->getMessage());
+        }
+
+        // ==================== TOP TEACHERS ====================
+        try {
+            // Check if staff_attendance table exists
+            $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'staff_attendance'");
+            $hasStaffAttendance = $tableCheck->rowCount() > 0;
+
+            if ($hasStaffAttendance) {
+                // Get teacher attendance rate over last 30 days
+                $teacherStmt = $schoolDb->prepare("
+                    SELECT 
+                        u.id,
+                        u.name,
+                        u.email,
+                        u.profile_photo as avatar,
+                        COUNT(CASE WHEN sa.status = 'present' THEN 1 END) * 100.0 / COUNT(sa.id) as attendance_rate,
+                        COUNT(DISTINCT cs.id) as subject_count
+                    FROM users u
+                    INNER JOIN teachers t ON u.id = t.user_id AND t.school_id = ?
+                    LEFT JOIN staff_attendance sa ON u.id = sa.user_id 
+                        AND sa.date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                        AND sa.school_id = ?
+                    LEFT JOIN class_subjects cs ON cs.teacher_id = u.id
+                    WHERE u.school_id = ? AND u.user_type = 'teacher' AND u.is_active = 1
+                    GROUP BY u.id
+                    HAVING COUNT(sa.id) > 0
+                    ORDER BY attendance_rate DESC
+                    LIMIT 5
+                ");
+                $teacherStmt->execute([$school['id'], $school['id'], $school['id']]);
+                $topTeachers = $teacherStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            // If no attendance data or table missing, fallback to subject count
+            if (empty($topTeachers)) {
+                $teacherStmt = $schoolDb->prepare("
+                    SELECT 
+                        u.id,
+                        u.name,
+                        u.email,
+                        u.profile_photo as avatar,
+                        COUNT(DISTINCT cs.id) as subject_count
+                    FROM users u
+                    INNER JOIN teachers t ON u.id = t.user_id AND t.school_id = ?
+                    LEFT JOIN class_subjects cs ON cs.teacher_id = u.id
+                    WHERE u.school_id = ? AND u.user_type = 'teacher' AND u.is_active = 1
+                    GROUP BY u.id
+                    ORDER BY subject_count DESC
+                    LIMIT 5
+                ");
+                $teacherStmt->execute([$school['id'], $school['id']]);
                 $topTeachers = $teacherStmt->fetchAll(PDO::FETCH_ASSOC);
             }
         } catch (Exception $e) {
             error_log("Error fetching top teachers: " . $e->getMessage());
+            $topTeachers = [];
         }
 
-        // Get new admissions (students added in last 30 days)
+        // ==================== NEW ADMISSIONS (Boys/Girls) ====================
+        $boysAdmissions = 0;
+        $girlsAdmissions = 0;
+        $totalAdmissions = 0;
         try {
-            $admissionStmt = $schoolDb->prepare("
-                SELECT 
-                    DATE(created_at) as admission_date,
-                    COUNT(*) as count
-                FROM students 
+            // First query: Get boys count (handling different gender formats)
+            $boysStmt = $schoolDb->prepare("
+                SELECT COUNT(*) as count FROM students 
                 WHERE school_id = ? 
                 AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-                GROUP BY DATE(created_at)
-                ORDER BY admission_date DESC
+                AND (
+                    LOWER(gender) IN ('male', 'm', 'boy', 'boys', '1') 
+                    OR gender = 'Male' 
+                    OR gender = 'MALE'
+                )
             ");
-            if ($admissionStmt) {
-                $admissionStmt->execute([$school['id']]);
-                $newAdmissions = $admissionStmt->fetchAll(PDO::FETCH_ASSOC);
+            if ($boysStmt) {
+                $boysStmt->execute([$school['id']]);
+                $boysResult = $boysStmt->fetch(PDO::FETCH_ASSOC);
+                $boysAdmissions = (int)($boysResult['count'] ?? 0);
             }
+            
+            // Second query: Get girls count (handling different gender formats)
+            $girlsStmt = $schoolDb->prepare("
+                SELECT COUNT(*) as count FROM students 
+                WHERE school_id = ? 
+                AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                AND (
+                    LOWER(gender) IN ('female', 'f', 'girl', 'girls', '2') 
+                    OR gender = 'female' 
+                    OR gender = 'FEMALE'
+                )
+            ");
+            if ($girlsStmt) {
+                $girlsStmt->execute([$school['id']]);
+                $girlsResult = $girlsStmt->fetch(PDO::FETCH_ASSOC);
+                $girlsAdmissions = (int)($girlsResult['count'] ?? 0);
+            }
+            
+            // Alternative query if gender column has different values
+            if ($boysAdmissions === 0 && $girlsAdmissions === 0) {
+                $genderStmt = $schoolDb->prepare("
+                    SELECT 
+                        gender,
+                        COUNT(*) as count
+                    FROM students 
+                    WHERE school_id = ? 
+                    AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                    AND gender IS NOT NULL 
+                    AND gender != ''
+                    GROUP BY gender
+                ");
+                if ($genderStmt) {
+                    $genderStmt->execute([$school['id']]);
+                    $genderResults = $genderStmt->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    foreach ($genderResults as $row) {
+                        $gender = strtolower(trim($row['gender']));
+                        if (in_array($gender, ['male', 'm', 'boy', '1'])) {
+                            $boysAdmissions += (int)$row['count'];
+                        } elseif (in_array($gender, ['female', 'f', 'girl', '2'])) {
+                            $girlsAdmissions += (int)$row['count'];
+                        }
+                    }
+                }
+            }
+            
+            $totalAdmissions = $boysAdmissions + $girlsAdmissions;
         } catch (Exception $e) {
             error_log("Error fetching new admissions: " . $e->getMessage());
         }
 
-        // Get top students by marks
+        // ==================== TOP STUDENTS ====================
         try {
-            $studentStmt = $schoolDb->prepare("
-                SELECT 
-                    s.id, s.first_name, s.last_name, s.admission_number,
-                    c.name as class_name,
-                    AVG(e.total_marks) as avg_marks
-                FROM students s
-                LEFT JOIN classes c ON s.class_id = c.id
-                LEFT JOIN exam_results e ON s.id = e.student_id
-                WHERE s.school_id = ? AND s.status = 'active'
-                GROUP BY s.id
-                HAVING avg_marks > 0
-                ORDER BY avg_marks DESC
-                LIMIT 5
-            ");
-            if ($studentStmt) {
+            // Check if exam_grades table exists
+            $tableCheck = $schoolDb->query("SHOW TABLES LIKE 'exam_grades'");
+            $hasExamGrades = $tableCheck->rowCount() > 0;
+
+            if ($hasExamGrades) {
+                $studentStmt = $schoolDb->prepare("
+                    SELECT 
+                        s.id,
+                        s.first_name,
+                        s.last_name,
+                        s.admission_number,
+                        c.name as class_name,
+                        s.profile_photo as avatar,
+                        AVG(eg.marks_obtained * 100.0 / eg.total_marks) as avg_percentage
+                    FROM students s
+                    LEFT JOIN classes c ON s.class_id = c.id
+                    LEFT JOIN exam_grades eg ON s.id = eg.student_id AND eg.school_id = ?
+                    WHERE s.school_id = ? AND s.status = 'active'
+                    GROUP BY s.id
+                    HAVING avg_percentage IS NOT NULL
+                    ORDER BY avg_percentage DESC
+                    LIMIT 5
+                ");
+                $studentStmt->execute([$school['id'], $school['id']]);
+                $topStudents = $studentStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            // If no exam grades, fallback to recent students (or empty)
+            if (empty($topStudents)) {
+                $studentStmt = $schoolDb->prepare("
+                    SELECT 
+                        s.id,
+                        s.first_name,
+                        s.last_name,
+                        s.admission_number,
+                        c.name as class_name,
+                        s.profile_photo as avatar
+                    FROM students s
+                    LEFT JOIN classes c ON s.class_id = c.id
+                    WHERE s.school_id = ? AND s.status = 'active'
+                    ORDER BY s.created_at DESC
+                    LIMIT 5
+                ");
                 $studentStmt->execute([$school['id']]);
                 $topStudents = $studentStmt->fetchAll(PDO::FETCH_ASSOC);
+                // Add a placeholder percentage
+                foreach ($topStudents as &$student) {
+                    $student['avg_percentage'] = 0;
+                }
             }
         } catch (Exception $e) {
             error_log("Error fetching top students: " . $e->getMessage());
+            $topStudents = [];
         }
 
         // Get income vs expense data for last 6 months
@@ -708,10 +861,10 @@ if ($schoolDb) {
                     ];
                 }
             }
-
+            
             // Sort by month order
             $monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            uksort($months, function ($a, $b) use ($monthOrder) {
+            uksort($months, function($a, $b) use ($monthOrder) {
                 return array_search($a, $monthOrder) - array_search($b, $monthOrder);
             });
 
@@ -747,6 +900,20 @@ if ($school['status'] === 'trial' && !empty($school['trial_ends_at'])) {
 // Format currency
 $currencySymbol = $settings['currency_symbol'] ?? '₦';
 
+// Helper function for time ago
+function timeAgo($datetime) {
+    $now = new DateTime;
+    $ago = new DateTime($datetime);
+    $diff = $now->diff($ago);
+
+    if ($diff->y > 0) return $diff->y . ' year' . ($diff->y > 1 ? 's' : '') . ' ago';
+    if ($diff->m > 0) return $diff->m . ' month' . ($diff->m > 1 ? 's' : '') . ' ago';
+    if ($diff->d > 0) return $diff->d . ' day' . ($diff->d > 1 ? 's' : '') . ' ago';
+    if ($diff->h > 0) return $diff->h . ' hour' . ($diff->h > 1 ? 's' : '') . ' ago';
+    if ($diff->i > 0) return $diff->i . ' minute' . ($diff->i > 1 ? 's' : '') . ' ago';
+    return 'just now';
+}
+
 error_log("=================== SCHOOL DASHBOARD END ===================");
 ?>
 <!-- meta tags and other links -->
@@ -761,15 +928,15 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
     <meta name="robots" content="INDEX,FOLLOW">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($school['name']); ?> | <?php echo defined('APP_NAME') ? APP_NAME : 'School Management'; ?></title>
-    <link rel="icon" type="image/png" href="/tenant/assets/images/favicon.png" sizes="16x16">
-    <link rel="stylesheet" href="/tenant/assets/css/remixicon.css">
-    <link rel="stylesheet" href="/tenant/assets/css/lib/bootstrap.min.css">
-    <link rel="stylesheet" href="/tenant/assets/css/lib/apexcharts.css">
-    <link rel="stylesheet" href="/tenant/assets/css/lib/dataTables.min.css">
-    <link rel="stylesheet" href="/tenant/assets/css/lib/flatpickr.min.css">
-    <link rel="stylesheet" href="/tenant/assets/css/lib/full-calendar.css">
-    <link rel="stylesheet" href="/tenant/assets/css/lib/calendar.css">
-    <link rel="stylesheet" href="/tenant/assets/css/style.css">
+    <link rel="icon" type="image/png" href="https://academixsuite.com/tenant/assets/images/favicon.png" sizes="16x16">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/remixicon.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/apexcharts.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/dataTables.min.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/flatpickr.min.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/full-calendar.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/calendar.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/style.css">
 </head>
 
 <body>
@@ -779,57 +946,77 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
     <button type="button" class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
         <i class="ri-settings-3-line animate-spin"></i>
     </button>
-    <div class="theme-customization-sidebar w-100 bg-base h-100vh overflow-y-auto position-fixed end-0 top-0">
-        <div class="d-flex align-items-center gap-3 py-16 px-24 justify-content-between border-bottom">
-            <div>
-                <h6 class="text-sm dark:text-white">Theme Settings</h6>
-                <p class="text-xs mb-0 text-neutral-500 dark:text-neutral-200">Customize and preview instantly</p>
-            </div>
-            <button data-slot="button" class="theme-customization-sidebar__close text-neutral-900 bg-transparent text-hover-primary-600 d-flex text-xl">
-                <i class="ri-close-fill"></i>
-            </button>
-        </div>
-        <div class="d-flex flex-column gap-48 p-24 overflow-y-auto flex-grow-1">
-            <div class="theme-setting-item">
-                <h6 class="fw-medium text-primary-light text-md mb-3">Theme Mode</h6>
-                <div class="d-grid grid-cols-3 gap-3 dark-light-mode">
-                    <button type="button" class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl active" data-theme="light" aria-label="light">
-                        <i class="ri-sun-line"></i>
-                    </button>
-                    <button type="button" class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl" data-theme="dark" aria-label="dark">
-                        <i class="ri-moon-line"></i>
-                    </button>
-                    <button type="button" class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl" data-theme="system" aria-label="system">
-                        <i class="ri-computer-line"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="theme-setting-item">
-                <h6 class="fw-medium text-primary-light text-md mb-3">Color Schema</h6>
-                <div class="d-grid grid-cols-3 gap-3">
-                    <button type="button" class="color-picker-btn d-flex flex-column justify-content-center align-items-center" data-color="base" aria-label="Base">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3" style="background-color: #25A194;"></span>
-                        <span class="fw-medium mt-1" style="color: #25A194;">Base</span>
-                    </button>
-                    <button type="button" class="color-picker-btn d-flex flex-column justify-content-center align-items-center" data-color="red" aria-label="Red">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3" style="background-color: #dc2626;"></span>
-                        <span class="fw-medium mt-1" style="color: #dc2626;">Red</span>
-                    </button>
-                    <button type="button" class="color-picker-btn d-flex flex-column justify-content-center align-items-center" data-color="blue" aria-label="Blue">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3" style="background-color: #2563eb;"></span>
-                        <span class="fw-medium mt-1" style="color: #2563eb;">Blue</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    
     <!-- Theme Customization Structure End -->
 
     <div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
-    <?php include_once('includes/sidebar.php'); ?>
-    <main class="dashboard-main">
+    
+    <?php include_once('includes/sidebar.php') ?>
 
-        <?php include_once('includes/header.php'); ?>
+    <main class="dashboard-main">
+        <div class="navbar-header shadow-1">
+            <div class="row align-items-center justify-content-between">
+                <div class="col-auto">
+                    <div class="d-flex flex-wrap align-items-center gap-4">
+                        <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
+                            <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
+                        </button>
+                        <form class="navbar-search">
+                            <input type="text" class="bg-transparent" name="search" placeholder="Search...">
+                            <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="d-flex flex-wrap align-items-center gap-3">
+                        <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
+                        <div class="dropdown">
+                            <button class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative" type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
+                                <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
+                                <?php if ($unreadCount > 0): ?>
+                                <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
+                                <?php endif; ?>
+                            </button>
+                            <div class="dropdown-menu to-top dropdown-menu-lg p-0">
+                                <div class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
+                                    <div>
+                                        <h6 class="text-lg text-primary-light fw-semibold mb-0">Notifications</h6>
+                                    </div>
+                                    <span class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center"><?php echo count($notifications); ?></span>
+                                </div>
+                                <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
+                                    <?php if (!empty($notifications)): ?>
+                                        <?php foreach ($notifications as $notif): ?>
+                                        <a href="notification.php?id=<?php echo $notif['id']; ?>" class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
+                                            <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
+                                                <span class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
+                                                    <iconify-icon icon="bitcoin-icons:verify-outline" class="icon text-xxl"></iconify-icon>
+                                                </span>
+                                                <div>
+                                                    <h6 class="text-md fw-semibold mb-4"><?php echo htmlspecialchars($notif['title']); ?></h6>
+                                                    <p class="mb-0 text-sm text-secondary-light text-w-200-px"><?php echo htmlspecialchars(substr($notif['message'] ?? '', 0, 50)) . '...'; ?></p>
+                                                </div>
+                                            </div>
+                                            <span class="text-sm text-secondary-light flex-shrink-0">
+                                                <?php echo timeAgo($notif['created_at']); ?>
+                                            </span>
+                                        </a>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <div class="text-center py-20">
+                                            <p class="text-secondary-light">No new notifications</p>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="text-center py-12 px-16">
+                                    <a href="notifications.php" class="text-primary-600 fw-semibold text-md hover-underline">See All Notifications</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="dashboard-main-body">
             <div class="breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
@@ -844,9 +1031,9 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                 </div>
                 <div class="">
                     <?php if ($academicYear): ?>
-                        <span class="badge bg-primary-100 text-primary-600 px-16 py-8 radius-8">
-                            Academic Year: <?php echo htmlspecialchars($academicYear['name']); ?>
-                        </span>
+                    <span class="badge bg-primary-100 text-primary-600 px-16 py-8 radius-8">
+                        Academic Year: <?php echo htmlspecialchars($academicYear['name']); ?>
+                    </span>
                     <?php endif; ?>
                 </div>
             </div>
@@ -860,18 +1047,18 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                     <div class="card-body p-20">
                                         <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
                                             <div class="w-44-px h-44-px bg-warning-600 rounded-circle d-flex justify-content-center align-items-center">
-                                                <img src="/tenant/assets/images/icons/dashboard-icon1.png" alt="Icon">
+                                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon1.png" alt="Icon">
                                             </div>
                                             <p class="fw-medium text-primary-light mb-1">Total Students</p>
                                         </div>
                                         <h6 class="mb-0"><?php echo number_format($totalStudents); ?></h6>
                                         <p class="fw-medium text-sm text-primary-light mt-12 mb-0 d-flex align-items-center gap-2">
                                             <?php if ($attendanceRate > 0): ?>
-                                                <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
-                                                    <?php echo $attendanceRate; ?>%
-                                                    <i class="ri-arrow-up-line text-xs"></i>
-                                                </span>
-                                                Attendance Rate Today
+                                            <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
+                                                <?php echo $attendanceRate; ?>%
+                                                <iconify-icon icon="bxs:up-arrow" class="text-xs"></iconify-icon>
+                                            </span>
+                                            Attendance Rate Today
                                             <?php endif; ?>
                                         </p>
                                     </div>
@@ -882,17 +1069,17 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                     <div class="card-body p-20">
                                         <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
                                             <div class="w-44-px h-44-px bg-blue-600 rounded-circle d-flex justify-content-center align-items-center">
-                                                <img src="/tenant/assets/images/icons/dashboard-icon2.png" alt="Icon">
+                                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon2.png" alt="Icon">
                                             </div>
                                             <p class="fw-medium text-primary-light mb-1">Total Teachers</p>
                                         </div>
                                         <h6 class="mb-0"><?php echo number_format($totalTeachers); ?></h6>
                                         <p class="fw-medium text-sm text-primary-light mt-12 mb-0 d-flex align-items-center gap-2">
                                             <?php if ($totalClasses > 0): ?>
-                                                <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
-                                                    <?php echo $totalClasses; ?> Classes
-                                                </span>
-                                                <?php echo $totalSubjects; ?> Subjects
+                                            <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
+                                                <?php echo $totalClasses; ?> Classes
+                                            </span>
+                                            <?php echo $totalSubjects; ?> Subjects
                                             <?php endif; ?>
                                         </p>
                                     </div>
@@ -903,7 +1090,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                     <div class="card-body p-20">
                                         <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
                                             <div class="w-44-px h-44-px bg-purple-600 rounded-circle d-flex justify-content-center align-items-center">
-                                                <img src="/tenant/assets/images/icons/dashboard-icon3.png" alt="Icon">
+                                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon3.png" alt="Icon">
                                             </div>
                                             <p class="fw-medium text-primary-light mb-1">Total Revenue</p>
                                         </div>
@@ -922,7 +1109,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                     <div class="card-body p-20">
                                         <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
                                             <div class="w-44-px h-44-px bg-primary-600 rounded-circle d-flex justify-content-center align-items-center">
-                                                <img src="/tenant/assets/images/icons/dashboard-icon4.png" alt="Icon">
+                                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon4.png" alt="Icon">
                                             </div>
                                             <p class="fw-medium text-primary-light mb-1">Pending Payments</p>
                                         </div>
@@ -941,7 +1128,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                     <div class="card-body p-20">
                                         <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
                                             <div class="w-44-px h-44-px bg-success-600 rounded-circle d-flex justify-content-center align-items-center">
-                                                <img src="/tenant/assets/images/icons/dashboard-icon5.png" alt="Icon">
+                                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon5.png" alt="Icon">
                                             </div>
                                             <p class="fw-medium text-primary-light mb-1">Active Classes</p>
                                         </div>
@@ -960,14 +1147,14 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                     <div class="card-body p-20">
                                         <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
                                             <div class="w-44-px h-44-px bg-cyan-600 rounded-circle d-flex justify-content-center align-items-center">
-                                                <img src="/tenant/assets/images/icons/dashboard-icon6.png" alt="Icon">
+                                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon6.png" alt="Icon">
                                             </div>
                                             <p class="fw-medium text-primary-light mb-1">Fee Collection</p>
                                         </div>
                                         <h6 class="mb-0"><?php echo $feeCollectionRate; ?>%</h6>
                                         <p class="fw-medium text-sm text-primary-light mt-12 mb-0 d-flex align-items-center gap-2">
                                             <?php if ($academicTerm): ?>
-                                                <span class="text-xs"><?php echo htmlspecialchars($academicTerm['name']); ?></span>
+                                            <span class="text-xs"><?php echo htmlspecialchars($academicTerm['name']); ?></span>
                                             <?php endif; ?>
                                         </p>
                                     </div>
@@ -1072,16 +1259,16 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                                     <div class="pe-20 d-flex flex-column gap-20 max-h-462-px overflow-y-auto scroll-sm">
                                                         <?php if (!empty($announcements)): ?>
                                                             <?php foreach ($announcements as $notice): ?>
-                                                                <div class="d-flex align-items-start gap-16">
-                                                                    <img src="<?php echo $notice['created_by_avatar'] ?? '/tenant/assets/images/thumbs/notice-board-img1.png'; ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
-                                                                    <div class="">
-                                                                        <h6 class="mb-4 text-lg"><?php echo htmlspecialchars($notice['created_by_name'] ?? 'Admin'); ?></h6>
-                                                                        <p class="text-secondary-light text-sm mb-0"><?php echo htmlspecialchars($notice['content']); ?></p>
-                                                                        <span class="text-secondary-light text-sm mb-0 mt-4">
-                                                                            <?php echo date('d M Y', strtotime($notice['created_at'])); ?>
-                                                                        </span>
-                                                                    </div>
+                                                            <div class="d-flex align-items-start gap-16">
+                                                                <img src="<?php echo $notice['created_by_avatar'] ?? 'https://academixsuite.com/tenant/assets/images/thumbs/notice-board-img1.png'; ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
+                                                                <div class="">
+                                                                    <h6 class="mb-4 text-lg"><?php echo htmlspecialchars($notice['created_by_name'] ?? 'Admin'); ?></h6>
+                                                                    <p class="text-secondary-light text-sm mb-0"><?php echo htmlspecialchars($notice['content'] ?? $notice['description'] ?? $notice['title'] ?? ''); ?></p>
+                                                                    <span class="text-secondary-light text-sm mb-0 mt-4">
+                                                                        <?php echo date('d M Y', strtotime($notice['created_at'])); ?>
+                                                                    </span>
                                                                 </div>
+                                                            </div>
                                                             <?php endforeach; ?>
                                                         <?php else: ?>
                                                             <div class="text-center py-20">
@@ -1098,25 +1285,25 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                             <div class="card-body p-0">
                                                 <div class="d-flex flex-wrap align-items-center justify-content-between px-20 py-16 border-bottom border-neutral-200">
                                                     <h6 class="text-lg mb-0">Leave Requests</h6>
-                                                    <a href="leaves/requests.php" class="text-primary-600">View All</a>
+                                                    <a href="leave-requests.php" class="text-primary-600">View All</a>
                                                 </div>
                                                 <div class="ps-20 pt-20 pb-20">
                                                     <div class="pe-20 d-flex flex-column gap-28 max-h-462-px overflow-y-auto scroll-sm">
                                                         <?php if (!empty($leaveRequests)): ?>
                                                             <?php foreach ($leaveRequests as $leave): ?>
-                                                                <div class="d-flex align-items-center justify-content-between gap-16">
-                                                                    <div class="d-flex align-items-start gap-16">
-                                                                        <img src="<?php echo $leave['avatar'] ?? '/tenant/assets/images/thumbs/leave-request-img1.png'; ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
-                                                                        <div class="">
-                                                                            <h6 class="mb-0 text-lg"><?php echo htmlspecialchars($leave['user_name']); ?></h6>
-                                                                            <span class="text-secondary-light text-sm mb-0"><?php echo htmlspecialchars($leave['user_type']); ?></span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="text-end">
-                                                                        <span class="d-block fw-bold text-primary-light"><?php echo $leave['days']; ?> Days</span>
-                                                                        <p class="text-secondary-light text-sm mb-0">Apply on: <?php echo date('d M', strtotime($leave['created_at'])); ?></p>
+                                                            <div class="d-flex align-items-center justify-content-between gap-16">
+                                                                <div class="d-flex align-items-start gap-16">
+                                                                    <img src="<?php echo $leave['avatar'] ?? 'https://academixsuite.com/tenant/assets/images/thumbs/leave-request-img1.png'; ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
+                                                                    <div class="">
+                                                                        <h6 class="mb-0 text-lg"><?php echo htmlspecialchars($leave['user_name']); ?></h6>
+                                                                        <span class="text-secondary-light text-sm mb-0"><?php echo htmlspecialchars($leave['user_type']); ?></span>
                                                                     </div>
                                                                 </div>
+                                                                <div class="text-end">
+                                                                    <span class="d-block fw-bold text-primary-light"><?php echo $leave['days']; ?> Days</span>
+                                                                    <p class="text-secondary-light text-sm mb-0">Apply on: <?php echo date('d M', strtotime($leave['created_at'])); ?></p>
+                                                                </div>
+                                                            </div>
                                                             <?php endforeach; ?>
                                                         <?php else: ?>
                                                             <div class="text-center py-20">
@@ -1164,25 +1351,25 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                             <div class="pe-20 d-flex flex-column gap-32 overflow-y-auto max-h-500-px scroll-sm">
                                                 <?php if (!empty($upcomingEvents)): ?>
                                                     <?php foreach ($upcomingEvents as $event): ?>
-                                                        <div class="d-flex align-items-center justify-content-between gap-16">
-                                                            <div class="ps-10 border-start-width-3-px border-purple-600">
-                                                                <div class="d-flex align-items-end gap-6">
-                                                                    <h6 class="text-lg fw-normal mb-0">
-                                                                        <?php echo date('H:i', strtotime($event['start_time'] ?? '09:00:00')); ?>
-                                                                    </h6>
-                                                                    <span class="text-xs text-secondary-light line-height-1 mb-2">
-                                                                        <?php echo date('A', strtotime($event['start_time'] ?? '09:00:00')); ?>
-                                                                    </span>
-                                                                </div>
-                                                                <p class="text-secondary-light mt-4 mb-2 text-sm"><?php echo htmlspecialchars($event['title']); ?></p>
-                                                                <p class="text-xs text-secondary-light mb-0">
-                                                                    <?php echo date('M d', strtotime($event['start_date'])); ?>
-                                                                </p>
+                                                    <div class="d-flex align-items-center justify-content-between gap-16">
+                                                        <div class="ps-10 border-start-width-3-px border-purple-600">
+                                                            <div class="d-flex align-items-end gap-6">
+                                                                <h6 class="text-lg fw-normal mb-0">
+                                                                    <?php echo date('H:i', strtotime($event['start_time'] ?? '09:00:00')); ?>
+                                                                </h6>
+                                                                <span class="text-xs text-secondary-light line-height-1 mb-2">
+                                                                    <?php echo date('A', strtotime($event['start_time'] ?? '09:00:00')); ?>
+                                                                </span>
                                                             </div>
-                                                            <div>
-                                                                <a href="events.php?id=<?php echo $event['id']; ?>" class="py-6 px-16 radius-4 bg-neutral-100 text-secondary-light fw-semibold bg-hover-primary-600 hover-text-white">View</a>
-                                                            </div>
+                                                            <p class="text-secondary-light mt-4 mb-2 text-sm"><?php echo htmlspecialchars($event['title']); ?></p>
+                                                            <p class="text-xs text-secondary-light mb-0">
+                                                                <?php echo date('M d', strtotime($event['start_date'])); ?>
+                                                            </p>
                                                         </div>
+                                                        <div>
+                                                            <a href="event.php?id=<?php echo $event['id']; ?>" class="py-6 px-16 radius-4 bg-neutral-100 text-secondary-light fw-semibold bg-hover-primary-600 hover-text-white">View</a>
+                                                        </div>
+                                                    </div>
                                                     <?php endforeach; ?>
                                                 <?php else: ?>
                                                     <div class="text-center py-20">
@@ -1212,15 +1399,15 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                         ?>
                                         <div class="mt-40 mb-24 pe-110 position-relative max-w-288-px mx-auto">
                                             <div class="w-170-px h-170-px rounded-circle z-1 position-relative d-inline-flex justify-content-center align-items-center">
-                                                <img src="/tenant/assets/images/icons/radial-bg1.png" alt="Image" class="position-absolute top-0 start-0 z-n1 w-100 h-100 object-fit-cover">
+                                                <img src="https://academixsuite.com/tenant/assets/images/icons/radial-bg1.png" alt="Image" class="position-absolute top-0 start-0 z-n1 w-100 h-100 object-fit-cover">
                                                 <h5 class="text-white"><?php echo $studentPercent; ?>%</h5>
                                             </div>
                                             <div class="w-144-px h-144-px rounded-circle z-1 position-relative d-inline-flex justify-content-center align-items-center position-absolute top-0 end-0 mt--36">
-                                                <img src="/tenant/assets/images/icons/radial-bg2.png" alt="Image" class="position-absolute top-0 start-0 z-n1 w-100 h-100 object-fit-cover">
+                                                <img src="https://academixsuite.com/tenant/assets/images/icons/radial-bg2.png" alt="Image" class="position-absolute top-0 start-0 z-n1 w-100 h-100 object-fit-cover">
                                                 <h5 class="text-white"><?php echo $teacherPercent; ?>%</h5>
                                             </div>
                                             <div class="w-110-px h-110-px rounded-circle z-1 position-relative d-inline-flex justify-content-center align-items-center position-absolute bottom-0 start-50 translate-middle-x ms-48">
-                                                <img src="/tenant/assets/images/icons/radial-bg3.png" alt="Image" class="position-absolute top-0 start-0 z-n1 w-100 h-100 object-fit-cover">
+                                                <img src="https://academixsuite.com/tenant/assets/images/icons/radial-bg3.png" alt="Image" class="position-absolute top-0 start-0 z-n1 w-100 h-100 object-fit-cover">
                                                 <h5 class="text-white"><?php echo $staffPercent; ?>%</h5>
                                             </div>
                                         </div>
@@ -1275,38 +1462,46 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                             </span>
                                         </li>
                                     </ul>
-                                    <div id="incomeExpense"
-                                        data-income='<?php echo json_encode($incomeVsExpense['income'] ?? []); ?>'
-                                        data-expense='<?php echo json_encode($incomeVsExpense['expense'] ?? []); ?>'
-                                        data-months='<?php echo json_encode($incomeVsExpense['months'] ?? []); ?>'
-                                        class="apexcharts-tooltip-style-1"></div>
+                                    <div id="incomeExpense" 
+                                         data-income='<?php echo json_encode($incomeVsExpense['income'] ?? []); ?>'
+                                         data-expense='<?php echo json_encode($incomeVsExpense['expense'] ?? []); ?>'
+                                         data-months='<?php echo json_encode($incomeVsExpense['months'] ?? []); ?>'
+                                         class="apexcharts-tooltip-style-1"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <!-- Top Teachers Block (UPDATED) -->
                     <div class="col-xxl-4 col-lg-6">
                         <div class="card h-100">
                             <div class="card-body p-0">
                                 <div class="d-flex flex-wrap align-items-center justify-content-between px-20 py-16 border-bottom border-neutral-200">
                                     <h6 class="text-lg mb-0">Top Teachers</h6>
-                                    <a href="teachers/list.php" class="text-primary-600">View All</a>
+                                    <a href="teacher-list.php" class="text-primary-600">View All</a>
                                 </div>
                                 <div class="ps-20 pt-20 pb-20">
                                     <div class="pe-20 d-flex flex-column gap-20 max-h-462-px overflow-y-auto scroll-sm">
                                         <?php if (!empty($topTeachers)): ?>
                                             <?php foreach ($topTeachers as $teacher): ?>
-                                                <div class="d-flex align-items-center justify-content-between gap-16">
-                                                    <div class="d-flex align-items-start gap-16">
-                                                        <img src="<?php echo $teacher['avatar'] ?? '/tenant/assets/images/thumbs/top-teacher-img1.png'; ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
-                                                        <div class="">
-                                                            <h6 class="mb-0 text-lg"><?php echo htmlspecialchars($teacher['name']); ?></h6>
-                                                            <span class="text-secondary-light text-sm mb-0"><?php echo htmlspecialchars($teacher['email']); ?></span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <span class="d-block fw-semibold text-primary-light"><?php echo round($teacher['attendance_rate']); ?>%</span>
+                                            <div class="d-flex align-items-center justify-content-between gap-16">
+                                                <div class="d-flex align-items-start gap-16">
+                                                    <img src="<?php echo htmlspecialchars($teacher['avatar'] ?? 'https://academixsuite.com/tenant/assets/images/thumbs/top-teacher-img1.png'); ?>" 
+                                                         alt="Teacher" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
+                                                    <div class="">
+                                                        <h6 class="mb-0 text-lg"><?php echo htmlspecialchars($teacher['name']); ?></h6>
+                                                        <span class="text-secondary-light text-sm mb-0"><?php echo htmlspecialchars($teacher['email']); ?></span>
                                                     </div>
                                                 </div>
+                                                <div class="text-end">
+                                                    <?php if (isset($teacher['attendance_rate'])): ?>
+                                                        <span class="d-block fw-semibold text-primary-light"><?php echo round($teacher['attendance_rate']); ?>%</span>
+                                                        <span class="text-xs text-secondary-light">Attendance</span>
+                                                    <?php else: ?>
+                                                        <span class="d-block fw-semibold text-primary-light"><?php echo $teacher['subject_count'] ?? 0; ?></span>
+                                                        <span class="text-xs text-secondary-light">Subjects</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <div class="text-center py-20">
@@ -1318,110 +1513,32 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                             </div>
                         </div>
                     </div>
+
+                    <!-- New Admissions Block -->
                     <div class="col-xxl-4 col-lg-6">
                         <div class="card h-100">
                             <div class="card-body p-0">
                                 <div class="d-flex flex-wrap align-items-center justify-content-between px-20 py-16 border-bottom border-neutral-200">
                                     <h6 class="text-lg mb-0">New Admissions (Last 30 Days)</h6>
-                                    <a href="students/list.php" class="text-primary-600">View All</a>
+                                    <a href="admission-list.php" class="text-primary-600">View All</a>
                                 </div>
                                 <div class="p-20">
                                     <?php
-                                    // Get boys vs girls admissions data for last 30 days
-                                    $boysAdmissions = 0;
-                                    $girlsAdmissions = 0;
-                                    $totalAdmissions = 0;
-
-                                    if ($schoolDb) {
-                                        try {
-                                            // First query: Get boys count (handling different gender formats)
-                                            $boysStmt = $schoolDb->prepare("
-                            SELECT COUNT(*) as count FROM students 
-                            WHERE school_id = ? 
-                            AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-                            AND (
-                                LOWER(gender) IN ('male', 'm', 'boy', 'boys', '1') 
-                                OR gender = 'Male' 
-                                OR gender = 'MALE'
-                            )
-                        ");
-                                            if ($boysStmt) {
-                                                $boysStmt->execute([$school['id']]);
-                                                $boysResult = $boysStmt->fetch(PDO::FETCH_ASSOC);
-                                                $boysAdmissions = (int)($boysResult['count'] ?? 0);
-                                            }
-
-                                            // Second query: Get girls count (handling different gender formats)
-                                            $girlsStmt = $schoolDb->prepare("
-                            SELECT COUNT(*) as count FROM students 
-                            WHERE school_id = ? 
-                            AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-                            AND (
-                                LOWER(gender) IN ('female', 'f', 'girl', 'girls', '2') 
-                                OR gender = 'Female' 
-                                OR gender = 'FEMALE'
-                            )
-                        ");
-                                            if ($girlsStmt) {
-                                                $girlsStmt->execute([$school['id']]);
-                                                $girlsResult = $girlsStmt->fetch(PDO::FETCH_ASSOC);
-                                                $girlsAdmissions = (int)($girlsResult['count'] ?? 0);
-                                            }
-
-                                            // Alternative query if gender column has different values
-                                            if ($boysAdmissions === 0 && $girlsAdmissions === 0) {
-                                                $genderStmt = $schoolDb->prepare("
-                                SELECT 
-                                    gender,
-                                    COUNT(*) as count
-                                FROM students 
-                                WHERE school_id = ? 
-                                AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-                                AND gender IS NOT NULL 
-                                AND gender != ''
-                                GROUP BY gender
-                            ");
-                                                if ($genderStmt) {
-                                                    $genderStmt->execute([$school['id']]);
-                                                    $genderResults = $genderStmt->fetchAll(PDO::FETCH_ASSOC);
-
-                                                    foreach ($genderResults as $row) {
-                                                        $gender = strtolower(trim($row['gender']));
-                                                        if (in_array($gender, ['male', 'm', 'boy', '1'])) {
-                                                            $boysAdmissions += (int)$row['count'];
-                                                        } elseif (in_array($gender, ['female', 'f', 'girl', '2'])) {
-                                                            $girlsAdmissions += (int)$row['count'];
-                                                        }
-                                                    }
-                                                }
-                                            }
-
-                                            $totalAdmissions = $boysAdmissions + $girlsAdmissions;
-                                        } catch (Exception $e) {
-                                            error_log("Error fetching gender-based admissions: " . $e->getMessage());
-                                        }
-                                    }
-
-                                    // Calculate percentages
                                     $boysPercentage = $totalAdmissions > 0 ? round(($boysAdmissions / $totalAdmissions) * 100) : 0;
                                     $girlsPercentage = $totalAdmissions > 0 ? round(($girlsAdmissions / $totalAdmissions) * 100) : 0;
-
-                                    // For the donut chart data
                                     $admissionsData = [$boysAdmissions, $girlsAdmissions];
                                     ?>
-
                                     <div class="position-relative text-center">
-                                        <div id="newAdmissions"
-                                            data-admissions='<?php echo json_encode($admissionsData); ?>'
-                                            data-boys="<?php echo $boysAdmissions; ?>"
-                                            data-girls="<?php echo $girlsAdmissions; ?>"
-                                            class="y-value-left apexcharts-tooltip-z-none"></div>
+                                        <div id="newAdmissions" 
+                                             data-admissions='<?php echo json_encode($admissionsData); ?>'
+                                             data-boys="<?php echo $boysAdmissions; ?>"
+                                             data-girls="<?php echo $girlsAdmissions; ?>"
+                                             class="y-value-left apexcharts-tooltip-z-none"></div>
                                         <div class="text-center position-absolute top-50 start-50 translate-middle">
                                             <h5 class="mb-4"><?php echo number_format($totalAdmissions); ?></h5>
                                             <span class="text-secondary-light">Total Admissions</span>
                                         </div>
                                     </div>
-
                                     <ul class="d-flex flex-wrap align-items-center justify-content-center mt-48 gap-24">
                                         <li class="d-flex align-items-center gap-2">
                                             <span class="w-12-px h-12-px radius-2 bg-warning-600 rotate-45-deg"></span>
@@ -1442,68 +1559,72 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                                             </div>
                                         </li>
                                     </ul>
-
                                     <?php if ($totalAdmissions > 0): ?>
-                                        <div class="mt-20">
-                                            <div class="d-flex justify-content-between mb-2">
-                                                <span class="text-xs text-secondary-light">Boys (<?php echo $boysPercentage; ?>%)</span>
-                                                <span class="text-xs text-secondary-light">Girls (<?php echo $girlsPercentage; ?>%)</span>
+                                    <div class="mt-20">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="text-xs text-secondary-light">Boys (<?php echo $boysPercentage; ?>%)</span>
+                                            <span class="text-xs text-secondary-light">Girls (<?php echo $girlsPercentage; ?>%)</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-warning-600" role="progressbar" 
+                                                 style="width: <?php echo $boysPercentage; ?>%;" 
+                                                 aria-valuenow="<?php echo $boysPercentage; ?>" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
                                             </div>
-                                            <div class="progress" style="height: 8px;">
-                                                <div class="progress-bar bg-warning-600" role="progressbar"
-                                                    style="width: <?php echo $boysPercentage; ?>%;"
-                                                    aria-valuenow="<?php echo $boysPercentage; ?>"
-                                                    aria-valuemin="0"
-                                                    aria-valuemax="100">
-                                                </div>
-                                                <div class="progress-bar bg-primary-600" role="progressbar"
-                                                    style="width: <?php echo $girlsPercentage; ?>%;"
-                                                    aria-valuenow="<?php echo $girlsPercentage; ?>"
-                                                    aria-valuemin="0"
-                                                    aria-valuemax="100">
-                                                </div>
+                                            <div class="progress-bar bg-primary-600" role="progressbar" 
+                                                 style="width: <?php echo $girlsPercentage; ?>%;" 
+                                                 aria-valuenow="<?php echo $girlsPercentage; ?>" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
                                             </div>
                                         </div>
+                                    </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Top Students Block (UPDATED) -->
                     <div class="col-xxl-4">
                         <div class="card radius-12 border-0 h-100">
                             <div class="d-flex align-items-center flex-wrap gap-2 justify-content-between py-12 px-20 border-bottom border-neutral-200">
                                 <h6 class="mb-2 fw-bold text-lg">Top Students</h6>
-                                <a href="students/list.php" class="text-primary-600">View All</a>
+                                <a href="student-list.php" class="text-primary-600">View All</a>
                             </div>
                             <div class="card-body">
                                 <div class="d-flex flex-column gap-28">
                                     <?php if (!empty($topStudents)): ?>
                                         <?php foreach ($topStudents as $index => $student): ?>
-                                            <?php
-                                            $color = ['blue', 'red', 'warning', 'green', 'blue'][$index % 5];
-                                            $marks = min(100, round($student['avg_marks'] ?? 0));
-                                            ?>
-                                            <div class="d-flex align-items-center justify-content-between gap-10">
-                                                <div class="d-flex align-items-center gap-12">
-                                                    <span class="w-44-px h-44-px rounded-circle d-flex justify-content-center align-items-center">
-                                                        <img src="<?php echo $student['avatar'] ?? '/tenant/assets/images/thumbs/avatar-img' . ($index + 1) . '.png'; ?>" class="w-44-px h-44-px object-fit-cover rounded-circle" alt="Icon">
-                                                    </span>
-                                                    <div class="">
-                                                        <h6 class="text-sm mb-2"><?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name']); ?></h6>
-                                                        <span class="text-xs text-secondary-light">Class: <?php echo htmlspecialchars($student['class_name']); ?></span>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex align-items-center gap-8">
-                                                    <span class="text-sm text-secondary-light">Marks</span>
-                                                    <span class="text-primary-light text-sm d-block text-end">
-                                                        <svg class="radial-progress w-44-px" data-percentage="<?php echo $marks; ?>" viewBox="0 0 80 80">
-                                                            <circle class="incomplete stroke-8-px opacity-02 stroke-<?php echo $color; ?>" cx="40" cy="40" r="35"></circle>
-                                                            <circle class="complete stroke-8-px stroke-<?php echo $color; ?>" cx="40" cy="40" r="35"></circle>
-                                                            <text class="percentage fill-black" x="50%" y="57%" transform="matrix(0, 1, -1, 0, 80, 0)"><?php echo $marks; ?></text>
-                                                        </svg>
-                                                    </span>
+                                        <?php
+                                        $color = ['blue', 'red', 'warning', 'green', 'blue'][$index % 5];
+                                        $percentage = min(100, round($student['avg_percentage'] ?? 0));
+                                        $name = htmlspecialchars($student['first_name'] . ' ' . ($student['last_name'] ?? ''));
+                                        $className = htmlspecialchars($student['class_name'] ?? 'N/A');
+                                        ?>
+                                        <div class="d-flex align-items-center justify-content-between gap-10">
+                                            <div class="d-flex align-items-center gap-12">
+                                                <span class="w-44-px h-44-px rounded-circle d-flex justify-content-center align-items-center">
+                                                    <img src="<?php echo htmlspecialchars($student['avatar'] ?? 'https://academixsuite.com/tenant/assets/images/thumbs/avatar-img' . ($index + 1) . '.png'); ?>" 
+                                                         class="w-44-px h-44-px object-fit-cover rounded-circle" alt="Student">
+                                                </span>
+                                                <div class="">
+                                                    <h6 class="text-sm mb-2"><?php echo $name; ?></h6>
+                                                    <span class="text-xs text-secondary-light">Class: <?php echo $className; ?></span>
                                                 </div>
                                             </div>
+                                            <div class="d-flex align-items-center gap-8">
+                                                <span class="text-sm text-secondary-light">Marks</span>
+                                                <span class="text-primary-light text-sm d-block text-end">
+                                                    <svg class="radial-progress w-44-px" data-percentage="<?php echo $percentage; ?>" viewBox="0 0 80 80">
+                                                        <circle class="incomplete stroke-8-px opacity-02 stroke-<?php echo $color; ?>" cx="40" cy="40" r="35"></circle>
+                                                        <circle class="complete stroke-8-px stroke-<?php echo $color; ?>" cx="40" cy="40" r="35"></circle>
+                                                        <text class="percentage fill-black" x="50%" y="57%" transform="matrix(0, 1, -1, 0, 80, 0)"><?php echo $percentage; ?></text>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        </div>
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <div class="text-center py-20">
@@ -1525,22 +1646,22 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
         </footer>
     </main>
 
-    <script src="/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
-    <script src="/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
-    <script src="/tenant/assets/js/lib/apexcharts.min.js"></script>
-    <script src="/tenant/assets/js/lib/iconify-icon.min.js"></script>
-    <script src="/tenant/assets/js/lib/dataTables.min.js"></script>
-    <script src="/tenant/assets/js/lib/jquery-ui.min.js"></script>
-    <script src="/tenant/assets/js/app.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/apexcharts.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/iconify-icon.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/dataTables.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-ui.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/app.js"></script>
 
     <script>
         // Revenue Statistics Chart
         var monthlyDataElement = document.querySelector("#revenueStatistic");
         var monthlyData = monthlyDataElement ? JSON.parse(monthlyDataElement.dataset.monthly || '[]') : [];
-
+        
         var revenueArray = [];
         var months = [];
-
+        
         if (monthlyData.length > 0) {
             monthlyData.forEach(function(item) {
                 revenueArray.push(item.revenue / 1000);
@@ -1557,17 +1678,13 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                 data: revenueArray
             }, {
                 name: 'Collected Fee',
-                data: revenueArray.map(function(value) {
-                    return value * 0.8;
-                })
+                data: revenueArray.map(function(value) { return value * 0.8; })
             }],
             chart: {
                 type: 'bar',
                 height: 250,
                 stacked: true,
-                toolbar: {
-                    show: false
-                }
+                toolbar: { show: false }
             },
             colors: ["#25A194", "#FF7A2C"],
             plotOptions: {
@@ -1576,9 +1693,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                     columnWidth: "50%"
                 }
             },
-            xaxis: {
-                categories: months
-            },
+            xaxis: { categories: months },
             yaxis: {
                 labels: {
                     formatter: function(value) {
@@ -1586,12 +1701,8 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                     }
                 }
             },
-            legend: {
-                show: false
-            },
-            fill: {
-                opacity: 1
-            }
+            legend: { show: false },
+            fill: { opacity: 1 }
         };
 
         var chart = new ApexCharts(document.querySelector("#revenueStatistic"), options);
@@ -1617,20 +1728,14 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                 name: 'Expense',
                 data: expenseData
             }],
-            legend: {
-                show: false
-            },
+            legend: { show: false },
             chart: {
                 type: 'area',
                 width: '100%',
                 height: 260,
-                toolbar: {
-                    show: false
-                }
+                toolbar: { show: false }
             },
-            dataLabels: {
-                enabled: false
-            },
+            dataLabels: { enabled: false },
             stroke: {
                 curve: 'stepline',
                 width: 2,
@@ -1641,25 +1746,17 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                 show: true,
                 borderColor: '#D1D5DB',
                 strokeDashArray: 1,
-                yaxis: {
-                    lines: {
-                        show: true
-                    }
-                }
+                yaxis: { lines: { show: true } }
             },
             colors: ['#16a34a', '#FF9F29'],
             markers: {
                 colors: ['#16a34a', '#FF9F29'],
                 size: 0,
-                hover: {
-                    size: 10
-                }
+                hover: { size: 10 }
             },
             xaxis: {
                 categories: monthLabels,
-                labels: {
-                    show: true
-                }
+                labels: { show: true }
             },
             yaxis: {
                 labels: {
@@ -1701,7 +1798,7 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
         }
 
         // Ensure we have valid data
-        if (!Array.isArray(admissionsData) || admissionsData.length === 0 ||
+        if (!Array.isArray(admissionsData) || admissionsData.length === 0 || 
             (admissionsData[0] === 0 && admissionsData[1] === 0)) {
             admissionsData = [1, 1]; // 50-50 default for visual when no data
             boysCount = 0;
@@ -1712,22 +1809,14 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
             series: admissionsData,
             colors: ['#FF7A2C', '#009F5E'], // Orange for boys, Green for girls
             labels: ['Boys', 'Girls'],
-            legend: {
-                show: false
-            },
+            legend: { show: false },
             chart: {
                 type: 'donut',
                 height: 270,
-                sparkline: {
-                    enabled: true
-                }
+                sparkline: { enabled: true }
             },
-            stroke: {
-                width: 2
-            },
-            dataLabels: {
-                enabled: false
-            },
+            stroke: { width: 2 },
+            dataLabels: { enabled: false },
             plotOptions: {
                 pie: {
                     donut: {
@@ -1852,13 +1941,10 @@ error_log("=================== SCHOOL DASHBOARD END ===================");
                     const radius = $(this).find($('circle.complete')).attr('r');
                     const circumference = 2 * Math.PI * radius;
                     const strokeDashOffset = circumference - ((percent * circumference) / 100);
-                    $(this).find($('circle.complete')).animate({
-                        'stroke-dashoffset': strokeDashOffset
-                    }, 1250);
+                    $(this).find($('circle.complete')).animate({ 'stroke-dashoffset': strokeDashOffset }, 1250);
                 }
             });
         }).trigger('scroll');
     </script>
 </body>
-
 </html>

@@ -1,1264 +1,733 @@
 <?php
 /**
  * School Management Hub
- * Comprehensive school management page handling multiple aspects of school operations
+ * Comprehensive school management with vertical navigation and professional UI
  */
 
-// Enable error logging
+// Error logging setup
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../../../logs/school_management.log');
 
-register_shutdown_function(function () {
-    $error = error_get_last();
-    if (!$error) {
-        return;
-    }
-
-    $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
-    if (!in_array($error['type'], $fatalTypes, true)) {
-        return;
-    }
-
-    $message = sprintf(
-        "[%s] GENERAL_FATAL: %s in %s on line %s\n",
-        date('Y-m-d H:i:s'),
-        $error['message'] ?? 'Unknown fatal error',
-        $error['file'] ?? 'unknown file',
-        $error['line'] ?? 'unknown'
-    );
-
-    error_log(trim($message));
-    @file_put_contents(__DIR__ . '/../../../logs/general_fatal.log', $message, FILE_APPEND);
-});
-
-error_log("=== SCHOOL MANAGEMENT HUB START ===");
-
-// Start session safely
+require_once __DIR__ . '/../../../includes/autoload.php';
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    session_name('academix_tenant');
+    session_start(function_exists('academix_session_options') ? academix_session_options() : []);
 }
 
-// Get school slug from GLOBALS (set by router)
+// Get school slug from router globals
 $schoolSlug = $GLOBALS['SCHOOL_SLUG'] ?? '';
-$userType = $GLOBALS['USER_TYPE'] ?? 'admin';
 $schoolData = $GLOBALS['SCHOOL_DATA'] ?? [];
 
 if (empty($schoolSlug)) {
-    error_log("ERROR: Empty school slug");
     header('HTTP/1.1 400 Bad Request');
     exit('School identifier missing');
 }
 
-// Get school info
+// Load school info
 $school = $schoolData;
 if (empty($school) && isset($_SESSION['school_info'][$schoolSlug])) {
     $school = $_SESSION['school_info'][$schoolSlug];
 }
-
 if (empty($school)) {
-    error_log("ERROR: School data not found for slug: " . $schoolSlug);
-    header("Location: ../../login.php?school_slug=" . urlencode($schoolSlug));
+    $loginUrl = function_exists('school_login_url') ? school_login_url($schoolSlug, false) : '../../login.php?school_slug=' . urlencode($schoolSlug);
+    header("Location: {$loginUrl}");
     exit;
 }
 
-// Verify authentication
-if (!isset($_SESSION['school_auth']) || 
-    $_SESSION['school_auth']['school_slug'] !== $schoolSlug) {
-    error_log("User not authenticated, redirecting to login");
-    header('Location: ../../login.php?school_slug=' . urlencode($schoolSlug));
+// Authentication check
+if (empty($_SESSION['school_auth']) || $_SESSION['school_auth']['school_slug'] !== $schoolSlug) {
+    $loginUrl = function_exists('school_login_url') ? school_login_url($schoolSlug, false) : '../../login.php?school_slug=' . urlencode($schoolSlug);
+    header("Location: {$loginUrl}");
     exit;
 }
 
-// Verify admin access
-$schoolAuth = $_SESSION['school_auth'];
-
-$currentPage = basename(__FILE__);
-$userId = $schoolAuth['user_id'] ?? 0;
-if ($schoolAuth['user_type'] !== 'admin') {
-    error_log("ERROR: Non-admin user attempted access");
+$userId = $_SESSION['school_auth']['user_id'] ?? 0;
+$userType = $_SESSION['school_auth']['user_type'] ?? '';
+if ($userType !== 'admin') {
     header('HTTP/1.1 403 Forbidden');
     exit('Access denied. Admin privileges required.');
 }
 
-// Load configuration
-try {
-    require_once __DIR__ . '/../../../includes/autoload.php';
-    
-    if (!class_exists('Database')) {
-        throw new Exception("Database class not found");
-    }
-} catch (Exception $e) {
-    error_log("Error loading autoload.php: " . $e->getMessage());
-    http_response_code(500);
-    die("System configuration error. Please contact support.");
-}
-
-// Try to load SchoolActionManager, create fallback if not exists
-$actionManagerPath = __DIR__ . '/../../../includes/SchoolActionManager.php';
-if (file_exists($actionManagerPath)) {
-    try {
-        require_once $actionManagerPath;
-        $actionManagerExists = class_exists('SchoolActionManager');
-    } catch (Throwable $e) {
-        $actionManagerExists = false;
-        error_log("SchoolActionManager failed to load: " . $e->getMessage());
-    }
-} else {
-    $actionManagerExists = false;
-    error_log("SchoolActionManager.php not found at: " . $actionManagerPath);
-}
-
-// Connect to platform database
-$platformDb = null;
-try {
-    $platformDb = Database::getPlatformConnection();
-    error_log("Platform database connection successful");
-} catch (Exception $e) {
-    error_log("ERROR connecting to platform database: " . $e->getMessage());
-    http_response_code(500);
-    die("Database connection error. Please try again later.");
-}
-
-// Connect to school database
+// Database connections
+$platformDb = Database::getPlatformConnection();
 $schoolDb = null;
 try {
     if (!empty($school['database_name'])) {
         $schoolDb = Database::getSchoolConnection($school['database_name']);
-        error_log("School database connection successful");
-    }
-} catch (Exception $e) {
-    error_log("ERROR connecting to school database: " . $e->getMessage());
-    $schoolDb = null;
-}
-
-// Define fallback SchoolActionManager if it doesn't exist
-if (!$actionManagerExists) {
-    class SchoolActionManager {
-        private $platformDb;
-        private $schoolDb;
-        private $schoolId;
-        private $schoolSlug;
-        
-        public function __construct($platformDb, $schoolDb, $schoolId, $schoolSlug, $userId = null) {
-            $this->platformDb = $platformDb;
-            $this->schoolDb = $schoolDb;
-            $this->schoolId = $schoolId;
-            $this->schoolSlug = $schoolSlug;
-        }
-        
-        public function setAcademicYear($yearData, $userId) {
-            try {
-                if (!$this->schoolDb) {
-                    throw new Exception("School database not connected");
-                }
-                
-                // If this is set as default, remove default from other years
-                if (!empty($yearData['is_default']) && $yearData['is_default'] == 1) {
-                    $resetStmt = $this->schoolDb->prepare("
-                        UPDATE academic_years 
-                        SET is_default = 0 
-                        WHERE school_id = ?
-                    ");
-                    $resetStmt->execute([$this->schoolId]);
-                }
-                
-                // Insert new academic year
-                $stmt = $this->schoolDb->prepare("
-                    INSERT INTO academic_years (
-                        school_id, name, start_date, end_date, 
-                        is_default, status, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, NOW())
-                ");
-                
-                $stmt->execute([
-                    $this->schoolId,
-                    $yearData['name'],
-                    $yearData['start_date'],
-                    $yearData['end_date'],
-                    $yearData['is_default'] ?? 0,
-                    $yearData['status'] ?? 'upcoming'
-                ]);
-                
-                $yearId = $this->schoolDb->lastInsertId();
-                
-                // Create audit log in school database
-                $this->createSchoolAuditLog([
-                    'user_id' => $userId,
-                    'user_type' => 'admin',
-                    'action' => 'academic_year_created',
-                    'entity_type' => 'academic_years',
-                    'entity_id' => $yearId,
-                    'new_values' => json_encode($yearData),
-                    'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null
-                ]);
-                
-                return [
-                    'success' => true,
-                    'message' => 'Academic year created successfully',
-                    'year_id' => $yearId
-                ];
-                
-            } catch (Exception $e) {
-                error_log("Error in setAcademicYear: " . $e->getMessage());
-                return [
-                    'success' => false,
-                    'message' => 'Failed to create academic year: ' . $e->getMessage()
-                ];
-            }
-        }
-        
-        public function changePassword($userId, $newPassword, $userType, $changedBy) {
-            try {
-                if (!$this->schoolDb) {
-                    throw new Exception("School database not connected");
-                }
-                
-                // Hash the password
-                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-                
-                // Update password
-                $stmt = $this->schoolDb->prepare("
-                    UPDATE users 
-                    SET password = ?, 
-                        updated_at = NOW(),
-                        reset_token = NULL,
-                        reset_token_expires = NULL
-                    WHERE id = ? AND school_id = ?
-                ");
-                $stmt->execute([$hashedPassword, $userId, $this->schoolId]);
-                
-                // Get user details for potential notification
-                $userStmt = $this->schoolDb->prepare("
-                    SELECT name, email 
-                    FROM users 
-                    WHERE id = ? AND school_id = ?
-                ");
-                $userStmt->execute([$userId, $this->schoolId]);
-                $user = $userStmt->fetch(PDO::FETCH_ASSOC);
-                
-                // Create audit log in school database
-                $this->createSchoolAuditLog([
-                    'user_id' => $changedBy,
-                    'user_type' => $userType,
-                    'action' => 'password_changed',
-                    'entity_type' => 'users',
-                    'entity_id' => $userId,
-                    'new_values' => json_encode(['password_updated' => true]),
-                    'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null
-                ]);
-                
-                return [
-                    'success' => true,
-                    'message' => 'Password changed successfully',
-                    'user_email' => $user['email'] ?? null
-                ];
-                
-            } catch (Exception $e) {
-                error_log("Error in changePassword: " . $e->getMessage());
-                return [
-                    'success' => false,
-                    'message' => 'Failed to change password: ' . $e->getMessage()
-                ];
-            }
-        }
-        
-        public function createPlatformAuditLog($data) {
-            try {
-                if (!$this->platformDb) {
-                    return;
-                }
-                
-                $stmt = $this->platformDb->prepare("
-                    INSERT INTO audit_logs (
-                        school_id, user_id, user_type, event, auditable_type,
-                        auditable_id, new_values, ip_address, user_agent, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-                ");
-                
-                $stmt->execute([
-                    $this->schoolId,
-                    $_SESSION['school_auth']['user_id'] ?? null,
-                    $_SESSION['school_auth']['user_type'] ?? 'admin',
-                    $data['event'],
-                    $data['auditable_type'],
-                    $data['auditable_id'],
-                    $data['new_values'],
-                    $data['ip_address'] ?? null,
-                    $data['user_agent'] ?? null
-                ]);
-                
-            } catch (Exception $e) {
-                error_log("Failed to create platform audit log: " . $e->getMessage());
-            }
-        }
-        
-        public function createSchoolAuditLog($data) {
-            try {
-                if (!$this->schoolDb) {
-                    return;
-                }
-                
-                $stmt = $this->schoolDb->prepare("
-                    INSERT INTO audit_logs (
-                        school_id, user_id, user_type, action, entity_type,
-                        entity_id, new_values, ip_address, user_agent, url, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-                ");
-                
-                $stmt->execute([
-                    $this->schoolId,
-                    $data['user_id'],
-                    $data['user_type'],
-                    $data['action'],
-                    $data['entity_type'],
-                    $data['entity_id'],
-                    $data['new_values'],
-                    $data['ip_address'] ?? null,
-                    $_SERVER['HTTP_USER_AGENT'] ?? null,
-                    $_SERVER['REQUEST_URI'] ?? null
-                ]);
-                
-            } catch (Exception $e) {
-                error_log("Failed to create school audit log: " . $e->getMessage());
-            }
-        }
-    }
-}
-
-// Initialize action manager
-try {
-    $managerReflection = new ReflectionClass('SchoolActionManager');
-    $constructor = $managerReflection->getConstructor();
-    if ($constructor && $constructor->getNumberOfParameters() >= 5) {
-        $actionManager = new SchoolActionManager($platformDb, $schoolDb, $school['id'], $schoolSlug, $userId);
-    } else {
-        $actionManager = new SchoolActionManager($platformDb, $schoolDb, $school['id'], $schoolSlug);
     }
 } catch (Throwable $e) {
-    error_log("Failed to initialize SchoolActionManager: " . $e->getMessage());
-    $actionManager = null;
+    error_log('General settings school database unavailable: ' . $e->getMessage());
 }
 
-// Initialize variables
-$schoolDetails = [];
-$schoolSettings = [];
-$academicYears = [];
-$academicTerms = [];
-$recentAnnouncements = [];
-$recentActivities = [];
-$subscriptionInfo = [];
-$storageUsage = [];
-$countries = [
-    'Nigeria', 'Ghana', 'Kenya', 'South Africa', 'Egypt', 
-    'Morocco', 'Tunisia', 'Rwanda', 'Uganda', 'Tanzania',
-    'United States', 'United Kingdom', 'Canada', 'Australia'
-];
+// Include SchoolActionManager
+require_once __DIR__ . '/../../../includes/SchoolActionManager.php';
+require_once __DIR__ . '/../../../includes/Services/WhatsAppService.php';
+$manager = new SchoolActionManager($platformDb, $schoolDb, $school['id'], $schoolSlug, $userId);
+
+// CSRF token
+if (!function_exists('generateCsrfToken')) {
+    function generateCsrfToken() {
+        if (!isset($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
+    }
+}
+if (!function_exists('validateCsrfToken')) {
+    function validateCsrfToken($token) {
+        return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+    }
+}
+$csrfToken = generateCsrfToken();
+
+// Handle AJAX requests for CRUD operations
+if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+    header('Content-Type: application/json');
+    if (!isset($_POST['csrf_token']) || !validateCsrfToken($_POST['csrf_token'])) {
+        echo json_encode(['success' => false, 'message' => 'Invalid security token.']);
+        exit;
+    }
+    $action = $_POST['action'] ?? '';
+    $response = ['success' => false, 'message' => 'Invalid action'];
+
+    switch ($action) {
+        // Academic Years
+        case 'create_academic_year':
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'start_date' => $_POST['start_date'] ?? '',
+                'end_date' => $_POST['end_date'] ?? '',
+                'is_default' => isset($_POST['is_default']) ? 1 : 0,
+                'status' => $_POST['status'] ?? 'upcoming'
+            ];
+            $response = $manager->createAcademicYear($data);
+            break;
+        case 'get_academic_year':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = $manager->getAcademicYearById($id);
+            $response = $data ? ['success' => true, 'data' => $data] : ['success' => false, 'message' => 'Not found'];
+            break;
+        case 'update_academic_year':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'start_date' => $_POST['start_date'] ?? '',
+                'end_date' => $_POST['end_date'] ?? '',
+                'is_default' => isset($_POST['is_default']) ? 1 : 0,
+                'status' => $_POST['status'] ?? 'upcoming'
+            ];
+            $response = $manager->updateAcademicYear($id, $data);
+            break;
+        case 'delete_academic_year':
+            $id = (int)($_POST['id'] ?? 0);
+            $response = $manager->deleteAcademicYear($id);
+            break;
+
+        // Academic Terms
+        case 'create_academic_term':
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'academic_year_id' => (int)($_POST['academic_year_id'] ?? 0),
+                'start_date' => $_POST['start_date'] ?? '',
+                'end_date' => $_POST['end_date'] ?? '',
+                'is_default' => isset($_POST['is_default']) ? 1 : 0
+            ];
+            $response = $manager->createAcademicTerm($data);
+            break;
+        case 'get_academic_term':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = $manager->getAcademicTermById($id);
+            $response = $data ? ['success' => true, 'data' => $data] : ['success' => false, 'message' => 'Not found'];
+            break;
+        case 'update_academic_term':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'academic_year_id' => (int)($_POST['academic_year_id'] ?? 0),
+                'start_date' => $_POST['start_date'] ?? '',
+                'end_date' => $_POST['end_date'] ?? '',
+                'is_default' => isset($_POST['is_default']) ? 1 : 0
+            ];
+            $response = $manager->updateAcademicTerm($id, $data);
+            break;
+        case 'delete_academic_term':
+            $id = (int)($_POST['id'] ?? 0);
+            $response = $manager->deleteAcademicTerm($id);
+            break;
+
+        // Classes
+        case 'create_class':
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'code' => $_POST['code'] ?? '',
+                'academic_year_id' => (int)($_POST['academic_year_id'] ?? 0),
+                'grade_level' => $_POST['grade_level'] ?? null,
+                'capacity' => (int)($_POST['capacity'] ?? 40),
+                'room_number' => $_POST['room_number'] ?? null,
+                'description' => $_POST['description'] ?? null,
+                'class_teacher_id' => !empty($_POST['class_teacher_id']) ? (int)$_POST['class_teacher_id'] : null
+            ];
+            $response = $manager->createClass($data);
+            break;
+        case 'get_class':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = $manager->getClassById($id);
+            $response = $data ? ['success' => true, 'data' => $data] : ['success' => false, 'message' => 'Not found'];
+            break;
+        case 'update_class':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'code' => $_POST['code'] ?? '',
+                'academic_year_id' => (int)($_POST['academic_year_id'] ?? 0),
+                'grade_level' => $_POST['grade_level'] ?? null,
+                'capacity' => (int)($_POST['capacity'] ?? 40),
+                'room_number' => $_POST['room_number'] ?? null,
+                'description' => $_POST['description'] ?? null,
+                'class_teacher_id' => !empty($_POST['class_teacher_id']) ? (int)$_POST['class_teacher_id'] : null
+            ];
+            $response = $manager->updateClass($id, $data);
+            break;
+        case 'delete_class':
+            $id = (int)($_POST['id'] ?? 0);
+            $response = $manager->deleteClass($id);
+            break;
+
+        // Sections
+        case 'create_section':
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'code' => $_POST['code'] ?? '',
+                'class_id' => (int)($_POST['class_id'] ?? 0),
+                'capacity' => (int)($_POST['capacity'] ?? 40),
+                'room_number' => $_POST['room_number'] ?? null,
+                'class_teacher_id' => !empty($_POST['class_teacher_id']) ? (int)$_POST['class_teacher_id'] : null
+            ];
+            $response = $manager->createSection($data);
+            break;
+        case 'get_section':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = $manager->getSectionById($id);
+            $response = $data ? ['success' => true, 'data' => $data] : ['success' => false, 'message' => 'Not found'];
+            break;
+        case 'update_section':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'code' => $_POST['code'] ?? '',
+                'class_id' => (int)($_POST['class_id'] ?? 0),
+                'capacity' => (int)($_POST['capacity'] ?? 40),
+                'room_number' => $_POST['room_number'] ?? null,
+                'class_teacher_id' => !empty($_POST['class_teacher_id']) ? (int)$_POST['class_teacher_id'] : null
+            ];
+            $response = $manager->updateSection($id, $data);
+            break;
+        case 'delete_section':
+            $id = (int)($_POST['id'] ?? 0);
+            $response = $manager->deleteSection($id);
+            break;
+
+        // Subjects
+        case 'create_subject':
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'code' => $_POST['code'] ?? '',
+                'type' => $_POST['type'] ?? 'core',
+                'credit_hours' => (float)($_POST['credit_hours'] ?? 1.0),
+                'description' => $_POST['description'] ?? null
+            ];
+            $response = $manager->createSubject($data);
+            break;
+        case 'get_subject':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = $manager->getSubjectById($id);
+            $response = $data ? ['success' => true, 'data' => $data] : ['success' => false, 'message' => 'Not found'];
+            break;
+        case 'update_subject':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'code' => $_POST['code'] ?? '',
+                'type' => $_POST['type'] ?? 'core',
+                'credit_hours' => (float)($_POST['credit_hours'] ?? 1.0),
+                'description' => $_POST['description'] ?? null
+            ];
+            $response = $manager->updateSubject($id, $data);
+            break;
+        case 'delete_subject':
+            $id = (int)($_POST['id'] ?? 0);
+            $response = $manager->deleteSubject($id);
+            break;
+
+        // Subject Assignments
+        case 'assign_subject':
+            $data = [
+                'class_id' => (int)($_POST['class_id'] ?? 0),
+                'subject_id' => (int)($_POST['subject_id'] ?? 0),
+                'teacher_id' => !empty($_POST['teacher_id']) ? (int)$_POST['teacher_id'] : null
+            ];
+            $response = $manager->assignSubjectToClass($data);
+            break;
+        case 'delete_assignment':
+            $id = (int)($_POST['id'] ?? 0);
+            $response = $manager->deleteSubjectAssignment($id);
+            break;
+
+        // Payment Methods
+        case 'create_payment_method':
+            $data = [
+                'type' => $_POST['type'] ?? '',
+                'provider' => $_POST['provider'] ?? null,
+                'last_four' => $_POST['last_four'] ?? null,
+                'exp_month' => !empty($_POST['exp_month']) ? (int)$_POST['exp_month'] : null,
+                'exp_year' => !empty($_POST['exp_year']) ? (int)$_POST['exp_year'] : null,
+                'is_default' => isset($_POST['is_default']) ? 1 : 0,
+                'is_verified' => isset($_POST['is_verified']) ? 1 : 0,
+                'metadata' => [
+                    'account_name' => $_POST['account_name'] ?? null,
+                    'account_number' => $_POST['account_number'] ?? null
+                ]
+            ];
+            $response = $manager->createPaymentMethod($data);
+            break;
+        case 'get_payment_method':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = $manager->getPaymentMethodById($id);
+            $response = $data ? ['success' => true, 'data' => $data] : ['success' => false, 'message' => 'Not found'];
+            break;
+        case 'update_payment_method':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = [
+                'type' => $_POST['type'] ?? '',
+                'provider' => $_POST['provider'] ?? null,
+                'last_four' => $_POST['last_four'] ?? null,
+                'exp_month' => !empty($_POST['exp_month']) ? (int)$_POST['exp_month'] : null,
+                'exp_year' => !empty($_POST['exp_year']) ? (int)$_POST['exp_year'] : null,
+                'is_default' => isset($_POST['is_default']) ? 1 : 0,
+                'is_verified' => isset($_POST['is_verified']) ? 1 : 0,
+                'metadata' => [
+                    'account_name' => $_POST['account_name'] ?? null,
+                    'account_number' => $_POST['account_number'] ?? null
+                ]
+            ];
+            $response = $manager->updatePaymentMethod($id, $data);
+            break;
+        case 'delete_payment_method':
+            $id = (int)($_POST['id'] ?? 0);
+            $response = $manager->deletePaymentMethod($id);
+            break;
+
+        // Fee Categories
+        case 'create_fee_category':
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'description' => $_POST['description'] ?? null
+            ];
+            $response = $manager->createFeeCategory($data);
+            break;
+        case 'get_fee_category':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = $manager->getFeeCategoryById($id);
+            $response = $data ? ['success' => true, 'data' => $data] : ['success' => false, 'message' => 'Not found'];
+            break;
+        case 'update_fee_category':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'description' => $_POST['description'] ?? null
+            ];
+            $response = $manager->updateFeeCategory($id, $data);
+            break;
+        case 'delete_fee_category':
+            $id = (int)($_POST['id'] ?? 0);
+            $response = $manager->deleteFeeCategory($id);
+            break;
+
+        // Fee Structures
+        case 'create_fee_structure':
+            $data = [
+                'academic_year_id' => (int)($_POST['academic_year_id'] ?? 0),
+                'class_id' => (int)($_POST['class_id'] ?? 0),
+                'fee_category_id' => (int)($_POST['fee_category_id'] ?? 0),
+                'amount' => (float)($_POST['amount'] ?? 0),
+                'due_date' => $_POST['due_date'] ?? null,
+                'late_fee' => (float)($_POST['late_fee'] ?? 0),
+                'academic_term_id' => !empty($_POST['academic_term_id']) ? (int)$_POST['academic_term_id'] : null
+            ];
+            $response = $manager->createFeeStructure($data);
+            break;
+        case 'get_fee_structure':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = $manager->getFeeStructureById($id);
+            $response = $data ? ['success' => true, 'data' => $data] : ['success' => false, 'message' => 'Not found'];
+            break;
+        case 'update_fee_structure':
+            $id = (int)($_POST['id'] ?? 0);
+            $data = [
+                'academic_year_id' => (int)($_POST['academic_year_id'] ?? 0),
+                'class_id' => (int)($_POST['class_id'] ?? 0),
+                'fee_category_id' => (int)($_POST['fee_category_id'] ?? 0),
+                'amount' => (float)($_POST['amount'] ?? 0),
+                'due_date' => $_POST['due_date'] ?? null,
+                'late_fee' => (float)($_POST['late_fee'] ?? 0),
+                'academic_term_id' => !empty($_POST['academic_term_id']) ? (int)$_POST['academic_term_id'] : null
+            ];
+            $response = $manager->updateFeeStructure($id, $data);
+            break;
+        case 'delete_fee_structure':
+            $id = (int)($_POST['id'] ?? 0);
+            $response = $manager->deleteFeeStructure($id);
+            break;
+
+        // Announcements
+        case 'create_announcement':
+            $data = [
+                'title' => $_POST['title'] ?? '',
+                'description' => $_POST['description'] ?? '',
+                'target' => $_POST['target'] ?? 'all',
+                'class_id' => !empty($_POST['class_id']) ? (int)$_POST['class_id'] : null,
+                'section_id' => !empty($_POST['section_id']) ? (int)$_POST['section_id'] : null,
+                'start_date' => $_POST['start_date'] ?? null,
+                'end_date' => $_POST['end_date'] ?? null
+            ];
+            $response = $manager->createAnnouncement($data);
+            break;
+
+        // API Keys
+        case 'create_api_key':
+            $data = [
+                'name' => $_POST['name'] ?? '',
+                'rate_limit_per_minute' => (int)($_POST['rate_limit_per_minute'] ?? 60),
+                'expires_at' => !empty($_POST['expires_at']) ? $_POST['expires_at'] : null
+            ];
+            $response = $manager->createApiKey($data);
+            break;
+        case 'delete_api_key':
+            $id = (int)($_POST['id'] ?? 0);
+            $response = $manager->deleteApiKey($id);
+            break;
+
+        // -----------------------------------------------------------------
+        // General Settings — updates the core school record in the platform
+        // database so changes are immediately visible on school_profile.php.
+        // -----------------------------------------------------------------
+        case 'update_general': {
+            $data = [];
+
+            // Scalar fields
+            $textFields = [
+                'name' => 'school_name',      // form field → DB column
+                'email'               => 'school_email',
+                'phone'               => 'school_phone',
+                'website'             => 'website',
+                'address'             => 'address',
+                'city'                => 'city',
+                'state'               => 'state',
+                'country'             => 'country',
+                'postal_code'         => 'postal_code',
+                'timezone'            => 'timezone',
+                'currency'            => 'currency',
+                'language'            => 'language',
+                'school_type'         => 'school_type',
+                'curriculum'          => 'curriculum',
+                'establishment_year'  => 'establishment_year',
+                'principal_name'      => 'principal_name',
+                'description'         => 'description',
+                'mission_statement'   => 'mission_statement',
+                'vision_statement'    => 'vision_statement',
+                'principal_message'   => 'principal_message',
+                'primary_color'       => 'primary_color',
+                'secondary_color'     => 'secondary_color',
+            ];
+
+            foreach ($textFields as $dbCol => $postKey) {
+                if (array_key_exists($postKey, $_POST)) {
+                    $data[$dbCol] = trim((string) $_POST[$postKey]);
+                }
+            }
+
+            // Social links passed as individual POST fields
+            foreach (['facebook','twitter','instagram','linkedin','youtube'] as $net) {
+                if (array_key_exists($net, $_POST)) {
+                    $data[$net] = trim((string) $_POST[$net]);
+                }
+            }
+
+            // Logo upload
+            $uploadDir = dirname(__DIR__, 3) . '/assets/uploads/schools/' . $school['id'] . '/branding';
+            $imageMimes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+
+            foreach (['logo' => 'logo_path', 'favicon' => 'favicon_path'] as $fileKey => $dbCol) {
+                $f = $_FILES[$fileKey] ?? null;
+                if ($f && ($f['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK && is_uploaded_file($f['tmp_name'] ?? '')) {
+                    if (($f['size'] ?? 0) <= 5 * 1024 * 1024) {
+                        $mime = function_exists('finfo_open')
+                            ? (function($p) { $fi = finfo_open(FILEINFO_MIME_TYPE); $m = (string) finfo_file($fi, $p); finfo_close($fi); return $m; })($f['tmp_name'])
+                            : (string) mime_content_type($f['tmp_name']);
+                        if (isset($imageMimes[$mime])) {
+                            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+                            $fname = $fileKey . '-' . bin2hex(random_bytes(8)) . '.' . $imageMimes[$mime];
+                            $dest  = $uploadDir . '/' . $fname;
+                            if (move_uploaded_file($f['tmp_name'], $dest)) {
+                                $data[$dbCol] = 'assets/uploads/schools/' . $school['id'] . '/branding/' . $fname;
+                            }
+                        }
+                    }
+                }
+            }
+
+            $response = $manager->updateSchoolDetails($data);
+            break;
+        }
+
+        // -----------------------------------------------------------------
+        // Public-profile editing (controls tenant/school_profile.php).
+        // Reads/writes against the PLATFORM database, scoped to the current
+        // school. Loaded from a separate file to keep this controller small.
+        // -----------------------------------------------------------------
+        case 'profile_save_basics':
+        case 'profile_save_contacts':
+        case 'profile_save_facilities':
+        case 'profile_gallery_add':
+        case 'profile_gallery_delete':
+        case 'profile_review_toggle':
+            $response = require __DIR__ . '/tabs/public_profile_actions.php';
+            break;
+
+        // -----------------------------------------------------------------
+        // AI Profile Content Generator
+        // Uses GrokClient to produce school description, mission, vision,
+        // and principal's message from school context + optional user hint.
+        // -----------------------------------------------------------------
+        case 'generate_profile_content': {
+            $field = $_POST['field'] ?? '';
+            $hint  = trim($_POST['hint'] ?? '');
+            $tone  = $_POST['tone']  ?? 'professional';
+
+            $validFields = [
+                // General Settings tab
+                'description', 'mission_statement', 'vision_statement', 'principal_message',
+                // Public Profile tab — Hero section
+                'landing_headline', 'landing_subheadline', 'landing_badge_text',
+                'landing_primary_cta_text', 'landing_secondary_cta_text',
+                // Public Profile tab — About & Story section
+                'landing_intro_title', 'landing_intro_text',
+                'landing_highlight_title', 'landing_highlight_text',
+                // Public Profile tab — Closing CTA
+                'landing_cta_title', 'landing_cta_text',
+            ];
+            if (!in_array($field, $validFields, true)) {
+                $response = ['success' => false, 'message' => 'Invalid field specified.'];
+                break;
+            }
+
+            require_once __DIR__ . '/../../../includes/GrokClient.php';
+            $apiKey = $_ENV['GROK_API_KEY'] ?? getenv('GROK_API_KEY') ?? '';
+            if (empty($apiKey) || $apiKey === 'xai-your-key-here') {
+                $response = ['success' => false, 'message' => 'Grok AI is not configured. Add GROK_API_KEY to your .env file.'];
+                break;
+            }
+
+            // Build school context for the prompt
+            $details    = $manager->getSchoolDetails();
+            $schoolName = $details['name']               ?? ($school['name'] ?? 'the school');
+            $schoolType = $details['school_type']        ?? '';
+            $curriculum = $details['curriculum']         ?? '';
+            $city       = $details['city']               ?? '';
+            $country    = $details['country']            ?? '';
+            $estYear    = $details['establishment_year'] ?? '';
+            $principal  = $details['principal_name']     ?? '';
+
+            // Field-specific generation instructions
+            $fieldLabels = [
+                // General Settings
+                'description'              => 'a concise and compelling school description (2–3 sentences) for the public profile page',
+                'mission_statement'        => 'a clear and purposeful mission statement (1–2 sentences) that captures what the school strives to do every day',
+                'vision_statement'         => 'an aspirational vision statement (1–2 sentences) describing where the school aims to be in the future',
+                'principal_message'        => 'a warm, professional welcome message from the principal (3–4 sentences) addressed to prospective students and parents',
+                // Hero section
+                'landing_headline'         => 'a punchy, memorable hero headline (max 10 words) for the school\'s public landing page — something that immediately grabs a parent\'s attention',
+                'landing_subheadline'      => 'a compelling sub-headline (1–2 sentences) that expands on the hero headline and invites parents to learn more or apply',
+                'landing_badge_text'       => 'a short badge/label (3–6 words) for the hero section, such as admission status or a key highlight — e.g. "Admissions Now Open" or "Top-Ranked Secondary School"',
+                'landing_primary_cta_text' => 'a short, action-oriented primary call-to-action button label (2–4 words) — e.g. "Apply Now", "Start Admission", "Enrol Today"',
+                'landing_secondary_cta_text' => 'a short secondary call-to-action button label (2–4 words) — e.g. "Take a Tour", "Learn More", "Portal Login"',
+                // About & Story
+                'landing_intro_title'      => 'a compelling section title (4–8 words) for the "About the school" intro section on the public profile page',
+                'landing_intro_text'       => 'an engaging intro paragraph (3–4 sentences) introducing the school\'s story, values, and what makes it stand out to prospective families',
+                'landing_highlight_title'  => 'a punchy highlight/achievement section title (4–8 words) showcasing what the school is known for — e.g. "Why Families Choose Us" or "Our Academic Achievements"',
+                'landing_highlight_text'   => 'a persuasive highlights paragraph (3–4 sentences) showcasing the school\'s key strengths, achievements, or differentiators that parents care about',
+                // Closing CTA
+                'landing_cta_title'        => 'a persuasive closing call-to-action heading (5–10 words) encouraging parents to take the next step — e.g. enrol, book a visit, or apply',
+                'landing_cta_text'         => 'a short supporting sentence (1–2 sentences) under the closing CTA heading that reinforces urgency or value and encourages action',
+            ];
+
+            $toneMap = [
+                'professional' => 'Use a professional and authoritative tone.',
+                'inspiring'    => 'Use an inspiring and motivational tone that energises readers.',
+                'formal'       => 'Use a formal, measured academic tone.',
+                'friendly'     => 'Use a warm, friendly, and approachable tone that feels welcoming.',
+                'academic'     => 'Use a scholarly and rigorous academic tone.',
+            ];
+
+            $toneInstr = $toneMap[$tone] ?? 'Use a professional tone.';
+
+            $contextParts = array_filter([
+                "School name: {$schoolName}",
+                $schoolType ? "Type: {$schoolType} school"          : '',
+                $curriculum ? "Curriculum: {$curriculum}"           : '',
+                ($city || $country)
+                    ? 'Location: ' . implode(', ', array_filter([$city, $country]))
+                    : '',
+                $estYear    ? "Established: {$estYear}"             : '',
+                $principal  ? "Principal: {$principal}"             : '',
+                $hint       ? "Admin's focus/context: {$hint}"      : '',
+            ]);
+
+            $systemPrompt = <<<SYSPROMPT
+You are a professional copywriter specialising in African school marketing and communications.
+Write content that is authentic, culturally appropriate, and tailored to the school's context.
+Return ONLY the requested text — no intro phrases, no labels, no quotes, no markdown, no extra commentary.
+SYSPROMPT;
+
+            $userPrompt = "Write {$fieldLabels[$field]} for:\n\n"
+                        . implode("\n", $contextParts)
+                        . "\n\n{$toneInstr}"
+                        . "\n\nReturn only the content text.";
+
+            try {
+                $grok   = new GrokClient($apiKey, 'grok-3-mini');
+                $result = $grok->chat(
+                    [
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user',   'content' => $userPrompt],
+                    ],
+                    null,     // no tools
+                    'none'    // no tool_choice pressure
+                );
+
+                if (!empty($result['error'])) {
+                    $response = ['success' => false, 'message' => $result['error']['message'] ?? 'AI error'];
+                } else {
+                    $content  = trim($result['choices'][0]['message']['content'] ?? '');
+                    // Strip any accidental wrapping quotes
+                    $content  = trim($content, '"\'');
+                    $response = ['success' => true, 'content' => $content];
+                }
+            } catch (Throwable $e) {
+                error_log('generate_profile_content error: ' . $e->getMessage());
+                $response = ['success' => false, 'message' => 'AI service error. Please try again.'];
+            }
+            break;
+        }
+
+        case 'update_whatsapp_settings': {
+            if (!$schoolDb) {
+                $response = ['success' => false, 'message' => 'School database is unavailable.'];
+                break;
+            }
+
+            $settings = [
+                'whatsapp_enabled' => isset($_POST['whatsapp_enabled']) ? '1' : '0',
+                'whatsapp_announcements_enabled' => isset($_POST['whatsapp_announcements_enabled']) ? '1' : '0',
+                'whatsapp_events_enabled' => isset($_POST['whatsapp_events_enabled']) ? '1' : '0',
+                'whatsapp_fees_enabled' => isset($_POST['whatsapp_fees_enabled']) ? '1' : '0',
+                'whatsapp_attendance_enabled' => isset($_POST['whatsapp_attendance_enabled']) ? '1' : '0',
+            ];
+
+            WhatsAppService::saveFeatureSettings($schoolDb, (int)$school['id'], $settings, (int)($school['campus_id'] ?? 1));
+            $response = ['success' => true, 'message' => 'WhatsApp notification settings saved.'];
+            break;
+        }
+
+        default:
+            $response = ['success' => false, 'message' => 'Unknown action'];
+    }
+    echo json_encode($response);
+    exit;
+}
+
+// Load all data via manager
+$schoolDetails = $manager->getSchoolDetails();
+$studentCount = $manager->getStudentCount();
+$teacherCount = $manager->getTeacherCount();
+$academicYears = $manager->getAcademicYears();
+$academicTerms = $manager->getAcademicTerms();
+$classes = $manager->getClasses();
+$sections = $manager->getSections();
+$subjects = $manager->getSubjects();
+$classSubjects = $manager->getClassSubjects();
+$paymentMethods = $manager->getPaymentMethods();
+$feeCategories = $manager->getFeeCategories();
+$feeStructures = $manager->getFeeStructures();
+$announcements = $manager->getAnnouncements(10);
+$recentActivities = $manager->getRecentActivities(20);
+$storageUsage = $manager->getStorageUsage();
+$subscriptionInfo = $manager->getSubscriptionInfo();
+$apiKeys = $manager->getApiKeys();
+$whatsappSettings = $schoolDb
+    ? WhatsAppService::getFeatureSettings($schoolDb, (int)$school['id'], true)
+    : WhatsAppService::defaultFeatureSettings(false);
+$whatsappService = $schoolDb ? new WhatsAppService($schoolDb, $school) : null;
+$whatsappConfigured = $whatsappService ? $whatsappService->isConfigured() : false;
+$whatsappConfigurationStatus = $whatsappService
+    ? $whatsappService->configurationStatus()
+    : 'School database unavailable. WhatsApp settings cannot be checked.';
+
+// Helper variables
 $currencies = ['NGN', 'GHS', 'KES', 'ZAR', 'USD', 'GBP', 'EUR'];
+$languages = [
+    'en' => 'English',
+    'fr' => 'French',
+    'ar' => 'Arabic',
+    'sw' => 'Swahili',
+    'ha' => 'Hausa',
+    'yo' => 'Yoruba',
+    'ig' => 'Igbo',
+    'pt' => 'Portuguese',
+    'es' => 'Spanish',
+];
 $timezones = [
     'Africa/Lagos', 'Africa/Accra', 'Africa/Nairobi', 'Africa/Johannesburg',
     'Africa/Cairo', 'Europe/London', 'America/New_York', 'America/Chicago',
     'America/Denver', 'America/Los_Angeles', 'Asia/Dubai'
 ];
-$languages = ['en' => 'English', 'fr' => 'French', 'ar' => 'Arabic', 'sw' => 'Swahili'];
-
-$adminUser = [
-    'name' => 'Administrator',
-    'role_name' => 'Admin',
-    'profile_photo' => ''
+$countries = [
+    'Nigeria', 'Ghana', 'Kenya', 'South Africa', 'Egypt',
+    'Morocco', 'Tunisia', 'Rwanda', 'Uganda', 'Tanzania',
+    'United States', 'United Kingdom', 'Canada', 'Australia'
 ];
-$message = '';
-$error = '';
-$success = false;
+$paymentTypes = [
+    'bank_transfer' => 'Bank Transfer',
+    'card' => 'Card',
+    'mobile_money' => 'Mobile Money',
+    'wallet' => 'Wallet'
+];
+$subjectTypes = ['core' => 'Core', 'elective' => 'Elective', 'extra_curricular' => 'Extra Curricular'];
+
+$currencySymbol = $schoolDetails['currency_symbol'] ?? '₦';
 $activeTab = $_GET['tab'] ?? 'general';
-
-// Fetch all necessary data
-try {
-    // Fetch school details from platform database
-    $stmt = $platformDb->prepare("
-        SELECT s.*, p.name as plan_name, p.price_monthly, p.features as plan_features
-        FROM schools s
-        LEFT JOIN plans p ON s.plan_id = p.id
-        WHERE s.id = ?
-    ");
-    $stmt->execute([$school['id']]);
-    $schoolDetails = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if (!$schoolDetails) {
-        $schoolDetails = $school;
-    }
-    
-    // Parse JSON fields safely
-    if (!empty($schoolDetails['facilities'])) {
-        $schoolDetails['facilities'] = json_decode($schoolDetails['facilities'], true) ?: [];
-    }
-    if (!empty($schoolDetails['social_links'])) {
-        $schoolDetails['social_links'] = json_decode($schoolDetails['social_links'], true) ?: [];
-    }
-    if (!empty($schoolDetails['plan_features'])) {
-        $schoolDetails['plan_features'] = json_decode($schoolDetails['plan_features'], true) ?: [];
-    }
-    if (!empty($schoolDetails['landing_programs'])) {
-        $schoolDetails['landing_programs'] = json_decode($schoolDetails['landing_programs'], true) ?: [];
-    }
-    if (!empty($schoolDetails['landing_testimonials'])) {
-        $schoolDetails['landing_testimonials'] = json_decode($schoolDetails['landing_testimonials'], true) ?: [];
-    }
-    
-    // Fetch subscription info
-    $subStmt = $platformDb->prepare("
-        SELECT * FROM subscriptions 
-        WHERE school_id = ? 
-        ORDER BY created_at DESC 
-        LIMIT 1
-    ");
-    $subStmt->execute([$school['id']]);
-    $subscriptionInfo = $subStmt->fetch(PDO::FETCH_ASSOC) ?: [];
-    
-    error_log("School details fetched successfully");
-} catch (Exception $e) {
-    error_log("Error fetching school details: " . $e->getMessage());
-    $schoolDetails = $school;
-}
-
-// Fetch school-specific data
-if ($schoolDb) {
-    try {
-        // Check if tables exist before querying
-        $tablesExist = true;
-        
-        // Get settings
-        try {
-            $settingsStmt = $schoolDb->prepare("SELECT * FROM settings WHERE school_id = ?");
-            $settingsStmt->execute([$school['id']]);
-            $settingsRows = $settingsStmt->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($settingsRows as $row) {
-                $schoolSettings[$row['key']] = $row['value'];
-            }
-        } catch (Exception $e) {
-            error_log("Error fetching settings: " . $e->getMessage());
-        }
-        
-        // Get admin user info
-        try {
-            $userStmt = $schoolDb->prepare("
-                SELECT u.*, r.name as role_name 
-                FROM users u 
-                LEFT JOIN roles r ON u.role_id = r.id 
-                WHERE u.id = ? AND u.school_id = ?
-            ");
-            $userStmt->execute([$userId, $school['id']]);
-            $adminUserData = $userStmt->fetch(PDO::FETCH_ASSOC);
-            
-            if ($adminUserData) {
-                $adminUser = [
-                    'name' => $adminUserData['name'] ?? 'Admin User',
-                    'role_name' => $adminUserData['role_name'] ?? 'Admin',
-                    'profile_photo' => $adminUserData['profile_photo'] ?? '',
-                    'email' => $adminUserData['email'] ?? '',
-                    'phone' => $adminUserData['phone'] ?? ''
-                ];
-            }
-        } catch (Exception $e) {
-            error_log("Error fetching user info: " . $e->getMessage());
-        }
-        
-        // Get academic years
-        try {
-            $yearStmt = $schoolDb->prepare("
-                SELECT * FROM academic_years 
-                WHERE school_id = ? 
-                ORDER BY start_date DESC
-            ");
-            $yearStmt->execute([$school['id']]);
-            $academicYears = $yearStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        } catch (Exception $e) {
-            error_log("Error fetching academic years: " . $e->getMessage());
-            $academicYears = [];
-        }
-        
-        // Get academic terms for current/default year
-        if (!empty($academicYears)) {
-            try {
-                $defaultYear = array_filter($academicYears, function($year) {
-                    return isset($year['is_default']) && $year['is_default'] == 1;
-                });
-                $currentYear = !empty($defaultYear) ? reset($defaultYear) : $academicYears[0];
-                
-                if (!empty($currentYear['id'])) {
-                    $termStmt = $schoolDb->prepare("
-                        SELECT * FROM academic_terms 
-                        WHERE school_id = ? AND academic_year_id = ?
-                        ORDER BY start_date
-                    ");
-                    $termStmt->execute([$school['id'], $currentYear['id']]);
-                    $academicTerms = $termStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-                }
-            } catch (Exception $e) {
-                error_log("Error fetching academic terms: " . $e->getMessage());
-                $academicTerms = [];
-            }
-        }
-        
-        // Get recent announcements
-        try {
-            $announceStmt = $schoolDb->prepare("
-                SELECT a.*, u.name as created_by_name 
-                FROM announcements a
-                LEFT JOIN users u ON a.created_by = u.id
-                WHERE a.school_id = ? AND a.is_published = 1
-                ORDER BY a.created_at DESC
-                LIMIT 5
-            ");
-            $announceStmt->execute([$school['id']]);
-            $recentAnnouncements = $announceStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        } catch (Exception $e) {
-            error_log("Error fetching announcements: " . $e->getMessage());
-            $recentAnnouncements = [];
-        }
-        
-        // Get recent activities (audit logs)
-        try {
-            $auditStmt = $schoolDb->prepare("
-                SELECT * FROM audit_logs 
-                WHERE school_id = ? 
-                ORDER BY created_at DESC 
-                LIMIT 10
-            ");
-            $auditStmt->execute([$school['id']]);
-            $recentActivities = $auditStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        } catch (Exception $e) {
-            error_log("Error fetching activities: " . $e->getMessage());
-            $recentActivities = [];
-        }
-        
-        // Get storage usage
-        try {
-            $storageStmt = $schoolDb->prepare("
-                SELECT * FROM storage_usage 
-                WHERE school_id = ?
-            ");
-            $storageStmt->execute([$school['id']]);
-            $storageUsage = $storageStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        } catch (Exception $e) {
-            error_log("Error fetching storage usage: " . $e->getMessage());
-            $storageUsage = [];
-        }
-        
-    } catch (Exception $e) {
-        error_log("Error fetching school data: " . $e->getMessage());
-    }
-}
-
-// Handle form submissions
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
-    
-    try {
-        switch ($action) {
-            case 'update_general':
-                // Handle general settings update
-                $result = handleGeneralSettingsUpdate($_POST, $_FILES, $platformDb, $schoolDb, $school, $userId, $actionManager);
-                break;
-                
-            case 'create_academic_year':
-                // Handle academic year creation
-                if (!$actionManager) {
-                    throw new Exception("Action manager not initialized");
-                }
-                
-                $yearData = [
-                    'name' => $_POST['year_name'] ?? '',
-                    'start_date' => $_POST['start_date'] ?? '',
-                    'end_date' => $_POST['end_date'] ?? '',
-                    'is_default' => isset($_POST['is_default']) ? 1 : 0,
-                    'status' => $_POST['status'] ?? 'upcoming'
-                ];
-                
-                // Validate required fields
-                if (empty($yearData['name']) || empty($yearData['start_date']) || empty($yearData['end_date'])) {
-                    throw new Exception("Year name, start date, and end date are required");
-                }
-                
-                if (method_exists($actionManager, 'setAcademicYear')) {
-                    $result = $actionManager->setAcademicYear($yearData, $userId);
-                } elseif (method_exists($actionManager, 'createAcademicYear')) {
-                    $result = $actionManager->createAcademicYear($yearData);
-                } else {
-                    throw new Exception("Academic year creation is not available");
-                }
-                break;
-                
-            case 'create_announcement':
-                // Handle announcement creation
-                if (!$schoolDb) {
-                    throw new Exception("School database not connected");
-                }
-                $result = createAnnouncement($_POST, $schoolDb, $school['id'], $userId, $actionManager);
-                break;
-                
-            case 'update_subscription':
-                // Handle subscription update
-                if (!$platformDb || !$actionManager) {
-                    throw new Exception("Database connection required");
-                }
-                $result = updateSubscription($_POST, $platformDb, $school['id'], $userId, $actionManager);
-                break;
-                
-            case 'create_backup':
-                // Handle backup creation
-                if (!$schoolDb || !$platformDb || !$actionManager) {
-                    throw new Exception("Database connections required");
-                }
-                $result = createBackup($schoolDb, $platformDb, $school['id'], $userId, $actionManager);
-                break;
-                
-            case 'change_password':
-                // Handle password change
-                if (!$actionManager) {
-                    throw new Exception("Action manager not initialized");
-                }
-                
-                // Validate password match
-                if (empty($_POST['new_password']) || empty($_POST['confirm_password'])) {
-                    throw new Exception("All password fields are required");
-                }
-                
-                if ($_POST['new_password'] !== $_POST['confirm_password']) {
-                    throw new Exception("New passwords do not match");
-                }
-                
-                // Validate password strength
-                if (strlen($_POST['new_password']) < 8) {
-                    throw new Exception("Password must be at least 8 characters long");
-                }
-                
-                if (method_exists($actionManager, 'changePassword')) {
-                    $result = $actionManager->changePassword(
-                        $userId,
-                        $_POST['new_password'],
-                        'admin',
-                        $userId
-                    );
-                } else {
-                    $result = changeAdminPasswordDirectly($schoolDb, $school['id'], $userId, $_POST['new_password']);
-                }
-                break;
-                
-            default:
-                $result = ['success' => false, 'message' => 'Unknown action'];
-        }
-        
-        if (isset($result)) {
-            if ($result['success']) {
-                $success = true;
-                $message = $result['message'];
-            } else {
-                $error = $result['message'];
-            }
-        }
-        
-        // Refresh data after update
-        if ($success && $schoolDb) {
-            try {
-                if (in_array($action, ['create_academic_year', 'update_academic_year'])) {
-                    // Refresh academic years
-                    if (isset($yearStmt)) {
-                        $yearStmt->execute([$school['id']]);
-                        $academicYears = $yearStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-                    }
-                } elseif ($action === 'create_announcement') {
-                    // Refresh announcements
-                    if (isset($announceStmt)) {
-                        $announceStmt->execute([$school['id']]);
-                        $recentAnnouncements = $announceStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-                    }
-                }
-            } catch (Exception $e) {
-                error_log("Error refreshing data: " . $e->getMessage());
-            }
-        }
-        
-    } catch (Throwable $e) {
-        $error = "Error processing request: " . $e->getMessage();
-        error_log("Management hub error: " . $e->getMessage());
-    }
-}
-
-error_log("=== SCHOOL MANAGEMENT HUB END ===");
-
-// Helper functions
-function handleGeneralSettingsUpdate($post, $files, $platformDb, $schoolDb, $school, $userId, $actionManager) {
-    try {
-        if (!$platformDb) {
-            throw new Exception("Platform database not connected");
-        }
-        
-        $platformDb->beginTransaction();
-        
-        // Collect and validate form data
-        $updateData = [
-            'name' => $post['school_name'] ?? $school['name'] ?? '',
-            'email' => $post['school_email'] ?? $school['email'] ?? '',
-            'phone' => $post['school_phone'] ?? $school['phone'] ?? '',
-            'address' => $post['address'] ?? $school['address'] ?? '',
-            'city' => $post['city'] ?? $school['city'] ?? '',
-            'state' => $post['state'] ?? $school['state'] ?? '',
-            'country' => $post['country'] ?? $school['country'] ?? 'Nigeria',
-            'postal_code' => $post['postal_code'] ?? $school['postal_code'] ?? '',
-            'website' => $post['website'] ?? '',
-            'establishment_year' => $post['establishment_year'] ?? $school['establishment_year'] ?? null,
-            'school_type' => $post['school_type'] ?? $school['school_type'] ?? 'secondary',
-            'curriculum' => $post['curriculum'] ?? $school['curriculum'] ?? 'Nigerian',
-            'principal_name' => $post['principal_name'] ?? $school['principal_name'] ?? '',
-            'principal_message' => $post['principal_message'] ?? $school['principal_message'] ?? '',
-            'mission_statement' => $post['mission_statement'] ?? $school['mission_statement'] ?? '',
-            'vision_statement' => $post['vision_statement'] ?? $school['vision_statement'] ?? '',
-            'description' => $post['description'] ?? $school['description'] ?? '',
-            'timezone' => $post['timezone'] ?? $school['timezone'] ?? 'Africa/Lagos',
-            'currency' => $post['currency'] ?? $school['currency'] ?? 'NGN',
-            'language' => $post['language'] ?? $school['language'] ?? 'en'
-        ];
-
-        $landingPrograms = parseLandingRows($post['landing_programs'] ?? '', ['title', 'description']);
-        $landingTestimonials = parseLandingRows($post['landing_testimonials'] ?? '', ['name', 'role', 'quote']);
-
-        $landingData = [
-            'landing_badge_text' => $post['landing_badge_text'] ?? $school['landing_badge_text'] ?? '',
-            'landing_headline' => $post['landing_headline'] ?? $school['landing_headline'] ?? '',
-            'landing_subheadline' => $post['landing_subheadline'] ?? $school['landing_subheadline'] ?? '',
-            'landing_primary_cta_text' => $post['landing_primary_cta_text'] ?? $school['landing_primary_cta_text'] ?? '',
-            'landing_secondary_cta_text' => $post['landing_secondary_cta_text'] ?? $school['landing_secondary_cta_text'] ?? '',
-            'landing_intro_title' => $post['landing_intro_title'] ?? $school['landing_intro_title'] ?? '',
-            'landing_intro_text' => $post['landing_intro_text'] ?? $school['landing_intro_text'] ?? '',
-            'landing_highlight_title' => $post['landing_highlight_title'] ?? $school['landing_highlight_title'] ?? '',
-            'landing_highlight_text' => $post['landing_highlight_text'] ?? $school['landing_highlight_text'] ?? '',
-            'landing_cta_title' => $post['landing_cta_title'] ?? $school['landing_cta_title'] ?? '',
-            'landing_cta_text' => $post['landing_cta_text'] ?? $school['landing_cta_text'] ?? '',
-            'landing_programs' => json_encode($landingPrograms),
-            'landing_testimonials' => json_encode($landingTestimonials),
-            'landing_updated_at' => date('Y-m-d H:i:s')
-        ];
-
-        $updateData = array_merge($updateData, $landingData);
-        
-        // Handle social links
-        $socialLinks = [
-            'facebook' => $post['facebook'] ?? '',
-            'twitter' => $post['twitter'] ?? '',
-            'instagram' => $post['instagram'] ?? '',
-            'linkedin' => $post['linkedin'] ?? '',
-            'youtube' => $post['youtube'] ?? ''
-        ];
-        
-        // Handle file uploads
-        $uploadResult = handleFileUploads($files, $school['id']);
-        if (!empty($uploadResult['logo'])) {
-            $updateData['logo_path'] = $uploadResult['logo'];
-        }
-        if (!empty($uploadResult['favicon'])) {
-            $updateData['favicon_path'] = $uploadResult['favicon'];
-        }
-        if (!empty($uploadResult['landing_hero_image'])) {
-            $updateData['landing_hero_image'] = $uploadResult['landing_hero_image'];
-        }
-        if (!empty($uploadResult['landing_feature_image'])) {
-            $updateData['landing_feature_image'] = $uploadResult['landing_feature_image'];
-        }
-
-        $schoolColumns = getPlatformTableColumns($platformDb, 'schools');
-        $allowEmptyFields = [
-            'landing_badge_text',
-            'landing_headline',
-            'landing_subheadline',
-            'landing_primary_cta_text',
-            'landing_secondary_cta_text',
-            'landing_intro_title',
-            'landing_intro_text',
-            'landing_highlight_title',
-            'landing_highlight_text',
-            'landing_cta_title',
-            'landing_cta_text'
-        ];
-        
-        // Build update query
-        $updateFields = [];
-        $updateParams = [];
-        foreach ($updateData as $field => $value) {
-            if (in_array($field, $schoolColumns, true) && $value !== null && ($value !== '' || in_array($field, $allowEmptyFields, true))) {
-                $updateFields[] = "`$field` = ?";
-                $updateParams[] = $value;
-            }
-        }
-        
-        // Add social links
-        if (in_array('social_links', $schoolColumns, true)) {
-            $updateFields[] = "social_links = ?";
-            $updateParams[] = json_encode($socialLinks);
-        }
-        
-        // Add updated_at
-        if (in_array('updated_at', $schoolColumns, true)) {
-            $updateFields[] = "updated_at = NOW()";
-        }
-        
-        // Add school ID at the end
-        $updateParams[] = $school['id'];
-        
-        if (!empty($updateFields)) {
-            // Execute update
-            $updateStmt = $platformDb->prepare("
-                UPDATE schools 
-                SET " . implode(', ', $updateFields) . "
-                WHERE id = ?
-            ");
-            $updateStmt->execute($updateParams);
-        }
-        
-        // Update school database settings
-        if ($schoolDb) {
-            updateSchoolSettings($schoolDb, $school['id'], $updateData);
-        }
-        
-        // Create audit log
-        if ($actionManager && method_exists($actionManager, 'createPlatformAuditLog')) {
-            $actionManager->createPlatformAuditLog([
-                'event' => 'settings_updated',
-                'auditable_type' => 'schools',
-                'auditable_id' => $school['id'],
-                'new_values' => json_encode(['updated_fields' => array_keys($updateData)]),
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
-            ]);
-        }
-        
-        if ($platformDb->inTransaction()) {
-            $platformDb->commit();
-        }
-        
-        return [
-            'success' => true,
-            'message' => 'School settings updated successfully!'
-        ];
-        
-    } catch (Exception $e) {
-        if ($platformDb && $platformDb->inTransaction()) {
-            $platformDb->rollBack();
-        }
-        return [
-            'success' => false,
-            'message' => 'Failed to update settings: ' . $e->getMessage()
-        ];
-    }
-}
-
-function handleFileUploads($files, $schoolId) {
-    $result = ['logo' => null, 'favicon' => null, 'landing_hero_image' => null, 'landing_feature_image' => null];
-    $uploadBaseDir = __DIR__ . '/../../../assets/uploads/schools/' . $schoolId . '/';
-    
-    if (!is_dir($uploadBaseDir)) {
-        if (!mkdir($uploadBaseDir, 0755, true)) {
-            error_log("Failed to create upload directory: " . $uploadBaseDir);
-            return $result;
-        }
-    }
-    
-    // Handle logo upload
-    if (isset($files['logo']) && $files['logo']['error'] === UPLOAD_ERR_OK) {
-        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg'];
-        $fileExtension = strtolower(pathinfo($files['logo']['name'], PATHINFO_EXTENSION));
-        
-        if (in_array($fileExtension, $allowedExtensions)) {
-            $fileName = 'logo_' . time() . '.' . $fileExtension;
-            $uploadPath = $uploadBaseDir . $fileName;
-            
-            if (move_uploaded_file($files['logo']['tmp_name'], $uploadPath)) {
-                $result['logo'] = '/assets/uploads/schools/' . $schoolId . '/' . $fileName;
-            } else {
-                error_log("Failed to move uploaded logo file");
-            }
-        } else {
-            error_log("Invalid file type for logo: " . $fileExtension);
-        }
-    }
-    
-    // Handle favicon upload
-    if (isset($files['favicon']) && $files['favicon']['error'] === UPLOAD_ERR_OK) {
-        $allowedExtensions = ['ico', 'png', 'jpg', 'jpeg', 'svg'];
-        $fileExtension = strtolower(pathinfo($files['favicon']['name'], PATHINFO_EXTENSION));
-        
-        if (in_array($fileExtension, $allowedExtensions)) {
-            $fileName = 'favicon_' . time() . '.' . $fileExtension;
-            $uploadPath = $uploadBaseDir . $fileName;
-            
-            if (move_uploaded_file($files['favicon']['tmp_name'], $uploadPath)) {
-                $result['favicon'] = '/assets/uploads/schools/' . $schoolId . '/' . $fileName;
-            } else {
-                error_log("Failed to move uploaded favicon file");
-            }
-        } else {
-            error_log("Invalid file type for favicon: " . $fileExtension);
-        }
-    }
-
-    foreach ([
-        'landing_hero_image' => 'landing_hero_' . time(),
-        'landing_feature_image' => 'landing_feature_' . time()
-    ] as $field => $prefix) {
-        if (isset($files[$field]) && $files[$field]['error'] === UPLOAD_ERR_OK) {
-            $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-            $fileExtension = strtolower(pathinfo($files[$field]['name'], PATHINFO_EXTENSION));
-
-            if (in_array($fileExtension, $allowedExtensions, true) && ($files[$field]['size'] ?? 0) <= 5 * 1024 * 1024) {
-                $fileName = $prefix . '.' . $fileExtension;
-                $uploadPath = $uploadBaseDir . $fileName;
-
-                if (move_uploaded_file($files[$field]['tmp_name'], $uploadPath)) {
-                    $result[$field] = 'assets/uploads/schools/' . $schoolId . '/' . $fileName;
-                } else {
-                    error_log("Failed to move uploaded {$field} file");
-                }
-            } else {
-                error_log("Invalid file type or size for {$field}");
-            }
-        }
-    }
-    
-    return $result;
-}
-
-function getPlatformTableColumns($db, $table) {
-    try {
-        $safeTable = str_replace('`', '', $table);
-        return $db->query("SHOW COLUMNS FROM `{$safeTable}`")->fetchAll(PDO::FETCH_COLUMN, 0);
-    } catch (Exception $e) {
-        error_log("Could not read columns for {$table}: " . $e->getMessage());
-        return [];
-    }
-}
-
-function parseLandingRows($text, array $keys) {
-    $rows = [];
-    $lines = preg_split('/\r\n|\r|\n/', trim((string) $text));
-
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if ($line === '') {
-            continue;
-        }
-
-        $parts = array_map('trim', explode('|', $line));
-        $row = [];
-        foreach ($keys as $index => $key) {
-            $row[$key] = $parts[$index] ?? '';
-        }
-
-        if (array_filter($row, static function ($value) {
-            return $value !== '';
-        })) {
-            $rows[] = $row;
-        }
-    }
-
-    return $rows;
-}
-
-function changeAdminPasswordDirectly($schoolDb, $schoolId, $userId, $newPassword) {
-    try {
-        if (!$schoolDb) {
-            throw new Exception("School database not connected");
-        }
-
-        $stmt = $schoolDb->prepare("
-            UPDATE users
-            SET password = ?, updated_at = NOW()
-            WHERE id = ? AND school_id = ?
-        ");
-        $stmt->execute([
-            password_hash($newPassword, PASSWORD_DEFAULT),
-            $userId,
-            $schoolId
-        ]);
-
-        return [
-            'success' => true,
-            'message' => 'Password changed successfully'
-        ];
-    } catch (Throwable $e) {
-        error_log("Direct password change failed: " . $e->getMessage());
-        return [
-            'success' => false,
-            'message' => 'Failed to change password: ' . $e->getMessage()
-        ];
-    }
-}
-
-function updateSchoolSettings($schoolDb, $schoolId, $data) {
-    if (!$schoolDb) {
-        return;
-    }
-    
-    $settingsToUpdate = [
-        'school_name' => $data['name'] ?? '',
-        'school_email' => $data['email'] ?? '',
-        'school_phone' => $data['phone'] ?? '',
-        'address' => $data['address'] ?? '',
-        'city' => $data['city'] ?? '',
-        'state' => $data['state'] ?? '',
-        'country' => $data['country'] ?? '',
-        'postal_code' => $data['postal_code'] ?? '',
-        'website' => $data['website'] ?? '',
-        'timezone' => $data['timezone'] ?? '',
-        'currency' => $data['currency'] ?? '',
-        'language' => $data['language'] ?? '',
-        'principal_name' => $data['principal_name'] ?? '',
-        'mission_statement' => $data['mission_statement'] ?? '',
-        'vision_statement' => $data['vision_statement'] ?? '',
-        'school_description' => $data['description'] ?? ''
-    ];
-    
-    foreach ($settingsToUpdate as $key => $value) {
-        if ($value !== '') {
-            try {
-                $checkStmt = $schoolDb->prepare("SELECT id FROM settings WHERE `key` = ? AND school_id = ?");
-                $checkStmt->execute([$key, $schoolId]);
-                
-                if ($checkStmt->fetch()) {
-                    $updateStmt = $schoolDb->prepare("
-                        UPDATE settings SET value = ?, updated_at = NOW() 
-                        WHERE `key` = ? AND school_id = ?
-                    ");
-                    $updateStmt->execute([$value, $key, $schoolId]);
-                } else {
-                    $insertStmt = $schoolDb->prepare("
-                        INSERT INTO settings (`key`, value, school_id, created_at) 
-                        VALUES (?, ?, ?, NOW())
-                    ");
-                    $insertStmt->execute([$key, $value, $schoolId]);
-                }
-            } catch (Exception $e) {
-                error_log("Error updating setting $key: " . $e->getMessage());
-            }
-        }
-    }
-}
-
-function createAnnouncement($post, $schoolDb, $schoolId, $userId, $actionManager) {
-    try {
-        if (!$schoolDb) {
-            throw new Exception("School database not connected");
-        }
-        
-        // Validate required fields
-        if (empty($post['title']) || empty($post['description'])) {
-            throw new Exception("Title and description are required");
-        }
-        
-        $stmt = $schoolDb->prepare("
-            INSERT INTO announcements (
-                school_id, title, description, target, class_id,
-                section_id, start_date, end_date, is_published, created_by, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-        ");
-        
-        $stmt->execute([
-            $schoolId,
-            $post['title'],
-            $post['description'],
-            $post['target'] ?? 'all',
-            !empty($post['class_id']) ? $post['class_id'] : null,
-            !empty($post['section_id']) ? $post['section_id'] : null,
-            !empty($post['start_date']) ? $post['start_date'] : null,
-            !empty($post['end_date']) ? $post['end_date'] : null,
-            1,
-            $userId
-        ]);
-        
-        $announcementId = $schoolDb->lastInsertId();
-        
-        // Create audit log
-        if ($actionManager && method_exists($actionManager, 'createSchoolAuditLog')) {
-            $actionManager->createSchoolAuditLog([
-                'user_id' => $userId,
-                'user_type' => 'admin',
-                'action' => 'announcement_created',
-                'entity_type' => 'announcements',
-                'entity_id' => $announcementId,
-                'new_values' => json_encode(['title' => $post['title']]),
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null
-            ]);
-        }
-        
-        return [
-            'success' => true,
-            'message' => 'Announcement created successfully!',
-            'announcement_id' => $announcementId
-        ];
-        
-    } catch (Exception $e) {
-        return [
-            'success' => false,
-            'message' => 'Failed to create announcement: ' . $e->getMessage()
-        ];
-    }
-}
-
-function updateSubscription($post, $platformDb, $schoolId, $userId, $actionManager) {
-    try {
-        if (!$platformDb) {
-            throw new Exception("Platform database not connected");
-        }
-        
-        $platformDb->beginTransaction();
-        
-        // Validate required fields
-        if (empty($post['plan_id'])) {
-            throw new Exception("Plan ID is required");
-        }
-        
-        $stmt = $platformDb->prepare("
-            UPDATE subscriptions 
-            SET plan_id = ?,
-                billing_cycle = ?,
-                amount = ?,
-                status = ?,
-                updated_at = NOW()
-            WHERE school_id = ?
-        ");
-        
-        $stmt->execute([
-            $post['plan_id'],
-            $post['billing_cycle'] ?? 'monthly',
-            $post['amount'] ?? 0,
-            $post['status'] ?? 'active',
-            $schoolId
-        ]);
-        
-        // Update school plan
-        $schoolStmt = $platformDb->prepare("
-            UPDATE schools SET plan_id = ? WHERE id = ?
-        ");
-        $schoolStmt->execute([$post['plan_id'], $schoolId]);
-        
-        // Create audit log
-        if ($actionManager && method_exists($actionManager, 'createPlatformAuditLog')) {
-            $actionManager->createPlatformAuditLog([
-                'event' => 'subscription_updated',
-                'auditable_type' => 'subscriptions',
-                'auditable_id' => $schoolId,
-                'new_values' => json_encode(['plan_id' => $post['plan_id'], 'status' => $post['status']]),
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null
-            ]);
-        }
-        
-        if ($platformDb->inTransaction()) {
-            $platformDb->commit();
-        }
-        
-        return [
-            'success' => true,
-            'message' => 'Subscription updated successfully!'
-        ];
-        
-    } catch (Exception $e) {
-        if ($platformDb && $platformDb->inTransaction()) {
-            $platformDb->rollBack();
-        }
-        return [
-            'success' => false,
-            'message' => 'Failed to update subscription: ' . $e->getMessage()
-        ];
-    }
-}
-
-function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager) {
-    try {
-        if (!$schoolDb || !$platformDb) {
-            throw new Exception("Database connections required");
-        }
-        
-        $backupFile = 'backup_' . $schoolId . '_' . date('Y-m-d_H-i-s') . '.sql';
-        $backupDir = __DIR__ . '/../../../backups/';
-        $backupPath = $backupDir . $backupFile;
-        
-        // Ensure backup directory exists
-        if (!is_dir($backupDir)) {
-            if (!mkdir($backupDir, 0755, true)) {
-                throw new Exception("Failed to create backup directory");
-            }
-        }
-        
-        // Get database name from connection
-        try {
-            $dbName = $schoolDb->query("SELECT DATABASE()")->fetchColumn();
-        } catch (Exception $e) {
-            $dbName = 'school_' . $schoolId;
-            error_log("Failed to get database name: " . $e->getMessage());
-        }
-        
-        // Create backup entry
-        $stmt = $platformDb->prepare("
-            INSERT INTO database_backups (
-                school_id, database_name, filename, file_size, backup_type, created_at
-            ) VALUES (?, ?, ?, ?, 'manual', NOW())
-        ");
-        
-        $stmt->execute([
-            $schoolId,
-            $dbName,
-            $backupFile,
-            0 // Will update after backup completes
-        ]);
-        
-        $backupId = $platformDb->lastInsertId();
-        
-        // Create audit log
-        if ($actionManager && method_exists($actionManager, 'createPlatformAuditLog')) {
-            $actionManager->createPlatformAuditLog([
-                'event' => 'backup_created',
-                'auditable_type' => 'database_backups',
-                'auditable_id' => $backupId,
-                'new_values' => json_encode(['filename' => $backupFile]),
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null
-            ]);
-        }
-        
-        return [
-            'success' => true,
-            'message' => 'Backup initiated successfully!',
-            'backup_id' => $backupId
-        ];
-        
-    } catch (Exception $e) {
-        return [
-            'success' => false,
-            'message' => 'Failed to create backup: ' . $e->getMessage()
-        ];
-    }
-}
 ?>
-
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="School Management Hub - Manage all aspects of your school">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>School Management - <?php echo htmlspecialchars($school['name'] ?? 'School'); ?></title>
-    
+
     <!-- Styles -->
-    <link rel="icon" type="image/png" href="/tenant/assets/images/favicon.png" sizes="16x16">
-    <link rel="stylesheet" href="/tenant/assets/css/remixicon.css">
-    <link rel="stylesheet" href="/tenant/assets/css/lib/bootstrap.min.css">
-    <link rel="stylesheet" href="/tenant/assets/css/lib/apexcharts.css">
-    <link rel="stylesheet" href="/tenant/assets/css/lib/dataTables.min.css">
-    <link rel="stylesheet" href="/tenant/assets/css/lib/flatpickr.min.css">
-    <link rel="stylesheet" href="/tenant/assets/css/lib/full-calendar.css">
-    <link rel="stylesheet" href="/tenant/assets/css/lib/calendar.css">
-    <link rel="stylesheet" href="/tenant/assets/css/style.css">
-    
+    <link rel="icon" type="image/png" href="https://academixsuite.com/tenant/assets/images/favicon.png" sizes="16x16">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/remixicon.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/apexcharts.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/dataTables.min.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/flatpickr.min.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/full-calendar.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/calendar.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/style.css">
+
     <style>
         .avatar-preview {
             width: 140px;
@@ -1275,13 +744,25 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
             background-size: cover;
             background-position: center;
         }
-        .nav-tabs .nav-link {
-            color: #6c757d;
+        .nav-pills .nav-link {
+            color: #495057;
             font-weight: 500;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            padding: 12px 20px;
+            transition: all 0.2s;
         }
-        .nav-tabs .nav-link.active {
+        .nav-pills .nav-link i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #25A194;
+            color: #fff;
+        }
+        .nav-pills .nav-link:hover:not(.active) {
+            background-color: #f8f9fa;
             color: #25A194;
-            border-bottom: 2px solid #25A194;
         }
         .form-section-title {
             font-size: 1rem;
@@ -1336,14 +817,66 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
             background: #25A194;
             transition: width 0.3s ease;
         }
-        .error-message {
-            color: #dc3545;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
+        .badge-success {
+            background-color: #28a745;
+            color: white;
         }
+        .badge-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .badge-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        .action-buttons {
+            white-space: nowrap;
+        }
+        .vertical-nav-wrapper {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 90px;
+        }
+        .content-col {
+            padding-left: 30px;
+        }
+        @media (max-width: 768px) {
+            .vertical-nav-wrapper {
+                margin-bottom: 30px;
+                position: static;
+            }
+            .content-col {
+                padding-left: 15px;
+            }
+        }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        .toast {
+            min-width: 300px;
+            background: white;
+            border-left: 4px solid;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+        }
+        .toast.success { border-left-color: #28a745; }
+        .toast.error { border-left-color: #dc3545; }
+        .toast.info { border-left-color: #17a2b8; }
     </style>
 </head>
-
 <body>
     <!-- Theme Customization Structure Start -->
     <div class="body-overlay"></div>
@@ -1351,116 +884,46 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
         class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
         <i class="ri-settings-3-line animate-spin"></i>
     </button>
-    <div class="theme-customization-sidebar w-100 bg-base h-100vh overflow-y-auto position-fixed end-0 top-0">
-        <div class="d-flex align-items-center gap-3 py-16 px-24 justify-content-between border-bottom">
-            <div>
-                <h6 class="text-sm dark:text-white">Theme Settings</h6>
-                <p class="text-xs mb-0 text-neutral-500 dark:text-neutral-200">Customize and preview instantly</p>
-            </div>
-            <button data-slot="button"
-                class="theme-customization-sidebar__close text-neutral-900 bg-transparent text-hover-primary-600 d-flex text-xl">
-                <i class="ri-close-fill"></i>
-            </button>
-        </div>
 
-        <div class="d-flex flex-column gap-48 p-24 overflow-y-auto flex-grow-1">
-            <div class="theme-setting-item">
-                <h6 class="fw-medium text-primary-light text-md mb-3">Theme Mode</h6>
-                <div class="d-grid grid-cols-3 gap-3 dark-light-mode">
-                    <button type="button"
-                        class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl active"
-                        data-theme="light" aria-label="light">
-                        <i class="ri-sun-line"></i>
-                    </button>
-                    <button type="button"
-                        class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl"
-                        data-theme="dark" aria-label="dark">
-                        <i class="ri-moon-line"></i>
-                    </button>
-                    <button type="button"
-                        class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl"
-                        data-theme="system" aria-label="system">
-                        <i class="ri-computer-line"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="theme-setting-item">
-                <h6 class="fw-medium text-primary-light text-md mb-3">Page Direction</h6>
-                <div class="d-grid grid-cols-2 gap-3">
-                    <button type="button"
-                        class="theme-setting-item__btn ltr-mode-btn d-flex align-items-center justify-content-center gap-2 h-56-px rounded-3 text-xl" aria-label="LTR">
-                        <span><i class="ri-align-item-left-line"></i></span>
-                        <span class="h6 text-sm font-medium mb-0">LTR</span>
-                    </button>
-                    <button type="button"
-                        class="theme-setting-item__btn rtl-mode-btn d-flex align-items-center justify-content-center gap-2 h-56-px rounded-3 text-xl" aria-label="RTL">
-                        <span class="h6 text-sm font-medium mb-0">RTL</span>
-                        <span><i class="ri-align-item-right-line"></i></span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="theme-setting-item">
-                <h6 class="fw-medium text-primary-light text-md mb-3">Color Schema</h6>
-                <div class="d-grid grid-cols-3 gap-3">
-                    <button type="button"
-                        class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                        data-color="base" aria-label="Base">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                            style="background-color: #25A194;"></span>
-                        <span class="fw-medium mt-1" style="color: #25A194;">Base</span>
-                    </button>
-                    <button type="button"
-                        class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                        data-color="red" aria-label="Red">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                            style="background-color: #dc2626;"></span>
-                        <span class="fw-medium mt-1" style="color: #dc2626;">Red</span>
-                    </button>
-                    <button type="button"
-                        class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                        data-color="blue" aria-label="Blue">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                            style="background-color: #2563eb;"></span>
-                        <span class="fw-medium mt-1" style="color: #2563eb;">Blue</span>
-                    </button>
-                    <button type="button"
-                        class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                        data-color="yellow" aria-label="Yellow">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                            style="background-color: #ff9f29;"></span>
-                        <span class="fw-medium mt-1" style="color: #ff9f29;">Yellow</span>
-                    </button>
-                    <button type="button"
-                        class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                        data-color="cyan" aria-label="Cyan">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                            style="background-color: #00b8f2;"></span>
-                        <span class="fw-medium mt-1" style="color: #00b8f2;">Cyan</span>
-                    </button>
-                    <button type="button"
-                        class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                        data-color="violet" aria-label="Violet">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                            style="background-color: #7c3aed;"></span>
-                        <span class="fw-medium mt-1" style="color: #7c3aed;">Violet</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- Theme Customization Structure End -->
 
     <div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
 
-    <!-- Sidebar -->
-    <?php include_once('includes/sidebar.php'); ?>
-<main class="dashboard-main">
-        
-        <?php include_once('includes/header.php'); ?>
+    <!-- Main Sidebar -->
+    <?php include_once('includes/sidebar.php') ?>
 
-         <div class="dashboard-main-body">
+    <main class="dashboard-main">
+        <div class="navbar-header shadow-1">
+            <div class="row align-items-center justify-content-between">
+                <div class="col-auto">
+                    <div class="d-flex flex-wrap align-items-center gap-4">
+                        <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
+                            <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
+                        </button>
+                        <form class="navbar-search">
+                            <input type="text" class="bg-transparent" name="search" placeholder="Search">
+                            <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <div class="d-flex flex-wrap align-items-center gap-3">
+                        <button type="button" data-theme-toggle
+                            class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
+                        <div class="dropdown">
+                            <button
+                                class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative"
+                                type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
+                                <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
+                                <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-main-body">
             <!-- Breadcrumb -->
             <div class="breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
                 <div class="">
@@ -1472,200 +935,1032 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
                 </div>
             </div>
 
-            <!-- Alerts -->
-            <?php if ($success): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="ri-checkbox-circle-line me-2"></i>
-                <?php echo htmlspecialchars($message); ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <?php endif; ?>
+            <!-- Toast Container -->
+            <div class="toast-container" id="toastContainer"></div>
 
-            <?php if ($error): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="ri-error-warning-line me-2"></i>
-                <?php echo htmlspecialchars($error); ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <?php endif; ?>
+           <!-- Quick Stats -->
+<div class="row mb-24">
+    <div class="col-xxl-12">
+        <div class="row gy-4">
+            <?php
+            // Derive additional stats
+            $totalRevenue = 0; // Replace with actual sum of payments if available
+            $monthlyRevenue = 0;
+            $pendingPayments = 0;
+            $collectionRate = 0;
+            $feeCollectionRate = 0;
+            $totalSubjects = count($subjects);
+            $totalClasses = count($classes);
+            $defaultTerm = !empty($academicTerms) ? $academicTerms[0] : null;
+            ?>
 
-            <!-- Quick Stats -->
-            <div class="row mb-24">
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stat-value"><?php echo $schoolDetails['student_count'] ?? 0; ?></div>
-                                <div class="stat-label">Total Students</div>
+            <!-- Total Students -->
+            <div class="col-xxl-3 col-sm-6">
+                <div class="card shadow-1 radius-8 gradient-bg-end-1 h-100">
+                    <div class="card-body p-20">
+                        <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
+                            <div class="w-44-px h-44-px bg-warning-600 rounded-circle d-flex justify-content-center align-items-center">
+                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon1.png" alt="Icon">
                             </div>
-                            <i class="ri-group-line"></i>
+                            <p class="fw-medium text-primary-light mb-1">Total Students</p>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stat-value"><?php echo $schoolDetails['teacher_count'] ?? 0; ?></div>
-                                <div class="stat-label">Total Teachers</div>
-                            </div>
-                            <i class="ri-user-star-line"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stat-value"><?php echo $schoolDetails['class_count'] ?? 0; ?></div>
-                                <div class="stat-label">Total Classes</div>
-                            </div>
-                            <i class="ri-school-line"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stat-value"><?php echo count($academicYears); ?></div>
-                                <div class="stat-label">Academic Years</div>
-                            </div>
-                            <i class="ri-calendar-line"></i>
-                        </div>
+                        <h6 class="mb-0"><?php echo number_format($studentCount); ?></h6>
+                        <p class="fw-medium text-sm text-primary-light mt-12 mb-0 d-flex align-items-center gap-2">
+                            <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
+                                <?php
+                                // Attendance rate for today (example)
+                                $attendanceRate = 0; // Replace with actual calculation
+                                echo $attendanceRate . '%';
+                                ?>
+                            </span>
+                            Attendance Rate Today
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Management Tabs -->
-            <ul class="nav nav-tabs mb-24" id="managementTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link <?php echo $activeTab == 'general' ? 'active' : ''; ?>" 
-                            id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">
-                        <i class="ri-settings-3-line me-2"></i>General Settings
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link <?php echo $activeTab == 'academic' ? 'active' : ''; ?>" 
-                            id="academic-tab" data-bs-toggle="tab" data-bs-target="#academic" type="button" role="tab">
-                        <i class="ri-graduation-cap-line me-2"></i>Academic Management
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link <?php echo $activeTab == 'announcements' ? 'active' : ''; ?>" 
-                            id="announcements-tab" data-bs-toggle="tab" data-bs-target="#announcements" type="button" role="tab">
-                        <i class="ri-megaphone-line me-2"></i>Announcements
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link <?php echo $activeTab == 'subscription' ? 'active' : ''; ?>" 
-                            id="subscription-tab" data-bs-toggle="tab" data-bs-target="#subscription" type="button" role="tab">
-                        <i class="ri-price-tag-3-line me-2"></i>Subscription & Billing
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link <?php echo $activeTab == 'security' ? 'active' : ''; ?>" 
-                            id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
-                        <i class="ri-shield-keyhole-line me-2"></i>Security & Backup
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link <?php echo $activeTab == 'activity' ? 'active' : ''; ?>" 
-                            id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab">
-                        <i class="ri-history-line me-2"></i>Activity Log
-                    </button>
-                </li>
-            </ul>
+            <!-- Total Teachers -->
+            <div class="col-xxl-3 col-sm-6">
+                <div class="card shadow-1 radius-8 gradient-bg-end-2 h-100">
+                    <div class="card-body p-20">
+                        <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
+                            <div class="w-44-px h-44-px bg-blue-600 rounded-circle d-flex justify-content-center align-items-center">
+                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon2.png" alt="Icon">
+                            </div>
+                            <p class="fw-medium text-primary-light mb-1">Total Teachers</p>
+                        </div>
+                        <h6 class="mb-0"><?php echo number_format($teacherCount); ?></h6>
+                        <p class="fw-medium text-sm text-primary-light mt-12 mb-0 d-flex align-items-center gap-2">
+                            <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
+                                <?php echo $totalClasses; ?> Classes
+                            </span>
+                            <?php echo $totalSubjects; ?> Subjects
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-            <!-- Tab Content -->
-            <div class="tab-content" id="managementTabsContent">
-                <!-- General Settings Tab -->
-                <div class="tab-pane fade <?php echo $activeTab == 'general' ? 'show active' : ''; ?>" id="general" role="tabpanel">
-                    <?php include 'tabs/general_settings.php'; ?>
+            <!-- Total Revenue (placeholder) -->
+            <div class="col-xxl-3 col-sm-6">
+                <div class="card shadow-1 radius-8 gradient-bg-end-3 h-100">
+                    <div class="card-body p-20">
+                        <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
+                            <div class="w-44-px h-44-px bg-purple-600 rounded-circle d-flex justify-content-center align-items-center">
+                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon3.png" alt="Icon">
+                            </div>
+                            <p class="fw-medium text-primary-light mb-1">Total Revenue</p>
+                        </div>
+                        <h6 class="mb-0"><?php echo $currencySymbol . ' ' . number_format($totalRevenue, 2); ?></h6>
+                        <p class="fw-medium text-sm text-primary-light mt-12 mb-0 d-flex align-items-center gap-2">
+                            <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
+                                <?php echo $currencySymbol . ' ' . number_format($monthlyRevenue, 2); ?>
+                            </span>
+                            This Month
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Classes -->
+            <div class="col-xxl-3 col-sm-6">
+                <div class="card shadow-1 radius-8 gradient-bg-end-5 h-100">
+                    <div class="card-body p-20">
+                        <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
+                            <div class="w-44-px h-44-px bg-success-600 rounded-circle d-flex justify-content-center align-items-center">
+                                <img src="https://academixsuite.com/tenant/assets/images/icons/dashboard-icon5.png" alt="Icon">
+                            </div>
+                            <p class="fw-medium text-primary-light mb-1">Active Classes</p>
+                        </div>
+                        <h6 class="mb-0"><?php echo number_format($totalClasses); ?></h6>
+                        <p class="fw-medium text-sm text-primary-light mt-12 mb-0 d-flex align-items-center gap-2">
+                            <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
+                                <?php echo $totalSubjects; ?> Subjects
+                            </span>
+                            Across Classes
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+            <!-- Main row with vertical navigation and content -->
+            <div class="row">
+                <!-- Vertical Navigation Column -->
+                <div class="col-lg-4 col-xl-3 mb-5">
+                    <div class="vertical-nav-wrapper">
+                        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                            <button class="nav-link <?php echo $activeTab == 'general' ? 'active' : ''; ?>"
+                                    id="v-pills-general-tab" data-bs-toggle="pill" data-bs-target="#v-pills-general"
+                                    type="button" role="tab" aria-controls="v-pills-general" aria-selected="true">
+                                <i class="ri-settings-3-line"></i> General Settings
+                            </button>
+                            <button class="nav-link <?php echo $activeTab == 'academic' ? 'active' : ''; ?>"
+                                    id="v-pills-academic-tab" data-bs-toggle="pill" data-bs-target="#v-pills-academic"
+                                    type="button" role="tab" aria-controls="v-pills-academic" aria-selected="false">
+                                <i class="ri-graduation-cap-line"></i> Academic Management
+                            </button>
+                            <button class="nav-link <?php echo $activeTab == 'classes' ? 'active' : ''; ?>"
+                                    id="v-pills-classes-tab" data-bs-toggle="pill" data-bs-target="#v-pills-classes"
+                                    type="button" role="tab" aria-controls="v-pills-classes" aria-selected="false">
+                                <i class="ri-school-line"></i> Classes & Sections
+                            </button>
+                            <button class="nav-link <?php echo $activeTab == 'subjects' ? 'active' : ''; ?>"
+                                    id="v-pills-subjects-tab" data-bs-toggle="pill" data-bs-target="#v-pills-subjects"
+                                    type="button" role="tab" aria-controls="v-pills-subjects" aria-selected="false">
+                                <i class="ri-book-open-line"></i> Subjects
+                            </button>
+                            <button class="nav-link <?php echo $activeTab == 'financial' ? 'active' : ''; ?>"
+                                    id="v-pills-financial-tab" data-bs-toggle="pill" data-bs-target="#v-pills-financial"
+                                    type="button" role="tab" aria-controls="v-pills-financial" aria-selected="false">
+                                <i class="ri-bank-card-line"></i> Financial Management
+                            </button>
+                            <button class="nav-link <?php echo $activeTab == 'announcements' ? 'active' : ''; ?>"
+                                    id="v-pills-announcements-tab" data-bs-toggle="pill" data-bs-target="#v-pills-announcements"
+                                    type="button" role="tab" aria-controls="v-pills-announcements" aria-selected="false">
+                                <i class="ri-megaphone-line"></i> Announcements
+                            </button>
+                            <button class="nav-link <?php echo $activeTab == 'whatsapp' ? 'active' : ''; ?>"
+                                    id="v-pills-whatsapp-tab" data-bs-toggle="pill" data-bs-target="#v-pills-whatsapp"
+                                    type="button" role="tab" aria-controls="v-pills-whatsapp" aria-selected="false">
+                                <i class="ri-whatsapp-line"></i> WhatsApp Alerts
+                            </button>
+                            <button class="nav-link <?php echo $activeTab == 'subscription' ? 'active' : ''; ?>"
+                                    id="v-pills-subscription-tab" data-bs-toggle="pill" data-bs-target="#v-pills-subscription"
+                                    type="button" role="tab" aria-controls="v-pills-subscription" aria-selected="false">
+                                <i class="ri-price-tag-3-line"></i> Subscription & Billing
+                            </button>
+                            <button class="nav-link <?php echo $activeTab == 'security' ? 'active' : ''; ?>"
+                                    id="v-pills-security-tab" data-bs-toggle="pill" data-bs-target="#v-pills-security"
+                                    type="button" role="tab" aria-controls="v-pills-security" aria-selected="false">
+                                <i class="ri-shield-keyhole-line"></i> Security & Backup
+                            </button>
+                            <button class="nav-link <?php echo $activeTab == 'api' ? 'active' : ''; ?>"
+                                    id="v-pills-api-tab" data-bs-toggle="pill" data-bs-target="#v-pills-api"
+                                    type="button" role="tab" aria-controls="v-pills-api" aria-selected="false">
+                                <i class="ri-key-2-line"></i> API Keys
+                            </button>
+                            <button class="nav-link <?php echo $activeTab == 'activity' ? 'active' : ''; ?>"
+                                    id="v-pills-activity-tab" data-bs-toggle="pill" data-bs-target="#v-pills-activity"
+                                    type="button" role="tab" aria-controls="v-pills-activity" aria-selected="false">
+                                <i class="ri-history-line"></i> Activity Log
+                            </button>
+                            <button class="nav-link <?php echo $activeTab == 'profile' ? 'active' : ''; ?>"
+                                    id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profile"
+                                    type="button" role="tab" aria-controls="v-pills-profile" aria-selected="false">
+                                <i class="ri-pages-line"></i> Public Profile
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Academic Management Tab -->
-                <div class="tab-pane fade <?php echo $activeTab == 'academic' ? 'show active' : ''; ?>" id="academic" role="tabpanel">
-                    <div class="row">
-                        <!-- Academic Years -->
-                        <div class="col-md-6">
-                            <div class="card mb-24">
-                                <div class="card-header">
-                                    <h5>Academic Years</h5>
-                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addYearModal">
-                                        <i class="ri-add-line"></i> Add Year
-                                    </button>
+                <!-- Content Column -->
+                <div class="col-lg-8 col-xl-9 content-col">
+                    <div class="tab-content" id="v-pills-tabContent">
+                        <!-- General Settings Tab -->
+                        <div class="tab-pane fade <?php echo $activeTab == 'general' ? 'show active' : ''; ?>" id="v-pills-general" role="tabpanel" aria-labelledby="v-pills-general-tab">
+                            <?php include 'tabs/general_settings.php'; ?>
+                        </div>
+
+                        <!-- Academic Management Tab -->
+                        <div class="tab-pane fade <?php echo $activeTab == 'academic' ? 'show active' : ''; ?>" id="v-pills-academic" role="tabpanel" aria-labelledby="v-pills-academic-tab">
+                            <div class="row">
+                                <!-- Academic Years -->
+                                <div class="col-md-6">
+                                    <div class="card mb-24">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Academic Years</h5>
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addYearModal">
+                                                <i class="ri-add-line"></i> Add Year
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover datatable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Year Name</th>
+                                                            <th>Start Date</th>
+                                                            <th>End Date</th>
+                                                            <th>Status</th>
+                                                            <th>Default</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php foreach ($academicYears as $year): ?>
+                                                        <tr data-id="<?php echo $year['id']; ?>">
+                                                            <td><?php echo htmlspecialchars($year['name']); ?></td>
+                                                            <td><?php echo date('M d, Y', strtotime($year['start_date'])); ?></td>
+                                                            <td><?php echo date('M d, Y', strtotime($year['end_date'])); ?></td>
+                                                            <td>
+                                                                <span class="badge bg-<?php
+                                                                    echo $year['status'] == 'active' ? 'success' :
+                                                                        ($year['status'] == 'upcoming' ? 'warning' : 'secondary');
+                                                                ?>">
+                                                                    <?php echo ucfirst($year['status']); ?>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <?php if (!empty($year['is_default']) && $year['is_default'] == 1): ?>
+                                                                    <span class="badge bg-primary">Default</span>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="action-buttons">
+                                                                <button class="btn btn-sm btn-outline-primary edit-year" data-id="<?php echo $year['id']; ?>">
+                                                                    <i class="ri-pencil-line"></i>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-outline-danger delete-year" data-id="<?php echo $year['id']; ?>">
+                                                                    <i class="ri-delete-bin-line"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        <?php endforeach; ?>
+                                                        <?php if (empty($academicYears)): ?>
+                                                        <tr>
+                                                            <td colspan="6" class="text-center text-muted">No academic years found</td>
+                                                        </tr>
+                                                        <?php endif; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <thead>
+
+                                <!-- Academic Terms -->
+                                <div class="col-md-6">
+                                    <div class="card mb-24">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Academic Terms</h5>
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addTermModal">
+                                                <i class="ri-add-line"></i> Add Term
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover datatable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Term Name</th>
+                                                            <th>Academic Year</th>
+                                                            <th>Start Date</th>
+                                                            <th>End Date</th>
+                                                            <th>Default</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php foreach ($academicTerms as $term): ?>
+                                                        <tr data-id="<?php echo $term['id']; ?>">
+                                                            <td><?php echo htmlspecialchars($term['name']); ?></td>
+                                                            <td><?php echo htmlspecialchars($term['academic_year_name']); ?></td>
+                                                            <td><?php echo date('M d, Y', strtotime($term['start_date'])); ?></td>
+                                                            <td><?php echo date('M d, Y', strtotime($term['end_date'])); ?></td>
+                                                            <td>
+                                                                <?php if (!empty($term['is_default'])): ?>
+                                                                    <span class="badge bg-primary">Default</span>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td class="action-buttons">
+                                                                <button class="btn btn-sm btn-outline-primary edit-term" data-id="<?php echo $term['id']; ?>">
+                                                                    <i class="ri-pencil-line"></i>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-outline-danger delete-term" data-id="<?php echo $term['id']; ?>">
+                                                                    <i class="ri-delete-bin-line"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        <?php endforeach; ?>
+                                                        <?php if (empty($academicTerms)): ?>
+                                                        <tr>
+                                                            <td colspan="6" class="text-center text-muted">No academic terms found</td>
+                                                        </tr>
+                                                        <?php endif; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Classes & Sections Tab -->
+                        <div class="tab-pane fade <?php echo $activeTab == 'classes' ? 'show active' : ''; ?>" id="v-pills-classes" role="tabpanel" aria-labelledby="v-pills-classes-tab">
+                            <div class="row">
+                                <!-- Classes -->
+                                <div class="col-md-6">
+                                    <div class="card mb-24">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Classes</h5>
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addClassModal">
+                                                <i class="ri-add-line"></i> Add Class
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover datatable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Class Name</th>
+                                                            <th>Code</th>
+                                                            <th>Grade Level</th>
+                                                            <th>Capacity</th>
+                                                            <th>Sections</th>
+                                                            <th>Subjects</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php foreach ($classes as $class): ?>
+                                                        <tr data-id="<?php echo $class['id']; ?>">
+                                                            <td><?php echo htmlspecialchars($class['name']); ?></td>
+                                                            <td><span class="badge bg-info"><?php echo htmlspecialchars($class['code']); ?></span></td>
+                                                            <td><?php echo htmlspecialchars($class['grade_level'] ?? 'N/A'); ?></td>
+                                                            <td><?php echo $class['capacity'] ?? 40; ?></td>
+                                                            <td><?php echo $class['section_count'] ?? 0; ?></td>
+                                                            <td><?php echo $class['subject_count'] ?? 0; ?></td>
+                                                            <td class="action-buttons">
+                                                                <button class="btn btn-sm btn-outline-primary edit-class" data-id="<?php echo $class['id']; ?>">
+                                                                    <i class="ri-pencil-line"></i>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-outline-danger delete-class" data-id="<?php echo $class['id']; ?>">
+                                                                    <i class="ri-delete-bin-line"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        <?php endforeach; ?>
+                                                        <?php if (empty($classes)): ?>
+                                                        <tr>
+                                                            <td colspan="7" class="text-center text-muted">No classes found</td>
+                                                        </tr>
+                                                        <?php endif; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sections -->
+                                <div class="col-md-6">
+                                    <div class="card mb-24">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Sections</h5>
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addSectionModal">
+                                                <i class="ri-add-line"></i> Add Section
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover datatable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Section</th>
+                                                            <th>Code</th>
+                                                            <th>Class</th>
+                                                            <th>Capacity</th>
+                                                            <th>Students</th>
+                                                            <th>Room</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php foreach ($sections as $section): ?>
+                                                        <tr data-id="<?php echo $section['id']; ?>">
+                                                            <td><?php echo htmlspecialchars($section['name']); ?></td>
+                                                            <td><span class="badge bg-info"><?php echo htmlspecialchars($section['code']); ?></span></td>
+                                                            <td><?php echo htmlspecialchars($section['class_name'] ?? 'N/A'); ?></td>
+                                                            <td><?php echo $section['capacity'] ?? 40; ?></td>
+                                                            <td>
+                                                                <span class="badge bg-<?php echo ($section['student_count'] ?? 0) >= ($section['capacity'] ?? 40) ? 'danger' : 'success'; ?>">
+                                                                    <?php echo $section['student_count'] ?? 0; ?>
+                                                                </span>
+                                                            </td>
+                                                            <td><?php echo htmlspecialchars($section['room_number'] ?? 'N/A'); ?></td>
+                                                            <td class="action-buttons">
+                                                                <button class="btn btn-sm btn-outline-primary edit-section" data-id="<?php echo $section['id']; ?>">
+                                                                    <i class="ri-pencil-line"></i>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-outline-danger delete-section" data-id="<?php echo $section['id']; ?>">
+                                                                    <i class="ri-delete-bin-line"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        <?php endforeach; ?>
+                                                        <?php if (empty($sections)): ?>
+                                                        <tr>
+                                                            <td colspan="7" class="text-center text-muted">No sections found</td>
+                                                        </tr>
+                                                        <?php endif; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subjects Tab -->
+                        <div class="tab-pane fade <?php echo $activeTab == 'subjects' ? 'show active' : ''; ?>" id="v-pills-subjects" role="tabpanel" aria-labelledby="v-pills-subjects-tab">
+                            <div class="row">
+                                <!-- Subjects List -->
+                                <div class="col-md-5">
+                                    <div class="card mb-24">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Subjects</h5>
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+                                                <i class="ri-add-line"></i> Add Subject
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover datatable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Subject Name</th>
+                                                            <th>Code</th>
+                                                            <th>Type</th>
+                                                            <th>Credit Hours</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php foreach ($subjects as $subject): ?>
+                                                        <tr data-id="<?php echo $subject['id']; ?>">
+                                                            <td><?php echo htmlspecialchars($subject['name']); ?></td>
+                                                            <td><span class="badge bg-info"><?php echo htmlspecialchars($subject['code']); ?></span></td>
+                                                            <td>
+                                                                <span class="badge bg-<?php
+                                                                    echo $subject['type'] == 'core' ? 'primary' :
+                                                                        ($subject['type'] == 'elective' ? 'success' : 'warning');
+                                                                ?>">
+                                                                    <?php echo ucfirst($subject['type']); ?>
+                                                                </span>
+                                                            </td>
+                                                            <td><?php echo $subject['credit_hours'] ?? 1.0; ?></td>
+                                                            <td class="action-buttons">
+                                                                <button class="btn btn-sm btn-outline-primary edit-subject" data-id="<?php echo $subject['id']; ?>">
+                                                                    <i class="ri-pencil-line"></i>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-outline-danger delete-subject" data-id="<?php echo $subject['id']; ?>">
+                                                                    <i class="ri-delete-bin-line"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        <?php endforeach; ?>
+                                                        <?php if (empty($subjects)): ?>
+                                                        <tr>
+                                                            <td colspan="5" class="text-center text-muted">No subjects found</td>
+                                                        </tr>
+                                                        <?php endif; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Subject Assignments -->
+                                <div class="col-md-7">
+                                    <div class="card mb-24">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Subject Assignments</h5>
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#assignSubjectModal">
+                                                <i class="ri-add-line"></i> Assign Subject
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover datatable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Class</th>
+                                                            <th>Subject</th>
+                                                            <th>Teacher</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php foreach ($classSubjects as $assignment): ?>
+                                                        <tr data-id="<?php echo $assignment['id']; ?>">
+                                                            <td><?php echo htmlspecialchars($assignment['class_name'] ?? 'N/A'); ?></td>
+                                                            <td><?php echo htmlspecialchars($assignment['subject_name'] ?? 'N/A'); ?></td>
+                                                            <td><?php echo htmlspecialchars($assignment['teacher_name'] ?? 'Not Assigned'); ?></td>
+                                                            <td class="action-buttons">
+                                                                <button class="btn btn-sm btn-outline-danger delete-assignment" data-id="<?php echo $assignment['id']; ?>">
+                                                                    <i class="ri-delete-bin-line"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        <?php endforeach; ?>
+                                                        <?php if (empty($classSubjects)): ?>
+                                                        <tr>
+                                                            <td colspan="4" class="text-center text-muted">No subject assignments found</td>
+                                                        </tr>
+                                                        <?php endif; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Financial Management Tab -->
+                        <div class="tab-pane fade <?php echo $activeTab == 'financial' ? 'show active' : ''; ?>" id="v-pills-financial" role="tabpanel" aria-labelledby="v-pills-financial-tab">
+                            <div class="row">
+                                <!-- Payment Methods -->
+                                <div class="col-md-6">
+                                    <div class="card mb-24">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Payment Methods</h5>
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addPaymentMethodModal">
+                                                <i class="ri-add-line"></i> Add Method
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover datatable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Type</th>
+                                                            <th>Provider</th>
+                                                            <th>Details</th>
+                                                            <th>Default</th>
+                                                            <th>Status</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php foreach ($paymentMethods as $method): ?>
+                                                        <tr data-id="<?php echo $method['id']; ?>">
+                                                            <td>
+                                                                <span class="badge bg-info">
+                                                                    <?php echo ucfirst(str_replace('_', ' ', $method['type'])); ?>
+                                                                </span>
+                                                            </td>
+                                                            <td><?php echo htmlspecialchars($method['provider'] ?? 'N/A'); ?></td>
+                                                            <td>
+                                                                <?php
+                                                                if ($method['type'] == 'card' && !empty($method['last_four'])) {
+                                                                    echo '**** **** **** ' . $method['last_four'];
+                                                                } elseif (!empty($method['metadata'])) {
+                                                                    $metadata = json_decode($method['metadata'], true);
+                                                                    echo $metadata['account_name'] ?? 'N/A';
+                                                                } else {
+                                                                    echo 'N/A';
+                                                                }
+                                                                ?>
+                                                            </td>
+                                                            <td>
+                                                                <?php if (!empty($method['is_default'])): ?>
+                                                                    <span class="badge bg-primary">Default</span>
+                                                                <?php endif; ?>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge bg-<?php echo !empty($method['is_verified']) ? 'success' : 'warning'; ?>">
+                                                                    <?php echo !empty($method['is_verified']) ? 'Verified' : 'Pending'; ?>
+                                                                </span>
+                                                            </td>
+                                                            <td class="action-buttons">
+                                                                <button class="btn btn-sm btn-outline-primary edit-payment-method" data-id="<?php echo $method['id']; ?>">
+                                                                    <i class="ri-pencil-line"></i>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-outline-danger delete-payment-method" data-id="<?php echo $method['id']; ?>">
+                                                                    <i class="ri-delete-bin-line"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        <?php endforeach; ?>
+                                                        <?php if (empty($paymentMethods)): ?>
+                                                        <tr>
+                                                            <td colspan="6" class="text-center text-muted">No payment methods found</td>
+                                                        </tr>
+                                                        <?php endif; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Fee Categories -->
+                                <div class="col-md-6">
+                                    <div class="card mb-24">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Fee Categories</h5>
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addFeeCategoryModal">
+                                                <i class="ri-add-line"></i> Add Category
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover datatable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Category Name</th>
+                                                            <th>Description</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php foreach ($feeCategories as $category): ?>
+                                                        <tr data-id="<?php echo $category['id']; ?>">
+                                                            <td><?php echo htmlspecialchars($category['name']); ?></td>
+                                                            <td><?php echo htmlspecialchars($category['description'] ?? ''); ?></td>
+                                                            <td class="action-buttons">
+                                                                <button class="btn btn-sm btn-outline-primary edit-fee-category" data-id="<?php echo $category['id']; ?>">
+                                                                    <i class="ri-pencil-line"></i>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-outline-danger delete-fee-category" data-id="<?php echo $category['id']; ?>">
+                                                                    <i class="ri-delete-bin-line"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        <?php endforeach; ?>
+                                                        <?php if (empty($feeCategories)): ?>
+                                                        <tr>
+                                                            <td colspan="3" class="text-center text-muted">No fee categories found</td>
+                                                        </tr>
+                                                        <?php endif; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Fee Structures -->
+                                <div class="col-12 mt-24">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Fee Structures</h5>
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addFeeStructureModal">
+                                                <i class="ri-add-line"></i> Add Fee Structure
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover datatable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Academic Year</th>
+                                                            <th>Class</th>
+                                                            <th>Category</th>
+                                                            <th>Amount</th>
+                                                            <th>Due Date</th>
+                                                            <th>Late Fee</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php foreach ($feeStructures as $fee): ?>
+                                                        <tr data-id="<?php echo $fee['id']; ?>">
+                                                            <td><?php echo htmlspecialchars($fee['academic_year_name'] ?? 'N/A'); ?></td>
+                                                            <td><?php echo htmlspecialchars($fee['class_name'] ?? 'N/A'); ?></td>
+                                                            <td><?php echo htmlspecialchars($fee['category_name'] ?? 'N/A'); ?></td>
+                                                            <td><strong><?php echo $currencySymbol . ' ' . number_format($fee['amount'], 2); ?></strong></td>
+                                                            <td><?php echo !empty($fee['due_date']) ? date('M d, Y', strtotime($fee['due_date'])) : 'N/A'; ?></td>
+                                                            <td><?php echo $currencySymbol . ' ' . number_format($fee['late_fee'] ?? 0, 2); ?></td>
+                                                            <td class="action-buttons">
+                                                                <button class="btn btn-sm btn-outline-primary edit-fee-structure" data-id="<?php echo $fee['id']; ?>">
+                                                                    <i class="ri-pencil-line"></i>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-outline-danger delete-fee-structure" data-id="<?php echo $fee['id']; ?>">
+                                                                    <i class="ri-delete-bin-line"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        <?php endforeach; ?>
+                                                        <?php if (empty($feeStructures)): ?>
+                                                        <tr>
+                                                            <td colspan="7" class="text-center text-muted">No fee structures found</td>
+                                                        </tr>
+                                                        <?php endif; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Announcements Tab -->
+                        <div class="tab-pane fade <?php echo $activeTab == 'announcements' ? 'show active' : ''; ?>" id="v-pills-announcements" role="tabpanel" aria-labelledby="v-pills-announcements-tab">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Create Announcement</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form id="announcementForm">
+                                                <input type="hidden" name="action" value="create_announcement">
+                                                <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Title</label>
+                                                    <input type="text" name="title" class="form-control" required>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Description</label>
+                                                    <textarea name="description" class="form-control" rows="3" required></textarea>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Target Audience</label>
+                                                    <select name="target" class="form-select">
+                                                        <option value="all">All</option>
+                                                        <option value="students">Students</option>
+                                                        <option value="teachers">Teachers</option>
+                                                        <option value="parents">Parents</option>
+                                                        <option value="class">Specific Class</option>
+                                                        <option value="section">Specific Section</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label">Start Date</label>
+                                                        <input type="date" name="start_date" class="form-control">
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label">End Date</label>
+                                                        <input type="date" name="end_date" class="form-control">
+                                                    </div>
+                                                </div>
+
+                                                <button type="submit" class="btn btn-primary w-100">Publish Announcement</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Recent Announcements</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="activity-feed">
+                                                <?php foreach ($announcements as $announcement): ?>
+                                                <div class="activity-item">
+                                                    <h6><?php echo htmlspecialchars($announcement['title']); ?></h6>
+                                                    <p class="text-muted mb-2"><?php echo htmlspecialchars(substr($announcement['description'], 0, 100)); ?>...</p>
+                                                    <div class="d-flex justify-content-between">
+                                                        <small class="text-primary">By: <?php echo htmlspecialchars($announcement['created_by_name'] ?? 'System'); ?></small>
+                                                        <small class="text-muted"><?php echo date('M d, Y H:i', strtotime($announcement['created_at'])); ?></small>
+                                                    </div>
+                                                    <small class="badge bg-info">Target: <?php echo ucfirst($announcement['target'] ?? 'all'); ?></small>
+                                                </div>
+                                                <?php endforeach; ?>
+                                                <?php if (empty($announcements)): ?>
+                                                <p class="text-muted text-center">No announcements found</p>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- WhatsApp Alerts Tab -->
+                        <div class="tab-pane fade <?php echo $activeTab == 'whatsapp' ? 'show active' : ''; ?>" id="v-pills-whatsapp" role="tabpanel" aria-labelledby="v-pills-whatsapp-tab">
+                            <?php include 'tabs/whatsapp_settings.php'; ?>
+                        </div>
+
+                        <!-- Subscription & Billing Tab -->
+                        <div class="tab-pane fade <?php echo $activeTab == 'subscription' ? 'show active' : ''; ?>" id="v-pills-subscription" role="tabpanel" aria-labelledby="v-pills-subscription-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Current Subscription</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <?php if ($subscriptionInfo): ?>
+                                            <table class="table">
                                                 <tr>
-                                                    <th>Year Name</th>
-                                                    <th>Start Date</th>
-                                                    <th>End Date</th>
-                                                    <th>Status</th>
-                                                    <th>Default</th>
+                                                    <th>Plan:</th>
+                                                    <td><?php echo htmlspecialchars($subscriptionInfo['plan_name'] ?? 'N/A'); ?></td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php foreach ($academicYears as $year): ?>
                                                 <tr>
-                                                    <td><?php echo htmlspecialchars($year['name']); ?></td>
-                                                    <td><?php echo $year['start_date']; ?></td>
-                                                    <td><?php echo $year['end_date']; ?></td>
+                                                    <th>Status:</th>
                                                     <td>
-                                                        <span class="badge bg-<?php 
-                                                            echo $year['status'] == 'active' ? 'success' : 
-                                                                ($year['status'] == 'upcoming' ? 'warning' : 'secondary'); 
+                                                        <span class="badge bg-<?php
+                                                            echo $subscriptionInfo['status'] == 'active' ? 'success' :
+                                                                ($subscriptionInfo['status'] == 'pending' ? 'warning' : 'danger');
                                                         ?>">
-                                                            <?php echo ucfirst($year['status']); ?>
+                                                            <?php echo ucfirst($subscriptionInfo['status']); ?>
                                                         </span>
                                                     </td>
-                                                    <td>
-                                                        <?php if ($year['is_default']): ?>
-                                                            <span class="badge bg-primary">Default</span>
-                                                        <?php endif; ?>
-                                                    </td>
                                                 </tr>
+                                                <tr>
+                                                    <th>Billing Cycle:</th>
+                                                    <td><?php echo ucfirst($subscriptionInfo['billing_cycle'] ?? 'Monthly'); ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Amount:</th>
+                                                    <td><?php echo ($subscriptionInfo['currency'] ?? 'NGN') . ' ' . number_format($subscriptionInfo['amount'] ?? 0, 2); ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Period Start:</th>
+                                                    <td><?php echo date('M d, Y', strtotime($subscriptionInfo['current_period_start'] ?? 'now')); ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Period End:</th>
+                                                    <td><?php echo date('M d, Y', strtotime($subscriptionInfo['current_period_end'] ?? 'now')); ?></td>
+                                                </tr>
+                                                <?php if (!empty($subscriptionInfo['trial_ends_at'])): ?>
+                                                <tr>
+                                                    <th>Trial Ends:</th>
+                                                    <td><?php echo date('M d, Y', strtotime($subscriptionInfo['trial_ends_at'])); ?></td>
+                                                </tr>
+                                                <?php endif; ?>
+                                            </table>
+                                            <?php else: ?>
+                                            <p class="text-muted">No active subscription found.</p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Plan Features</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <?php if (!empty($schoolDetails['plan_features'])): ?>
+                                            <ul class="list-group">
+                                                <?php foreach ($schoolDetails['plan_features'] as $feature): ?>
+                                                <li class="list-group-item">
+                                                    <i class="ri-check-line text-success me-2"></i>
+                                                    <?php echo htmlspecialchars($feature); ?>
+                                                </li>
                                                 <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
+                                            </ul>
+                                            <?php else: ?>
+                                            <p class="text-muted">No features available.</p>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Academic Terms -->
-                        <div class="col-md-6">
-                            <div class="card mb-24">
-                                <div class="card-header">
-                                    <h5>Academic Terms</h5>
+                        <!-- Security & Backup Tab -->
+                        <div class="tab-pane fade <?php echo $activeTab == 'security' ? 'show active' : ''; ?>" id="v-pills-security" role="tabpanel" aria-labelledby="v-pills-security-tab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card mb-24">
+                                        <div class="card-header">
+                                            <h5>Change Password</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form id="passwordForm">
+                                                <input type="hidden" name="action" value="change_password">
+                                                <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Current Password</label>
+                                                    <input type="password" name="current_password" class="form-control" required>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">New Password</label>
+                                                    <input type="password" name="new_password" class="form-control"
+                                                           pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
+                                                    <small class="text-muted">Min 8 chars, with uppercase, lowercase and number</small>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label">Confirm New Password</label>
+                                                    <input type="password" name="confirm_password" class="form-control" required>
+                                                </div>
+
+                                                <button type="submit" class="btn btn-warning">Change Password</button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Two-Factor Authentication</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-muted">Two-factor authentication adds an extra layer of security to your account.</p>
+                                            <button class="btn btn-primary" disabled>Enable 2FA (Coming Soon)</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card mb-24">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0">Storage Usage</h5>
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="createBackup()">
+                                                <i class="ri-database-2-line"></i> Create Backup
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <?php
+                                            $totalStorage = 0;
+                                            $usedStorage = 0;
+                                            foreach ($storageUsage as $storage) {
+                                                $totalStorage += $storage['limit_bytes'];
+                                                $usedStorage += $storage['used_bytes'];
+                                            }
+                                            $usagePercent = $totalStorage > 0 ? ($usedStorage / $totalStorage) * 100 : 0;
+                                            ?>
+
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Used: <?php echo round($usedStorage / 1024 / 1024, 2); ?> MB</span>
+                                                    <span>Total: <?php echo round($totalStorage / 1024 / 1024, 2); ?> MB</span>
+                                                </div>
+                                                <div class="storage-bar">
+                                                    <div class="storage-bar-fill" style="width: <?php echo $usagePercent; ?>%"></div>
+                                                </div>
+                                            </div>
+
+                                            <form method="POST" id="backupForm">
+                                                <input type="hidden" name="action" value="create_backup">
+                                                <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Recent Security Events</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-muted">Security monitoring coming soon.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- API Keys Tab -->
+                        <div class="tab-pane fade <?php echo $activeTab == 'api' ? 'show active' : ''; ?>" id="v-pills-api" role="tabpanel" aria-labelledby="v-pills-api-tab">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">API Keys</h5>
+                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addApiKeyModal">
+                                        <i class="ri-add-line"></i> Generate API Key
+                                    </button>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table class="table">
+                                        <table class="table table-hover datatable">
                                             <thead>
                                                 <tr>
-                                                    <th>Term Name</th>
-                                                    <th>Start Date</th>
-                                                    <th>End Date</th>
-                                                    <th>Default</th>
+                                                    <th>Name</th>
+                                                    <th>API Key</th>
+                                                    <th>Rate Limit</th>
+                                                    <th>Expires</th>
+                                                    <th>Last Used</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php foreach ($academicTerms as $term): ?>
-                                                <tr>
-                                                    <td><?php echo htmlspecialchars($term['name']); ?></td>
-                                                    <td><?php echo $term['start_date']; ?></td>
-                                                    <td><?php echo $term['end_date']; ?></td>
+                                                <?php foreach ($apiKeys as $key): ?>
+                                                <tr data-id="<?php echo $key['id']; ?>">
+                                                    <td><?php echo htmlspecialchars($key['name']); ?></td>
+                                                    <td><code><?php echo substr($key['api_key'], 0, 8); ?>...</code></td>
+                                                    <td><?php echo $key['rate_limit_per_minute'] ?? 60; ?>/min</td>
+                                                    <td><?php echo $key['expires_at'] ? date('M d, Y', strtotime($key['expires_at'])) : 'Never'; ?></td>
+                                                    <td><?php echo $key['last_used_at'] ? date('M d, Y', strtotime($key['last_used_at'])) : 'Never'; ?></td>
                                                     <td>
-                                                        <?php if ($term['is_default']): ?>
-                                                            <span class="badge bg-primary">Default</span>
-                                                        <?php endif; ?>
+                                                        <span class="badge bg-<?php echo $key['is_active'] ? 'success' : 'danger'; ?>">
+                                                            <?php echo $key['is_active'] ? 'Active' : 'Inactive'; ?>
+                                                        </span>
+                                                    </td>
+                                                    <td class="action-buttons">
+                                                        <button class="btn btn-sm btn-outline-secondary copy-api-key" data-key="<?php echo $key['api_key']; ?>">
+                                                            <i class="ri-file-copy-line"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger delete-api-key" data-id="<?php echo $key['id']; ?>">
+                                                            <i class="ri-delete-bin-line"></i>
+                                                        </button>
                                                     </td>
                                                 </tr>
                                                 <?php endforeach; ?>
+                                                <?php if (empty($apiKeys)): ?>
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted">No API keys found</td>
+                                                </tr>
+                                                <?php endif; ?>
                                             </tbody>
                                         </table>
                                     </div>
@@ -1673,293 +1968,45 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
                             </div>
                         </div>
 
-                        <!-- Fee Structures -->
-                        <div class="col-12">
+                        <!-- Activity Log Tab -->
+                        <div class="tab-pane fade <?php echo $activeTab == 'activity' ? 'show active' : ''; ?>" id="v-pills-activity" role="tabpanel" aria-labelledby="v-pills-activity-tab">
                             <div class="card">
                                 <div class="card-header">
-                                    <h5>Fee Structures</h5>
-                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addFeeModal">
-                                        <i class="ri-add-line"></i> Add Fee Structure
-                                    </button>
+                                    <h5>Recent Activities</h5>
                                 </div>
                                 <div class="card-body">
-                                    <p class="text-muted">Fee management interface would go here</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Announcements Tab -->
-                <div class="tab-pane fade <?php echo $activeTab == 'announcements' ? 'show active' : ''; ?>" id="announcements" role="tabpanel">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Create Announcement</h5>
-                                </div>
-                                <div class="card-body">
-                                    <form method="POST">
-                                        <input type="hidden" name="action" value="create_announcement">
-                                        
-                                        <div class="mb-3">
-                                            <label class="form-label">Title</label>
-                                            <input type="text" name="title" class="form-control" required>
-                                        </div>
-                                        
-                                        <div class="mb-3">
-                                            <label class="form-label">Description</label>
-                                            <textarea name="description" class="form-control" rows="3" required></textarea>
-                                        </div>
-                                        
-                                        <div class="mb-3">
-                                            <label class="form-label">Target Audience</label>
-                                            <select name="target" class="form-select">
-                                                <option value="all">All</option>
-                                                <option value="students">Students</option>
-                                                <option value="teachers">Teachers</option>
-                                                <option value="parents">Parents</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">Start Date</label>
-                                                <input type="date" name="start_date" class="form-control">
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">End Date</label>
-                                                <input type="date" name="end_date" class="form-control">
-                                            </div>
-                                        </div>
-                                        
-                                        <button type="submit" class="btn btn-primary w-100">Publish Announcement</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-8">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Recent Announcements</h5>
-                                </div>
-                                <div class="card-body">
-                                    <?php foreach ($recentAnnouncements as $announcement): ?>
-                                    <div class="card mb-3">
-                                        <div class="card-body">
-                                            <h6><?php echo htmlspecialchars($announcement['title']); ?></h6>
-                                            <p class="text-muted mb-2"><?php echo substr($announcement['description'], 0, 100); ?>...</p>
+                                    <div class="activity-feed">
+                                        <?php foreach ($recentActivities as $activity): ?>
+                                        <div class="activity-item">
                                             <div class="d-flex justify-content-between">
-                                                <small>By: <?php echo htmlspecialchars($announcement['created_by_name']); ?></small>
-                                                <small><?php echo date('M d, Y', strtotime($announcement['created_at'])); ?></small>
+                                                <strong><?php echo ucfirst(str_replace('_', ' ', $activity['action'])); ?></strong>
+                                                <small class="activity-time">
+                                                    <?php echo date('M d, H:i', strtotime($activity['created_at'])); ?>
+                                                </small>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small>
+                                                    Entity: <?php echo ucfirst($activity['entity_type']); ?>
+                                                    (ID: <?php echo $activity['entity_id']; ?>)
+                                                </small><br>
+                                                <small class="text-muted">
+                                                    By: <?php echo htmlspecialchars($activity['user_type']); ?>
+                                                    (IP: <?php echo $activity['ip_address'] ?? 'N/A'; ?>)
+                                                </small>
                                             </div>
                                         </div>
-                                    </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Subscription & Billing Tab -->
-                <div class="tab-pane fade <?php echo $activeTab == 'subscription' ? 'show active' : ''; ?>" id="subscription" role="tabpanel">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Current Subscription</h5>
-                                </div>
-                                <div class="card-body">
-                                    <?php if ($subscriptionInfo): ?>
-                                    <table class="table">
-                                        <tr>
-                                            <th>Plan:</th>
-                                            <td><?php echo htmlspecialchars($subscriptionInfo['plan_name'] ?? 'N/A'); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Status:</th>
-                                            <td>
-                                                <span class="badge bg-<?php 
-                                                    echo $subscriptionInfo['status'] == 'active' ? 'success' : 
-                                                        ($subscriptionInfo['status'] == 'pending' ? 'warning' : 'danger'); 
-                                                ?>">
-                                                    <?php echo ucfirst($subscriptionInfo['status']); ?>
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Billing Cycle:</th>
-                                            <td><?php echo ucfirst($subscriptionInfo['billing_cycle']); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Amount:</th>
-                                            <td><?php echo $subscriptionInfo['currency'] . ' ' . number_format($subscriptionInfo['amount'], 2); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Period Start:</th>
-                                            <td><?php echo $subscriptionInfo['current_period_start']; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Period End:</th>
-                                            <td><?php echo $subscriptionInfo['current_period_end']; ?></td>
-                                        </tr>
-                                        <?php if ($subscriptionInfo['trial_ends_at']): ?>
-                                        <tr>
-                                            <th>Trial Ends:</th>
-                                            <td><?php echo $subscriptionInfo['trial_ends_at']; ?></td>
-                                        </tr>
-                                        <?php endif; ?>
-                                    </table>
-                                    <?php else: ?>
-                                    <p class="text-muted">No active subscription found.</p>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Plan Features</h5>
-                                </div>
-                                <div class="card-body">
-                                    <?php if (!empty($schoolDetails['plan_features'])): ?>
-                                    <ul class="list-group">
-                                        <?php foreach ($schoolDetails['plan_features'] as $feature): ?>
-                                        <li class="list-group-item">
-                                            <i class="ri-check-line text-success me-2"></i>
-                                            <?php echo htmlspecialchars($feature); ?>
-                                        </li>
                                         <?php endforeach; ?>
-                                    </ul>
-                                    <?php else: ?>
-                                    <p class="text-muted">No features available.</p>
-                                    <?php endif; ?>
+                                        <?php if (empty($recentActivities)): ?>
+                                        <p class="text-muted text-center">No activities found</p>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Security & Backup Tab -->
-                <div class="tab-pane fade <?php echo $activeTab == 'security' ? 'show active' : ''; ?>" id="security" role="tabpanel">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card mb-24">
-                                <div class="card-header">
-                                    <h5>Change Password</h5>
-                                </div>
-                                <div class="card-body">
-                                    <form method="POST">
-                                        <input type="hidden" name="action" value="change_password">
-                                        
-                                        <div class="mb-3">
-                                            <label class="form-label">Current Password</label>
-                                            <input type="password" name="current_password" class="form-control" required>
-                                        </div>
-                                        
-                                        <div class="mb-3">
-                                            <label class="form-label">New Password</label>
-                                            <input type="password" name="new_password" class="form-control" 
-                                                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
-                                            <small class="text-muted">Min 8 chars, with uppercase, lowercase and number</small>
-                                        </div>
-                                        
-                                        <div class="mb-3">
-                                            <label class="form-label">Confirm New Password</label>
-                                            <input type="password" name="confirm_password" class="form-control" required>
-                                        </div>
-                                        
-                                        <button type="submit" class="btn btn-warning">Change Password</button>
-                                    </form>
-                                </div>
-                            </div>
-                            
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Two-Factor Authentication</h5>
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-muted">Two-factor authentication adds an extra layer of security to your account.</p>
-                                    <button class="btn btn-primary" disabled>Enable 2FA (Coming Soon)</button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="card mb-24">
-                                <div class="card-header">
-                                    <h5>Storage Usage</h5>
-                                    <button type="button" class="btn btn-primary btn-sm" onclick="createBackup()">
-                                        <i class="ri-database-2-line"></i> Create Backup
-                                    </button>
-                                </div>
-                                <div class="card-body">
-                                    <?php 
-                                    $totalStorage = 0;
-                                    $usedStorage = 0;
-                                    foreach ($storageUsage as $storage) {
-                                        $totalStorage += $storage['limit_bytes'];
-                                        $usedStorage += $storage['used_bytes'];
-                                    }
-                                    $usagePercent = $totalStorage > 0 ? ($usedStorage / $totalStorage) * 100 : 0;
-                                    ?>
-                                    
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between">
-                                            <span>Used: <?php echo round($usedStorage / 1024 / 1024, 2); ?> MB</span>
-                                            <span>Total: <?php echo round($totalStorage / 1024 / 1024, 2); ?> MB</span>
-                                        </div>
-                                        <div class="storage-bar">
-                                            <div class="storage-bar-fill" style="width: <?php echo $usagePercent; ?>%"></div>
-                                        </div>
-                                    </div>
-                                    
-                                    <form method="POST" id="backupForm">
-                                        <input type="hidden" name="action" value="create_backup">
-                                    </form>
-                                </div>
-                            </div>
-                            
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Recent Security Events</h5>
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-muted">Security monitoring coming soon.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Activity Log Tab -->
-                <div class="tab-pane fade <?php echo $activeTab == 'activity' ? 'show active' : ''; ?>" id="activity" role="tabpanel">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Recent Activities</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="activity-feed">
-                                <?php foreach ($recentActivities as $activity): ?>
-                                <div class="activity-item">
-                                    <div class="d-flex justify-content-between">
-                                        <strong><?php echo ucfirst(str_replace('_', ' ', $activity['action'])); ?></strong>
-                                        <small class="activity-time">
-                                            <?php echo date('M d, H:i', strtotime($activity['created_at'])); ?>
-                                        </small>
-                                    </div>
-                                    <div class="mt-2">
-                                        <small>
-                                            By: <?php echo htmlspecialchars($activity['user_type']); ?> 
-                                            (IP: <?php echo $activity['ip_address'] ?? 'N/A'; ?>)
-                                        </small>
-                                    </div>
-                                </div>
-                                <?php endforeach; ?>
-                            </div>
+                        <!-- Public Profile Tab -- the editor for everything visible on tenant/school_profile.php -->
+                        <div class="tab-pane fade <?php echo $activeTab == 'profile' ? 'show active' : ''; ?>" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+                            <?php include __DIR__ . '/tabs/public_profile.php'; ?>
                         </div>
                     </div>
                 </div>
@@ -1973,6 +2020,8 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
         </footer>
     </main>
 
+    <!-- ========== MODALS ========== -->
+
     <!-- Add Academic Year Modal -->
     <div class="modal fade" id="addYearModal" tabindex="-1">
         <div class="modal-dialog">
@@ -1981,16 +2030,16 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
                     <h5 class="modal-title">Add Academic Year</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST">
+                <form class="modal-form" data-action="create_academic_year">
                     <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                         <input type="hidden" name="action" value="create_academic_year">
-                        
+
                         <div class="mb-3">
                             <label class="form-label">Year Name</label>
-                            <input type="text" name="year_name" class="form-control" 
-                                   placeholder="e.g., 2025-2026" required>
+                            <input type="text" name="name" class="form-control" placeholder="e.g., 2025-2026" required>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Start Date</label>
@@ -2001,7 +2050,7 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
                                 <input type="date" name="end_date" class="form-control" required>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Status</label>
@@ -2029,68 +2078,1431 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
         </div>
     </div>
 
+    <!-- Edit Academic Year Modal -->
+    <div class="modal fade" id="editYearModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Academic Year</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="update_academic_year">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="update_academic_year">
+                        <input type="hidden" name="id" id="edit_year_id" value="">
+
+                        <div class="mb-3">
+                            <label class="form-label">Year Name</label>
+                            <input type="text" name="name" id="edit_year_name" class="form-control" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" name="start_date" id="edit_year_start" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" name="end_date" id="edit_year_end" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Status</label>
+                                <select name="status" id="edit_year_status" class="form-select">
+                                    <option value="upcoming">Upcoming</option>
+                                    <option value="active">Active</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Default Year</label>
+                                <div class="form-check mt-2">
+                                    <input type="checkbox" name="is_default" value="1" class="form-check-input" id="edit_year_default">
+                                    <label class="form-check-label" for="edit_year_default">Set as default</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Year</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Academic Term Modal -->
+    <div class="modal fade" id="addTermModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Academic Term</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="create_academic_term">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="create_academic_term">
+
+                        <div class="mb-3">
+                            <label class="form-label">Academic Year</label>
+                            <select name="academic_year_id" class="form-select" required>
+                                <option value="">Select Academic Year</option>
+                                <?php foreach ($academicYears as $year): ?>
+                                <option value="<?php echo $year['id']; ?>">
+                                    <?php echo htmlspecialchars($year['name']); ?>
+                                    <?php echo (!empty($year['is_default']) && $year['is_default'] == 1) ? '(Default)' : ''; ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Term Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g., First Term" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" name="start_date" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" name="end_date" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" name="is_default" value="1" class="form-check-input" id="isDefaultTerm">
+                                <label class="form-check-label" for="isDefaultTerm">Set as default term for this academic year</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Term</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Academic Term Modal -->
+    <div class="modal fade" id="editTermModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Academic Term</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="update_academic_term">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="update_academic_term">
+                        <input type="hidden" name="id" id="edit_term_id" value="">
+
+                        <div class="mb-3">
+                            <label class="form-label">Academic Year</label>
+                            <select name="academic_year_id" id="edit_term_year" class="form-select" required>
+                                <option value="">Select Academic Year</option>
+                                <?php foreach ($academicYears as $year): ?>
+                                <option value="<?php echo $year['id']; ?>">
+                                    <?php echo htmlspecialchars($year['name']); ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Term Name</label>
+                            <input type="text" name="name" id="edit_term_name" class="form-control" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" name="start_date" id="edit_term_start" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" name="end_date" id="edit_term_end" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" name="is_default" value="1" class="form-check-input" id="edit_term_default">
+                                <label class="form-check-label" for="edit_term_default">Set as default term for this academic year</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Term</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Class Modal -->
+    <div class="modal fade" id="addClassModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Class</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="create_class">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="create_class">
+
+                        <div class="mb-3">
+                            <label class="form-label">Class Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g., Grade 10" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Class Code</label>
+                            <input type="text" name="code" class="form-control" placeholder="e.g., G10" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Academic Year</label>
+                            <select name="academic_year_id" class="form-select" required>
+                                <option value="">Select Academic Year</option>
+                                <?php foreach ($academicYears as $year): ?>
+                                <option value="<?php echo $year['id']; ?>"><?php echo htmlspecialchars($year['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Grade Level</label>
+                                <input type="text" name="grade_level" class="form-control" placeholder="e.g., Secondary">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Capacity</label>
+                                <input type="number" name="capacity" class="form-control" value="40" min="1">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Room Number</label>
+                            <input type="text" name="room_number" class="form-control" placeholder="e.g., A101">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Class</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Class Modal -->
+    <div class="modal fade" id="editClassModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Class</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="update_class">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="update_class">
+                        <input type="hidden" name="id" id="edit_class_id" value="">
+
+                        <div class="mb-3">
+                            <label class="form-label">Class Name</label>
+                            <input type="text" name="name" id="edit_class_name" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Class Code</label>
+                            <input type="text" name="code" id="edit_class_code" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Academic Year</label>
+                            <select name="academic_year_id" id="edit_class_year" class="form-select" required>
+                                <option value="">Select Academic Year</option>
+                                <?php foreach ($academicYears as $year): ?>
+                                <option value="<?php echo $year['id']; ?>"><?php echo htmlspecialchars($year['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Grade Level</label>
+                                <input type="text" name="grade_level" id="edit_class_grade" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Capacity</label>
+                                <input type="number" name="capacity" id="edit_class_capacity" class="form-control" min="1">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Room Number</label>
+                            <input type="text" name="room_number" id="edit_class_room" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" id="edit_class_desc" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Class</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Section Modal -->
+    <div class="modal fade" id="addSectionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Section</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="create_section">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="create_section">
+
+                        <div class="mb-3">
+                            <label class="form-label">Class</label>
+                            <select name="class_id" class="form-select" required>
+                                <option value="">Select Class</option>
+                                <?php foreach ($classes as $class): ?>
+                                <option value="<?php echo $class['id']; ?>"><?php echo htmlspecialchars($class['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Section Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g., Section A" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Section Code</label>
+                            <input type="text" name="code" class="form-control" placeholder="e.g., A" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Capacity</label>
+                                <input type="number" name="capacity" class="form-control" value="40" min="1">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Room Number</label>
+                                <input type="text" name="room_number" class="form-control" placeholder="e.g., A101">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Section</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Section Modal -->
+    <div class="modal fade" id="editSectionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Section</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="update_section">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="update_section">
+                        <input type="hidden" name="id" id="edit_section_id" value="">
+
+                        <div class="mb-3">
+                            <label class="form-label">Class</label>
+                            <select name="class_id" id="edit_section_class" class="form-select" required>
+                                <option value="">Select Class</option>
+                                <?php foreach ($classes as $class): ?>
+                                <option value="<?php echo $class['id']; ?>"><?php echo htmlspecialchars($class['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Section Name</label>
+                            <input type="text" name="name" id="edit_section_name" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Section Code</label>
+                            <input type="text" name="code" id="edit_section_code" class="form-control" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Capacity</label>
+                                <input type="number" name="capacity" id="edit_section_capacity" class="form-control" min="1">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Room Number</label>
+                                <input type="text" name="room_number" id="edit_section_room" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Section</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Subject Modal -->
+    <div class="modal fade" id="addSubjectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Subject</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="create_subject">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="create_subject">
+
+                        <div class="mb-3">
+                            <label class="form-label">Subject Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g., Mathematics" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Subject Code</label>
+                            <input type="text" name="code" class="form-control" placeholder="e.g., MATH101" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Type</label>
+                                <select name="type" class="form-select">
+                                    <option value="core">Core</option>
+                                    <option value="elective">Elective</option>
+                                    <option value="extra_curricular">Extra Curricular</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Credit Hours</label>
+                                <input type="number" name="credit_hours" class="form-control" value="1.0" step="0.5" min="0.5">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Subject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Subject Modal -->
+    <div class="modal fade" id="editSubjectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Subject</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="update_subject">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="update_subject">
+                        <input type="hidden" name="id" id="edit_subject_id" value="">
+
+                        <div class="mb-3">
+                            <label class="form-label">Subject Name</label>
+                            <input type="text" name="name" id="edit_subject_name" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Subject Code</label>
+                            <input type="text" name="code" id="edit_subject_code" class="form-control" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Type</label>
+                                <select name="type" id="edit_subject_type" class="form-select">
+                                    <option value="core">Core</option>
+                                    <option value="elective">Elective</option>
+                                    <option value="extra_curricular">Extra Curricular</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Credit Hours</label>
+                                <input type="number" name="credit_hours" id="edit_subject_credit" class="form-control" step="0.5" min="0.5">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" id="edit_subject_desc" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Subject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Subject to Class Modal -->
+    <div class="modal fade" id="assignSubjectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign Subject to Class</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="assign_subject">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="assign_subject">
+
+                        <div class="mb-3">
+                            <label class="form-label">Class</label>
+                            <select name="class_id" class="form-select" required>
+                                <option value="">Select Class</option>
+                                <?php foreach ($classes as $class): ?>
+                                <option value="<?php echo $class['id']; ?>"><?php echo htmlspecialchars($class['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Subject</label>
+                            <select name="subject_id" class="form-select" required>
+                                <option value="">Select Subject</option>
+                                <?php foreach ($subjects as $subject): ?>
+                                <option value="<?php echo $subject['id']; ?>"><?php echo htmlspecialchars($subject['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Teacher (Optional)</label>
+                            <select name="teacher_id" class="form-select">
+                                <option value="">Select Teacher</option>
+                                <!-- Teachers would be loaded here -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Assign</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Payment Method Modal -->
+    <div class="modal fade" id="addPaymentMethodModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Payment Method</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="create_payment_method">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="create_payment_method">
+
+                        <div class="mb-3">
+                            <label class="form-label">Payment Type</label>
+                            <select name="type" class="form-select" required>
+                                <option value="">Select Type</option>
+                                <?php foreach ($paymentTypes as $key => $value): ?>
+                                <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Provider/Bank Name</label>
+                            <input type="text" name="provider" class="form-control" placeholder="e.g., GTBank">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Account Name</label>
+                            <input type="text" name="account_name" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Account Number</label>
+                            <input type="text" name="account_number" class="form-control">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Expiry Month (Card)</label>
+                                <input type="number" name="exp_month" class="form-control" min="1" max="12">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Expiry Year (Card)</label>
+                                <input type="number" name="exp_year" class="form-control" min="<?php echo date('Y'); ?>">
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input type="checkbox" name="is_default" value="1" class="form-check-input" id="isDefaultPayment">
+                            <label class="form-check-label" for="isDefaultPayment">Set as default payment method</label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input type="checkbox" name="is_verified" value="1" class="form-check-input" id="isVerified">
+                            <label class="form-check-label" for="isVerified">Mark as verified</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Payment Method</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Payment Method Modal -->
+    <div class="modal fade" id="editPaymentMethodModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Payment Method</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="update_payment_method">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="update_payment_method">
+                        <input type="hidden" name="id" id="edit_payment_id" value="">
+
+                        <div class="mb-3">
+                            <label class="form-label">Payment Type</label>
+                            <select name="type" id="edit_payment_type" class="form-select" required>
+                                <option value="">Select Type</option>
+                                <?php foreach ($paymentTypes as $key => $value): ?>
+                                <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Provider/Bank Name</label>
+                            <input type="text" name="provider" id="edit_payment_provider" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Account Name</label>
+                            <input type="text" name="account_name" id="edit_payment_acc_name" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Account Number</label>
+                            <input type="text" name="account_number" id="edit_payment_acc_num" class="form-control">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Expiry Month (Card)</label>
+                                <input type="number" name="exp_month" id="edit_payment_exp_month" class="form-control" min="1" max="12">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Expiry Year (Card)</label>
+                                <input type="number" name="exp_year" id="edit_payment_exp_year" class="form-control" min="<?php echo date('Y'); ?>">
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input type="checkbox" name="is_default" value="1" class="form-check-input" id="edit_payment_default">
+                            <label class="form-check-label" for="edit_payment_default">Set as default payment method</label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input type="checkbox" name="is_verified" value="1" class="form-check-input" id="edit_payment_verified">
+                            <label class="form-check-label" for="edit_payment_verified">Mark as verified</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Payment Method</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Fee Category Modal -->
+    <div class="modal fade" id="addFeeCategoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Fee Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="create_fee_category">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="create_fee_category">
+
+                        <div class="mb-3">
+                            <label class="form-label">Category Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g., Tuition Fee" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Category</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Fee Category Modal -->
+    <div class="modal fade" id="editFeeCategoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Fee Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="update_fee_category">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="update_fee_category">
+                        <input type="hidden" name="id" id="edit_fee_cat_id" value="">
+
+                        <div class="mb-3">
+                            <label class="form-label">Category Name</label>
+                            <input type="text" name="name" id="edit_fee_cat_name" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" id="edit_fee_cat_desc" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Category</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Fee Structure Modal -->
+    <div class="modal fade" id="addFeeStructureModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Fee Structure</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="create_fee_structure">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="create_fee_structure">
+
+                        <div class="mb-3">
+                            <label class="form-label">Academic Year</label>
+                            <select name="academic_year_id" class="form-select" required>
+                                <option value="">Select Academic Year</option>
+                                <?php foreach ($academicYears as $year): ?>
+                                <option value="<?php echo $year['id']; ?>"><?php echo htmlspecialchars($year['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Class</label>
+                            <select name="class_id" class="form-select" required>
+                                <option value="">Select Class</option>
+                                <?php foreach ($classes as $class): ?>
+                                <option value="<?php echo $class['id']; ?>"><?php echo htmlspecialchars($class['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Fee Category</label>
+                            <select name="fee_category_id" class="form-select" required>
+                                <option value="">Select Category</option>
+                                <?php foreach ($feeCategories as $category): ?>
+                                <option value="<?php echo $category['id']; ?>"><?php echo htmlspecialchars($category['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Amount (<?php echo $currencySymbol; ?>)</label>
+                            <input type="number" name="amount" class="form-control" step="0.01" min="0" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Due Date</label>
+                                <input type="date" name="due_date" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Late Fee (<?php echo $currencySymbol; ?>)</label>
+                                <input type="number" name="late_fee" class="form-control" step="0.01" min="0" value="0.00">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Academic Term (Optional)</label>
+                            <select name="academic_term_id" class="form-select">
+                                <option value="">Select Term</option>
+                                <?php foreach ($academicTerms as $term): ?>
+                                <option value="<?php echo $term['id']; ?>"><?php echo htmlspecialchars($term['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Fee Structure</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Fee Structure Modal -->
+    <div class="modal fade" id="editFeeStructureModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Fee Structure</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="update_fee_structure">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="update_fee_structure">
+                        <input type="hidden" name="id" id="edit_fee_struct_id" value="">
+
+                        <div class="mb-3">
+                            <label class="form-label">Academic Year</label>
+                            <select name="academic_year_id" id="edit_fee_struct_year" class="form-select" required>
+                                <option value="">Select Academic Year</option>
+                                <?php foreach ($academicYears as $year): ?>
+                                <option value="<?php echo $year['id']; ?>"><?php echo htmlspecialchars($year['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Class</label>
+                            <select name="class_id" id="edit_fee_struct_class" class="form-select" required>
+                                <option value="">Select Class</option>
+                                <?php foreach ($classes as $class): ?>
+                                <option value="<?php echo $class['id']; ?>"><?php echo htmlspecialchars($class['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Fee Category</label>
+                            <select name="fee_category_id" id="edit_fee_struct_cat" class="form-select" required>
+                                <option value="">Select Category</option>
+                                <?php foreach ($feeCategories as $category): ?>
+                                <option value="<?php echo $category['id']; ?>"><?php echo htmlspecialchars($category['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Amount (<?php echo $currencySymbol; ?>)</label>
+                            <input type="number" name="amount" id="edit_fee_struct_amount" class="form-control" step="0.01" min="0" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Due Date</label>
+                                <input type="date" name="due_date" id="edit_fee_struct_due" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Late Fee (<?php echo $currencySymbol; ?>)</label>
+                                <input type="number" name="late_fee" id="edit_fee_struct_late" class="form-control" step="0.01" min="0">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Academic Term (Optional)</label>
+                            <select name="academic_term_id" id="edit_fee_struct_term" class="form-select">
+                                <option value="">Select Term</option>
+                                <?php foreach ($academicTerms as $term): ?>
+                                <option value="<?php echo $term['id']; ?>"><?php echo htmlspecialchars($term['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Fee Structure</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add API Key Modal -->
+    <div class="modal fade" id="addApiKeyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Generate API Key</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form class="modal-form" data-action="create_api_key">
+                    <div class="modal-body">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                        <input type="hidden" name="action" value="create_api_key">
+
+                        <div class="mb-3">
+                            <label class="form-label">Key Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g., Mobile App" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Rate Limit (per minute)</label>
+                            <input type="number" name="rate_limit_per_minute" class="form-control" value="60" min="1">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Expiration Date (optional)</label>
+                            <input type="date" name="expires_at" class="form-control">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Generate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
-    <script src="/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
-    <script src="/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
-    <script src="/tenant/assets/js/lib/apexcharts.min.js"></script>
-    <script src="/tenant/assets/js/lib/iconify-icon.min.js"></script>
-    <script src="/tenant/assets/js/lib/dataTables.min.js"></script>
-    <script src="/tenant/assets/js/lib/jquery-ui.min.js"></script>
-    <script src="/tenant/assets/js/lib/flatpickr.min.js"></script>
-    <script src="/tenant/assets/js/app.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/apexcharts.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/iconify-icon.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/dataTables.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-ui.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/lib/flatpickr.min.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/app.js"></script>
 
     <script>
-        // Initialize flatpickr for date inputs
-        flatpickr("input[type=date]", {
-            dateFormat: "Y-m-d"
-        });
-
-        // Image Preview
-        function readURL(input, previewElement) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#' + previewElement).css('background-image', 'url(' + e.target.result + ')');
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
+        // Toast function
+        function showToast(message, type = 'success') {
+            const toastHtml = `
+                <div class="toast ${type} show" role="alert">
+                    <div class="toast-header">
+                        <i class="ri-${type === 'success' ? 'checkbox-circle' : type === 'error' ? 'error-warning' : 'information'}-line me-2"></i>
+                        <strong class="me-auto">${type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Info'}</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">${message}</div>
+                </div>
+            `;
+            $('#toastContainer').append(toastHtml);
+            setTimeout(() => $('.toast').first().remove(), 5000);
         }
 
-        $("#logo").change(function() {
-            readURL(this, 'logoPreview');
-        });
+        // CSRF token
+        const csrfToken = '<?php echo $csrfToken; ?>';
 
-        $("#favicon").change(function() {
-            readURL(this, 'faviconPreview');
-        });
+        // Generic AJAX form submission
+        $('.modal-form').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const action = form.data('action');
+            const formData = form.serializeArray();
+            // Add action to data
+            formData.push({name: 'action', value: action});
 
-        // Auto-dismiss alerts
-        setTimeout(function() {
-            $('.alert').fadeOut('slow');
-        }, 5000);
-
-        // Tab persistence
-        $(document).ready(function() {
-            var hash = window.location.hash;
-            if (hash) {
-                $('#managementTabs a[href="' + hash + '"]').tab('show');
-            }
-
-            $('#managementTabs a').on('click', function(e) {
-                window.location.hash = $(this).attr('href');
+            $.post(window.location.href, formData, function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    form.closest('.modal').modal('hide');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }, 'json').fail(() => {
+                showToast('Request failed. Please try again.', 'error');
             });
         });
 
-        // Password match validation
-        $('input[name="confirm_password"]').on('keyup', function() {
-            var password = $('input[name="new_password"]').val();
-            var confirm = $(this).val();
-            
-            if (password !== confirm) {
-                $(this).addClass('is-invalid');
-            } else {
-                $(this).removeClass('is-invalid');
-            }
+        // Edit button handlers
+        $('.edit-year').on('click', function() {
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'get_academic_year',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    const d = response.data;
+                    $('#edit_year_id').val(d.id);
+                    $('#edit_year_name').val(d.name);
+                    $('#edit_year_start').val(d.start_date);
+                    $('#edit_year_end').val(d.end_date);
+                    $('#edit_year_status').val(d.status);
+                    $('#edit_year_default').prop('checked', d.is_default == 1);
+                    $('#editYearModal').modal('show');
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Failed to fetch data', 'error'));
+        });
+
+        $('.delete-year').on('click', function() {
+            if (!confirm('Are you sure you want to delete this academic year?')) return;
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'delete_academic_year',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Request failed', 'error'));
+        });
+
+        $('.edit-term').on('click', function() {
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'get_academic_term',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    const d = response.data;
+                    $('#edit_term_id').val(d.id);
+                    $('#edit_term_name').val(d.name);
+                    $('#edit_term_year').val(d.academic_year_id);
+                    $('#edit_term_start').val(d.start_date);
+                    $('#edit_term_end').val(d.end_date);
+                    $('#edit_term_default').prop('checked', d.is_default == 1);
+                    $('#editTermModal').modal('show');
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Failed to fetch data', 'error'));
+        });
+
+        $('.delete-term').on('click', function() {
+            if (!confirm('Are you sure you want to delete this academic term?')) return;
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'delete_academic_term',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Request failed', 'error'));
+        });
+
+        $('.edit-class').on('click', function() {
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'get_class',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    const d = response.data;
+                    $('#edit_class_id').val(d.id);
+                    $('#edit_class_name').val(d.name);
+                    $('#edit_class_code').val(d.code);
+                    $('#edit_class_year').val(d.academic_year_id);
+                    $('#edit_class_grade').val(d.grade_level || '');
+                    $('#edit_class_capacity').val(d.capacity || 40);
+                    $('#edit_class_room').val(d.room_number || '');
+                    $('#edit_class_desc').val(d.description || '');
+                    $('#editClassModal').modal('show');
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Failed to fetch data', 'error'));
+        });
+
+        $('.delete-class').on('click', function() {
+            if (!confirm('Are you sure you want to delete this class?')) return;
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'delete_class',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Request failed', 'error'));
+        });
+
+        $('.edit-section').on('click', function() {
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'get_section',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    const d = response.data;
+                    $('#edit_section_id').val(d.id);
+                    $('#edit_section_name').val(d.name);
+                    $('#edit_section_code').val(d.code);
+                    $('#edit_section_class').val(d.class_id);
+                    $('#edit_section_capacity').val(d.capacity || 40);
+                    $('#edit_section_room').val(d.room_number || '');
+                    $('#editSectionModal').modal('show');
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Failed to fetch data', 'error'));
+        });
+
+        $('.delete-section').on('click', function() {
+            if (!confirm('Are you sure you want to delete this section?')) return;
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'delete_section',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Request failed', 'error'));
+        });
+
+        $('.edit-subject').on('click', function() {
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'get_subject',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    const d = response.data;
+                    $('#edit_subject_id').val(d.id);
+                    $('#edit_subject_name').val(d.name);
+                    $('#edit_subject_code').val(d.code);
+                    $('#edit_subject_type').val(d.type);
+                    $('#edit_subject_credit').val(d.credit_hours || 1.0);
+                    $('#edit_subject_desc').val(d.description || '');
+                    $('#editSubjectModal').modal('show');
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Failed to fetch data', 'error'));
+        });
+
+        $('.delete-subject').on('click', function() {
+            if (!confirm('Are you sure you want to delete this subject?')) return;
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'delete_subject',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Request failed', 'error'));
+        });
+
+        $('.delete-assignment').on('click', function() {
+            if (!confirm('Are you sure you want to remove this subject assignment?')) return;
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'delete_assignment',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Request failed', 'error'));
+        });
+
+        $('.edit-payment-method').on('click', function() {
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'get_payment_method',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    const d = response.data;
+                    $('#edit_payment_id').val(d.id);
+                    $('#edit_payment_type').val(d.type);
+                    $('#edit_payment_provider').val(d.provider || '');
+                    const metadata = typeof d.metadata === 'string'
+                        ? JSON.parse(d.metadata || '{}')
+                        : (d.metadata || {});
+                    $('#edit_payment_acc_name').val(metadata.account_name || '');
+                    $('#edit_payment_acc_num').val(metadata.account_number || '');
+                    $('#edit_payment_exp_month').val(d.exp_month || '');
+                    $('#edit_payment_exp_year').val(d.exp_year || '');
+                    $('#edit_payment_default').prop('checked', d.is_default == 1);
+                    $('#edit_payment_verified').prop('checked', d.is_verified == 1);
+                    $('#editPaymentMethodModal').modal('show');
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Failed to fetch data', 'error'));
+        });
+
+        $('.delete-payment-method').on('click', function() {
+            if (!confirm('Are you sure you want to delete this payment method?')) return;
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'delete_payment_method',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Request failed', 'error'));
+        });
+
+        $('.edit-fee-category').on('click', function() {
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'get_fee_category',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    const d = response.data;
+                    $('#edit_fee_cat_id').val(d.id);
+                    $('#edit_fee_cat_name').val(d.name);
+                    $('#edit_fee_cat_desc').val(d.description || '');
+                    $('#editFeeCategoryModal').modal('show');
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Failed to fetch data', 'error'));
+        });
+
+        $('.delete-fee-category').on('click', function() {
+            if (!confirm('Are you sure you want to delete this fee category?')) return;
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'delete_fee_category',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Request failed', 'error'));
+        });
+
+        $('.edit-fee-structure').on('click', function() {
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'get_fee_structure',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    const d = response.data;
+                    $('#edit_fee_struct_id').val(d.id);
+                    $('#edit_fee_struct_year').val(d.academic_year_id);
+                    $('#edit_fee_struct_class').val(d.class_id);
+                    $('#edit_fee_struct_cat').val(d.fee_category_id);
+                    $('#edit_fee_struct_amount').val(d.amount);
+                    $('#edit_fee_struct_due').val(d.due_date || '');
+                    $('#edit_fee_struct_late').val(d.late_fee || 0);
+                    $('#edit_fee_struct_term').val(d.academic_term_id || '');
+                    $('#editFeeStructureModal').modal('show');
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Failed to fetch data', 'error'));
+        });
+
+        $('.delete-fee-structure').on('click', function() {
+            if (!confirm('Are you sure you want to delete this fee structure?')) return;
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'delete_fee_structure',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Request failed', 'error'));
+        });
+
+        $('.copy-api-key').on('click', function() {
+            const key = $(this).data('key');
+            navigator.clipboard.writeText(key).then(() => {
+                showToast('API key copied to clipboard', 'info');
+            }).catch(() => showToast('Failed to copy', 'error'));
+        });
+
+        $('.delete-api-key').on('click', function() {
+            if (!confirm('Are you sure you want to delete this API key?')) return;
+            const id = $(this).data('id');
+            $.post(window.location.href, {
+                action: 'delete_api_key',
+                id: id,
+                csrf_token: csrfToken
+            }, function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(response.message, 'error');
+                }
+            }).fail(() => showToast('Request failed', 'error'));
+        });
+
+        // ── General Settings form (AJAX with file-upload support) ──────────
+        (function () {
+            // Find the hidden action input inside the general settings form
+            const hiddenAction = document.querySelector('input[type="hidden"][name="action"][value="update_general"]');
+            if (!hiddenAction) return;
+            const generalForm = hiddenAction.closest('form');
+            if (!generalForm) return;
+
+            generalForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const fd = new FormData(generalForm);
+                fd.set('csrf_token', csrfToken);
+                // action is already in the hidden input; ensure it's present
+                if (!fd.has('action')) fd.set('action', 'update_general');
+
+                const btn = generalForm.querySelector('[type="submit"]');
+                if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+                fetch(window.location.href, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: fd
+                })
+                .then(r => r.json())
+                .then(res => {
+                    showToast(res.message || (res.success ? 'Saved' : 'Error'), res.success ? 'success' : 'error');
+                    if (res.success) {
+                        // Refresh after a short delay so logo/favicon previews update
+                        setTimeout(() => location.reload(), 1600);
+                    }
+                })
+                .catch(() => showToast('Request failed. Please try again.', 'error'))
+                .finally(() => {
+                    if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; }
+                });
+            });
+        })();
+
+        // Initialize flatpickr
+        flatpickr("input[type=date]", { dateFormat: "Y-m-d" });
+
+        // Initialize DataTables
+        $(document).ready(function() {
+            $('.datatable').DataTable({
+                pageLength: 10,
+                responsive: true,
+                language: {
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: { first: "First", last: "Last", next: "Next", previous: "Previous" }
+                }
+            });
         });
 
         // Create backup function
@@ -2099,27 +3511,6 @@ function createBackup($schoolDb, $platformDb, $schoolId, $userId, $actionManager
                 $('#backupForm').submit();
             }
         }
-
-        // Initialize data tables
-        $(document).ready(function() {
-            if ($('.table').length > 0) {
-                $('.table').DataTable({
-                    pageLength: 10,
-                    responsive: true,
-                    language: {
-                        search: "Search:",
-                        lengthMenu: "Show _MENU_ entries",
-                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                        paginate: {
-                            first: "First",
-                            last: "Last",
-                            next: "Next",
-                            previous: "Previous"
-                        }
-                    }
-                });
-            }
-        });
     </script>
 </body>
 </html>

@@ -222,6 +222,10 @@ function sendSuspensionEmail($student, $school, $suspension, $db, $logger) {
         
         // Build email content
         $subject = "Account Suspension Notice - $schoolName";
+        $logoUrl = function_exists('academix_logo_url')
+            ? academix_logo_url(true)
+            : ((defined('APP_URL') ? rtrim(APP_URL, '/') : 'https://www.academixsuite.com') . '/tenant/assets/images/logo.png');
+        $logoUrl = htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8');
         
         $htmlContent = "
         <!DOCTYPE html>
@@ -239,6 +243,7 @@ function sendSuspensionEmail($student, $school, $suspension, $db, $logger) {
         <body>
             <div class='container'>
                 <div class='header'>
+                    <img src='{$logoUrl}' alt='AcademixSuite' style='height:36px;width:auto;display:block;margin:0 auto 12px;'>
                     <h1>Account Suspension Notice</h1>
                 </div>
                 <div class='content'>

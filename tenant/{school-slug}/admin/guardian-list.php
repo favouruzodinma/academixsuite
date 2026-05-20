@@ -1,5 +1,406 @@
-<?php $currentPage = basename(__FILE__); ?>
-<!-- meta tags and other links -->
+<?php
+/**
+ * School Guardian List Page
+ * Displays all guardians/parents in the school
+ * 
+ * @package AcademixSuite
+ * @version 2.0
+ */
+
+// Enable error reporting for debugging
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../../../logs/school_guardian_list.log');
+
+error_log("=== GUARDIAN LIST PAGE START ===");
+error_log("Script: " . __FILE__);
+
+// Define constants if not defined
+defined('APP_NAME') or define('APP_NAME', 'AcademixSuite');
+defined('IS_LOCAL') or define('IS_LOCAL', true);
+
+/**
+ * Initialize session safely
+ */
+function initializeSession() {
+    try {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start([
+                'cookie_lifetime' => 86400,
+                'read_and_close' => false,
+                'cookie_secure' => !IS_LOCAL,
+                'cookie_httponly' => true,
+                'cookie_samesite' => 'Lax'
+            ]);
+            error_log("Session started successfully");
+        }
+        return true;
+    } catch (Exception $e) {
+        error_log("Session initialization error: " . $e->getMessage());
+        return false;
+    }
+}
+
+// Start session
+initializeSession();
+
+/**
+ * Get school slug from router
+ */
+$schoolSlug = $GLOBALS['SCHOOL_SLUG'] ?? '';
+$userType = $GLOBALS['USER_TYPE'] ?? 'admin';
+$currentPage = $GLOBALS['CURRENT_PAGE'] ?? 'guardian-list.php';
+$schoolData = $GLOBALS['SCHOOL_DATA'] ?? [];
+
+error_log("School Slug: " . $schoolSlug);
+
+// Validate school slug
+if (empty($schoolSlug)) {
+    error_log("ERROR: Empty school slug from router");
+    header('HTTP/1.1 400 Bad Request');
+    die(json_encode(['error' => 'School identifier missing']));
+}
+
+/**
+ * Get school information
+ */
+$school = $schoolData;
+if (empty($school) && isset($_SESSION['school_info'][$schoolSlug])) {
+    $school = $_SESSION['school_info'][$schoolSlug];
+}
+
+// Redirect if school not found
+if (empty($school)) {
+    error_log("ERROR: School data not found for slug: " . $schoolSlug);
+    header("Location: ../../login.php?school_slug=" . urlencode($schoolSlug));
+    exit;
+}
+
+error_log("School ID: " . ($school['id'] ?? 'N/A'));
+error_log("School Name: " . ($school['name'] ?? 'N/A'));
+
+/**
+ * Verify authentication
+ */
+$isAuthenticated = isset($_SESSION['school_auth']) && 
+                   is_array($_SESSION['school_auth']) && 
+                   ($_SESSION['school_auth']['school_slug'] ?? '') === $schoolSlug;
+
+if (!$isAuthenticated) {
+    error_log("User not authenticated, redirecting to login");
+    header('Location: ../../login.php?school_slug=' . urlencode($schoolSlug));
+    exit;
+}
+
+// Get user info
+$schoolAuth = $_SESSION['school_auth'];
+$userId = (int)($schoolAuth['user_id'] ?? 0);
+$userType = $schoolAuth['user_type'] ?? '';
+
+error_log("Authenticated User ID: " . $userId);
+
+/**
+ * Load required files
+ */
+try {
+    $autoloadPath = __DIR__ . '/../../../includes/autoload.php';
+    error_log("Loading autoload from: " . $autoloadPath);
+    
+    if (!file_exists($autoloadPath)) {
+        throw new Exception("Autoload file not found at: " . $autoloadPath);
+    }
+    require_once $autoloadPath;
+    error_log("Autoload loaded successfully");
+    
+    if (!class_exists('Database')) {
+        throw new Exception("Database class not found");
+    }
+    error_log("Database class found");
+    
+    // Include GuardianManager
+    $guardianManagerPath = __DIR__ . '/../../../includes/GuardianManager.php';
+    error_log("Loading GuardianManager from: " . $guardianManagerPath);
+    
+    if (!file_exists($guardianManagerPath)) {
+        throw new Exception("GuardianManager file not found at: " . $guardianManagerPath);
+    } else {
+        require_once $guardianManagerPath;
+        error_log("GuardianManager loaded successfully");
+    }
+    
+} catch (Exception $e) {
+    error_log("CRITICAL ERROR loading configuration: " . $e->getMessage());
+    http_response_code(500);
+    die("System configuration loading failed. Please try again later.");
+}
+
+/**
+ * Connect to school database
+ */
+$schoolDb = null;
+try {
+    if (!empty($school['database_name'])) {
+        error_log("Attempting to connect to database: " . $school['database_name']);
+        $schoolDb = Database::getSchoolConnection($school['database_name']);
+        
+        if ($schoolDb) {
+            error_log("School database connection successful");
+        } else {
+            throw new Exception("Database connection returned null");
+        }
+    } else {
+        throw new Exception("No database name configured for school");
+    }
+} catch (Exception $e) {
+    error_log("ERROR connecting to school database: " . $e->getMessage());
+    $schoolDb = null;
+    $_SESSION['toast_error'] = "Database connection failed. Please contact support.";
+}
+
+/**
+ * Initialize GuardianManager
+ */
+$guardianManager = null;
+if ($schoolDb) {
+    try {
+        $guardianManager = new GuardianManager($schoolDb, $school['id'], $userId, $userType, $school);
+        error_log("GuardianManager initialized successfully");
+    } catch (Exception $e) {
+        error_log("ERROR initializing GuardianManager: " . $e->getMessage());
+        $_SESSION['toast_error'] = "Failed to initialize guardian management system.";
+    }
+}
+
+$notificationCount = 0;
+$notifications = [];
+if ($guardianManager) {
+    try {
+        $notificationCount = (int) $guardianManager->getNotificationCount();
+        $notifications = $guardianManager->getNotifications(5);
+    } catch (Exception $e) {
+        error_log("Error fetching notifications: " . $e->getMessage());
+    }
+}
+
+/**
+ * Define helper functions
+ */
+if (!function_exists('sanitize')) {
+    function sanitize($input) {
+        if ($input === null) return null;
+        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+    }
+}
+
+/**
+ * Get guardians list from database
+ */
+$guardians = [];
+$totalGuardians = 0;
+
+if ($schoolDb) {
+    try {
+        // Get total count
+        $countStmt = $schoolDb->prepare("
+            SELECT COUNT(DISTINCT u.id) as total 
+            FROM users u
+            JOIN user_roles ur ON u.id = ur.user_id
+            WHERE u.school_id = ? AND u.user_type = 'parent' AND ur.role_id = 5
+        ");
+        $countStmt->execute([$school['id']]);
+        $totalGuardians = $countStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
+        
+        // Get guardians with their linked students
+        $stmt = $schoolDb->prepare("
+            SELECT 
+                u.id,
+                u.name,
+                u.email,
+                u.phone,
+                u.profile_photo,
+                u.created_at,
+                u.is_active,
+                (
+                    SELECT CONCAT(
+                        '[',
+                        GROUP_CONCAT(
+                            JSON_OBJECT(
+                                'student_id', s.id,
+                                'student_name', CONCAT(s.first_name, ' ', s.last_name),
+                                'class_name', c.name,
+                                'section_name', sc.name,
+                                'admission_number', s.admission_number,
+                                'relationship', g.relationship,
+                                'is_primary', g.is_primary
+                            )
+                        ),
+                        ']'
+                    )
+                    FROM guardians g
+                    JOIN students s ON g.student_id = s.id
+                    LEFT JOIN classes c ON s.class_id = c.id
+                    LEFT JOIN sections sc ON s.section_id = sc.id
+                    WHERE g.user_id = u.id AND g.school_id = u.school_id
+                ) as linked_students
+            FROM users u
+            JOIN user_roles ur ON u.id = ur.user_id
+            WHERE u.school_id = ? AND u.user_type = 'parent' AND ur.role_id = 5
+            ORDER BY u.created_at DESC
+        ");
+        $stmt->execute([$school['id']]);
+        
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            // Parse linked students JSON
+            $row['linked_students'] = json_decode($row['linked_students'] ?? '[]', true);
+            $guardians[] = $row;
+        }
+        
+        error_log("Found " . count($guardians) . " guardians");
+        
+    } catch (Exception $e) {
+        error_log("Error fetching guardians: " . $e->getMessage());
+        $_SESSION['toast_error'] = "Error loading guardians list.";
+    }
+}
+
+/**
+ * Handle AJAX requests
+ */
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['ajax'])) {
+    header('Content-Type: application/json');
+    
+    try {
+        if ($_GET['ajax'] === 'get_guardians' && $guardianManager) {
+            $search = $_GET['search'] ?? '';
+            $offset = (int)($_GET['offset'] ?? 0);
+            $limit = (int)($_GET['limit'] ?? 10);
+            
+            // Search guardians
+            $searchStmt = $schoolDb->prepare("
+                SELECT 
+                    u.id,
+                    u.name,
+                    u.email,
+                    u.phone,
+                    u.profile_photo,
+                    u.created_at,
+                    u.is_active,
+                    (
+                        SELECT COUNT(*) 
+                        FROM guardians g 
+                        WHERE g.user_id = u.id
+                    ) as student_count
+                FROM users u
+                JOIN user_roles ur ON u.id = ur.user_id
+                WHERE u.school_id = ? AND u.user_type = 'parent' AND ur.role_id = 5
+                AND (u.name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?)
+                ORDER BY u.created_at DESC
+                LIMIT ? OFFSET ?
+            ");
+            
+            $searchTerm = "%{$search}%";
+            $searchStmt->execute([$school['id'], $searchTerm, $searchTerm, $searchTerm, $limit, $offset]);
+            
+            echo json_encode([
+                'success' => true, 
+                'guardians' => $searchStmt->fetchAll(PDO::FETCH_ASSOC)
+            ]);
+            exit;
+        }
+        
+        if ($_GET['ajax'] === 'delete_guardian' && isset($_GET['id']) && $guardianManager) {
+            $guardianId = (int)$_GET['id'];
+            
+            // Check if guardian has any students linked
+            $checkStmt = $schoolDb->prepare("SELECT COUNT(*) as count FROM guardians WHERE user_id = ?");
+            $checkStmt->execute([$guardianId]);
+            $studentCount = $checkStmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
+            
+            if ($studentCount > 0) {
+                echo json_encode([
+                    'success' => false, 
+                    'error' => 'Cannot delete guardian with linked students. Please remove student links first.'
+                ]);
+                exit;
+            }
+            
+            // Soft delete or hard delete? Using soft delete by setting inactive
+            $deleteStmt = $schoolDb->prepare("UPDATE users SET is_active = 0, deleted_at = NOW() WHERE id = ? AND school_id = ?");
+            $result = $deleteStmt->execute([$guardianId, $school['id']]);
+            
+            echo json_encode([
+                'success' => $result,
+                'message' => $result ? 'Guardian deactivated successfully' : 'Failed to deactivate guardian'
+            ]);
+            exit;
+        }
+    } catch (Exception $e) {
+        error_log("AJAX error: " . $e->getMessage());
+        echo json_encode(['success' => false, 'error' => 'An error occurred']);
+        exit;
+    }
+}
+
+/**
+ * Handle form actions
+ */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['guardian_id'])) {
+        $guardianId = (int)$_POST['guardian_id'];
+        
+        try {
+            // Check if guardian has any students linked
+            $checkStmt = $schoolDb->prepare("SELECT COUNT(*) as count FROM guardians WHERE user_id = ?");
+            $checkStmt->execute([$guardianId]);
+            $studentCount = $checkStmt->fetch(PDO::FETCH_ASSOC)['count'] ?? 0;
+            
+            if ($studentCount > 0) {
+                $_SESSION['toast_error'] = "Cannot delete guardian with linked students. Please remove student links first.";
+            } else {
+                // Soft delete
+                $deleteStmt = $schoolDb->prepare("UPDATE users SET is_active = 0, deleted_at = NOW() WHERE id = ? AND school_id = ?");
+                if ($deleteStmt->execute([$guardianId, $school['id']])) {
+                    $_SESSION['toast_success'] = "Guardian deactivated successfully";
+                    
+                    // Create audit log
+                    $auditStmt = $schoolDb->prepare("
+                        INSERT INTO audit_logs (
+                            school_id, user_id, user_type, action, entity_type, entity_id,
+                            ip_address, user_agent, url, created_at
+                        ) VALUES (?, ?, ?, 'delete', 'guardian', ?, ?, ?, ?, NOW())
+                    ");
+                    
+                    $auditStmt->execute([
+                        $school['id'],
+                        $userId,
+                        $userType,
+                        $guardianId,
+                        $_SERVER['REMOTE_ADDR'] ?? null,
+                        $_SERVER['HTTP_USER_AGENT'] ?? null,
+                        $_SERVER['REQUEST_URI'] ?? null
+                    ]);
+                } else {
+                    $_SESSION['toast_error'] = "Failed to deactivate guardian";
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error deleting guardian: " . $e->getMessage());
+            $_SESSION['toast_error'] = "Error deleting guardian";
+        }
+        
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit;
+    }
+}
+
+// Collect toast messages
+$toastSuccess = $_SESSION['toast_success'] ?? '';
+$toastError = $_SESSION['toast_error'] ?? '';
+unset($_SESSION['toast_success'], $_SESSION['toast_error']);
+
+error_log("=== GUARDIAN LIST PAGE END ===");
+?>
+
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 
@@ -13,384 +414,238 @@
   <meta name="robots" content="INDEX,FOLLOW">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Title -->
-  <title> <?php echo htmlspecialchars($school['name']); ?> | <?php echo defined('APP_NAME') ? APP_NAME : 'School Management'; ?></title>
+  <title><?php echo htmlspecialchars($school['name']); ?> | <?php echo defined('APP_NAME') ? APP_NAME : 'School Management'; ?> - Guardian List</title>
   <link rel="icon" type="image/png" href="https://academixsuite.com/tenant/assets/images/favicon.png" sizes="16x16">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/remixicon.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/bootstrap.min.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/apexcharts.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/dataTables.min.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/flatpickr.min.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/full-calendar.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/calendar.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/style.css">
+  <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/remixicon.css">
+  <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/bootstrap.min.css">
+  <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/apexcharts.css">
+  <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/dataTables.min.css">
+  <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/flatpickr.min.css">
+  <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/full-calendar.css">
+  <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/calendar.css">
+  <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/style.css">
+  <style>
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+    .toast {
+      min-width: 300px;
+      background: white;
+      border-left: 4px solid;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      margin-bottom: 10px;
+      animation: slideIn 0.3s ease;
+    }
+    .toast.success {
+      border-left-color: #28a745;
+    }
+    .toast.success .toast-header {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .toast.error {
+      border-left-color: #dc3545;
+    }
+    .toast.error .toast-header {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .student-badge {
+      background: var(--primary-50);
+      color: var(--primary-700);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      display: inline-block;
+      margin: 2px;
+    }
+    
+    .primary-badge {
+      background: var(--primary-600);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      margin-left: 4px;
+    }
+    
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .status-active {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-inactive {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
 </head>
 
 <body>
 
-  <!-- Theme Customization Structure Start -->
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer">
+    <?php if (!empty($toastSuccess)): ?>
+    <div class="toast success show" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="true" data-delay="5000">
+        <div class="toast-header">
+            <i class="ri-checkbox-circle-line me-2"></i>
+            <strong class="me-auto">Success</strong>
+            <small>just now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            <?php echo htmlspecialchars($toastSuccess); ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if (!empty($toastError)): ?>
+    <div class="toast error show" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="true" data-delay="5000">
+        <div class="toast-header">
+            <i class="ri-error-warning-line me-2"></i>
+            <strong class="me-auto">Error</strong>
+            <small>just now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            <?php echo htmlspecialchars($toastError); ?>
+        </div>
+    </div>
+    <?php endif; ?>
+</div>
+
+<!-- Theme Customization Structure Start -->
 <div class="body-overlay"></div>
 
 <button type="button"
     class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
     <i class="ri-settings-3-line animate-spin"></i>
 </button>
-<div class="theme-customization-sidebar w-100 bg-base h-100vh overflow-y-auto position-fixed end-0 top-0">
-    <div class="d-flex align-items-center gap-3 py-16 px-24 justify-content-between border-bottom">
-        <div>
-            <h6 class="text-sm dark:text-white">Theme Settings</h6>
-            <p class="text-xs mb-0 text-neutral-500 dark:text-neutral-200">Customize and preview instantly</p>
-        </div>
-        <button data-slot="button"
-            class="theme-customization-sidebar__close text-neutral-900 bg-transparent text-hover-primary-600 d-flex text-xl">
-            <i class="ri-close-fill"></i>
-        </button>
-    </div>
 
-    <div class="d-flex flex-column gap-48 p-24 overflow-y-auto flex-grow-1">
-
-        <div class="theme-setting-item">
-            <h6 class="fw-medium text-primary-light text-md mb-3">Theme Mode</h6>
-            <div class="d-grid grid-cols-3 gap-3 dark-light-mode">
-                <button type="button"
-                    class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl active"
-                    data-theme="light" aria-label="light">
-                    <i class="ri-sun-line"></i>
-                </button>
-                <button type="button"
-                    class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl"
-                    data-theme="dark" aria-label="dark">
-                    <i class="ri-moon-line"></i>
-                </button>
-                <button type="button"
-                    class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl"
-                    data-theme="system" aria-label="system">
-                    <i class="ri-computer-line"></i>
-                </button>
-            </div>
-        </div>
-
-        <div class="theme-setting-item">
-            <h6 class="fw-medium text-primary-light text-md mb-3">Page Direction</h6>
-            <div class="d-grid grid-cols-2 gap-3">
-                <button type="button"
-                    class="theme-setting-item__btn ltr-mode-btn d-flex align-items-center justify-content-center gap-2 h-56-px rounded-3 text-xl" aria-label="LTR">
-                    <span><i class="ri-align-item-left-line"></i></span>
-                    <span class="h6 text-sm font-medium mb-0">LTR</span>
-                </button>
-
-                <button type="button"
-                    class="theme-setting-item__btn rtl-mode-btn d-flex align-items-center justify-content-center gap-2 h-56-px rounded-3 text-xl" aria-label="RTL">
-                    <span class="h6 text-sm font-medium mb-0">RTL</span>
-                    <span><i class="ri-align-item-right-line"></i></span>
-                </button>
-            </div>
-        </div>
-
-        <div class="theme-setting-item">
-            <h6 class="fw-medium text-primary-light text-md mb-3">Color Schema</h6>
-            <div class="d-grid grid-cols-3 gap-3">
-                <button type="button"
-                    class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                    data-color="base" aria-label="Base">
-                    <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                        style="background-color: #25A194;"></span>
-                    <span class="fw-medium mt-1" style="color: #25A194;">Base</span>
-                </button>
-                <button type="button"
-                    class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                    data-color="red" aria-label="Red">
-                    <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                        style="background-color: #dc2626;"></span>
-                    <span class="fw-medium mt-1" style="color: #dc2626;">Red</span>
-                </button>
-                <button type="button"
-                    class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                    data-color="blue" aria-label="Blue">
-                    <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                        style="background-color: #2563eb;"></span>
-                    <span class="fw-medium mt-1" style="color: #2563eb;">Blue</span>
-                </button>
-                <button type="button"
-                    class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                    data-color="yellow" aria-label="Yellow">
-                    <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                        style="background-color: #ff9f29;"></span>
-                    <span class="fw-medium mt-1" style="color: #ff9f29;">Yellow</span>
-                </button>
-                <button type="button"
-                    class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                    data-color="cyan" aria-label="Cyan">
-                    <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                        style="background-color: #00b8f2;"></span>
-                    <span class="fw-medium mt-1" style="color: #00b8f2;">Cyan</span>
-                </button>
-                <button type="button"
-                    class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                    data-color="violet" aria-label="Violet">
-                    <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                        style="background-color: #7c3aed;"></span>
-                    <span class="fw-medium mt-1" style="color: #7c3aed;">Violet</span>
-                </button>
-            </div>
-        </div>
-
-    </div>
-</div>
 <!-- Theme Customization Structure End -->
 
-  <div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300">
-  </div>
-    <?php include_once('includes/sidebar.php'); ?>
+<div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
+
+<?php include_once('includes/sidebar.php') ?>
+
 <main class="dashboard-main">
-    
-        <?php include_once('includes/header.php'); ?>
-</div>
-    <div class="col-auto">
-      <div class="d-flex flex-wrap align-items-center gap-3">
-        <button type="button" data-theme-toggle
-          class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-        <div class="dropdown d-inline-block">
-          <button
-            class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center"
-            type="button" data-bs-toggle="dropdown" aria-label="Language Change Button">
-            <img src="https://academixsuite.com/tenant/assets/images/flags/flag1.png" alt="image" class="w-24 h-24 object-fit-cover rounded-circle">
-          </button>
-          <div class="dropdown-menu to-top dropdown-menu-sm">
-            <div
-              class="py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
-              <div>
-                <h6 class="text-lg text-primary-light fw-semibold mb-0">Choose Your Language</h6>
-              </div>
-            </div>
-
-            <div class="max-h-400-px overflow-y-auto scroll-sm pe-8">
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="english">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag1.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">English</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="english">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="japan">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag2.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Japan</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="japan">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="france">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag3.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">France</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="france">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="germany">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag4.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Germany</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="germany">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="korea">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag5.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">South Korea</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="korea">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="bangladesh">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag6.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Bangladesh</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="bangladesh">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="india">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag7.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">India</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="india">
-              </div>
-              <div class="form-check style-check d-flex align-items-center justify-content-between">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="canada">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag8.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Canada</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="canada">
-              </div>
-            </div>
-          </div>
-        </div><!-- Language dropdown end -->
-
-        <div class="dropdown">
-          <button
-            class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative"
-            type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
-            <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
-            <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
-          </button>
-          <div class="dropdown-menu to-top dropdown-menu-lg p-0">
-            <div
-              class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
-              <div>
-                <h6 class="text-lg text-primary-light fw-semibold mb-0">Notifications</h6>
-              </div>
-              <span
-                class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center">05</span>
-            </div>
-
-            <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    <iconify-icon icon="bitcoin-icons:verify-outline" class="icon text-xxl"></iconify-icon>
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Congratulations</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Your profile has been Verified. Your
-                      profile has been Verified</p>
-                  </div>
+    <div class="navbar-header shadow-1">
+        <div class="row align-items-center justify-content-between">
+            <div class="col-auto">
+                <div class="d-flex flex-wrap align-items-center gap-4">
+                    <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
+                        <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
+                    </button>
+                    <form class="navbar-search">
+                        <input type="text" class="bg-transparent" name="search" placeholder="Search">
+                        <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                    </form>
                 </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    <img src="https://academixsuite.com/tenant/assets/images/notification/profile-1.png" alt="Image">
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Ronald Richards</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">You can stitch between artboards</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-info-subtle text-info-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    AM
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Arlene McCoy</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Invite you to prototyping</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    <img src="https://academixsuite.com/tenant/assets/images/notification/profile-2.png" alt="Image">
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Robiul Hasan</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Invite you to prototyping</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-info-subtle text-info-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    DR
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Darlene Robertson</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Invite you to prototyping</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
             </div>
+            <div class="col-auto">
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <button type="button" data-theme-toggle
+                        class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
+                    <div class="dropdown d-inline-block">
+                        <button
+                            class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative"
+                            type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
+                            <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
+                            <?php if ($notificationCount > 0): ?>
+                            <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
+                            <?php endif; ?>
+                        </button>
+                        <div class="dropdown-menu to-top dropdown-menu-lg p-0">
+                            <div
+                                class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
+                                <div>
+                                    <h6 class="text-lg text-primary-light fw-semibold mb-0">Notifications</h6>
+                                </div>
+                                <span
+                                    class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center"><?php echo str_pad($notificationCount, 2, '0', STR_PAD_LEFT); ?></span>
+                            </div>
 
-            <div class="text-center py-12 px-16">
-              <a href="javascript:void(0)" class="text-primary-600 fw-semibold text-md hover-underline">See All Notification</a>
+                            <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
+                                <?php if (!empty($notifications)): ?>
+                                    <?php foreach ($notifications as $notification): ?>
+                                    <a href="javascript:void(0)"
+                                        class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between <?php echo !$notification['is_read'] ? 'bg-neutral-50' : ''; ?>">
+                                        <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
+                                            <span
+                                                class="w-44-px h-44-px bg-<?php echo $notification['type'] == 'success' ? 'success' : ($notification['type'] == 'error' ? 'danger' : 'info'); ?>-subtle text-<?php echo $notification['type'] == 'success' ? 'success' : ($notification['type'] == 'error' ? 'danger' : 'info'); ?>-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
+                                                <i class="ri-<?php echo $notification['icon'] ?? 'notification-line'; ?> text-xl"></i>
+                                            </span>
+                                            <div>
+                                                <h6 class="text-md fw-semibold mb-4"><?php echo htmlspecialchars($notification['title']); ?></h6>
+                                                <p class="mb-0 text-sm text-secondary-light text-w-200-px"><?php echo htmlspecialchars($notification['message']); ?></p>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm text-secondary-light flex-shrink-0"><?php echo date('d M', strtotime($notification['created_at'])); ?></span>
+                                    </a>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="text-center py-20">
+                                        <p class="text-secondary-light">No notifications</p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="text-center py-12 px-16">
+                                <a href="notifications.php" class="text-primary-600 fw-semibold text-md hover-underline">See All Notifications</a>
+                            </div>
+
+                        </div>
+                    </div><!-- Notification dropdown end -->
+                </div>
             </div>
-
-          </div>
-        </div><!-- Notification dropdown end -->
-
-      </div>
+        </div>
     </div>
-  </div>
-</div>
 
     <div class="dashboard-main-body">
-
         <div class="breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-  <div class="">
-    <h1 class="fw-semibold mb-4 h6 text-primary-light">Guardian List</h1>
-    <div class="">
-      <a href="index.html" class="text-secondary-light hover-text-primary hover-underline">Dashboard </a>
-      <a href="javascript:void(0)" class="text-secondary-light hover-text-primary hover-underline d-none"> /
-        guardian</a>
-      <span class="text-secondary-light">/ Guardian List</span>
-    </div>
-  </div>
-  <a href="add-new-guardian.html" class="btn btn-primary-600 d-flex align-items-center gap-6 ">
-    <span class="d-flex text-md">
-      <i class="ri-add-large-line"></i>
-    </span>
-    Add Guardian
-  </a>
-</div>
+            <div class="">
+                <h1 class="fw-semibold mb-4 h6 text-primary-light">Guardian List</h1>
+                <div class="">
+                    <a href="index.php" class="text-secondary-light hover-text-primary hover-underline">Dashboard </a>
+                    <a href="javascript:void(0)" class="text-secondary-light hover-text-primary hover-underline d-none"> / guardian</a>
+                    <span class="text-secondary-light">/ Guardian List</span>
+                </div>
+            </div>
+            <a href="add-new-guardian.php" class="btn btn-primary-600 d-flex align-items-center gap-6">
+                <span class="d-flex text-md">
+                    <i class="ri-add-large-line"></i>
+                </span>
+                Add Guardian
+            </a>
+        </div>
 
         <div class="mt-24">
             <div class="card h-100">
                 <div class="card-body p-0 dataTable-wrapper">
-
-                    <div
-                        class="d-flex align-items-center justify-content-between flex-wrap gap-16 px-20 py-12 border-bottom border-neutral-200">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-16 px-20 py-12 border-bottom border-neutral-200">
                         <div class="d-flex flex-wrap align-items-center gap-16">
                             <div class="dropdown">
                                 <button type="button"
-                                    class="px-12 py-5-px border border-neutral-300 radius-8 d-flex align-items-center gap-20 "
+                                    class="px-12 py-5-px border border-neutral-300 radius-8 d-flex align-items-center gap-20"
                                     data-bs-toggle="dropdown" aria-expanded="false">
                                     <span class="d-flex align-items-center gap-1 text-secondary-light text-sm">
                                         <i class="ri-file-upload-line text-md line-height-1"></i>
@@ -404,7 +659,7 @@
                                     <li>
                                         <button type="button"
                                             class="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-10"
-                                            data-bs-toggle="modal" data-bs-target="#exampleModalView">
+                                            onclick="exportGuardians('pdf')">
                                             <i class="ri-file-3-line"></i>
                                             PDF
                                         </button>
@@ -412,7 +667,7 @@
                                     <li>
                                         <button type="button"
                                             class="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-10"
-                                            data-bs-toggle="modal" data-bs-target="#exampleModalEdit">
+                                            onclick="exportGuardians('excel')">
                                             <i class="ri-file-excel-line"></i>
                                             Excel
                                         </button>
@@ -421,7 +676,7 @@
                             </div>
                             <form class="navbar-search dt-search m-0">
                                 <input type="text" class="dt-input bg-transparent radius-4" aria-controls="dataTable"
-                                    name="search" placeholder="Search...">
+                                    name="search" placeholder="Search..." id="searchInput">
                                 <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
                             </form>
                             <div class="dropdown">
@@ -436,40 +691,26 @@
                                     </span>
                                 </button>
                                 <div class="dropdown-menu border bg-base shadow dropdown-menu-lg p-0">
-                                    <div
-                                        class="d-flex align-items-center justify-content-between border-bottom py-8 px-16">
+                                    <div class="d-flex align-items-center justify-content-between border-bottom py-8 px-16">
                                         <span class="fw-semibold text-lg text-primary-light">Filter</span>
-                                        <button type="button">
+                                        <button type="button" onclick="closeFilter()">
                                             <i class="ri-close-large-line"></i>
                                         </button>
                                     </div>
 
-                                    <form action="#" class="p-16">
+                                    <form action="#" class="p-16" id="filterForm">
                                         <div class="row g-3">
-                                            <div class="col-12">
-                                                <label for="subject"
-                                                    class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Gender</label>
-                                                <select id="subject" class="form-control form-select">
-                                                    <option value="Select">Select Subject</option>
-                                                    <option value="Match">Match</option>
-                                                    <option value="English">English</option>
-                                                    <option value="Bangla">Bangla</option>
-                                                    <option value="Economics">Economics</option>
-                                                    <option value="Physics">Physics</option>
-                                                </select>
-                                            </div>
                                             <div class="col-12">
                                                 <label for="status"
                                                     class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Status</label>
-                                                <select id="status" class="form-control form-select">
-                                                    <option value="Select">Select Status</option>
-                                                    <option value="Active">Active</option>
-                                                    <option value="Inactive">Inactive</option>
+                                                <select id="status" class="form-control form-select" name="status">
+                                                    <option value="">All</option>
+                                                    <option value="active">Active</option>
+                                                    <option value="inactive">Inactive</option>
                                                 </select>
                                             </div>
                                             <div class="col-6">
-                                                <button type="reset"
-                                                    class="btn btn-danger-200 text-danger-600 w-100">Reset</button>
+                                                <button type="reset" class="btn btn-danger-200 text-danger-600 w-100" onclick="resetFilter()">Reset</button>
                                             </div>
                                             <div class="col-6">
                                                 <button type="submit" class="btn btn-primary-600 w-100">Apply</button>
@@ -485,7 +726,7 @@
                             </span>
                             <div class="dt-length">
                                 <select name="dataTable_length" aria-controls="dataTable"
-                                    class="dt-input form-control form-select">
+                                    class="dt-input form-control form-select" id="pageLength">
                                     <option value="5">5</option>
                                     <option value="10" selected>10</option>
                                     <option value="25">25</option>
@@ -500,694 +741,138 @@
                         <table class="table bordered-table mb-0 data-table" id="dataTable" data-page-length='10'>
                             <thead>
                                 <tr>
-                                    <th scope="col">
+                                    <th scope="col" width="50">
                                         <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">
-                                                S.L
-                                            </label>
+                                            <input class="form-check-input" type="checkbox" id="selectAll">
+                                            <label class="form-check-label">S.L</label>
                                         </div>
                                     </th>
                                     <th scope="col">ID</th>
                                     <th scope="col">Name</th>
-                                    <th scope="col">Child</th>
+                                    <th scope="col">Children</th>
                                     <th scope="col">Email</th>
                                     <th scope="col">Phone Number</th>
                                     <th scope="col">Join Date</th>
+                                    <th scope="col">Status</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                <?php if (empty($guardians)): ?>
                                 <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">01</label>
-                                        </div>
-                                    </td>
-                                    <td><span class="text-primary-600">AD52365</span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img1.png"
-                                                alt="Marvin McKinney Image" class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Marvin McKinney</h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/avatar-img1.png"
-                                                alt="Darlene Robertson Image" class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Darlene Robertson</h6>
-                                                <span class="text-secondary-light text-sm">Class: 1 (A)</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>chinthaka@hotmail.com</td>
-                                    <td>209.555.0104</td>
-                                    <td>05 May 2012</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="guardian-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Guardian</a></li>
-                                                <li><a href="edit-guardian.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><a href="login.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-login-box-line"></i>Login</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModalDelete"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
+                                    <td colspan="9" class="text-center py-4">
+                                        <div class="text-secondary-light">
+                                            <i class="ri-user-search-line fs-1 mb-3 d-block"></i>
+                                            <p>No guardians found. Click "Add Guardian" to create one.</p>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">02</label>
-                                        </div>
-                                    </td>
-                                    <td><span class="text-primary-600">AD65412</span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img2.png"
-                                                alt="Esther Howard Image" class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium text-secondary-light">Esther Howard
-                                                </h6>
+                                <?php else: ?>
+                                    <?php $sl = 1; ?>
+                                    <?php foreach ($guardians as $guardian): ?>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check style-check d-flex align-items-center">
+                                                <input class="form-check-input row-checkbox" type="checkbox" value="<?php echo $guardian['id']; ?>">
+                                                <label class="form-check-label"><?php echo str_pad($sl++, 2, '0', STR_PAD_LEFT); ?></label>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/avatar-img2.png" alt="Jane Cooper Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium text-secondary-light">Jane Cooper</h6>
-                                                <span class="text-secondary-light text-sm">Class: 2 (B)</span>
+                                        </td>
+                                        <td><span class="text-primary-600">G<?php echo str_pad($guardian['id'], 5, '0', STR_PAD_LEFT); ?></span></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="<?php echo !empty($guardian['profile_photo']) ? htmlspecialchars($guardian['profile_photo']) : 'https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img1.png'; ?>"
+                                                    alt="<?php echo htmlspecialchars($guardian['name']); ?>" class="flex-shrink-0 me-12 radius-8" style="width: 40px; height: 40px; object-fit: cover;">
+                                                <div>
+                                                    <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
+                                                        <?php echo htmlspecialchars($guardian['name']); ?>
+                                                    </h6>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td>esther@example.com</td>
-                                    <td>305.442.0899</td>
-                                    <td>10 Feb 2014</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="guardian-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Guardian</a></li>
-                                                <li><a href="edit-guardian.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><a href="login.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-login-box-line"></i>Login</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModalDelete"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center"><input
-                                                class="form-check-input" type="checkbox"><label
-                                                class="form-check-label">03</label></div>
-                                    </td>
-                                    <td><span class="text-primary-600">AD76548</span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center"><img
-                                                src="https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img3.png" alt="Cody Fisher"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium text-secondary-light">Cody Fisher</h6>
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($guardian['linked_students'])): ?>
+                                                <?php foreach ($guardian['linked_students'] as $index => $student): ?>
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <div>
+                                                        <h6 class="text-sm mb-0 fw-medium flex-grow-1 text-secondary-light">
+                                                            <?php echo htmlspecialchars($student['student_name']); ?>
+                                                            <?php if ($student['is_primary']): ?>
+                                                                <span class="primary-badge">Primary</span>
+                                                            <?php endif; ?>
+                                                        </h6>
+                                                        <span class="text-secondary-light text-xs">
+                                                            <?php echo htmlspecialchars($student['class_name'] ?? 'N/A'); ?> 
+                                                            (<?php echo htmlspecialchars($student['section_name'] ?? 'N/A'); ?>) - 
+                                                            <?php echo htmlspecialchars($student['relationship']); ?>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <?php endforeach; ?>
+                                            <?php else: ?>
+                                                <span class="text-secondary-light">No children linked</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($guardian['email']); ?></td>
+                                        <td><?php echo htmlspecialchars($guardian['phone'] ?? 'N/A'); ?></td>
+                                        <td><?php echo date('d M Y', strtotime($guardian['created_at'])); ?></td>
+                                        <td>
+                                            <span class="status-badge <?php echo $guardian['is_active'] ? 'status-active' : 'status-inactive'; ?>">
+                                                <?php echo $guardian['is_active'] ? 'Active' : 'Inactive'; ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button type="button" class="text-primary-light text-xl"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
+                                                    <li>
+                                                        <a href="guardian-details.php?id=<?php echo $guardian['id']; ?>"
+                                                            class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
+                                                            <i class="ri-user-3-line"></i>View Guardian
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="edit-guardian.php?id=<?php echo $guardian['id']; ?>"
+                                                            class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
+                                                            <i class="ri-edit-2-line"></i>Edit
+                                                        </a>
+                                                    </li>
+                                                    <?php if ($guardian['is_active']): ?>
+                                                    <li>
+                                                        <a href="login-as-parent.php?id=<?php echo $guardian['id']; ?>"
+                                                            class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
+                                                            <i class="ri-login-box-line"></i>Login as Parent
+                                                        </a>
+                                                    </li>
+                                                    <?php endif; ?>
+                                                    <li>
+                                                        <button
+                                                            class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
+                                                            onclick="confirmDelete(<?php echo $guardian['id']; ?>, '<?php echo htmlspecialchars($guardian['name']); ?>')">
+                                                            <i class="ri-delete-bin-6-line"></i><?php echo $guardian['is_active'] ? 'Deactivate' : 'Delete'; ?>
+                                                        </button>
+                                                    </li>
+                                                </ul>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center"><img
-                                                src="https://academixsuite.com/tenant/assets/images/thumbs/avatar-img3.png" alt="Robert Fox"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium text-secondary-light">Robert Fox</h6>
-                                                <span class="text-secondary-light text-sm">Class: 3 (A)</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>codyf@example.com</td>
-                                    <td>312.900.0981</td>
-                                    <td>08 Mar 2016</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" aria-expanded="false"><iconify-icon
-                                                    icon="tabler:dots-vertical"></iconify-icon></button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="guardian-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Guardian</a></li>
-                                                <li><a href="edit-guardian.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><a href="login.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-login-box-line"></i>Login</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModalDelete"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center"><input
-                                                class="form-check-input" type="checkbox"><label
-                                                class="form-check-label">04</label></div>
-                                    </td>
-                                    <td><span class="text-primary-600">AD33221</span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center"><img
-                                                src="https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img4.png" alt="Jenny Wilson"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium text-secondary-light">Jenny Wilson
-                                                </h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center"><img
-                                                src="https://academixsuite.com/tenant/assets/images/thumbs/avatar-img4.png" alt="Albert Flores"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium text-secondary-light">Albert Flores
-                                                </h6><span class="text-secondary-light text-sm">Class: 4 (B)</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>jenny@example.com</td>
-                                    <td>404.788.1120</td>
-                                    <td>15 Aug 2017</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" aria-expanded="false"><iconify-icon
-                                                    icon="tabler:dots-vertical"></iconify-icon></button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="guardian-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Guardian</a></li>
-                                                <li><a href="edit-guardian.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><a href="login.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-login-box-line"></i>Login</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModalDelete"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center"><input
-                                                class="form-check-input" type="checkbox"><label
-                                                class="form-check-label">05</label></div>
-                                    </td>
-                                    <td><span class="text-primary-600">AD77231</span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center"><img
-                                                src="https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img5.png" alt="Theresa Webb"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium text-secondary-light">Theresa Webb
-                                                </h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center"><img
-                                                src="https://academixsuite.com/tenant/assets/images/thumbs/avatar-img5.png" alt="Leslie Alexander"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium text-secondary-light">Leslie Alexander
-                                                </h6><span class="text-secondary-light text-sm">Class: 5 (A)</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>theresa.webb@example.com</td>
-                                    <td>213.987.7770</td>
-                                    <td>22 Sep 2018</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" aria-expanded="false"><iconify-icon
-                                                    icon="tabler:dots-vertical"></iconify-icon></button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="guardian-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Guardian</a></li>
-                                                <li><a href="edit-guardian.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><a href="login.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-login-box-line"></i>Login</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModalDelete"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label"> 06 </label>
-                                        </div>
-                                    </td>
-                                    <td><span class="text-primary-600">AD52366</span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img2.png"
-                                                alt="John Smith Image" class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">John
-                                                    Smith</h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/avatar-img2.png" alt="Student Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Kathryn Murphy</h6>
-                                                <span class="text-secondary-light text-sm">Class: 2 (B)</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>kathryn.murphy@example.com</td>
-                                    <td>208.555.1122</td>
-                                    <td>12 Jan 2013</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="guardian-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Guardian</a></li>
-                                                <li><a href="edit-guardian.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><a href="login.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-login-box-line"></i>Login</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModalDelete"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label"> 07 </label>
-                                        </div>
-                                    </td>
-                                    <td><span class="text-primary-600">AD52367</span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img3.png" alt="Teacher Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Theresa Webb</h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/avatar-img3.png" alt="Student Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">Guy
-                                                    Hawkins</h6>
-                                                <span class="text-secondary-light text-sm">Class: 3 (C)</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>guy.hawkins@example.com</td>
-                                    <td>203.555.2145</td>
-                                    <td>27 Mar 2014</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="guardian-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Guardian</a></li>
-                                                <li><a href="edit-guardian.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><a href="login.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-login-box-line"></i>Login</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModalDelete"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label"> 08 </label>
-                                        </div>
-                                    </td>
-                                    <td><span class="text-primary-600">AD52368</span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img4.png" alt="Teacher Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Courtney Henry</h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/avatar-img4.png" alt="Student Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Eleanor Pena</h6>
-                                                <span class="text-secondary-light text-sm">Class: 4 (A)</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>eleanor.pena@example.com</td>
-                                    <td>210.555.1098</td>
-                                    <td>08 Sep 2014</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="guardian-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Guardian</a></li>
-                                                <li><a href="edit-guardian.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><a href="login.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-login-box-line"></i>Login</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModalDelete"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label"> 09 </label>
-                                        </div>
-                                    </td>
-                                    <td><span class="text-primary-600">AD52369</span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img5.png" alt="Teacher Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Albert Flores</h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/avatar-img5.png" alt="Student Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Jenny Wilson</h6>
-                                                <span class="text-secondary-light text-sm">Class: 5 (B)</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>jenny.wilson@example.com</td>
-                                    <td>212.555.3223</td>
-                                    <td>11 Nov 2015</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="guardian-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Guardian</a></li>
-                                                <li><a href="edit-guardian.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><a href="login.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-login-box-line"></i>Login</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModalDelete"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label"> 10 </label>
-                                        </div>
-                                    </td>
-                                    <td><span class="text-primary-600">AD52370</span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img6.png" alt="Teacher Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Jerome Bell</h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/avatar-img6.png" alt="Student Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Esther Howard</h6>
-                                                <span class="text-secondary-light text-sm">Class: 6 (A)</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>esther.howard@example.com</td>
-                                    <td>210.555.7766</td>
-                                    <td>22 Feb 2016</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="guardian-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Guardian</a></li>
-                                                <li><a href="edit-guardian.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><a href="login.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-login-box-line"></i>Login</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModalDelete"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label"> 11 </label>
-                                        </div>
-                                    </td>
-                                    <td><span class="text-primary-600">AD52371</span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img7.png" alt="Teacher Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Devon Lane</h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/avatar-img7.png" alt="Student Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Robert Fox</h6>
-                                                <span class="text-secondary-light text-sm">Class: 7 (C)</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>robert.fox@example.com</td>
-                                    <td>202.555.8974</td>
-                                    <td>10 Jul 2017</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="guardian-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Guardian</a></li>
-                                                <li><a href="edit-guardian.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><a href="login.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-login-box-line"></i>Login</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModalDelete"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label"> 12 </label>
-                                        </div>
-                                    </td>
-                                    <td><span class="text-primary-600">AD52372</span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/teacher-avatar-img8.png" alt="Teacher Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Floyd Miles</h6>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <img src="https://academixsuite.com/tenant/assets/images/thumbs/avatar-img8.png" alt="Student Image"
-                                                class="flex-shrink-0 me-12 radius-8">
-                                            <div>
-                                                <h6 class="text-md mb-0 fw-medium flex-grow-1 text-secondary-light">
-                                                    Leslie Alexander</h6>
-                                                <span class="text-secondary-light text-sm">Class: 8 (A)</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>leslie.alexander@example.com</td>
-                                    <td>205.555.6742</td>
-                                    <td>21 Oct 2018</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="guardian-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Guardian</a></li>
-                                                <li><a href="edit-guardian.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><a href="login.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-login-box-line"></i>Login</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModalDelete"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </tbody>
                         </table>
+                    </div>
+                    
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-16 px-20 py-12 border-top border-neutral-200">
+                        <div class="text-secondary-light">
+                            Showing <?php echo count($guardians); ?> of <?php echo $totalGuardians; ?> entries
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination mb-0" id="pagination">
+                                <!-- Pagination will be populated by JavaScript -->
+                            </ul>
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -1195,77 +880,183 @@
     </div>
 
     <footer class="d-footer">
-  <div class="">
-    <p class="mb-0 text-center"> &copy; <span class="current-year"></span> Made With ❤️ by Wowtheme7.</p>
-  </div>
-</footer>
+        <div class="">
+            <p class="mb-0 text-center"> &copy; <span class="current-year"></span> <?php echo htmlspecialchars($school['name'] ?? 'School'); ?> | Made With ❤️ by AcademixSuite.</p>
+        </div>
+    </footer>
 </main>
 
-<!-- Modal Delete Event start -->
-<div class="modal fade" id="exampleModalDelete" tabindex="-1" aria-hidden="true">
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm modal-dialog modal-dialog-centered max-w-340-px">
         <div class="modal-content radius-16 bg-base">
             <div class="modal-body pt-32 px-36 pb-24 text-center">
                 <span class="mb-16 fs-1 line-height-1 text-danger">
                     <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
                 </span>
-                <h6 class="text-lg fw-semibold text-primary-light mb-0">Are your sure you want to Suspend this teacher
+                <h6 class="text-lg fw-semibold text-primary-light mb-0" id="deleteModalMessage">
+                    Are you sure you want to deactivate this guardian?
                 </h6>
+                <p class="text-secondary-light text-sm mt-2" id="deleteGuardianName"></p>
                 <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                    <button type="reset"
-                        class="flex-grow-1 border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-24 py-11 radius-8">
+                    <button type="button"
+                        class="flex-grow-1 border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-24 py-11 radius-8"
+                        data-bs-dismiss="modal">
                         Cancel
                     </button>
-                    <button type="button"
-                        class="flex-grow-1 btn btn-primary-600 border border-primary-600 text-md px-16 py-12 radius-8">
-                        Yes, Suspend
-                    </button>
+                    <form method="POST" style="display: inline;" id="deleteForm">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="guardian_id" id="deleteGuardianId">
+                        <button type="submit"
+                            class="flex-grow-1 btn btn-danger-600 border border-danger-600 text-md px-16 py-12 radius-8">
+                            Yes, Deactivate
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- Modal Delete Event end -->
 
-  <!-- jQuery library js -->
-  <script src="assets/js/lib/jquery-3.7.1.min.js"></script>
-  <!-- Bootstrap js -->
-  <script src="assets/js/lib/bootstrap.bundle.min.js"></script>
-  <!-- Apex Chart js -->
-  <script src="assets/js/lib/apexcharts.min.js"></script>
-  <!-- Iconify Font js -->
-  <script src="assets/js/lib/iconify-icon.min.js"></script>
-  <!-- Data Table js -->
-  <script src="assets/js/lib/dataTables.min.js"></script>
-  
-  <!-- jQuery UI js -->
-  <script src="assets/js/lib/jquery-ui.min.js"></script>
-  
-  <!-- main js -->
-  <script src="assets/js/app.js"></script>
+<!-- jQuery library js -->
+<script src="https://academixsuite.com/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
+<!-- Bootstrap js -->
+<script src="https://academixsuite.com/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
+<!-- Apex Chart js -->
+<script src="https://academixsuite.com/tenant/assets/js/lib/apexcharts.min.js"></script>
+<!-- Iconify Font js -->
+<script src="https://academixsuite.com/tenant/assets/js/lib/iconify-icon.min.js"></script>
+<!-- Data Table js -->
+<script src="https://academixsuite.com/tenant/assets/js/lib/dataTables.min.js"></script>
+<!-- jQuery UI js -->
+<script src="https://academixsuite.com/tenant/assets/js/lib/jquery-ui.min.js"></script>
+<!-- main js -->
+<script src="https://academixsuite.com/tenant/assets/js/app.js"></script>
 
 <script>
-    let table = new DataTable('#dataTable');
+    $(document).ready(function() {
+        // Initialize Bootstrap toasts
+        $('.toast').toast({
+            autohide: true,
+            delay: 5000
+        });
+        $('.toast').toast('show');
 
-    // ✅ Data Table start
-    $('.data-table').each(function () {
-        const $table = $(this);
-        const tableInstance = new DataTable(this);
+        // Current year
+        $('.current-year').text(new Date().getFullYear());
 
-        // Handle search input (inside same wrapper)
-        $table.closest('.dataTable-wrapper').find('.dt-search .dt-input').on('keyup', function () {
-            tableInstance.search(this.value).draw();
+        // Initialize DataTable
+        let table = new DataTable('#dataTable', {
+            pageLength: 10,
+            ordering: true,
+            searching: true,
+            paging: true,
+            info: true,
+            language: {
+                emptyTable: "No guardians found",
+                zeroRecords: "No matching guardians found"
+            }
         });
 
-        // Handle page length change (inside same wrapper)
-        $table.closest('.dataTable-wrapper').find('.dt-length .dt-input').on('change', function () {
+        // Handle search input
+        $('#searchInput').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+
+        // Handle page length change
+        $('#pageLength').on('change', function() {
             const value = $(this).val();
-            tableInstance.page.len(value).draw();
+            table.page.len(value).draw();
+        });
+
+        // Handle filter form
+        $('#filterForm').on('submit', function(e) {
+            e.preventDefault();
+            const status = $('#status').val();
+            
+            // Custom filtering
+            $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    const statusCell = data[7]; // Status column
+                    if (!status) return true;
+                    if (status === 'active') return statusCell.includes('Active');
+                    if (status === 'inactive') return statusCell.includes('Inactive');
+                    return true;
+                }
+            );
+            
+            table.draw();
+            $.fn.dataTable.ext.search.pop();
+        });
+
+        // Select all checkboxes
+        $('#selectAll').on('change', function() {
+            $('.row-checkbox').prop('checked', $(this).prop('checked'));
+        });
+
+        // Individual checkbox change
+        $('.row-checkbox').on('change', function() {
+            if ($('.row-checkbox:checked').length === $('.row-checkbox').length) {
+                $('#selectAll').prop('checked', true);
+            } else {
+                $('#selectAll').prop('checked', false);
+            }
         });
     });
-    // ✅ Data Table end
+
+    // Export function
+    function exportGuardians(type) {
+        if (type === 'pdf') {
+            // Implement PDF export
+            alert('PDF export functionality will be implemented here');
+        } else if (type === 'excel') {
+            // Implement Excel export
+            alert('Excel export functionality will be implemented here');
+        }
+    }
+
+    // Close filter dropdown
+    function closeFilter() {
+        // Bootstrap doesn't have a direct method, but we can trigger the dropdown to close
+        $('.dropdown-menu.show').removeClass('show');
+    }
+
+    // Reset filter
+    function resetFilter() {
+        $('#status').val('');
+        $('#filterForm').submit();
+    }
+
+    // Confirm delete
+    function confirmDelete(guardianId, guardianName) {
+        $('#deleteGuardianId').val(guardianId);
+        $('#deleteGuardianName').text('Guardian: ' + guardianName);
+        $('#deleteModal').modal('show');
+    }
+
+    // Bulk action
+    function bulkAction(action) {
+        const selectedIds = [];
+        $('.row-checkbox:checked').each(function() {
+            selectedIds.push($(this).val());
+        });
+        
+        if (selectedIds.length === 0) {
+            alert('Please select at least one guardian');
+            return;
+        }
+        
+        if (action === 'delete') {
+            if (confirm('Are you sure you want to deactivate ' + selectedIds.length + ' selected guardians?')) {
+                // Implement bulk delete
+                console.log('Bulk delete:', selectedIds);
+            }
+        } else if (action === 'export') {
+            // Implement bulk export
+            console.log('Bulk export:', selectedIds);
+        }
+    }
 </script>
 
 </body>
-
 </html>

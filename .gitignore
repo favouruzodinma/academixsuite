@@ -1,0 +1,8 @@
+.env
+.DS_Store
+*.log
+public/error_log
+.vscode/
+vendor/
+uploads/
+backups/

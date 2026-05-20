@@ -9,6 +9,8 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require_once __DIR__ . '/Services/WhatsAppService.php';
+
 class AttendanceManager {
     private $db;
     private $schoolId;
@@ -312,6 +314,8 @@ class AttendanceManager {
 
         $sent = 0;
         $emailSent = 0;
+        $whatsappSent = 0;
+        $whatsappFailed = 0;
         $statusLabels = [
             'present' => 'Present',
             'absent' => 'Absent',
@@ -321,6 +325,12 @@ class AttendanceManager {
         ];
 
         try {
+            $whatsappEnabled = class_exists('WhatsAppService')
+                && WhatsAppService::featureEnabled($this->db, (int)$this->schoolId, 'attendance', true);
+            $whatsappService = $whatsappEnabled
+                ? new WhatsAppService($this->db, array_merge($this->schoolData ?: [], ['id' => $this->schoolId]))
+                : null;
+
             foreach ($attendanceRecords as $record) {
                 // 1. Send in-app notification to the student
                 $studentTitle = "Attendance Update";
@@ -370,22 +380,47 @@ class AttendanceManager {
                                 error_log("Failed to send email to parent: " . $guardian['email']);
                             }
                         }
+
+                        if ($whatsappService && !empty($guardian['phone'])) {
+                            $whatsappMessage = strip_tags(str_replace('**', '', $parentMessage));
+                            $result = $whatsappService->sendDirectNotification(
+                                'attendance',
+                                (int)$record['student_id'],
+                                [
+                                    'user_id' => (int)$guardian['user_id'],
+                                    'name' => $guardian['guardian_name'] ?? 'Parent',
+                                    'phone' => $guardian['phone'],
+                                    'recipient_type' => 'parent',
+                                ],
+                                $parentTitle,
+                                $whatsappMessage,
+                                'parent/dashboard.php'
+                            );
+
+                            if (!empty($result['success'])) {
+                                $whatsappSent++;
+                            } else {
+                                $whatsappFailed++;
+                            }
+                        }
                         $sent++;
                     }
                 }
             }
 
-            error_log("Total notifications sent: $sent in-app, $emailSent emails");
+            error_log("Total notifications sent: $sent in-app, $emailSent emails, $whatsappSent WhatsApp, $whatsappFailed WhatsApp failed/skipped");
             return [
                 'success' => true,
                 'sent' => $sent,
                 'email_sent' => $emailSent,
-                'message' => "$sent notifications sent ($emailSent emails)"
+                'whatsapp_sent' => $whatsappSent,
+                'whatsapp_failed' => $whatsappFailed,
+                'message' => "$sent notifications sent ($emailSent emails, $whatsappSent WhatsApp)"
             ];
 
         } catch (Exception $e) {
             error_log("Error sending attendance notifications: " . $e->getMessage());
-            return ['success' => false, 'sent' => 0, 'email_sent' => 0, 'error' => $e->getMessage()];
+            return ['success' => false, 'sent' => 0, 'email_sent' => 0, 'whatsapp_sent' => 0, 'error' => $e->getMessage()];
         }
     }
 

@@ -573,117 +573,67 @@ class GuardianManager {
      * @param int $userId
      * @return bool
      */
-    private function sendLoginEmail($userId) {
+    private function sendLoginEmail($userId): bool
+    {
         try {
-            error_log("Sending login email for user ID: " . $userId);
-            
+            error_log("Sending welcome email for guardian user ID: " . $userId);
+
             $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
             $stmt->execute([$userId]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if (!$user || empty($user['email'])) {
-                error_log("No email found for user");
+                error_log("No email found for guardian user ID: " . $userId);
                 return false;
             }
 
             if (!isset($_SESSION['temp_passwords'][$userId])) {
-                error_log("No password found for user");
+                error_log("No temp password found for guardian user ID: " . $userId);
                 return false;
             }
 
             $password = $_SESSION['temp_passwords'][$userId];
-            $loginUrl = function_exists('school_portal_url')
-                ? school_portal_url($this->schoolData['slug'] ?? '', 'login.php', true)
-                : ((defined('APP_URL') ? rtrim(APP_URL, '/') : 'https://academixsuite.com') . '/login.php?school_slug=' . ($this->schoolData['slug'] ?? ''));
-            
-            $subject = "Welcome to " . ($this->schoolData['name'] ?? 'School') . " - Parent Portal Access";
-            
-            $body = "
-            <html>
-            <head>
-                <title>Welcome to " . ($this->schoolData['name'] ?? 'School') . "</title>
-                <style>
-                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
-                    .header { background: #25A194; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; margin: -20px -20px 20px -20px; }
-                    .header h2 { margin: 0; }
-                    .credentials { background: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0; }
-                    .credential-row { display: flex; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-                    .credential-label { font-weight: bold; width: 100px; }
-                    .credential-value { flex: 1; font-family: monospace; background: white; padding: 5px 10px; border-radius: 3px; }
-                    .footer { font-size: 12px; color: #666; text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; }
-                    .btn { display: inline-block; background: #25A194; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-                </style>
-            </head>
-            <body>
-                <div class='container'>
-                    <div class='header'>
-                        <h2>Welcome to " . ($this->schoolData['name'] ?? 'School') . "!</h2>
-                    </div>
-                    
+
+            // Use school-branded WelcomeEmailService when available
+            $svcPath = __DIR__ . '/Services/WelcomeEmailService.php';
+            if (file_exists($svcPath)) {
+                require_once $svcPath;
+            }
+
+            $ok = false;
+            if (class_exists('WelcomeEmailService')) {
+                $svc = new WelcomeEmailService($this->schoolData);
+                $ok  = $svc->send('guardian', [
+                    'name'     => $user['name'],
+                    'email'    => $user['email'],
+                    'username' => $user['username'] ?? $user['email'],
+                    'password' => $password,
+                ]);
+            } else {
+                // Minimal raw-mail fallback
+                $schoolName = $this->schoolData['name'] ?? 'School';
+                $loginUrl   = defined('APP_URL')
+                    ? rtrim(APP_URL, '/') . '/login.php?school_slug=' . rawurlencode($this->schoolData['slug'] ?? '')
+                    : '#';
+                $subject = "Welcome to {$schoolName} — Parent Portal Access";
+                $body    = "<html><body style='font-family:Arial,sans-serif;'>
+                    <h2 style='color:#25A194;'>Welcome to {$schoolName}</h2>
                     <p>Dear {$user['name']},</p>
-                    
-                    <p>Your parent portal account has been created successfully. You can now access the parent portal to:</p>
-                    
-                    <ul>
-                        <li>View your children's academic progress</li>
-                        <li>Track attendance records</li>
-                        <li>Receive important announcements</li>
-                        <li>Communicate with teachers</li>
-                        <li>View fee details and make payments</li>
-                    </ul>
-                    
-                    <div class='credentials'>
-                        <h4 style='margin-top: 0;'>Your Login Credentials</h4>
-                        
-                        <div class='credential-row'>
-                            <div class='credential-label'>Email:</div>
-                            <div class='credential-value'>{$user['email']}</div>
-                        </div>
-                        
-                        <div class='credential-row'>
-                            <div class='credential-label'>Password:</div>
-                            <div class='credential-value'>{$password}</div>
-                        </div>
-                    </div>
-                    
-                    <div style='text-align: center;'>
-                        <a href='{$loginUrl}' class='btn'>Login to Parent Portal</a>
-                    </div>
-                    
-                    <p><strong>Important Security Notes:</strong></p>
-                    <ul>
-                        <li>This is your initial password. Please change it after your first login</li>
-                        <li>Never share your login credentials with anyone</li>
-                        <li>The school will never ask for your password via email</li>
-                    </ul>
-                    
-                    <div class='footer'>
-                        <p>This is an automated message. Please do not reply to this email.</p>
-                        <p>&copy; " . date('Y') . " " . ($this->schoolData['name'] ?? 'School') . ". All rights reserved.</p>
-                    </div>
-                </div>
-            </body>
-            </html>
-            ";
-            
-            $headers = "MIME-Version: 1.0" . "\r\n";
-            $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-            $headers .= 'From: ' . ($this->schoolData['email'] ?? 'noreply@academixsuite.com') . "\r\n";
-            $headers .= 'Reply-To: ' . ($this->schoolData['email'] ?? 'noreply@academixsuite.com') . "\r\n";
-            $headers .= 'X-Mailer: PHP/' . phpversion();
-            
-            $result = mail($user['email'], $subject, $body, $headers);
-            
-            error_log("Email sent: " . ($result ? 'Yes' : 'No'));
-            
-            // Clear stored password
+                    <p>Your parent/guardian portal account has been created. Login: <strong>{$user['email']}</strong> / Password: <strong>{$password}</strong></p>
+                    <p><a href='{$loginUrl}'>Click here to log in</a></p>
+                    <p style='font-size:12px;color:#666;'>Please change your password after first login.</p>
+                </body></html>";
+                $headers  = "MIME-Version: 1.0\r\nContent-type:text/html;charset=UTF-8\r\n";
+                $headers .= 'From: ' . ($this->schoolData['email'] ?? 'noreply@academixsuite.com') . "\r\n";
+                $ok = (bool) mail($user['email'], $subject, $body, $headers);
+            }
+
+            error_log("Guardian welcome email " . ($ok ? 'sent' : 'failed') . " to: " . $user['email']);
             unset($_SESSION['temp_passwords'][$userId]);
-            
-            return $result;
-            
+            return $ok;
+
         } catch (Exception $e) {
-            error_log("Error sending email: " . $e->getMessage());
+            error_log("Error sending guardian welcome email: " . $e->getMessage());
             return false;
         }
     }

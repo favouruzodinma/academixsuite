@@ -1,937 +1,860 @@
 <?php
 /**
- * School Public-Profile Editor (Tenant Admin)
+ * School public profile editor.
  *
- * Lets a school admin customise everything that renders on the public
- * school_profile page (the {slug}.academixsuite.com landing page).
- *
- * Persistence layout:
- *   - Platform DB → `schools` row owns the headline copy, colors, hero/feature
- *     images, programs/testimonials JSON, mission/vision/principal message,
- *     admission status & deadline.
- *   - Platform DB → `school_contacts`, `school_facilities`, `school_gallery`
- *     hold structured records joined by school_id.
- *   - School DB → unchanged. The profile page reads stats/announcements/events
- *     from there but those are managed via their own admin screens.
- *
- * Every write checks the resolved $school['id'] against the session so one
- * tenant cannot edit another tenant's data.
+ * Admins manage the content used by tenant/school_profile.php:
+ * landing copy, logo, contacts, facilities, gallery, and moderated reviews.
  */
 
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/../../../logs/school_profile_admin.log');
+require_once __DIR__ . '/includes/admin-bootstrap.php';
 
-if (!defined('APP_NAME')) define('APP_NAME', 'AcademixSuite');
+$currentPage = 'school-profile.php';
+$GLOBALS['CURRENT_PAGE'] = $currentPage;
 
-require_once __DIR__ . '/../../../includes/autoload.php';
-
-if (session_status() === PHP_SESSION_NONE) {
-    require_once __DIR__ . '/../../../includes/session_config.php';
-    session_start(academix_session_options());
-}
-
-// -- Authentication ---------------------------------------------------------
-if (empty($_SESSION['school_auth'])
-    || ($_SESSION['school_auth']['user_type'] ?? '') !== 'admin') {
-    header('Location: ../../login.php?school_slug=' . urlencode($_SESSION['school_auth']['school_slug'] ?? ''));
-    exit;
-}
-
-$schoolSlug = (string) ($_SESSION['school_auth']['school_slug'] ?? '');
-$schoolId   = (int)    ($_SESSION['school_auth']['school_id']   ?? 0);
-$adminName  = (string) ($_SESSION['school_auth']['name']        ?? 'Admin');
-
-if ($schoolId <= 0 || $schoolSlug === '') {
-    http_response_code(403);
-    echo 'Session error. Please log out and back in.';
-    exit;
-}
-
-$platformDb = Database::getPlatformConnection();
-
-// -- Helpers ----------------------------------------------------------------
-$columns_cache = [];
-$columnsOf = function (string $table) use ($platformDb, &$columns_cache): array {
-    if (isset($columns_cache[$table])) return $columns_cache[$table];
-    try {
-        $stmt = $platformDb->query("SHOW COLUMNS FROM `{$table}`");
-        $cols = $stmt ? array_column($stmt->fetchAll(PDO::FETCH_ASSOC), 'Field') : [];
-    } catch (Throwable $e) {
-        error_log("school-profile editor: SHOW COLUMNS {$table}: " . $e->getMessage());
-        $cols = [];
-    }
-    return $columns_cache[$table] = $cols;
-};
-
-$tableExists = function (string $table) use ($platformDb): bool {
-    try {
-        $stmt = $platformDb->prepare('SHOW TABLES LIKE ?');
-        $stmt->execute([$table]);
-        return (bool) $stmt->fetchColumn();
-    } catch (Throwable $e) {
-        return false;
-    }
-};
-
-$e = static function ($v): string {
-    return htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
-};
-
-// MIME → safe-extension map used by every upload on this page.
-$imageMimeExt = [
-    'image/jpeg' => 'jpg',
-    'image/png'  => 'png',
-    'image/webp' => 'webp',
-    'image/gif'  => 'gif',
-];
-
-$saveUploadedImage = function (array $file, string $purpose) use ($schoolId, $imageMimeExt): ?string {
-    if (!isset($file['tmp_name']) || $file['error'] !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name'])) {
-        return null;
-    }
-    if ($file['size'] > 5 * 1024 * 1024) {
-        return null; // 5 MB cap
-    }
-    $mime = function_exists('finfo_open')
-        ? (function () use ($file) {
-            $fi = finfo_open(FILEINFO_MIME_TYPE);
-            $m  = $fi ? finfo_file($fi, $file['tmp_name']) : '';
-            if ($fi) finfo_close($fi);
-            return (string) $m;
-        })()
-        : (function_exists('mime_content_type') ? (string) mime_content_type($file['tmp_name']) : '');
-
-    if (!isset($imageMimeExt[$mime])) return null;
-    $ext = $imageMimeExt[$mime];
-
-    $root = dirname(__DIR__, 3);
-    $rel  = 'assets/uploads/schools/' . $schoolId . '/profile';
-    $abs  = $root . '/' . $rel;
-    if (!is_dir($abs) && !mkdir($abs, 0755, true) && !is_dir($abs)) {
-        return null;
-    }
-    $name = $purpose . '-' . bin2hex(random_bytes(8)) . '.' . $ext;
-    $target = $abs . '/' . $name;
-    if (!move_uploaded_file($file['tmp_name'], $target)) {
-        return null;
-    }
-    return $rel . '/' . $name;
-};
-
-// -- CSRF -------------------------------------------------------------------
-$csrfToken = Session::generateCsrfToken('school_profile_editor');
-
-// -- Load current data ------------------------------------------------------
-$stmt = $platformDb->prepare("SELECT * FROM schools WHERE id = ? LIMIT 1");
-$stmt->execute([$schoolId]);
-$school = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$school) {
-    http_response_code(404);
-    echo 'School record not found.';
-    exit;
-}
-$schoolColumns = $columnsOf('schools');
-
-$contacts = $tableExists('school_contacts')
-    ? (function () use ($platformDb, $schoolId) {
-        $s = $platformDb->prepare('SELECT * FROM school_contacts WHERE school_id = ? ORDER BY is_primary DESC, sort_order ASC, type ASC');
-        $s->execute([$schoolId]);
-        return $s->fetchAll(PDO::FETCH_ASSOC);
-    })()
-    : [];
-
-$facilities = $tableExists('school_facilities')
-    ? (function () use ($platformDb, $schoolId) {
-        $s = $platformDb->prepare('SELECT * FROM school_facilities WHERE school_id = ? ORDER BY sort_order ASC, id ASC');
-        $s->execute([$schoolId]);
-        return $s->fetchAll(PDO::FETCH_ASSOC);
-    })()
-    : [];
-
-$gallery = $tableExists('school_gallery')
-    ? (function () use ($platformDb, $schoolId) {
-        $s = $platformDb->prepare('SELECT * FROM school_gallery WHERE school_id = ? ORDER BY sort_order ASC, id DESC');
-        $s->execute([$schoolId]);
-        return $s->fetchAll(PDO::FETCH_ASSOC);
-    })()
-    : [];
-
-$reviews = $tableExists('school_reviews')
-    ? (function () use ($platformDb, $schoolId) {
-        $s = $platformDb->prepare('SELECT * FROM school_reviews WHERE school_id = ? ORDER BY created_at DESC LIMIT 30');
-        $s->execute([$schoolId]);
-        return $s->fetchAll(PDO::FETCH_ASSOC);
-    })()
-    : [];
-
-// -- Handle POST ------------------------------------------------------------
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!Session::validateCsrfToken($_POST['csrf_token'] ?? '', 'school_profile_editor')) {
-        flash_set('error', 'Security token expired. Please refresh and try again.');
-        header('Location: ' . $_SERVER['REQUEST_URI']);
-        exit;
-    }
-
-    $action = (string) ($_POST['action'] ?? '');
-
-    try {
-        switch ($action) {
-
-            // ---------------- BASIC INFO / HERO / ABOUT -------------------
-            case 'save_basics':
-                $editableTextCols = [
-                    'description', 'mission_statement', 'vision_statement', 'principal_message',
-                    'landing_badge_text', 'landing_headline', 'landing_subheadline',
-                    'landing_primary_cta_text', 'landing_secondary_cta_text',
-                    'landing_intro_title', 'landing_intro_text',
-                    'landing_highlight_title', 'landing_highlight_text',
-                    'landing_cta_title', 'landing_cta_text',
-                    'curriculum', 'school_type', 'address', 'city', 'state', 'country',
-                    'phone', 'email', 'website',
-                ];
-                $sets = [];
-                $vals = [];
-                foreach ($editableTextCols as $col) {
-                    if (in_array($col, $schoolColumns, true) && array_key_exists($col, $_POST)) {
-                        $sets[] = "`$col` = ?";
-                        $vals[] = trim((string) $_POST[$col]);
-                    }
-                }
-
-                // Colours — validate format strictly so a bad value can't poison CSS.
-                foreach (['primary_color', 'secondary_color'] as $colorCol) {
-                    if (in_array($colorCol, $schoolColumns, true) && isset($_POST[$colorCol])) {
-                        $v = (string) $_POST[$colorCol];
-                        if (preg_match('/^#[0-9a-fA-F]{6}$/', $v)) {
-                            $sets[] = "`$colorCol` = ?";
-                            $vals[] = $v;
-                        }
-                    }
-                }
-
-                // Admission status / deadline.
-                if (in_array('admission_status', $schoolColumns, true)
-                    && in_array((string) ($_POST['admission_status'] ?? ''), ['open', 'closed', 'waiting_list'], true)) {
-                    $sets[] = "`admission_status` = ?";
-                    $vals[] = (string) $_POST['admission_status'];
-                }
-                if (in_array('admission_deadline', $schoolColumns, true)) {
-                    $deadline = trim((string) ($_POST['admission_deadline'] ?? ''));
-                    $sets[] = "`admission_deadline` = ?";
-                    $vals[] = $deadline !== '' && strtotime($deadline) ? $deadline : null;
-                }
-
-                // Programs / Testimonials — stored as JSON.
-                foreach (['landing_programs', 'landing_testimonials'] as $jsonCol) {
-                    if (!in_array($jsonCol, $schoolColumns, true)) continue;
-                    $rawList = $_POST[$jsonCol] ?? [];
-                    if (!is_array($rawList)) $rawList = [];
-                    $clean = [];
-                    foreach ($rawList as $row) {
-                        if (!is_array($row)) continue;
-                        $row = array_map(static fn ($v) => trim((string) $v), $row);
-                        if ($jsonCol === 'landing_programs' && $row['title'] !== '') {
-                            $clean[] = ['title' => $row['title'], 'description' => $row['description'] ?? ''];
-                        } elseif ($jsonCol === 'landing_testimonials' && ($row['quote'] ?? '') !== '') {
-                            $clean[] = [
-                                'name'  => $row['name']  ?? '',
-                                'role'  => $row['role']  ?? '',
-                                'quote' => $row['quote'] ?? '',
-                            ];
-                        }
-                    }
-                    $sets[] = "`$jsonCol` = ?";
-                    $vals[] = json_encode($clean, JSON_UNESCAPED_UNICODE);
-                }
-
-                // Hero/feature image uploads (optional).
-                foreach (['landing_hero_image', 'landing_feature_image', 'logo_path'] as $imgCol) {
-                    if (!in_array($imgCol, $schoolColumns, true)) continue;
-                    if (!isset($_FILES[$imgCol]) || $_FILES[$imgCol]['error'] === UPLOAD_ERR_NO_FILE) continue;
-                    $savedPath = $saveUploadedImage($_FILES[$imgCol], str_replace('_', '-', $imgCol));
-                    if ($savedPath !== null) {
-                        $sets[] = "`$imgCol` = ?";
-                        $vals[] = $savedPath;
-                    }
-                }
-
-                if (!$sets) {
-                    throw new Exception('No editable fields were submitted.');
-                }
-                $vals[] = $schoolId;
-                $sql = 'UPDATE schools SET ' . implode(', ', $sets) . ' WHERE id = ?';
-                $platformDb->prepare($sql)->execute($vals);
-
-                flash_set('success', 'Profile basics updated.');
-                break;
-
-            // ---------------- CONTACTS ------------------------------------
-            case 'save_contacts':
-                if (!$tableExists('school_contacts')) {
-                    throw new Exception('school_contacts table is not available.');
-                }
-                $contactCols = $columnsOf('school_contacts');
-                $platformDb->beginTransaction();
-                $platformDb->prepare('DELETE FROM school_contacts WHERE school_id = ?')->execute([$schoolId]);
-                $rows = $_POST['contacts'] ?? [];
-                if (!is_array($rows)) $rows = [];
-                $sort = 0;
-                $insertCols = ['school_id', 'type', 'label', 'value', 'is_primary', 'sort_order'];
-                $insertCols = array_values(array_filter($insertCols, fn ($c) => $c === 'school_id' || in_array($c, $contactCols, true)));
-                $placeholders = implode(', ', array_fill(0, count($insertCols), '?'));
-                $insertSql = 'INSERT INTO school_contacts (`' . implode('`,`', $insertCols) . "`) VALUES ($placeholders)";
-                $ins = $platformDb->prepare($insertSql);
-                foreach ($rows as $r) {
-                    if (!is_array($r)) continue;
-                    $value = trim((string) ($r['value'] ?? ''));
-                    if ($value === '') continue;
-                    $type = in_array($r['type'] ?? '', ['email', 'phone', 'address', 'website', 'whatsapp', 'social'], true)
-                        ? $r['type'] : 'phone';
-                    $params = [];
-                    foreach ($insertCols as $col) {
-                        switch ($col) {
-                            case 'school_id': $params[] = $schoolId; break;
-                            case 'type':      $params[] = $type; break;
-                            case 'label':     $params[] = trim((string) ($r['label'] ?? '')); break;
-                            case 'value':     $params[] = $value; break;
-                            case 'is_primary': $params[] = !empty($r['is_primary']) ? 1 : 0; break;
-                            case 'sort_order': $params[] = $sort; break;
-                            default:          $params[] = null;
-                        }
-                    }
-                    $ins->execute($params);
-                    $sort++;
-                }
-                $platformDb->commit();
-                flash_set('success', 'Contacts saved.');
-                break;
-
-            // ---------------- FACILITIES ----------------------------------
-            case 'save_facilities':
-                if (!$tableExists('school_facilities')) {
-                    throw new Exception('school_facilities table is not available.');
-                }
-                $facCols = $columnsOf('school_facilities');
-                $platformDb->beginTransaction();
-                $platformDb->prepare('DELETE FROM school_facilities WHERE school_id = ?')->execute([$schoolId]);
-                $rows = $_POST['facilities'] ?? [];
-                if (!is_array($rows)) $rows = [];
-                $sort = 0;
-                $insertCols = array_values(array_filter(
-                    ['school_id', 'name', 'description', 'icon', 'is_active', 'sort_order'],
-                    fn ($c) => $c === 'school_id' || in_array($c, $facCols, true)
-                ));
-                $placeholders = implode(', ', array_fill(0, count($insertCols), '?'));
-                $insertSql = 'INSERT INTO school_facilities (`' . implode('`,`', $insertCols) . "`) VALUES ($placeholders)";
-                $ins = $platformDb->prepare($insertSql);
-                foreach ($rows as $r) {
-                    if (!is_array($r)) continue;
-                    $name = trim((string) ($r['name'] ?? ''));
-                    if ($name === '') continue;
-                    $params = [];
-                    foreach ($insertCols as $col) {
-                        switch ($col) {
-                            case 'school_id':   $params[] = $schoolId; break;
-                            case 'name':        $params[] = $name; break;
-                            case 'description': $params[] = trim((string) ($r['description'] ?? '')); break;
-                            case 'icon':        $params[] = trim((string) ($r['icon'] ?? '')); break;
-                            case 'is_active':   $params[] = empty($r['is_inactive']) ? 1 : 0; break;
-                            case 'sort_order':  $params[] = $sort; break;
-                            default:            $params[] = null;
-                        }
-                    }
-                    $ins->execute($params);
-                    $sort++;
-                }
-                $platformDb->commit();
-                flash_set('success', 'Facilities saved.');
-                break;
-
-            // ---------------- GALLERY ADD ---------------------------------
-            case 'gallery_add':
-                if (!$tableExists('school_gallery')) {
-                    throw new Exception('school_gallery table is not available.');
-                }
-                $galCols = $columnsOf('school_gallery');
-                $files = $_FILES['gallery_images'] ?? null;
-                if (!$files || !is_array($files['tmp_name'])) {
-                    throw new Exception('No image files were uploaded.');
-                }
-                $insertCols = array_values(array_filter(
-                    ['school_id', 'image_url', 'caption', 'type', 'sort_order'],
-                    fn ($c) => $c === 'school_id' || in_array($c, $galCols, true)
-                ));
-                $placeholders = implode(', ', array_fill(0, count($insertCols), '?'));
-                $ins = $platformDb->prepare(
-                    'INSERT INTO school_gallery (`' . implode('`,`', $insertCols) . "`) VALUES ($placeholders)"
-                );
-                $captions = $_POST['gallery_captions'] ?? [];
-                $count = count($files['tmp_name']);
-                $added = 0;
-                for ($i = 0; $i < $count; $i++) {
-                    if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
-                    $f = [
-                        'tmp_name' => $files['tmp_name'][$i],
-                        'error'    => $files['error'][$i],
-                        'size'     => $files['size'][$i],
-                        'name'     => $files['name'][$i] ?? '',
-                    ];
-                    $path = $saveUploadedImage($f, 'gallery');
-                    if (!$path) continue;
-                    $params = [];
-                    foreach ($insertCols as $col) {
-                        switch ($col) {
-                            case 'school_id':  $params[] = $schoolId; break;
-                            case 'image_url':  $params[] = $path; break;
-                            case 'caption':    $params[] = trim((string) ($captions[$i] ?? '')); break;
-                            case 'type':       $params[] = 'campus'; break;
-                            case 'sort_order': $params[] = 1000 + $i; break;
-                            default:           $params[] = null;
-                        }
-                    }
-                    $ins->execute($params);
-                    $added++;
-                }
-                flash_set('success', "Added {$added} image(s) to the gallery.");
-                break;
-
-            // ---------------- GALLERY DELETE ------------------------------
-            case 'gallery_delete':
-                $imgId = (int) ($_POST['image_id'] ?? 0);
-                if ($imgId <= 0) throw new Exception('Invalid image id.');
-                // Strict tenant scoping — never trust the id alone.
-                $sel = $platformDb->prepare('SELECT image_url FROM school_gallery WHERE id = ? AND school_id = ?');
-                $sel->execute([$imgId, $schoolId]);
-                $img = $sel->fetch(PDO::FETCH_ASSOC);
-                if (!$img) throw new Exception('Image not found.');
-                $platformDb->prepare('DELETE FROM school_gallery WHERE id = ? AND school_id = ?')
-                    ->execute([$imgId, $schoolId]);
-                // Best-effort file removal.
-                $abs = dirname(__DIR__, 3) . '/' . ltrim((string) $img['image_url'], '/');
-                if (is_file($abs)) @unlink($abs);
-                flash_set('success', 'Image removed.');
-                break;
-
-            // ---------------- REVIEW MODERATION ---------------------------
-            case 'review_toggle':
-                if (!$tableExists('school_reviews')) {
-                    throw new Exception('school_reviews table is not available.');
-                }
-                $reviewId = (int) ($_POST['review_id'] ?? 0);
-                $approve  = !empty($_POST['approve']) ? 1 : 0;
-                $platformDb->prepare(
-                    'UPDATE school_reviews SET is_approved = ? WHERE id = ? AND school_id = ?'
-                )->execute([$approve, $reviewId, $schoolId]);
-                flash_set('success', $approve ? 'Review approved.' : 'Review hidden.');
-                break;
-
-            default:
-                throw new Exception('Unknown action.');
+if (!function_exists('school_profile_admin_columns_fresh')) {
+    function school_profile_admin_columns_fresh(PDO $db, string $table): array {
+        try {
+            $safeTable = str_replace('`', '', $table);
+            $rows = $db->query("SHOW COLUMNS FROM `{$safeTable}`")->fetchAll(PDO::FETCH_ASSOC);
+            return array_column($rows, 'Field');
+        } catch (Throwable $e) {
+            error_log('School profile editor column lookup failed: ' . $e->getMessage());
+            return [];
         }
-    } catch (Throwable $ex) {
-        if ($platformDb->inTransaction()) $platformDb->rollBack();
-        error_log('school-profile editor error: ' . $ex->getMessage());
-        flash_set('error', $ex->getMessage());
+    }
+}
+
+if (!function_exists('school_profile_admin_ensure_schema')) {
+    function school_profile_admin_ensure_schema(PDO $db): void {
+        $schoolsColumns = school_profile_admin_columns_fresh($db, 'schools');
+        $columnSql = [
+            'landing_badge_text' => 'VARCHAR(120) NULL',
+            'landing_headline' => 'VARCHAR(255) NULL',
+            'landing_subheadline' => 'TEXT NULL',
+            'landing_primary_cta_text' => 'VARCHAR(60) NULL',
+            'landing_secondary_cta_text' => 'VARCHAR(60) NULL',
+            'landing_intro_title' => 'VARCHAR(255) NULL',
+            'landing_intro_text' => 'TEXT NULL',
+            'landing_highlight_title' => 'VARCHAR(255) NULL',
+            'landing_highlight_text' => 'TEXT NULL',
+            'landing_cta_title' => 'VARCHAR(255) NULL',
+            'landing_cta_text' => 'TEXT NULL',
+            'landing_hero_image' => 'VARCHAR(500) NULL',
+            'landing_feature_image' => 'VARCHAR(500) NULL',
+            'landing_programs' => 'LONGTEXT NULL',
+            'landing_testimonials' => 'LONGTEXT NULL',
+            'primary_color' => "VARCHAR(7) NULL DEFAULT '#3B82F6'",
+            'secondary_color' => "VARCHAR(7) NULL DEFAULT '#10B981'",
+        ];
+
+        foreach ($columnSql as $column => $definition) {
+            if (!in_array($column, $schoolsColumns, true)) {
+                $db->exec("ALTER TABLE `schools` ADD COLUMN `{$column}` {$definition}");
+            }
+        }
+
+        if (!academix_admin_table_exists($db, 'school_contacts')) {
+            $db->exec("
+                CREATE TABLE `school_contacts` (
+                    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    `school_id` INT UNSIGNED NOT NULL,
+                    `type` ENUM('phone','email','address','website','social') NOT NULL DEFAULT 'phone',
+                    `label` VARCHAR(100) NULL,
+                    `value` VARCHAR(255) NOT NULL,
+                    `is_primary` TINYINT(1) NOT NULL DEFAULT 0,
+                    `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    KEY `idx_school_contacts_school` (`school_id`, `sort_order`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            ");
+        }
+
+        if (!academix_admin_table_exists($db, 'school_facilities')) {
+            $db->exec("
+                CREATE TABLE `school_facilities` (
+                    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    `school_id` INT UNSIGNED NOT NULL,
+                    `name` VARCHAR(100) NOT NULL,
+                    `description` TEXT NULL,
+                    `icon` VARCHAR(50) NULL,
+                    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+                    `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    KEY `idx_school_facilities_school` (`school_id`, `sort_order`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            ");
+        }
+
+        if (!academix_admin_table_exists($db, 'school_gallery')) {
+            $db->exec("
+                CREATE TABLE `school_gallery` (
+                    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    `school_id` INT UNSIGNED NOT NULL,
+                    `image_url` VARCHAR(500) NOT NULL,
+                    `caption` VARCHAR(255) NULL,
+                    `type` ENUM('campus','classroom','laboratory','library','sports','events','other') NOT NULL DEFAULT 'campus',
+                    `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    KEY `idx_school_gallery_school` (`school_id`, `sort_order`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            ");
+        }
+
+        if (!academix_admin_table_exists($db, 'school_reviews')) {
+            $db->exec("
+                CREATE TABLE `school_reviews` (
+                    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    `school_id` INT UNSIGNED NOT NULL,
+                    `parent_name` VARCHAR(255) NOT NULL,
+                    `parent_email` VARCHAR(255) NULL,
+                    `student_name` VARCHAR(255) NULL,
+                    `rating` DECIMAL(2,1) NOT NULL DEFAULT 5,
+                    `title` VARCHAR(255) NULL,
+                    `comment` TEXT NOT NULL,
+                    `pros` TEXT NULL,
+                    `cons` TEXT NULL,
+                    `is_verified` TINYINT(1) NOT NULL DEFAULT 0,
+                    `is_approved` TINYINT(1) NOT NULL DEFAULT 0,
+                    `helpful_count` INT UNSIGNED NOT NULL DEFAULT 0,
+                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    KEY `idx_school_reviews_school` (`school_id`, `is_approved`, `created_at`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            ");
+        } elseif (in_array('parent_email', school_profile_admin_columns_fresh($db, 'school_reviews'), true)) {
+            try {
+                $db->exec('ALTER TABLE `school_reviews` MODIFY `parent_email` VARCHAR(255) NULL');
+            } catch (Throwable $e) {
+                error_log('Could not relax school_reviews.parent_email: ' . $e->getMessage());
+            }
+        }
+    }
+}
+
+if (!function_exists('school_profile_admin_lines_to_json')) {
+    function school_profile_admin_lines_to_json(string $value, string $mode): ?string {
+        $items = [];
+        foreach (preg_split('/\r\n|\r|\n/', trim($value)) as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            $parts = array_map('trim', explode('|', $line));
+            if ($mode === 'programs') {
+                $items[] = [
+                    'title' => $parts[0] ?? '',
+                    'description' => $parts[1] ?? '',
+                ];
+            } else {
+                $items[] = [
+                    'name' => $parts[0] ?? '',
+                    'role' => $parts[1] ?? '',
+                    'quote' => $parts[2] ?? '',
+                ];
+            }
+        }
+
+        return $items ? json_encode($items, JSON_UNESCAPED_SLASHES) : null;
+    }
+}
+
+if (!function_exists('school_profile_admin_json_to_lines')) {
+    function school_profile_admin_json_to_lines($value, string $mode): string {
+        $decoded = json_decode((string) $value, true);
+        if (!is_array($decoded)) {
+            return '';
+        }
+
+        $lines = [];
+        foreach ($decoded as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            if ($mode === 'programs') {
+                $lines[] = trim(($item['title'] ?? '') . ' | ' . ($item['description'] ?? ''));
+            } else {
+                $lines[] = trim(($item['name'] ?? '') . ' | ' . ($item['role'] ?? '') . ' | ' . ($item['quote'] ?? ''));
+            }
+        }
+        return implode("\n", $lines);
+    }
+}
+
+if (!function_exists('school_profile_admin_upload_image')) {
+    function school_profile_admin_upload_image(string $field, int $schoolId, string $schoolSlug, string $prefix): ?string {
+        if (empty($_FILES[$field]['name']) || ($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            return null;
+        }
+
+        if (($_FILES[$field]['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+            throw new RuntimeException('Upload failed for ' . $field . '.');
+        }
+
+        $tmp = (string) $_FILES[$field]['tmp_name'];
+        $size = (int) ($_FILES[$field]['size'] ?? 0);
+        if ($size <= 0 || $size > 5 * 1024 * 1024) {
+            throw new RuntimeException('Images must be less than 5MB.');
+        }
+
+        $mime = function_exists('mime_content_type') ? (string) mime_content_type($tmp) : '';
+        $extensions = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+        ];
+        if (!isset($extensions[$mime])) {
+            throw new RuntimeException('Only JPG, PNG, WebP, and GIF images are allowed.');
+        }
+
+        $dir = ROOT_PATH . '/assets/uploads/schools/' . $schoolId;
+        if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+            throw new RuntimeException('Could not create upload directory.');
+        }
+
+        $fileName = $prefix . '-' . preg_replace('/[^a-z0-9-]/', '-', strtolower($schoolSlug)) . '-' . time() . '.' . $extensions[$mime];
+        $target = $dir . '/' . $fileName;
+        if (!move_uploaded_file($tmp, $target)) {
+            throw new RuntimeException('Could not save uploaded image.');
+        }
+
+        return 'assets/uploads/schools/' . $schoolId . '/' . $fileName;
+    }
+}
+
+if (!function_exists('school_profile_admin_insert_row')) {
+    function school_profile_admin_insert_row(PDO $db, string $table, array $data): void {
+        $columns = school_profile_admin_columns_fresh($db, $table);
+        $insert = array_intersect_key($data, array_flip($columns));
+        if (!$insert) {
+            throw new RuntimeException('No valid columns found for ' . $table . '.');
+        }
+
+        $fields = array_keys($insert);
+        $placeholders = array_fill(0, count($fields), '?');
+        $sql = 'INSERT INTO `' . str_replace('`', '', $table) . '` (`' . implode('`,`', $fields) . '`) VALUES (' . implode(',', $placeholders) . ')';
+        $db->prepare($sql)->execute(array_values($insert));
+    }
+}
+
+if (!function_exists('school_profile_admin_delete_row')) {
+    function school_profile_admin_delete_row(PDO $db, string $table, int $id, int $schoolId): void {
+        $safeTable = str_replace('`', '', $table);
+        $stmt = $db->prepare("DELETE FROM `{$safeTable}` WHERE id = ? AND school_id = ?");
+        $stmt->execute([$id, $schoolId]);
+    }
+}
+
+try {
+    school_profile_admin_ensure_schema($platformDb);
+} catch (Throwable $e) {
+    error_log('School profile editor schema check failed: ' . $e->getMessage());
+    $_SESSION['school_profile_flash'] = [
+        'type' => 'error',
+        'message' => 'Profile editor schema needs attention: ' . $e->getMessage(),
+    ];
+}
+
+$schoolId = (int) $school['id'];
+$flash = $_SESSION['school_profile_flash'] ?? null;
+unset($_SESSION['school_profile_flash']);
+
+$setFlash = static function (string $type, string $message): void {
+    $_SESSION['school_profile_flash'] = ['type' => $type, 'message' => $message];
+};
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        if (!academix_admin_validate_csrf($_POST['csrf_token'] ?? '')) {
+            throw new RuntimeException('Your security token expired. Please try again.');
+        }
+
+        $action = (string) ($_POST['action'] ?? '');
+
+        if ($action === 'save_profile') {
+            $columns = school_profile_admin_columns_fresh($platformDb, 'schools');
+            $updates = [];
+            $values = [];
+            $candidateFields = [
+                'name', 'description', 'mission_statement', 'vision_statement', 'principal_name', 'principal_message',
+                'school_type', 'curriculum', 'email', 'phone', 'address', 'city', 'state', 'country',
+                'teacher_student_ratio', 'school_hours', 'admission_process',
+                'landing_badge_text', 'landing_headline', 'landing_subheadline', 'landing_primary_cta_text',
+                'landing_secondary_cta_text', 'landing_intro_title', 'landing_intro_text', 'landing_highlight_title',
+                'landing_highlight_text', 'landing_cta_title', 'landing_cta_text'
+            ];
+
+            foreach ($candidateFields as $field) {
+                if (in_array($field, $columns, true)) {
+                    $updates[] = "`{$field}` = ?";
+                    $values[] = trim((string) ($_POST[$field] ?? ''));
+                }
+            }
+
+            foreach (['student_count', 'teacher_count', 'class_count', 'average_class_size'] as $field) {
+                if (in_array($field, $columns, true)) {
+                    $updates[] = "`{$field}` = ?";
+                    $values[] = max(0, (int) ($_POST[$field] ?? 0));
+                }
+            }
+
+            foreach (['fee_range_from', 'fee_range_to'] as $field) {
+                if (in_array($field, $columns, true)) {
+                    $updates[] = "`{$field}` = ?";
+                    $values[] = max(0, (float) ($_POST[$field] ?? 0));
+                }
+            }
+
+            if (in_array('establishment_year', $columns, true)) {
+                $updates[] = '`establishment_year` = ?';
+                $year = (int) ($_POST['establishment_year'] ?? 0);
+                $values[] = $year > 1800 ? $year : null;
+            }
+
+            if (in_array('admission_deadline', $columns, true)) {
+                $updates[] = '`admission_deadline` = ?';
+                $values[] = trim((string) ($_POST['admission_deadline'] ?? '')) ?: null;
+            }
+
+            if (in_array('admission_status', $columns, true)) {
+                $status = (string) ($_POST['admission_status'] ?? 'open');
+                $updates[] = '`admission_status` = ?';
+                $values[] = in_array($status, ['open', 'closed', 'waiting_list'], true) ? $status : 'open';
+            }
+
+            foreach (['primary_color', 'secondary_color'] as $field) {
+                if (in_array($field, $columns, true)) {
+                    $color = trim((string) ($_POST[$field] ?? ''));
+                    $updates[] = "`{$field}` = ?";
+                    $values[] = preg_match('/^#[0-9a-fA-F]{6}$/', $color) ? $color : null;
+                }
+            }
+
+            if (in_array('landing_programs', $columns, true)) {
+                $updates[] = '`landing_programs` = ?';
+                $values[] = school_profile_admin_lines_to_json((string) ($_POST['landing_programs_text'] ?? ''), 'programs');
+            }
+
+            if (in_array('landing_testimonials', $columns, true)) {
+                $updates[] = '`landing_testimonials` = ?';
+                $values[] = school_profile_admin_lines_to_json((string) ($_POST['landing_testimonials_text'] ?? ''), 'testimonials');
+            }
+
+            foreach ([
+                'logo_file' => ['logo_path', 'logo'],
+                'hero_file' => ['landing_hero_image', 'hero'],
+                'feature_file' => ['landing_feature_image', 'feature'],
+            ] as $fileField => $target) {
+                if (in_array($target[0], $columns, true)) {
+                    $uploaded = school_profile_admin_upload_image($fileField, $schoolId, $schoolSlug, $target[1]);
+                    if ($uploaded) {
+                        $updates[] = "`{$target[0]}` = ?";
+                        $values[] = $uploaded;
+                    }
+                }
+            }
+
+            if ($updates) {
+                $values[] = $schoolId;
+                $platformDb->prepare('UPDATE schools SET ' . implode(', ', $updates) . ' WHERE id = ?')->execute($values);
+            }
+
+            $setFlash('success', 'School profile content updated.');
+        } elseif ($action === 'add_contact') {
+            school_profile_admin_insert_row($platformDb, 'school_contacts', [
+                'school_id' => $schoolId,
+                'type' => in_array($_POST['type'] ?? '', ['phone', 'email', 'address', 'website', 'social'], true) ? $_POST['type'] : 'phone',
+                'label' => trim((string) ($_POST['label'] ?? '')),
+                'value' => trim((string) ($_POST['value'] ?? '')),
+                'is_primary' => !empty($_POST['is_primary']) ? 1 : 0,
+                'sort_order' => (int) ($_POST['sort_order'] ?? 0),
+            ]);
+            $setFlash('success', 'Contact added.');
+        } elseif ($action === 'delete_contact') {
+            school_profile_admin_delete_row($platformDb, 'school_contacts', (int) ($_POST['id'] ?? 0), $schoolId);
+            $setFlash('success', 'Contact removed.');
+        } elseif ($action === 'add_facility') {
+            school_profile_admin_insert_row($platformDb, 'school_facilities', [
+                'school_id' => $schoolId,
+                'name' => trim((string) ($_POST['name'] ?? '')),
+                'description' => trim((string) ($_POST['description'] ?? '')),
+                'icon' => trim((string) ($_POST['icon'] ?? 'ri-building-4-line')),
+                'is_active' => !empty($_POST['is_active']) ? 1 : 0,
+                'sort_order' => (int) ($_POST['sort_order'] ?? 0),
+            ]);
+            $setFlash('success', 'Facility saved.');
+        } elseif ($action === 'delete_facility') {
+            school_profile_admin_delete_row($platformDb, 'school_facilities', (int) ($_POST['id'] ?? 0), $schoolId);
+            $setFlash('success', 'Facility removed.');
+        } elseif ($action === 'add_gallery') {
+            $imagePath = school_profile_admin_upload_image('gallery_file', $schoolId, $schoolSlug, 'gallery');
+            if (!$imagePath) {
+                throw new RuntimeException('Please choose a gallery image.');
+            }
+            school_profile_admin_insert_row($platformDb, 'school_gallery', [
+                'school_id' => $schoolId,
+                'image_url' => $imagePath,
+                'caption' => trim((string) ($_POST['caption'] ?? '')),
+                'type' => in_array($_POST['type'] ?? '', ['campus', 'classroom', 'laboratory', 'library', 'sports', 'events', 'other'], true) ? $_POST['type'] : 'campus',
+                'sort_order' => (int) ($_POST['sort_order'] ?? 0),
+            ]);
+            $setFlash('success', 'Gallery image added.');
+        } elseif ($action === 'delete_gallery') {
+            school_profile_admin_delete_row($platformDb, 'school_gallery', (int) ($_POST['id'] ?? 0), $schoolId);
+            $setFlash('success', 'Gallery image removed.');
+        } elseif (in_array($action, ['approve_review', 'unapprove_review', 'delete_review'], true)) {
+            $reviewId = (int) ($_POST['id'] ?? 0);
+            if ($action === 'delete_review') {
+                school_profile_admin_delete_row($platformDb, 'school_reviews', $reviewId, $schoolId);
+                $setFlash('success', 'Review deleted.');
+            } else {
+                $stmt = $platformDb->prepare('UPDATE school_reviews SET is_approved = ? WHERE id = ? AND school_id = ?');
+                $stmt->execute([$action === 'approve_review' ? 1 : 0, $reviewId, $schoolId]);
+                $setFlash('success', $action === 'approve_review' ? 'Review approved.' : 'Review hidden.');
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('School profile editor action failed: ' . $e->getMessage());
+        $setFlash('error', $e->getMessage());
     }
 
-    header('Location: ' . $_SERVER['REQUEST_URI']);
+    header('Location: school-profile.php');
     exit;
 }
 
-// -- Render helpers ---------------------------------------------------------
-$programs    = [];
-$testimonials = [];
-$pRaw = $school['landing_programs']     ?? null;
-$tRaw = $school['landing_testimonials'] ?? null;
-if ($pRaw) { $d = json_decode((string) $pRaw, true); if (is_array($d)) $programs    = $d; }
-if ($tRaw) { $d = json_decode((string) $tRaw, true); if (is_array($d)) $testimonials = $d; }
+$stmt = $platformDb->prepare('SELECT * FROM schools WHERE id = ? LIMIT 1');
+$stmt->execute([$schoolId]);
+$school = $stmt->fetch(PDO::FETCH_ASSOC) ?: $school;
+$_SESSION['school_info'][$schoolSlug] = $school;
+$GLOBALS['SCHOOL_DATA'] = $school;
+$schoolLogoUrl = school_logo_url($school);
 
-$publicUrl = 'https://' . $e($schoolSlug) . '.academixsuite.com/';
-
-?><!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>School Profile Editor · <?php echo $e($school['name']); ?></title>
-<?php flash_render(); ?>
-<style>
-:root { --ink:#161616; --muted:#666; --line:#e4e1d8; --paper:#fff; --soft:#f5f5f0; --accent:<?php echo $e($school['primary_color'] ?? '#7c73ff'); ?>; }
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,sans-serif;background:#fafaf7;color:var(--ink);line-height:1.5}
-.wrap{max-width:1080px;margin:0 auto;padding:24px 16px 80px}
-header.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
-h1{font-size:24px;margin:0}
-.lede{color:var(--muted);font-size:14px;margin-top:4px}
-.preview-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:var(--accent);color:#fff;border-radius:10px;font-weight:600;font-size:14px}
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto}
-.tabs button{background:none;border:0;padding:12px 18px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
-.tabs button.active{color:var(--ink);border-bottom-color:var(--accent)}
-.panel{display:none;background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;margin-bottom:16px}
-.panel.active{display:block}
-.panel h2{margin:0 0 4px;font-size:18px}
-.panel .hint{font-size:13px;color:var(--muted);margin-bottom:20px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
-.field{margin-bottom:16px}
-input[type=text], input[type=email], input[type=url], input[type=tel], input[type=date], input[type=color], select, textarea{
-  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:var(--ink)
+$contacts = academix_admin_table_exists($platformDb, 'school_contacts')
+    ? $platformDb->prepare('SELECT * FROM school_contacts WHERE school_id = ? ORDER BY is_primary DESC, sort_order ASC, id DESC')
+    : null;
+if ($contacts) {
+    $contacts->execute([$schoolId]);
+    $contacts = $contacts->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $contacts = [];
 }
-textarea{min-height:90px;resize:vertical}
-.row-actions{display:flex;gap:8px;margin-top:8px}
-button.primary{background:var(--ink);color:#fff;border:0;padding:11px 22px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
-button.secondary{background:#fff;color:var(--ink);border:1px solid var(--line);padding:9px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer}
-button.danger{background:#fff5f5;color:#b62121;border:1px solid #f7c4c4;padding:7px 12px;border-radius:8px;font-size:12px;cursor:pointer}
-.repeater{border:1px dashed var(--line);border-radius:12px;padding:14px;margin-bottom:10px;background:var(--soft)}
-.repeater .grid{margin-bottom:10px}
-.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:16px}
-.gallery-grid figure{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;position:relative}
-.gallery-grid img{width:100%;height:120px;object-fit:cover;display:block}
-.gallery-grid figcaption{font-size:11px;padding:8px;color:var(--muted)}
-.gallery-grid form{position:absolute;top:6px;right:6px}
-.flash{padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:14px}
-.flash.success{background:#e8f7ec;color:#1f6c33;border:1px solid #b6dfc3}
-.flash.error{background:#fdecea;color:#a3271a;border:1px solid #f3c2bb}
-table.reviews{width:100%;border-collapse:collapse;margin-top:8px}
-table.reviews th, table.reviews td{padding:10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}
-table.reviews th{color:var(--muted);font-weight:600;background:var(--soft)}
-.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
-.pill.approved{background:#e8f7ec;color:#1f6c33}
-.pill.pending{background:#fff7e6;color:#9a6b00}
-.sticky-save{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:14px 0;margin-top:24px;display:flex;justify-content:flex-end;gap:8px}
-.colour-pair{display:flex;gap:8px;align-items:center}
-.colour-pair input[type=color]{width:48px;height:42px;padding:2px;border-radius:8px}
-.colour-pair input[type=text]{width:120px}
-.image-preview{margin-top:8px;max-width:240px;border-radius:10px;border:1px solid var(--line)}
-</style>
+
+$facilities = academix_admin_table_exists($platformDb, 'school_facilities')
+    ? $platformDb->prepare('SELECT * FROM school_facilities WHERE school_id = ? ORDER BY sort_order ASC, id DESC')
+    : null;
+if ($facilities) {
+    $facilities->execute([$schoolId]);
+    $facilities = $facilities->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $facilities = [];
+}
+
+$gallery = academix_admin_table_exists($platformDb, 'school_gallery')
+    ? $platformDb->prepare('SELECT * FROM school_gallery WHERE school_id = ? ORDER BY sort_order ASC, created_at DESC, id DESC')
+    : null;
+if ($gallery) {
+    $gallery->execute([$schoolId]);
+    $gallery = $gallery->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $gallery = [];
+}
+
+$reviews = academix_admin_table_exists($platformDb, 'school_reviews')
+    ? $platformDb->prepare('SELECT * FROM school_reviews WHERE school_id = ? ORDER BY is_approved ASC, created_at DESC, id DESC')
+    : null;
+if ($reviews) {
+    $reviews->execute([$schoolId]);
+    $reviews = $reviews->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $reviews = [];
+}
+
+$profileUrl = function_exists('school_portal_url') ? school_portal_url($schoolSlug, '', true) : '/tenant/school_profile.php?slug=' . rawurlencode($schoolSlug);
+$loginUrl = function_exists('school_login_url') ? school_login_url($schoolSlug, true) : $profileUrl . 'login.php';
+$programLines = school_profile_admin_json_to_lines($school['landing_programs'] ?? '', 'programs');
+$testimonialLines = school_profile_admin_json_to_lines($school['landing_testimonials'] ?? '', 'testimonials');
+$primaryColor = preg_match('/^#[0-9a-fA-F]{6}$/', (string)($school['primary_color'] ?? '')) ? $school['primary_color'] : '#3B82F6';
+$secondaryColor = preg_match('/^#[0-9a-fA-F]{6}$/', (string)($school['secondary_color'] ?? '')) ? $school['secondary_color'] : '#10B981';
+?>
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo academix_admin_e($school['name'] ?? 'School'); ?> | Public Profile</title>
+    <link rel="icon" type="image/png" href="<?php echo academix_admin_e($schoolLogoUrl); ?>">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/remixicon.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/style.css">
+    <style>
+        body { background: #f6f8fb; }
+        .profile-shell { padding: 28px; }
+        .profile-hero { background: linear-gradient(135deg, <?php echo academix_admin_e($primaryColor); ?> 0%, #101828 100%); color: #fff; border-radius: 24px; padding: 28px; position: relative; overflow: hidden; }
+        .profile-hero:after { content: ""; position: absolute; inset: auto -80px -120px auto; width: 320px; height: 320px; background: <?php echo academix_admin_e($secondaryColor); ?>; opacity: .25; border-radius: 50%; }
+        .profile-logo-card { width: 96px; height: 96px; background: #fff; border-radius: 22px; display: grid; place-items: center; padding: 12px; box-shadow: 0 18px 40px rgba(15, 23, 42, .18); }
+        .profile-logo-card img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .profile-card { background: #fff; border: 1px solid #e8edf3; border-radius: 18px; box-shadow: 0 18px 42px rgba(15, 23, 42, .05); }
+        .profile-card-header { padding: 22px 24px; border-bottom: 1px solid #edf1f6; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .profile-card-body { padding: 24px; }
+        .profile-tabs { position: sticky; top: 16px; }
+        .profile-tabs a { display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: #667085; border-radius: 12px; font-weight: 600; text-decoration: none; }
+        .profile-tabs a:hover { background: #f2f5f9; color: #101828; }
+        .soft-label { color: #667085; font-size: 13px; margin-bottom: 8px; font-weight: 700; }
+        .form-control, .form-select { border-radius: 12px; border-color: #d8dee8; min-height: 46px; }
+        textarea.form-control { min-height: 110px; }
+        .profile-table img { width: 72px; height: 56px; object-fit: cover; border-radius: 12px; }
+        .empty-state { border: 1px dashed #d0d5dd; border-radius: 16px; padding: 24px; color: #667085; background: #fbfcfe; text-align: center; }
+        .btn-brand { background: <?php echo academix_admin_e($primaryColor); ?>; color: #fff; border: 0; }
+        .btn-brand:hover { color: #fff; filter: brightness(.95); }
+        .color-preview { width: 38px; height: 38px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 1px #d0d5dd; }
+        @media (max-width: 991px) { .profile-shell { padding: 18px; } .profile-tabs { position: static; } }
+    </style>
 </head>
 <body>
-<div class="wrap">
+<div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
+<?php include_once __DIR__ . '/includes/sidebar.php'; ?>
 
-  <header class="top">
-    <div>
-      <h1>School Profile Editor</h1>
-      <p class="lede">Edit what visitors see at <a href="<?php echo $publicUrl; ?>" target="_blank" style="color:var(--accent)"><?php echo $e(rtrim($publicUrl, '/')); ?></a></p>
+<main class="dashboard-main">
+    <div class="navbar-header shadow-1">
+        <div class="row align-items-center justify-content-between">
+            <div class="col-auto">
+                <div class="d-flex flex-wrap align-items-center gap-4">
+                    <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
+                        <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
+                    </button>
+                    <div>
+                        <h6 class="mb-0">School Profile</h6>
+                        <span class="text-sm text-secondary-light">Manage the public school landing page</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-auto d-flex align-items-center gap-2">
+                <a href="<?php echo academix_admin_e($profileUrl); ?>" target="_blank" class="btn btn-outline-primary d-flex align-items-center gap-2">
+                    <i class="ri-external-link-line"></i> View Site
+                </a>
+                <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
+            </div>
+        </div>
     </div>
-    <a class="preview-btn" href="<?php echo $publicUrl; ?>" target="_blank">View live page →</a>
-  </header>
 
-  <nav class="tabs">
-    <button data-tab="basics" class="active">Hero & About</button>
-    <button data-tab="programs">Programs & Testimonials</button>
-    <button data-tab="contacts">Contacts</button>
-    <button data-tab="facilities">Facilities</button>
-    <button data-tab="gallery">Gallery</button>
-    <button data-tab="reviews">Reviews</button>
-  </nav>
-
-  <!-- ================= BASICS ================= -->
-  <section class="panel active" id="panel-basics">
-    <h2>Hero, About, Admissions</h2>
-    <p class="hint">The headline area visitors see first, plus your school's story and current admission status.</p>
-    <form method="post" enctype="multipart/form-data">
-      <input type="hidden" name="csrf_token" value="<?php echo $e($csrfToken); ?>">
-      <input type="hidden" name="action" value="save_basics">
-
-      <div class="grid">
-        <div class="field">
-          <label>School name (display only)</label>
-          <input type="text" value="<?php echo $e($school['name']); ?>" disabled>
-        </div>
-        <div class="field">
-          <label>School type</label>
-          <select name="school_type">
-            <?php foreach (['nursery','primary','secondary','comprehensive','international','montessori','boarding','day'] as $opt): ?>
-              <option value="<?php echo $opt; ?>" <?php echo ($school['school_type'] ?? '') === $opt ? 'selected' : ''; ?>><?php echo ucfirst($opt); ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        <div class="field">
-          <label>Curriculum</label>
-          <input type="text" name="curriculum" value="<?php echo $e($school['curriculum'] ?? ''); ?>" placeholder="e.g. Nigerian / British / Montessori">
-        </div>
-      </div>
-
-      <h3 style="margin-top:24px;font-size:15px">Hero section</h3>
-      <div class="grid">
-        <div class="field">
-          <label>Badge text</label>
-          <input type="text" name="landing_badge_text" value="<?php echo $e($school['landing_badge_text'] ?? ''); ?>" placeholder="Admissions open">
-        </div>
-        <div class="field">
-          <label>Primary CTA label</label>
-          <input type="text" name="landing_primary_cta_text" value="<?php echo $e($school['landing_primary_cta_text'] ?? ''); ?>" placeholder="Apply Now">
-        </div>
-        <div class="field">
-          <label>Secondary CTA label</label>
-          <input type="text" name="landing_secondary_cta_text" value="<?php echo $e($school['landing_secondary_cta_text'] ?? ''); ?>" placeholder="Portal Login">
-        </div>
-      </div>
-      <div class="field">
-        <label>Headline</label>
-        <input type="text" name="landing_headline" value="<?php echo $e($school['landing_headline'] ?? ''); ?>">
-      </div>
-      <div class="field">
-        <label>Sub-headline</label>
-        <textarea name="landing_subheadline"><?php echo $e($school['landing_subheadline'] ?? ''); ?></textarea>
-      </div>
-      <div class="grid">
-        <div class="field">
-          <label>Hero image (cap 5MB, jpg/png/webp)</label>
-          <input type="file" name="landing_hero_image" accept="image/png,image/jpeg,image/webp">
-          <?php if (!empty($school['landing_hero_image'])): ?>
-            <img class="image-preview" src="/<?php echo $e(ltrim((string) $school['landing_hero_image'], '/')); ?>" alt="">
-          <?php endif; ?>
-        </div>
-        <div class="field">
-          <label>Feature/secondary image</label>
-          <input type="file" name="landing_feature_image" accept="image/png,image/jpeg,image/webp">
-          <?php if (!empty($school['landing_feature_image'])): ?>
-            <img class="image-preview" src="/<?php echo $e(ltrim((string) $school['landing_feature_image'], '/')); ?>" alt="">
-          <?php endif; ?>
-        </div>
-        <div class="field">
-          <label>School logo</label>
-          <input type="file" name="logo_path" accept="image/png,image/jpeg,image/webp">
-          <?php if (!empty($school['logo_path'])): ?>
-            <img class="image-preview" src="/<?php echo $e(ltrim((string) $school['logo_path'], '/')); ?>" alt="" style="max-width:120px">
-          <?php endif; ?>
-        </div>
-      </div>
-
-      <h3 style="margin-top:24px;font-size:15px">About / Story</h3>
-      <div class="field">
-        <label>Short description</label>
-        <textarea name="description"><?php echo $e($school['description'] ?? ''); ?></textarea>
-      </div>
-      <div class="grid">
-        <div class="field">
-          <label>Intro section title</label>
-          <input type="text" name="landing_intro_title" value="<?php echo $e($school['landing_intro_title'] ?? ''); ?>">
-        </div>
-        <div class="field">
-          <label>Highlight section title</label>
-          <input type="text" name="landing_highlight_title" value="<?php echo $e($school['landing_highlight_title'] ?? ''); ?>">
-        </div>
-      </div>
-      <div class="field">
-        <label>Intro section body</label>
-        <textarea name="landing_intro_text"><?php echo $e($school['landing_intro_text'] ?? ''); ?></textarea>
-      </div>
-      <div class="field">
-        <label>Highlight section body</label>
-        <textarea name="landing_highlight_text"><?php echo $e($school['landing_highlight_text'] ?? ''); ?></textarea>
-      </div>
-      <div class="grid">
-        <div class="field">
-          <label>Mission statement</label>
-          <textarea name="mission_statement"><?php echo $e($school['mission_statement'] ?? ''); ?></textarea>
-        </div>
-        <div class="field">
-          <label>Vision statement</label>
-          <textarea name="vision_statement"><?php echo $e($school['vision_statement'] ?? ''); ?></textarea>
-        </div>
-      </div>
-      <div class="field">
-        <label>Head of school / principal's message</label>
-        <textarea name="principal_message"><?php echo $e($school['principal_message'] ?? ''); ?></textarea>
-      </div>
-
-      <h3 style="margin-top:24px;font-size:15px">Closing CTA</h3>
-      <div class="field">
-        <label>CTA title</label>
-        <input type="text" name="landing_cta_title" value="<?php echo $e($school['landing_cta_title'] ?? ''); ?>">
-      </div>
-      <div class="field">
-        <label>CTA body</label>
-        <textarea name="landing_cta_text"><?php echo $e($school['landing_cta_text'] ?? ''); ?></textarea>
-      </div>
-
-      <h3 style="margin-top:24px;font-size:15px">Brand colours</h3>
-      <div class="grid">
-        <div class="field">
-          <label>Primary colour (hex)</label>
-          <div class="colour-pair">
-            <input type="color" value="<?php echo $e($school['primary_color'] ?? '#7c73ff'); ?>" oninput="this.nextElementSibling.value=this.value">
-            <input type="text" name="primary_color" value="<?php echo $e($school['primary_color'] ?? '#7c73ff'); ?>" pattern="^#[0-9A-Fa-f]{6}$">
-          </div>
-        </div>
-        <div class="field">
-          <label>Secondary colour (hex)</label>
-          <div class="colour-pair">
-            <input type="color" value="<?php echo $e($school['secondary_color'] ?? '#b8ff61'); ?>" oninput="this.nextElementSibling.value=this.value">
-            <input type="text" name="secondary_color" value="<?php echo $e($school['secondary_color'] ?? '#b8ff61'); ?>" pattern="^#[0-9A-Fa-f]{6}$">
-          </div>
-        </div>
-      </div>
-
-      <h3 style="margin-top:24px;font-size:15px">Admissions</h3>
-      <div class="grid">
-        <div class="field">
-          <label>Status</label>
-          <select name="admission_status">
-            <?php foreach (['open','closed','waiting_list'] as $opt): ?>
-              <option value="<?php echo $opt; ?>" <?php echo ($school['admission_status'] ?? 'open') === $opt ? 'selected' : ''; ?>>
-                <?php echo str_replace('_', ' ', ucfirst($opt)); ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        <div class="field">
-          <label>Deadline (optional)</label>
-          <input type="date" name="admission_deadline" value="<?php echo $e($school['admission_deadline'] ?? ''); ?>">
-        </div>
-      </div>
-
-      <h3 style="margin-top:24px;font-size:15px">Location & top-level contact</h3>
-      <div class="grid">
-        <div class="field"><label>Phone</label><input type="tel" name="phone" value="<?php echo $e($school['phone'] ?? ''); ?>"></div>
-        <div class="field"><label>Email</label><input type="email" name="email" value="<?php echo $e($school['email'] ?? ''); ?>"></div>
-        <div class="field"><label>Website</label><input type="url" name="website" value="<?php echo $e($school['website'] ?? ''); ?>" placeholder="https://"></div>
-        <div class="field"><label>Address</label><input type="text" name="address" value="<?php echo $e($school['address'] ?? ''); ?>"></div>
-        <div class="field"><label>City</label><input type="text" name="city" value="<?php echo $e($school['city'] ?? ''); ?>"></div>
-        <div class="field"><label>State</label><input type="text" name="state" value="<?php echo $e($school['state'] ?? ''); ?>"></div>
-        <div class="field"><label>Country</label><input type="text" name="country" value="<?php echo $e($school['country'] ?? ''); ?>"></div>
-      </div>
-
-      <div class="sticky-save"><button type="submit" class="primary">Save changes</button></div>
-    </form>
-  </section>
-
-  <!-- ================= PROGRAMS & TESTIMONIALS ================= -->
-  <section class="panel" id="panel-programs">
-    <h2>Programs & Testimonials</h2>
-    <p class="hint">Programs appear as cards on the landing page. Testimonials are quoted under "What parents say".</p>
-    <form method="post" enctype="multipart/form-data">
-      <input type="hidden" name="csrf_token" value="<?php echo $e($csrfToken); ?>">
-      <input type="hidden" name="action" value="save_basics">
-
-      <h3 style="font-size:14px;margin-bottom:12px">Programs</h3>
-      <div id="programs-list">
-        <?php $programs = $programs ?: [['title'=>'', 'description'=>'']];
-        foreach ($programs as $i => $prog): ?>
-          <div class="repeater" data-block>
-            <div class="grid">
-              <div class="field"><label>Title</label><input type="text" name="landing_programs[<?php echo $i; ?>][title]" value="<?php echo $e($prog['title'] ?? ''); ?>"></div>
-              <div class="field"><label>Description</label><input type="text" name="landing_programs[<?php echo $i; ?>][description]" value="<?php echo $e($prog['description'] ?? ''); ?>"></div>
+    <div class="dashboard-main-body profile-shell">
+        <?php if ($flash): ?>
+            <div class="alert alert-<?php echo $flash['type'] === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
+                <?php echo academix_admin_e($flash['message']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div class="row-actions"><button type="button" class="danger" onclick="this.closest('[data-block]').remove()">Remove</button></div>
-          </div>
-        <?php endforeach; ?>
-      </div>
-      <button type="button" class="secondary" onclick="addRepeater('programs-list','landing_programs', ['title','description'])">+ Add program</button>
+        <?php endif; ?>
 
-      <h3 style="font-size:14px;margin:24px 0 12px">Testimonials</h3>
-      <div id="testimonials-list">
-        <?php $testimonials = $testimonials ?: [['name'=>'', 'role'=>'', 'quote'=>'']];
-        foreach ($testimonials as $i => $t): ?>
-          <div class="repeater" data-block>
-            <div class="grid">
-              <div class="field"><label>Author name</label><input type="text" name="landing_testimonials[<?php echo $i; ?>][name]" value="<?php echo $e($t['name'] ?? ''); ?>"></div>
-              <div class="field"><label>Author role</label><input type="text" name="landing_testimonials[<?php echo $i; ?>][role]" value="<?php echo $e($t['role'] ?? ''); ?>"></div>
+        <section class="profile-hero mb-24">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-4 position-relative z-1">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="profile-logo-card">
+                        <img src="<?php echo academix_admin_e($schoolLogoUrl); ?>" alt="<?php echo academix_admin_e($school['name']); ?> logo">
+                    </div>
+                    <div>
+                        <div class="text-sm opacity-75 mb-1"><?php echo academix_admin_e($school['slug']); ?></div>
+                        <h2 class="mb-2 text-white"><?php echo academix_admin_e($school['name']); ?></h2>
+                        <p class="mb-0 opacity-75"><?php echo academix_admin_e($school['landing_headline'] ?? 'Interactive learning that students love'); ?></p>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="badge bg-white text-dark px-16 py-10">Profile URL</span>
+                    <a class="text-white fw-semibold" href="<?php echo academix_admin_e($profileUrl); ?>" target="_blank"><?php echo academix_admin_e($profileUrl); ?></a>
+                </div>
             </div>
-            <div class="field"><label>Quote</label><textarea name="landing_testimonials[<?php echo $i; ?>][quote]"><?php echo $e($t['quote'] ?? ''); ?></textarea></div>
-            <div class="row-actions"><button type="button" class="danger" onclick="this.closest('[data-block]').remove()">Remove</button></div>
-          </div>
-        <?php endforeach; ?>
-      </div>
-      <button type="button" class="secondary" onclick="addRepeater('testimonials-list','landing_testimonials', ['name','role','quote'])">+ Add testimonial</button>
+        </section>
 
-      <div class="sticky-save"><button type="submit" class="primary">Save programs & testimonials</button></div>
-    </form>
-  </section>
-
-  <!-- ================= CONTACTS ================= -->
-  <section class="panel" id="panel-contacts">
-    <h2>Contact entries</h2>
-    <p class="hint">Each row appears in the public page's contact section.</p>
-    <form method="post">
-      <input type="hidden" name="csrf_token" value="<?php echo $e($csrfToken); ?>">
-      <input type="hidden" name="action" value="save_contacts">
-      <div id="contacts-list">
-        <?php
-        $contacts = $contacts ?: [['type'=>'phone','label'=>'','value'=>'','is_primary'=>0]];
-        foreach ($contacts as $i => $c): ?>
-          <div class="repeater" data-block>
-            <div class="grid">
-              <div class="field">
-                <label>Type</label>
-                <select name="contacts[<?php echo $i; ?>][type]">
-                  <?php foreach (['email','phone','address','website','whatsapp','social'] as $opt): ?>
-                    <option value="<?php echo $opt; ?>" <?php echo ($c['type'] ?? '') === $opt ? 'selected' : ''; ?>><?php echo ucfirst($opt); ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-              <div class="field"><label>Label</label><input type="text" name="contacts[<?php echo $i; ?>][label]" value="<?php echo $e($c['label'] ?? ''); ?>" placeholder="e.g. Admissions office"></div>
-              <div class="field"><label>Value</label><input type="text" name="contacts[<?php echo $i; ?>][value]" value="<?php echo $e($c['value'] ?? ''); ?>" required></div>
-              <div class="field" style="display:flex;align-items:center;margin-top:24px;gap:8px">
-                <input type="checkbox" name="contacts[<?php echo $i; ?>][is_primary]" value="1" <?php echo !empty($c['is_primary']) ? 'checked' : ''; ?>>
-                <label style="margin:0">Show as primary</label>
-              </div>
+        <div class="row gy-4">
+            <div class="col-xl-3">
+                <div class="profile-card profile-tabs p-12">
+                    <a href="#landing"><i class="ri-layout-5-line"></i> Landing Content</a>
+                    <a href="#identity"><i class="ri-school-line"></i> School Details</a>
+                    <a href="#contacts"><i class="ri-contacts-book-line"></i> Contacts</a>
+                    <a href="#facilities"><i class="ri-building-4-line"></i> Facilities</a>
+                    <a href="#gallery"><i class="ri-image-line"></i> Gallery</a>
+                    <a href="#reviews"><i class="ri-chat-smile-2-line"></i> Reviews</a>
+                    <a href="<?php echo academix_admin_e($loginUrl); ?>" target="_blank"><i class="ri-login-circle-line"></i> Login Page</a>
+                </div>
             </div>
-            <div class="row-actions"><button type="button" class="danger" onclick="this.closest('[data-block]').remove()">Remove</button></div>
-          </div>
-        <?php endforeach; ?>
-      </div>
-      <button type="button" class="secondary" onclick="addRepeater('contacts-list','contacts', ['type','label','value','is_primary'])">+ Add contact</button>
-      <div class="sticky-save"><button type="submit" class="primary">Save contacts</button></div>
-    </form>
-  </section>
 
-  <!-- ================= FACILITIES ================= -->
-  <section class="panel" id="panel-facilities">
-    <h2>Facilities & services</h2>
-    <p class="hint">These render as "What we offer" badges/cards on the public page.</p>
-    <form method="post">
-      <input type="hidden" name="csrf_token" value="<?php echo $e($csrfToken); ?>">
-      <input type="hidden" name="action" value="save_facilities">
-      <div id="facilities-list">
-        <?php
-        $facilities = $facilities ?: [['name'=>'','description'=>'','icon'=>'']];
-        foreach ($facilities as $i => $f): ?>
-          <div class="repeater" data-block>
-            <div class="grid">
-              <div class="field"><label>Name</label><input type="text" name="facilities[<?php echo $i; ?>][name]" value="<?php echo $e($f['name'] ?? ''); ?>"></div>
-              <div class="field"><label>Icon (Font Awesome class, optional)</label><input type="text" name="facilities[<?php echo $i; ?>][icon]" value="<?php echo $e($f['icon'] ?? ''); ?>" placeholder="fa-school"></div>
+            <div class="col-xl-9">
+                <form method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrfToken); ?>">
+                    <input type="hidden" name="action" value="save_profile">
+
+                    <div class="profile-card mb-24" id="landing">
+                        <div class="profile-card-header">
+                            <div>
+                                <h5 class="mb-1">Landing Content</h5>
+                                <p class="text-secondary-light mb-0">Text and images shown on the school public homepage.</p>
+                            </div>
+                            <button type="submit" class="btn btn-brand px-24">Save Changes</button>
+                        </div>
+                        <div class="profile-card-body">
+                            <div class="row gy-3">
+                                <div class="col-md-6">
+                                    <label class="soft-label">Badge Text</label>
+                                    <input class="form-control" name="landing_badge_text" value="<?php echo academix_admin_e($school['landing_badge_text'] ?? 'Admissions open'); ?>">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Headline</label>
+                                    <input class="form-control" name="landing_headline" value="<?php echo academix_admin_e($school['landing_headline'] ?? 'Interactive learning that students love'); ?>">
+                                </div>
+                                <div class="col-12">
+                                    <label class="soft-label">Subheadline</label>
+                                    <textarea class="form-control" name="landing_subheadline"><?php echo academix_admin_e($school['landing_subheadline'] ?? ''); ?></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Primary Button Text</label>
+                                    <input class="form-control" name="landing_primary_cta_text" value="<?php echo academix_admin_e($school['landing_primary_cta_text'] ?? 'Apply Now'); ?>">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Secondary Button Text</label>
+                                    <input class="form-control" name="landing_secondary_cta_text" value="<?php echo academix_admin_e($school['landing_secondary_cta_text'] ?? 'Portal Login'); ?>">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Hero Image</label>
+                                    <input class="form-control" type="file" name="hero_file" accept="image/*">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Feature Image</label>
+                                    <input class="form-control" type="file" name="feature_file" accept="image/*">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Intro Title</label>
+                                    <input class="form-control" name="landing_intro_title" value="<?php echo academix_admin_e($school['landing_intro_title'] ?? 'Learning made fun, focused, and personal'); ?>">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Highlight Title</label>
+                                    <input class="form-control" name="landing_highlight_title" value="<?php echo academix_admin_e($school['landing_highlight_title'] ?? 'Explore our amazing educational world'); ?>">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Intro Text</label>
+                                    <textarea class="form-control" name="landing_intro_text"><?php echo academix_admin_e($school['landing_intro_text'] ?? ''); ?></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Highlight Text</label>
+                                    <textarea class="form-control" name="landing_highlight_text"><?php echo academix_admin_e($school['landing_highlight_text'] ?? ''); ?></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Final CTA Title</label>
+                                    <input class="form-control" name="landing_cta_title" value="<?php echo academix_admin_e($school['landing_cta_title'] ?? 'Start the learning adventure today'); ?>">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Final CTA Text</label>
+                                    <textarea class="form-control" name="landing_cta_text"><?php echo academix_admin_e($school['landing_cta_text'] ?? ''); ?></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Programs</label>
+                                    <textarea class="form-control" name="landing_programs_text" placeholder="ABCs & Reading | Foundational literacy and vocabulary"><?php echo academix_admin_e($programLines); ?></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Testimonials</label>
+                                    <textarea class="form-control" name="landing_testimonials_text" placeholder="Jane Doe | Parent | My child is more confident now"><?php echo academix_admin_e($testimonialLines); ?></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-card mb-24" id="identity">
+                        <div class="profile-card-header">
+                            <div>
+                                <h5 class="mb-1">School Details</h5>
+                                <p class="text-secondary-light mb-0">Brand, contact, admission, and public information.</p>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="color-preview" style="background: <?php echo academix_admin_e($primaryColor); ?>"></span>
+                                <span class="color-preview" style="background: <?php echo academix_admin_e($secondaryColor); ?>"></span>
+                            </div>
+                        </div>
+                        <div class="profile-card-body">
+                            <div class="row gy-3">
+                                <div class="col-md-8">
+                                    <label class="soft-label">School Name</label>
+                                    <input class="form-control" name="name" value="<?php echo academix_admin_e($school['name'] ?? ''); ?>" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="soft-label">School Logo</label>
+                                    <input class="form-control" type="file" name="logo_file" accept="image/*">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Primary Color</label>
+                                    <input class="form-control" type="color" name="primary_color" value="<?php echo academix_admin_e($primaryColor); ?>">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Secondary Color</label>
+                                    <input class="form-control" type="color" name="secondary_color" value="<?php echo academix_admin_e($secondaryColor); ?>">
+                                </div>
+                                <div class="col-12">
+                                    <label class="soft-label">Description</label>
+                                    <textarea class="form-control" name="description"><?php echo academix_admin_e($school['description'] ?? ''); ?></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Mission Statement</label>
+                                    <textarea class="form-control" name="mission_statement"><?php echo academix_admin_e($school['mission_statement'] ?? ''); ?></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Vision Statement</label>
+                                    <textarea class="form-control" name="vision_statement"><?php echo academix_admin_e($school['vision_statement'] ?? ''); ?></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Principal Name</label>
+                                    <input class="form-control" name="principal_name" value="<?php echo academix_admin_e($school['principal_name'] ?? ''); ?>">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="soft-label">Principal Message</label>
+                                    <textarea class="form-control" name="principal_message"><?php echo academix_admin_e($school['principal_message'] ?? ''); ?></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="soft-label">Type</label>
+                                    <select class="form-select" name="school_type">
+                                        <?php foreach (['nursery','primary','secondary','comprehensive','international','montessori','boarding','day'] as $type): ?>
+                                            <option value="<?php echo $type; ?>" <?php echo (($school['school_type'] ?? '') === $type) ? 'selected' : ''; ?>><?php echo academix_admin_e(ucwords($type)); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="soft-label">Curriculum</label>
+                                    <input class="form-control" name="curriculum" value="<?php echo academix_admin_e($school['curriculum'] ?? ''); ?>">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="soft-label">Established Year</label>
+                                    <input class="form-control" type="number" name="establishment_year" value="<?php echo academix_admin_e($school['establishment_year'] ?? ''); ?>">
+                                </div>
+                                <div class="col-md-4"><label class="soft-label">Students</label><input class="form-control" type="number" name="student_count" value="<?php echo academix_admin_e($school['student_count'] ?? 0); ?>"></div>
+                                <div class="col-md-4"><label class="soft-label">Teachers</label><input class="form-control" type="number" name="teacher_count" value="<?php echo academix_admin_e($school['teacher_count'] ?? 0); ?>"></div>
+                                <div class="col-md-4"><label class="soft-label">Classes</label><input class="form-control" type="number" name="class_count" value="<?php echo academix_admin_e($school['class_count'] ?? 0); ?>"></div>
+                                <div class="col-md-6"><label class="soft-label">Email</label><input class="form-control" type="email" name="email" value="<?php echo academix_admin_e($school['email'] ?? ''); ?>"></div>
+                                <div class="col-md-6"><label class="soft-label">Phone</label><input class="form-control" name="phone" value="<?php echo academix_admin_e($school['phone'] ?? ''); ?>"></div>
+                                <div class="col-12"><label class="soft-label">Address</label><textarea class="form-control" name="address"><?php echo academix_admin_e($school['address'] ?? ''); ?></textarea></div>
+                                <div class="col-md-4"><label class="soft-label">City</label><input class="form-control" name="city" value="<?php echo academix_admin_e($school['city'] ?? ''); ?>"></div>
+                                <div class="col-md-4"><label class="soft-label">State</label><input class="form-control" name="state" value="<?php echo academix_admin_e($school['state'] ?? ''); ?>"></div>
+                                <div class="col-md-4"><label class="soft-label">Country</label><input class="form-control" name="country" value="<?php echo academix_admin_e($school['country'] ?? 'Nigeria'); ?>"></div>
+                                <div class="col-md-4"><label class="soft-label">Admission Status</label><select class="form-select" name="admission_status"><?php foreach (['open'=>'Open','closed'=>'Closed','waiting_list'=>'Waiting List'] as $k=>$v): ?><option value="<?php echo $k; ?>" <?php echo (($school['admission_status'] ?? '') === $k) ? 'selected' : ''; ?>><?php echo $v; ?></option><?php endforeach; ?></select></div>
+                                <div class="col-md-4"><label class="soft-label">Admission Deadline</label><input class="form-control" type="date" name="admission_deadline" value="<?php echo academix_admin_e($school['admission_deadline'] ?? ''); ?>"></div>
+                                <div class="col-md-4"><label class="soft-label">School Hours</label><input class="form-control" name="school_hours" value="<?php echo academix_admin_e($school['school_hours'] ?? ''); ?>"></div>
+                                <div class="col-md-6"><label class="soft-label">Fee Range From</label><input class="form-control" type="number" step="0.01" name="fee_range_from" value="<?php echo academix_admin_e($school['fee_range_from'] ?? 0); ?>"></div>
+                                <div class="col-md-6"><label class="soft-label">Fee Range To</label><input class="form-control" type="number" step="0.01" name="fee_range_to" value="<?php echo academix_admin_e($school['fee_range_to'] ?? 0); ?>"></div>
+                                <div class="col-12"><label class="soft-label">Admission Process</label><textarea class="form-control" name="admission_process"><?php echo academix_admin_e($school['admission_process'] ?? ''); ?></textarea></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="profile-card mb-24" id="contacts">
+                    <div class="profile-card-header"><div><h5 class="mb-1">Contacts</h5><p class="text-secondary-light mb-0">Published on the contact section of the school page.</p></div></div>
+                    <div class="profile-card-body">
+                        <form method="post" class="row gy-3 align-items-end mb-4">
+                            <input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrfToken); ?>">
+                            <input type="hidden" name="action" value="add_contact">
+                            <div class="col-md-2"><label class="soft-label">Type</label><select name="type" class="form-select"><option>phone</option><option>email</option><option>address</option><option>website</option><option>social</option></select></div>
+                            <div class="col-md-3"><label class="soft-label">Label</label><input name="label" class="form-control" placeholder="Admissions office"></div>
+                            <div class="col-md-4"><label class="soft-label">Value</label><input name="value" class="form-control" required></div>
+                            <div class="col-md-1"><label class="soft-label">Order</label><input name="sort_order" type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><label class="soft-label">Primary</label><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="is_primary" value="1"></div></div>
+                            <div class="col-md-1"><button class="btn btn-brand w-100" type="submit"><i class="ri-add-line"></i></button></div>
+                        </form>
+                        <?php if ($contacts): ?>
+                            <div class="table-responsive"><table class="table profile-table align-middle"><tbody>
+                                <?php foreach ($contacts as $contact): ?><tr>
+                                    <td><span class="badge bg-primary-subtle text-primary-main"><?php echo academix_admin_e($contact['type'] ?? ''); ?></span></td>
+                                    <td><?php echo academix_admin_e($contact['label'] ?? ''); ?></td>
+                                    <td><?php echo academix_admin_e($contact['value'] ?? ''); ?></td>
+                                    <td><?php echo !empty($contact['is_primary']) ? '<span class="badge bg-success-subtle text-success-main">Primary</span>' : ''; ?></td>
+                                    <td class="text-end"><form method="post"><input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrfToken); ?>"><input type="hidden" name="action" value="delete_contact"><input type="hidden" name="id" value="<?php echo (int)$contact['id']; ?>"><button class="btn btn-sm btn-outline-danger" type="submit"><i class="ri-delete-bin-line"></i></button></form></td>
+                                </tr><?php endforeach; ?>
+                            </tbody></table></div>
+                        <?php else: ?><div class="empty-state">No extra contacts yet. Add admissions, support, website, or social links.</div><?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="profile-card mb-24" id="facilities">
+                    <div class="profile-card-header"><div><h5 class="mb-1">Facilities</h5><p class="text-secondary-light mb-0">Showcase what makes the school environment strong.</p></div></div>
+                    <div class="profile-card-body">
+                        <form method="post" class="row gy-3 align-items-end mb-4">
+                            <input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrfToken); ?>">
+                            <input type="hidden" name="action" value="add_facility">
+                            <div class="col-md-3"><label class="soft-label">Name</label><input name="name" class="form-control" required placeholder="Science Laboratory"></div>
+                            <div class="col-md-5"><label class="soft-label">Description</label><input name="description" class="form-control"></div>
+                            <div class="col-md-2"><label class="soft-label">Icon</label><input name="icon" class="form-control" value="ri-building-4-line"></div>
+                            <div class="col-md-1"><label class="soft-label">Order</label><input name="sort_order" type="number" class="form-control" value="0"></div>
+                            <div class="col-md-1"><input type="hidden" name="is_active" value="1"><button class="btn btn-brand w-100" type="submit"><i class="ri-add-line"></i></button></div>
+                        </form>
+                        <div class="row gy-3">
+                            <?php foreach ($facilities as $facility): ?>
+                                <div class="col-md-6">
+                                    <div class="border rounded-4 p-16 h-100 d-flex justify-content-between gap-3">
+                                        <div><i class="<?php echo academix_admin_e($facility['icon'] ?? 'ri-building-4-line'); ?> text-primary-main text-xl"></i><h6 class="mt-2 mb-1"><?php echo academix_admin_e($facility['name'] ?? ''); ?></h6><p class="text-secondary-light text-sm mb-0"><?php echo academix_admin_e($facility['description'] ?? ''); ?></p></div>
+                                        <form method="post"><input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrfToken); ?>"><input type="hidden" name="action" value="delete_facility"><input type="hidden" name="id" value="<?php echo (int)$facility['id']; ?>"><button class="btn btn-sm btn-outline-danger" type="submit"><i class="ri-delete-bin-line"></i></button></form>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                            <?php if (!$facilities): ?><div class="col-12"><div class="empty-state">No facilities added yet.</div></div><?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card mb-24" id="gallery">
+                    <div class="profile-card-header"><div><h5 class="mb-1">Gallery</h5><p class="text-secondary-light mb-0">Images power the public landing page hero and campus sections.</p></div></div>
+                    <div class="profile-card-body">
+                        <form method="post" enctype="multipart/form-data" class="row gy-3 align-items-end mb-4">
+                            <input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrfToken); ?>">
+                            <input type="hidden" name="action" value="add_gallery">
+                            <div class="col-md-4"><label class="soft-label">Image</label><input class="form-control" type="file" name="gallery_file" accept="image/*" required></div>
+                            <div class="col-md-3"><label class="soft-label">Caption</label><input class="form-control" name="caption"></div>
+                            <div class="col-md-2"><label class="soft-label">Type</label><select class="form-select" name="type"><option>campus</option><option>classroom</option><option>laboratory</option><option>library</option><option>sports</option><option>events</option><option>other</option></select></div>
+                            <div class="col-md-2"><label class="soft-label">Order</label><input class="form-control" type="number" name="sort_order" value="0"></div>
+                            <div class="col-md-1"><button class="btn btn-brand w-100" type="submit"><i class="ri-upload-cloud-line"></i></button></div>
+                        </form>
+                        <div class="row gy-3">
+                            <?php foreach ($gallery as $image): $imageUrl = preg_match('#^https?://#', $image['image_url'] ?? '') ? $image['image_url'] : '/' . ltrim($image['image_url'] ?? '', '/'); ?>
+                                <div class="col-md-4">
+                                    <div class="border rounded-4 overflow-hidden bg-white">
+                                        <img src="<?php echo academix_admin_e($imageUrl); ?>" alt="" style="width:100%;height:160px;object-fit:cover;">
+                                        <div class="p-12 d-flex justify-content-between gap-2">
+                                            <div><div class="fw-semibold"><?php echo academix_admin_e($image['caption'] ?? 'Campus image'); ?></div><span class="text-secondary-light text-sm"><?php echo academix_admin_e($image['type'] ?? 'campus'); ?></span></div>
+                                            <form method="post"><input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrfToken); ?>"><input type="hidden" name="action" value="delete_gallery"><input type="hidden" name="id" value="<?php echo (int)$image['id']; ?>"><button class="btn btn-sm btn-outline-danger" type="submit"><i class="ri-delete-bin-line"></i></button></form>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                            <?php if (!$gallery): ?><div class="col-12"><div class="empty-state">No gallery images uploaded yet.</div></div><?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card" id="reviews">
+                    <div class="profile-card-header"><div><h5 class="mb-1">Reviews</h5><p class="text-secondary-light mb-0">Approve reviews before they appear on the public page.</p></div></div>
+                    <div class="profile-card-body">
+                        <?php if ($reviews): ?>
+                            <div class="table-responsive"><table class="table align-middle">
+                                <thead><tr><th>Reviewer</th><th>Rating</th><th>Comment</th><th>Status</th><th class="text-end">Action</th></tr></thead>
+                                <tbody>
+                                <?php foreach ($reviews as $review): ?>
+                                    <tr>
+                                        <td><strong><?php echo academix_admin_e($review['parent_name'] ?? 'Parent'); ?></strong><div class="text-secondary-light text-sm"><?php echo academix_admin_e($review['parent_email'] ?? ($review['student_name'] ?? '')); ?></div></td>
+                                        <td><?php echo str_repeat('★', max(1, min(5, (int)($review['rating'] ?? 5)))); ?></td>
+                                        <td style="max-width:380px;"><?php echo academix_admin_e($review['comment'] ?? ''); ?></td>
+                                        <td><?php echo !empty($review['is_approved']) ? '<span class="badge bg-success-subtle text-success-main">Approved</span>' : '<span class="badge bg-warning-subtle text-warning-main">Pending</span>'; ?></td>
+                                        <td class="text-end d-flex justify-content-end gap-2">
+                                            <form method="post"><input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrfToken); ?>"><input type="hidden" name="id" value="<?php echo (int)$review['id']; ?>"><input type="hidden" name="action" value="<?php echo !empty($review['is_approved']) ? 'unapprove_review' : 'approve_review'; ?>"><button class="btn btn-sm btn-outline-primary" type="submit"><?php echo !empty($review['is_approved']) ? 'Hide' : 'Approve'; ?></button></form>
+                                            <form method="post"><input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrfToken); ?>"><input type="hidden" name="id" value="<?php echo (int)$review['id']; ?>"><input type="hidden" name="action" value="delete_review"><button class="btn btn-sm btn-outline-danger" type="submit"><i class="ri-delete-bin-line"></i></button></form>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table></div>
+                        <?php else: ?><div class="empty-state">No reviews have been submitted yet.</div><?php endif; ?>
+                    </div>
+                </div>
             </div>
-            <div class="field"><label>Description</label><textarea name="facilities[<?php echo $i; ?>][description]"><?php echo $e($f['description'] ?? ''); ?></textarea></div>
-            <div class="row-actions">
-              <label style="display:flex;align-items:center;gap:6px;font-weight:400;font-size:12px">
-                <input type="checkbox" name="facilities[<?php echo $i; ?>][is_inactive]" value="1" <?php echo isset($f['is_active']) && (int) $f['is_active'] === 0 ? 'checked' : ''; ?>>
-                Hide from public page
-              </label>
-              <button type="button" class="danger" onclick="this.closest('[data-block]').remove()">Remove</button>
-            </div>
-          </div>
-        <?php endforeach; ?>
-      </div>
-      <button type="button" class="secondary" onclick="addRepeater('facilities-list','facilities', ['name','icon','description'])">+ Add facility</button>
-      <div class="sticky-save"><button type="submit" class="primary">Save facilities</button></div>
-    </form>
-  </section>
-
-  <!-- ================= GALLERY ================= -->
-  <section class="panel" id="panel-gallery">
-    <h2>Photo gallery</h2>
-    <p class="hint">Up to 12 most recent images render on the landing page. Each image is capped at 5MB and must be jpg/png/webp.</p>
-    <form method="post" enctype="multipart/form-data">
-      <input type="hidden" name="csrf_token" value="<?php echo $e($csrfToken); ?>">
-      <input type="hidden" name="action" value="gallery_add">
-      <div class="field">
-        <label>Add images (you can select multiple)</label>
-        <input type="file" name="gallery_images[]" accept="image/png,image/jpeg,image/webp" multiple>
-      </div>
-      <button type="submit" class="primary">Upload selected</button>
-    </form>
-
-    <div class="gallery-grid">
-      <?php foreach ($gallery as $img): ?>
-        <figure>
-          <img src="/<?php echo $e(ltrim((string) $img['image_url'], '/')); ?>" alt="">
-          <?php if (!empty($img['caption'])): ?><figcaption><?php echo $e($img['caption']); ?></figcaption><?php endif; ?>
-          <form method="post" onsubmit="return confirm('Remove this image?')">
-            <input type="hidden" name="csrf_token" value="<?php echo $e($csrfToken); ?>">
-            <input type="hidden" name="action" value="gallery_delete">
-            <input type="hidden" name="image_id" value="<?php echo (int) $img['id']; ?>">
-            <button type="submit" class="danger" title="Delete">×</button>
-          </form>
-        </figure>
-      <?php endforeach; ?>
-      <?php if (!$gallery): ?><p style="color:var(--muted);font-size:13px">No images uploaded yet.</p><?php endif; ?>
+        </div>
     </div>
-  </section>
+</main>
 
-  <!-- ================= REVIEWS ================= -->
-  <section class="panel" id="panel-reviews">
-    <h2>Parent reviews</h2>
-    <p class="hint">Reviews are submitted by parents on the public profile page. Approve them here to make them visible.</p>
-    <?php if (!$reviews): ?>
-      <p style="color:var(--muted);font-size:14px">No reviews yet.</p>
-    <?php else: ?>
-      <table class="reviews">
-        <thead><tr><th>Parent</th><th>Rating</th><th>Comment</th><th>Status</th><th></th></tr></thead>
-        <tbody>
-        <?php foreach ($reviews as $r): ?>
-          <tr>
-            <td><strong><?php echo $e($r['parent_name'] ?? '—'); ?></strong>
-              <?php if (!empty($r['student_name'])): ?><div style="color:var(--muted);font-size:12px">parent of <?php echo $e($r['student_name']); ?></div><?php endif; ?>
-            </td>
-            <td><?php echo str_repeat('★', (int) ($r['rating'] ?? 0)); ?></td>
-            <td><?php echo $e($r['comment'] ?? ''); ?></td>
-            <td>
-              <?php if (!empty($r['is_approved'])): ?>
-                <span class="pill approved">Approved</span>
-              <?php else: ?>
-                <span class="pill pending">Pending</span>
-              <?php endif; ?>
-            </td>
-            <td>
-              <form method="post" style="display:inline">
-                <input type="hidden" name="csrf_token" value="<?php echo $e($csrfToken); ?>">
-                <input type="hidden" name="action" value="review_toggle">
-                <input type="hidden" name="review_id" value="<?php echo (int) $r['id']; ?>">
-                <input type="hidden" name="approve" value="<?php echo !empty($r['is_approved']) ? '0' : '1'; ?>">
-                <button type="submit" class="secondary"><?php echo !empty($r['is_approved']) ? 'Hide' : 'Approve'; ?></button>
-              </form>
-            </td>
-          </tr>
-        <?php endforeach; ?>
-        </tbody>
-      </table>
-    <?php endif; ?>
-  </section>
-
-</div>
-
-<script>
-  // ---- Tabs ----
-  document.querySelectorAll('.tabs button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
-      history.replaceState(null, '', '#' + btn.dataset.tab);
-    });
-  });
-  // Open the tab in the URL hash on load (so post-save redirects land on the right tab).
-  if (location.hash) {
-    const tab = location.hash.slice(1);
-    const btn = document.querySelector('.tabs button[data-tab="' + tab + '"]');
-    if (btn) btn.click();
-  }
-
-  // ---- Generic repeater helper ----
-  function addRepeater(containerId, namePrefix, fields) {
-    const list = document.getElementById(containerId);
-    const idx = list.querySelectorAll('[data-block]').length;
-    const block = document.createElement('div');
-    block.className = 'repeater';
-    block.setAttribute('data-block', '');
-    let inner = '<div class="grid">';
-    fields.forEach(f => {
-      const isCheckbox = (f === 'is_primary' || f === 'is_inactive');
-      if (isCheckbox) {
-        inner += `<div class="field" style="display:flex;align-items:center;margin-top:24px;gap:8px">
-          <input type="checkbox" name="${namePrefix}[${idx}][${f}]" value="1">
-          <label style="margin:0">${f.replace('_',' ')}</label></div>`;
-      } else if (f === 'description' || f === 'quote') {
-        inner += `<div class="field" style="grid-column:1/-1"><label>${f}</label><textarea name="${namePrefix}[${idx}][${f}]"></textarea></div>`;
-      } else if (f === 'type') {
-        inner += `<div class="field"><label>type</label><select name="${namePrefix}[${idx}][type]">
-          <option value="phone">phone</option><option value="email">email</option>
-          <option value="address">address</option><option value="website">website</option>
-          <option value="whatsapp">whatsapp</option><option value="social">social</option></select></div>`;
-      } else {
-        inner += `<div class="field"><label>${f}</label><input type="text" name="${namePrefix}[${idx}][${f}]"></div>`;
-      }
-    });
-    inner += '</div><div class="row-actions"><button type="button" class="danger" onclick="this.closest(\'[data-block]\').remove()">Remove</button></div>';
-    block.innerHTML = inner;
-    list.appendChild(block);
-  }
-</script>
+<script src="https://academixsuite.com/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
+<script src="https://academixsuite.com/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>
+<script src="https://academixsuite.com/tenant/assets/js/lib/iconify-icon.min.js"></script>
+<script src="https://academixsuite.com/tenant/assets/js/app.js"></script>
 </body>
 </html>

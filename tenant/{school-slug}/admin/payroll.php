@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/includes/handlers/hrm-handler.php'; ?>
 <?php
 /**
  * Payroll List Page
@@ -62,7 +63,7 @@ if (!$isAuthenticated) {
 }
 
 // Get user info from session
-$schoolAuth = $_SESSION['school_auth'];
+$schoolAuth = $_SESSION['school_auth'] ?? [];
 $userId = (int)($schoolAuth['user_id'] ?? 0);
 $userType = $schoolAuth['user_type'] ?? '';
 

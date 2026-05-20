@@ -287,6 +287,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Get current user type for UI
 $selectedUserType = $_POST['user_type'] ?? 'admin';
+$tenantLoginLogoUrl = function_exists('school_logo_url')
+    ? school_logo_url($school)
+    : (!empty($school['logo_path']) ? '/' . ltrim((string) $school['logo_path'], '/') : '/tenant/assets/images/logo.png');
+$tenantLoginLogoAlt = !empty($school['name']) ? ($school['name'] . ' logo') : 'AcademixSuite';
+$tenantLoginTitle = !empty($school['name']) ? $school['name'] : 'School Portal';
 ?>
 <!-- meta tags and other links -->
 <!DOCTYPE html>
@@ -302,8 +307,8 @@ $selectedUserType = $_POST['user_type'] ?? 'admin';
     <meta name="robots" content="INDEX,FOLLOW">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Title -->
-    <title>School Portal Login | <?php echo defined('APP_NAME') ? APP_NAME : 'AcademixSuite'; ?></title>
-    <link rel="icon" type="image/png" href="https://academixsuite.com/tenant/assets/images/favicon.png" sizes="16x16">
+    <title><?php echo htmlspecialchars($tenantLoginTitle); ?> Login | <?php echo defined('APP_NAME') ? APP_NAME : 'AcademixSuite'; ?></title>
+    <link rel="icon" type="image/png" href="<?php echo htmlspecialchars($tenantLoginLogoUrl); ?>" sizes="16x16">
     <!-- remix icon font css  -->
     <link rel="stylesheet" href="assets/css/remixicon.css">
     <!-- BootStrap css -->
@@ -449,7 +454,7 @@ $selectedUserType = $_POST['user_type'] ?? 'admin';
         <div class="lg-w-50 px-24 py-32 d-flex justify-content-center align-items-center">
             <div class="max-w-540-px mx-auto">
                 <a href="./" class="">
-                    <img src="<?php echo htmlspecialchars(function_exists('academix_logo_url') ? academix_logo_url() : '/tenant/assets/images/logo.png'); ?>" alt="AcademixSuite" width="150">
+                    <img src="<?php echo htmlspecialchars($tenantLoginLogoUrl); ?>" alt="<?php echo htmlspecialchars($tenantLoginLogoAlt); ?>" width="150">
                 </a>
                 <div class="mt-32 mb-32">
                     <h1 class="h6 fw-bold text-primary-light mb-8">

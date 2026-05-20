@@ -555,6 +555,21 @@ function uploadFile($file, $type = 'image', $directory = '') {
 function sendEmail($to, $subject, $body, $attachments = []) {
     // In production, use PHPMailer or AWS SES
     // This is a simplified version
+    if (stripos((string)$body, 'tenant/assets/images/logo.png') === false) {
+        $logoUrl = function_exists('academix_logo_url')
+            ? academix_logo_url(true)
+            : rtrim((defined('APP_URL') ? APP_URL : 'https://www.academixsuite.com'), '/') . '/tenant/assets/images/logo.png';
+        $brand = defined('APP_NAME') ? APP_NAME : 'AcademixSuite';
+        $emailHeader = '<div style="background:#0f172a;padding:18px 22px;margin:0 0 24px 0;text-align:left;">'
+            . '<img src="' . htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8') . '" alt="' . htmlspecialchars($brand, ENT_QUOTES, 'UTF-8') . '" style="height:36px;width:auto;display:block;">'
+            . '</div>';
+
+        if (preg_match('/<body\b[^>]*>/i', (string)$body)) {
+            $body = preg_replace('/<body\b[^>]*>/i', '$0' . $emailHeader, (string)$body, 1);
+        } else {
+            $body = $emailHeader . (string)$body;
+        }
+    }
     
     $headers = "From: " . APP_NAME . " <noreply@" . parse_url(APP_URL, PHP_URL_HOST) . ">\r\n";
     $headers .= "Reply-To: support@" . parse_url(APP_URL, PHP_URL_HOST) . "\r\n";

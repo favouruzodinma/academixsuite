@@ -57,8 +57,6 @@ if (!isset($_SESSION['school_auth']) ||
 
 // Verify admin access
 $schoolAuth = $_SESSION['school_auth'];
-
-$currentPage = basename(__FILE__);
 $userId = $schoolAuth['user_id'] ?? 0;
 if ($schoolAuth['user_type'] !== 'admin') {
     error_log("ERROR: Non-admin user attempted access");
@@ -308,11 +306,7 @@ error_log("=== INVOICE VIEW PAGE END ===");
     <!-- Print Header (only visible when printing) -->
     <div class="print-only">
         <div class="text-center mb-4">
-            <?php if (!empty($school['logo_path'])): ?>
-                <img src="<?php echo htmlspecialchars($school['logo_path']); ?>" alt="<?php echo htmlspecialchars($school['name']); ?> logo" height="60">
-            <?php else: ?>
-                <img src="https://academixsuite.com/tenant/assets/images/logo.png" alt="AcademixSuite" height="60">
-            <?php endif; ?>
+            <img src="https://academixsuite.com/tenant/assets/images/logo.png" alt="AcademixSuite" height="60">
             <h2 class="mt-3">Invoice #<?php echo htmlspecialchars($invoice['invoice_number']); ?></h2>
             <p><?php echo htmlspecialchars($school['name']); ?></p>
             <hr>
@@ -322,11 +316,114 @@ error_log("=== INVOICE VIEW PAGE END ===");
     <div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
 
     <!-- Sidebar -->
-    <?php include_once('includes/sidebar.php'); ?>
-<main class="dashboard-main">
-        
-        <?php include_once('includes/header.php'); ?>
-</div>
+    <aside class="sidebar no-print">
+        <button type="button" class="sidebar-close-btn">
+            <iconify-icon icon="radix-icons:cross-2"></iconify-icon>
+        </button>
+        <div class="">
+            <div class="sidebar-logo d-flex align-items-center justify-content-between">
+                <a href="index.html" class="">
+                    <img src="https://academixsuite.com/tenant/assets/images/logo.png" alt="site logo" class="light-logo">
+                    <img src="https://academixsuite.com/tenant/assets/images/logo-light.png" alt="site logo" class="dark-logo">
+                    <img src="https://academixsuite.com/tenant/assets/images/logo-icon.png" alt="site logo" class="logo-icon">
+                </a>
+                <button type="button" class="text-xxl d-xl-flex d-none line-height-1 sidebar-toggle text-neutral-500" aria-label="Collapse Sidebar">
+                    <i class="ri-contract-left-line"></i>
+                </button>
+            </div>
+        </div>
+        <!-- User Info start -->
+        <div class="mx-16 py-12">
+            <div class="dropdown profile-dropdown">
+                <button type="button" class="profile-dropdown__button d-flex align-items-center justify-content-between p-10 w-100 overflow-hidden bg-neutral-50 radius-12" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                    <span class="d-flex align-items-start gap-10">
+                        <img src="<?php echo !empty($adminUser['profile_photo']) ? htmlspecialchars($adminUser['profile_photo']) : 'https://academixsuite.com/tenant/assets/images/thumbs/leave-request-img2.png'; ?>" alt="Thumbnail" class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
+                        <span class="profile-dropdown__contents">
+                            <span class="h6 mb-0 text-md d-block text-primary-light"><?php echo htmlspecialchars($adminUser['name']); ?></span>
+                            <span class="text-secondary-light text-sm mb-0 d-block"><?php echo htmlspecialchars($adminUser['role_name']); ?></span>
+                        </span>
+                    </span>
+                    <span class="profile-dropdown__icon pe-8 text-xl d-flex line-height-1">
+                        <i class="ri-arrow-right-s-line"></i>
+                    </span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
+                    <li>
+                        <a href="profile.html" class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
+                            <i class="ri-user-3-line"></i>
+                            My Profile
+                        </a>
+                    </li>
+                    <li>
+                        <a href="general.html" class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
+                            <i class="ri-settings-3-line"></i>
+                            Setting
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../../logout.php?school_slug=<?php echo urlencode($schoolSlug); ?>" class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
+                            <i class="ri-shut-down-line"></i>
+                            Log Out
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- User Info end -->
+        <div class="sidebar-menu-area">
+            <ul class="sidebar-menu" id="sidebar-menu">
+                <!-- Sidebar menu items (same as subscription page) -->
+                <li class="dropdown">
+                    <a href="javascript:void(0)">
+                        <i class="ri-home-4-line"></i>
+                        <span>Dashboard </span>
+                    </a>
+                    <ul class="sidebar-submenu">
+                        <li><a href="index.html"><i class="ri-circle-fill circle-icon w-auto"></i>School</a></li>
+                        <li><a href="index-2.html"><i class="ri-circle-fill circle-icon w-auto"></i>Student</a></li>
+                        <li><a href="index-3.html"><i class="ri-circle-fill circle-icon w-auto"></i>Teacher</a></li>
+                        <li><a href="index-4.html"><i class="ri-circle-fill circle-icon w-auto"></i>Parent</a></li>
+                        <li><a href="index-5.html"><i class="ri-circle-fill circle-icon w-auto"></i>LMS</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a href="javascript:void(0)">
+                        <i class="ri-graduation-cap-line"></i>
+                        <span>Students</span>
+                    </a>
+                    <ul class="sidebar-submenu">
+                        <li><a href="add-new-student.html"><i class="ri-circle-fill circle-icon w-auto"></i>Add New Student</a></li>
+                        <li><a href="student-list.html"><i class="ri-circle-fill circle-icon w-auto"></i>Student List</a></li>
+                        <li><a href="suspended-student.html"><i class="ri-circle-fill circle-icon w-auto"></i>Suspend Student</a></li>
+                        <li><a href="student-category.html"><i class="ri-circle-fill circle-icon w-auto"></i>Student Categories</a></li>
+                        <li><a href="edit-student.html"><i class="ri-circle-fill circle-icon w-auto"></i>Edit Student</a></li>
+                        <li><a href="student-details.html"><i class="ri-circle-fill circle-icon w-auto"></i>Student Details</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="subscription-plan.php" class="active">
+                        <i class="ri-price-tag-3-line"></i>
+                        <span>Subscription Plan</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <main class="dashboard-main">
+        <div class="navbar-header shadow-1 no-print">
+            <div class="row align-items-center justify-content-between">
+                <div class="col-auto">
+                    <div class="d-flex flex-wrap align-items-center gap-4">
+                        <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
+                            <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
+                        </button>
+                        <form class="navbar-search">
+                            <input type="text" class="bg-transparent" name="search" placeholder="Search...">
+                            <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                        </form>
+                    </div>
+                </div>
                 <div class="col-auto">
                     <div class="d-flex flex-wrap align-items-center gap-3">
                         <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
@@ -399,7 +496,7 @@ error_log("=== INVOICE VIEW PAGE END ===");
                                     <div class="border p-20 radius-12 bg-neutral-50">
                                         <span class="invoice-detail-label">To</span>
                                         <h5 class="mb-4"><?php echo htmlspecialchars($school['name']); ?></h5>
-                                        <p class="text-secondary-light mb-8"><?php echo htmlspecialchars($school['email']); ?></p>
+                                        <p class="text-secondary-light mb-8"><?php echo htmlspecialchars($school['email'] ?? $school['school_email'] ?? 'N/A'); ?></p>
                                         <p class="text-secondary-light mb-0"><?php echo htmlspecialchars($school['address'] ?? 'N/A'); ?></p>
                                     </div>
                                 </div>

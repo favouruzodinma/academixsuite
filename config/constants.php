@@ -21,7 +21,7 @@ define('APP_VERSION', '1.0.0');
 define('APP_ENV', IS_LOCAL ? 'development' : 'production');
 define('APP_DEBUG', IS_LOCAL);
 define('APP_URL', IS_LOCAL ? 'http://localhost/academixsuite' : 'https://www.academixsuite.com');
-define('APP_LOGO', APP_URL . '/assets/images/logo.png');
+define('APP_LOGO', APP_URL . '/tenant/assets/images/logo.png');
 
 // File Upload Constants
 define('MAX_UPLOAD_SIZE', 10 * 1024 * 1024); // 10MB

@@ -529,12 +529,15 @@ try {
             $reviewError = 'Reviews are not available right now.';
         } else {
             $parentName  = trim(strip_tags((string) ($_POST['review_parent_name']  ?? '')));
+            $parentEmail = trim(strip_tags((string) ($_POST['review_parent_email'] ?? '')));
             $studentName = trim(strip_tags((string) ($_POST['review_student_name'] ?? '')));
             $rating      = (int) ($_POST['review_rating']  ?? 0);
             $comment     = trim(strip_tags((string) ($_POST['review_comment']     ?? '')));
 
             if ($parentName === '' || $comment === '') {
                 $reviewError = 'Please enter your name and a short comment.';
+            } elseif ($parentEmail === '' || !filter_var($parentEmail, FILTER_VALIDATE_EMAIL)) {
+                $reviewError = 'Please enter a valid email address.';
             } elseif ($rating < 1 || $rating > 5) {
                 $reviewError = 'Please choose a rating from 1 to 5.';
             } elseif (mb_strlen($comment) > 1000) {
@@ -543,13 +546,17 @@ try {
                 try {
                     // Cheap dedupe — same IP can post one review per school per hour.
                     $ip = $_SERVER['REMOTE_ADDR'] ?? '';
-                    $dup = $platformDb->prepare(
-                        "SELECT 1 FROM school_reviews
-                         WHERE school_id = ? AND submitter_ip = ?
-                         AND created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
-                         LIMIT 1"
-                    );
-                    try { $dup->execute([$school['id'], $ip]); } catch (Throwable $eDup) { /* submitter_ip column may not exist */ }
+                    try {
+                        $dup = $platformDb->prepare(
+                            "SELECT 1 FROM school_reviews
+                             WHERE school_id = ? AND submitter_ip = ?
+                             AND created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+                             LIMIT 1"
+                        );
+                        $dup->execute([$school['id'], $ip]);
+                    } catch (Throwable $eDup) {
+                        // submitter_ip exists only on newer installs.
+                    }
 
                     $reviewColumns = (function () use ($platformDb) {
                         try {
@@ -558,7 +565,7 @@ try {
                     })();
 
                     $cols = array_values(array_filter(
-                        ['school_id', 'parent_name', 'student_name', 'rating', 'comment', 'is_approved', 'submitter_ip', 'created_at'],
+                        ['school_id', 'parent_name', 'parent_email', 'student_name', 'rating', 'comment', 'is_approved', 'submitter_ip', 'created_at'],
                         fn ($c) => $c === 'school_id' || $c === 'created_at' || in_array($c, $reviewColumns, true)
                     ));
                     $vals = [];
@@ -567,6 +574,7 @@ try {
                         switch ($c) {
                             case 'school_id':    $vals[] = $school['id']; $placeholders[] = '?'; break;
                             case 'parent_name':  $vals[] = $parentName;  $placeholders[] = '?'; break;
+                            case 'parent_email': $vals[] = $parentEmail; $placeholders[] = '?'; break;
                             case 'student_name': $vals[] = $studentName; $placeholders[] = '?'; break;
                             case 'rating':       $vals[] = $rating;      $placeholders[] = '?'; break;
                             case 'comment':      $vals[] = $comment;     $placeholders[] = '?'; break;
@@ -2126,12 +2134,15 @@ foreach ($events as $event) {
                         <input type="hidden" name="csrf_token" value="<?php echo school_profile_e($csrfToken); ?>">
                         <input type="hidden" name="review_submit" value="1">
                         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
-                            <label>Your name *
-                                <input type="text" name="review_parent_name" required maxlength="120" style="display:block;width:100%;margin-top:4px;padding:10px;border:1px solid var(--line);border-radius:10px;">
-                            </label>
-                            <label>Student's name (optional)
-                                <input type="text" name="review_student_name" maxlength="120" style="display:block;width:100%;margin-top:4px;padding:10px;border:1px solid var(--line);border-radius:10px;">
-                            </label>
+	                            <label>Your name *
+	                                <input type="text" name="review_parent_name" required maxlength="120" style="display:block;width:100%;margin-top:4px;padding:10px;border:1px solid var(--line);border-radius:10px;">
+	                            </label>
+	                            <label>Your email *
+	                                <input type="email" name="review_parent_email" required maxlength="180" style="display:block;width:100%;margin-top:4px;padding:10px;border:1px solid var(--line);border-radius:10px;">
+	                            </label>
+	                            <label>Student's name (optional)
+	                                <input type="text" name="review_student_name" maxlength="120" style="display:block;width:100%;margin-top:4px;padding:10px;border:1px solid var(--line);border-radius:10px;">
+	                            </label>
                         </div>
                         <label>Rating *
                             <select name="review_rating" required style="display:block;width:200px;margin-top:4px;padding:10px;border:1px solid var(--line);border-radius:10px;">

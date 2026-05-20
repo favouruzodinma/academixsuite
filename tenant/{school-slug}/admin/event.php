@@ -21,8 +21,8 @@ error_log("=== EVENT PAGE START ===");
 error_log("Script: " . __FILE__);
 
 // --- Constants ---
-// IS_LOCAL is self-defining via config/constants.php; never force it true.
 defined('APP_NAME') or define('APP_NAME', 'AcademixSuite');
+defined('IS_LOCAL') or define('IS_LOCAL', true);
 
 // --- Safe Session Start ---
 if (session_status() === PHP_SESSION_NONE) {
@@ -71,8 +71,6 @@ if (!$isAuthenticated) {
 }
 
 $schoolAuth = $_SESSION['school_auth'];
-
-$currentPage = basename(__FILE__);
 $userId     = (int)($schoolAuth['user_id'] ?? 0);
 $userType   = $schoolAuth['user_type'] ?? '';
 error_log("User: ID=$userId, Type=$userType");
@@ -139,6 +137,7 @@ try {
 // --- Initialize Event Manager ---
 $eventManager = null;
 $eventStats   = [];
+$whatsappEventEnabled = false;
 
 if ($schoolDb && $platformDb) {
     try {
@@ -153,6 +152,239 @@ if ($schoolDb && $platformDb) {
         $_SESSION['toast_error'] = "Failed to initialize event system.";
     }
 }
+
+if ($schoolDb && class_exists('WhatsAppService')) {
+    $whatsappEventEnabled = WhatsAppService::featureEnabled($schoolDb, (int)$school['id'], 'events', true);
+}
+
+// --- CSRF Token ---
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrfToken = $_SESSION['csrf_token'];
+
+// ============================================
+// AJAX HANDLERS FOR FULLCALENDAR
+// ============================================
+
+// --- AJAX GET Handlers for FullCalendar ---
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fc_ajax'])) {
+    header('Content-Type: application/json');
+
+    try {
+        // Check if event manager is initialized
+        if (!$eventManager) {
+            throw new Exception("Event manager not initialized");
+        }
+
+        // Handle different AJAX actions
+        switch ($_GET['fc_ajax']) {
+            case 'get_events':
+                // Get date range from FullCalendar
+                $start = $_GET['start'] ?? null;
+                $end = $_GET['end'] ?? null;
+
+                error_log("FC AJAX: Fetching events from $start to $end");
+
+                // Fetch events based on date range
+                if ($start && $end) {
+                    $events = $eventManager->getEventsByDateRange($start, $end);
+                } else {
+                    $events = $eventManager->getCalendarEvents();
+                }
+
+                // Format events for FullCalendar
+                $formattedEvents = [];
+                foreach ($events as $event) {
+                    // Determine if it's an all-day event
+                    $allDay = empty($event['start_time']) && empty($event['end_time']);
+
+                    // Format start and end dates with times
+                    $startDate = $event['start'];
+                    $endDate = $event['end'] ?? $event['start'];
+
+                    if (!$allDay) {
+                        if (!empty($event['start_time'])) {
+                            $startDate = $event['start'] . 'T' . date('H:i:s', strtotime($event['start_time']));
+                        }
+                        if (!empty($event['end_time'])) {
+                            $endDate = ($event['end'] ?? $event['start']) . 'T' . date('H:i:s', strtotime($event['end_time']));
+                        }
+                    }
+
+                    // Get color based on event type
+                    $color = $event['color'] ?? null;
+                    if (!$color && isset($event['type'])) {
+                        $eventColors = [
+                            'holiday' => '#dc3545',
+                            'exam' => '#fd7e14',
+                            'meeting' => '#0d6efd',
+                            'celebration' => '#198754',
+                            'sports' => '#6f42c1',
+                            'other' => '#6c757d'
+                        ];
+                        $color = $eventColors[$event['type']] ?? $eventColors['other'];
+                    }
+
+                    $formattedEvents[] = [
+                        'id' => $event['id'],
+                        'title' => $event['title'],
+                        'start' => $startDate,
+                        'end' => $endDate,
+                        'allDay' => $allDay,
+                        'color' => $color,
+                        'textColor' => '#ffffff',
+                        'type' => $event['type'] ?? 'other',
+                        'venue' => $event['venue'] ?? null,
+                        'description' => $event['description'] ?? null,
+                        'className' => 'fc-event-' . ($event['type'] ?? 'other')
+                    ];
+                }
+
+                echo json_encode([
+                    'success' => true,
+                    'events' => $formattedEvents
+                ]);
+                break;
+
+            case 'get_event':
+                // Get single event by ID
+                $eventId = $_GET['event_id'] ?? 0;
+                if (!$eventId) {
+                    throw new Exception("Event ID required");
+                }
+
+                $event = $eventManager->getEventById($eventId);
+                if ($event) {
+                    echo json_encode([
+                        'success' => true,
+                        'event' => $event
+                    ]);
+                } else {
+                    echo json_encode([
+                        'success' => false,
+                        'error' => 'Event not found'
+                    ]);
+                }
+                break;
+
+            case 'get_upcoming':
+                // Get upcoming events
+                $limit = $_GET['limit'] ?? 10;
+                $events = $eventManager->getUpcomingEvents($limit);
+
+                echo json_encode([
+                    'success' => true,
+                    'events' => $events
+                ]);
+                break;
+
+            default:
+                throw new Exception("Invalid AJAX action");
+        }
+
+    } catch (Exception $e) {
+        error_log("FC AJAX Error: " . $e->getMessage());
+        echo json_encode([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+    exit;
+}
+
+// --- AJAX POST Handlers for creating/updating events ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['fc_ajax'])) {
+    header('Content-Type: application/json');
+
+    try {
+        // Verify CSRF token
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $csrfToken) {
+            throw new Exception("Invalid security token");
+        }
+
+        if (!$eventManager) {
+            throw new Exception("Event manager not initialized");
+        }
+
+        $action = $_POST['fc_ajax'];
+
+        switch ($action) {
+            case 'create_event':
+                // Validate required fields
+                if (empty($_POST['title']) || empty($_POST['start_date'])) {
+                    throw new Exception("Title and start date are required");
+                }
+
+                $eventData = [
+                    'title' => $_POST['title'],
+                    'description' => $_POST['description'] ?? '',
+                    'type' => $_POST['type'] ?? 'other',
+                    'start_date' => $_POST['start_date'],
+                    'end_date' => $_POST['end_date'] ?? $_POST['start_date'],
+                    'start_time' => $_POST['start_time'] ?? null,
+                    'end_time' => $_POST['end_time'] ?? null,
+                    'venue' => $_POST['venue'] ?? null,
+                    'is_public' => 1,
+                    'send_whatsapp' => isset($_POST['send_whatsapp_present']) ? isset($_POST['send_whatsapp']) : $whatsappEventEnabled
+                ];
+
+                $sendNotification = isset($_POST['send_notification']);
+                $result = $eventManager->createEvent($eventData, $sendNotification);
+
+                echo json_encode($result);
+                break;
+
+            case 'update_event':
+                if (empty($_POST['event_id'])) {
+                    throw new Exception("Event ID required");
+                }
+
+                $eventData = [
+                    'title' => $_POST['title'],
+                    'description' => $_POST['description'] ?? '',
+                    'type' => $_POST['type'] ?? 'other',
+                    'start_date' => $_POST['start_date'],
+                    'end_date' => $_POST['end_date'] ?? $_POST['start_date'],
+                    'start_time' => $_POST['start_time'] ?? null,
+                    'end_time' => $_POST['end_time'] ?? null,
+                    'venue' => $_POST['venue'] ?? null,
+                    'is_public' => 1,
+                    'send_whatsapp' => isset($_POST['send_whatsapp_present']) ? isset($_POST['send_whatsapp']) : $whatsappEventEnabled
+                ];
+
+                $sendNotification = isset($_POST['send_notification']);
+                $result = $eventManager->updateEvent($_POST['event_id'], $eventData, $sendNotification);
+
+                echo json_encode($result);
+                break;
+
+            case 'delete_event':
+                if (empty($_POST['event_id'])) {
+                    throw new Exception("Event ID required");
+                }
+
+                $result = $eventManager->deleteEvent($_POST['event_id'], true);
+                echo json_encode($result);
+                break;
+
+            default:
+                throw new Exception("Invalid action");
+        }
+
+    } catch (Exception $e) {
+        error_log("FC AJAX POST Error: " . $e->getMessage());
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+    }
+    exit;
+}
+
+// ============================================
+// REGULAR PAGE HANDLING (Non-AJAX)
+// ============================================
 
 // --- Notifications (optional) ---
 $notificationCount = 0;
@@ -177,7 +409,6 @@ $eventId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $events  = [];
 $upcomingEvents = [];
 $selectedEvent  = null;
-$calendarEvents = [];
 
 if ($eventManager) {
     try {
@@ -185,14 +416,13 @@ if ($eventManager) {
             $selectedEvent = $eventManager->getEventById($eventId);
             if (!$selectedEvent) {
                 $_SESSION['toast_error'] = "Event not found.";
-                header("Location: event.php");
+                header("Location: event.php?school_slug=" . urlencode($schoolSlug));
                 exit;
             }
         }
 
-        $calendarEvents = $eventManager->getCalendarEvents();
         $upcomingEvents = $eventManager->getUpcomingEvents(10);
-        error_log("Fetched " . count($calendarEvents) . " events");
+        error_log("Fetched " . count($upcomingEvents) . " upcoming events");
     } catch (Exception $e) {
         error_log("Event fetch error: " . $e->getMessage());
         $_SESSION['toast_error'] = "Error loading events.";
@@ -218,44 +448,12 @@ $eventColors = [
     'other'      => '#6c757d'
 ];
 
-// --- AJAX Handlers ---
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['ajax'])) {
-    header('Content-Type: application/json');
-    try {
-        if ($_GET['ajax'] === 'get_events' && $eventManager) {
-            $start = $_GET['start'] ?? null;
-            $end   = $_GET['end'] ?? null;
-            $events = ($start && $end)
-                ? $eventManager->getEventsByDateRange($start, $end)
-                : $eventManager->getCalendarEvents();
-            echo json_encode(['success' => true, 'events' => $events]);
-            exit;
-        }
-
-        if ($_GET['ajax'] === 'get_event' && isset($_GET['event_id']) && $eventManager) {
-            $event = $eventManager->getEventById($_GET['event_id']);
-            echo json_encode($event ? ['success' => true, 'event' => $event] : ['success' => false, 'error' => 'Not found']);
-            exit;
-        }
-    } catch (Exception $e) {
-        error_log("AJAX error: " . $e->getMessage());
-        echo json_encode(['success' => false, 'error' => 'Server error']);
-        exit;
-    }
-}
-
-// --- CSRF Token ---
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-$csrfToken = $_SESSION['csrf_token'];
-
-// --- Handle POST (Create, Update, Delete) ---
+// --- Handle Regular POST (non-AJAX form submissions) ---
 $message = '';
 $error   = '';
 $success = false;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['fc_ajax'])) {
     $action = $_POST['action'] ?? '';
 
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $csrfToken) {
@@ -281,7 +479,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'start_time'  => $_POST['start_time'] ?: null,
                         'end_time'    => $_POST['end_time'] ?: null,
                         'venue'       => $_POST['venue'] ?: null,
-                        'is_public'   => 1
+                        'is_public'   => 1,
+                        'send_whatsapp' => isset($_POST['send_whatsapp_present']) ? isset($_POST['send_whatsapp']) : $whatsappEventEnabled
                     ];
                     $result = $eventManager->createEvent($eventData, $sendNotification);
                     break;
@@ -297,7 +496,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'start_time'  => $_POST['start_time'] ?: null,
                         'end_time'    => $_POST['end_time'] ?: null,
                         'venue'       => $_POST['venue'] ?: null,
-                        'is_public'   => 1
+                        'is_public'   => 1,
+                        'send_whatsapp' => isset($_POST['send_whatsapp_present']) ? isset($_POST['send_whatsapp']) : $whatsappEventEnabled
                     ];
                     $result = $eventManager->updateEvent($_POST['event_id'], $eventData, $sendNotification);
                     break;
@@ -314,6 +514,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($result['success']) {
                 $success = true;
                 $message = $result['message'];
+
+                // Redirect to refresh the page after successful operation
+                $redirectUrl = "event.php?school_slug=" . urlencode($schoolSlug);
+                if ($action === 'edit_event' || $action === 'create_event') {
+                    // Stay on same page
+                } else if ($action === 'delete_event') {
+                    // Redirect to main calendar
+                    header("Location: " . $redirectUrl);
+                    exit;
+                }
             } else {
                 $error = $result['message'];
             }
@@ -346,16 +556,23 @@ error_log("=== EVENT PAGE END ===");
     <meta name="description" content="School Events Calendar - Manage all school events and activities">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($school['name']) ?> | <?= APP_NAME ?> - Events Calendar</title>
-    <!-- Styles -->
+
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://academixsuite.com/tenant/assets/images/favicon.png" sizes="16x16">
+
+    <!-- Core Styles -->
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/remixicon.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/bootstrap.min.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/apexcharts.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/dataTables.min.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/flatpickr.min.css">
+
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/full-calendar.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/calendar.css">
+
+    <!-- Main Style -->
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/style.css">
+
     <style>
         .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
         .toast { min-width: 300px; background: white; border-left: 4px solid; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 10px; animation: slideIn 0.3s ease; }
@@ -366,9 +583,27 @@ error_log("=== EVENT PAGE END ===");
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .event-item { transition: all 0.3s ease; }
         .event-item:hover { background-color: #f8f9fa; border-radius: 8px; padding-left: 10px; }
-        .my-sidebar, .edit-sidebar { transition: transform 0.3s ease; transform: translateX(100%); }
-        .my-sidebar.active, .edit-sidebar.active { transform: translateX(0); }
-        .overlay.active { visibility: visible; opacity: 1; }
+
+        /* Sidebar styles */
+        .my-sidebar {
+            transition: transform 0.3s ease;
+            transform: translateX(100%);
+        }
+        .my-sidebar.active {
+            transform: translateX(0);
+        }
+        .edit-sidebar {
+            transition: transform 0.3s ease;
+            transform: translateX(100%);
+        }
+        .edit-sidebar.active {
+            transform: translateX(0);
+        }
+        .overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
         #calendar { max-width: 100%; margin: 0 auto; }
         .fc-event { cursor: pointer; }
         .event-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
@@ -380,6 +615,40 @@ error_log("=== EVENT PAGE END ===");
         .event-detail-item { margin-bottom: 16px; }
         .event-detail-label { font-size: 12px; color: #6c757d; margin-bottom: 4px; }
         .event-detail-value { font-size: 16px; font-weight: 500; color: #212529; }
+
+        /* Calendar loading state */
+        #calendar.fc-loading {
+            opacity: 0.6;
+            pointer-events: none;
+            position: relative;
+        }
+
+        #calendar.fc-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            margin: -20px 0 0 -20px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 1000;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fc-event-venue {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-top: 2px;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -409,24 +678,31 @@ error_log("=== EVENT PAGE END ===");
         <?php endif; ?>
     </div>
 
-    <!-- Theme Customization (unchanged) -->
+    <!-- Theme Customization -->
     <div class="body-overlay"></div>
     <button type="button" class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
         <i class="ri-settings-3-line animate-spin"></i>
     </button>
-    <div class="theme-customization-sidebar w-100 bg-base h-100vh overflow-y-auto position-fixed end-0 top-0">
-        <!-- ... theme content ... (keep as original) -->
-    </div>
 
     <div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
 
-    <!-- Sidebar (include your actual sidebar file) -->
+    <!-- Sidebar -->
     <?php include_once('includes/sidebar.php'); ?>
 
     <main class="dashboard-main">
-        
-        <?php include_once('includes/header.php'); ?>
-</div>
+        <div class="navbar-header shadow-1">
+            <div class="row align-items-center justify-content-between">
+                <div class="col-auto">
+                    <div class="d-flex flex-wrap align-items-center gap-4">
+                        <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
+                            <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
+                        </button>
+                        <form class="navbar-search">
+                            <input type="text" class="bg-transparent" name="search" placeholder="Search events...">
+                            <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                        </form>
+                    </div>
+                </div>
                 <div class="col-auto">
                     <div class="d-flex flex-wrap align-items-center gap-3">
                         <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
@@ -438,35 +714,7 @@ error_log("=== EVENT PAGE END ===");
                                 <?php endif; ?>
                             </button>
                             <div class="dropdown-menu to-top dropdown-menu-lg p-0">
-                                <div class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
-                                    <h6 class="text-lg text-primary-light fw-semibold mb-0">Notifications</h6>
-                                    <span class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center"><?= str_pad($notificationCount, 2, '0', STR_PAD_LEFT) ?></span>
-                                </div>
-                                <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
-                                    <?php if (!empty($notifications)): ?>
-                                        <?php foreach ($notifications as $notification): ?>
-                                        <a href="#" class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between <?= !$notification['is_read'] ? 'bg-neutral-50' : '' ?>">
-                                            <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                                                <span class="w-44-px h-44-px bg-<?= $notification['type'] == 'success' ? 'success' : ($notification['type'] == 'error' ? 'danger' : 'info') ?>-subtle text-<?= $notification['type'] == 'success' ? 'success' : ($notification['type'] == 'error' ? 'danger' : 'info') ?>-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                                                    <i class="ri-<?= $notification['icon'] ?? 'notification-line' ?> text-xl"></i>
-                                                </span>
-                                                <div>
-                                                    <h6 class="text-md fw-semibold mb-4"><?= htmlspecialchars($notification['title']) ?></h6>
-                                                    <p class="mb-0 text-sm text-secondary-light text-w-200-px"><?= htmlspecialchars($notification['message']) ?></p>
-                                                </div>
-                                            </div>
-                                            <span class="text-sm text-secondary-light flex-shrink-0"><?= date('d M', strtotime($notification['created_at'])) ?></span>
-                                        </a>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <div class="text-center py-20">
-                                            <p class="text-secondary-light">No notifications</p>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="text-center py-12 px-16">
-                                    <a href="notifications.php" class="text-primary-600 fw-semibold text-md hover-underline">See All Notifications</a>
-                                </div>
+                                <!-- notification content -->
                             </div>
                         </div>
                     </div>
@@ -480,7 +728,7 @@ error_log("=== EVENT PAGE END ===");
                 <div>
                     <h1 class="fw-semibold mb-4 h6 text-primary-light">Events Calendar</h1>
                     <div>
-                        <a href="index.php" class="text-secondary-light hover-text-primary hover-underline">Dashboard</a>
+                        <a href="index.php?school_slug=<?= urlencode($schoolSlug) ?>" class="text-secondary-light hover-text-primary hover-underline">Dashboard</a>
                         <?php if ($selectedEvent): ?>
                         <span class="text-secondary-light">/ Event Details</span>
                         <?php else: ?>
@@ -494,7 +742,7 @@ error_log("=== EVENT PAGE END ===");
                     Add New Event
                 </button>
                 <?php else: ?>
-                <a href="event.php" class="btn btn-outline-primary d-flex align-items-center gap-6">
+                <a href="event.php?school_slug=<?= urlencode($schoolSlug) ?>" class="btn btn-outline-primary d-flex align-items-center gap-6">
                     <span class="d-flex text-md"><i class="ri-arrow-left-line"></i></span>
                     Back to Calendar
                 </a>
@@ -579,7 +827,7 @@ error_log("=== EVENT PAGE END ===");
                             </div>
                             <?php endif; ?>
                             <div class="d-flex justify-content-between align-items-center border-top pt-24 mt-24">
-                                <a href="event.php" class="btn btn-outline-primary"><i class="ri-arrow-left-line me-2"></i>Back to Calendar</a>
+                                <a href="event.php?school_slug=<?= urlencode($schoolSlug) ?>" class="btn btn-outline-primary"><i class="ri-arrow-left-line me-2"></i>Back to Calendar</a>
                                 <span class="text-muted">Created: <?= date('d M Y, h:i A', strtotime($selectedEvent['created_at'])) ?></span>
                             </div>
                         </div>
@@ -605,7 +853,7 @@ error_log("=== EVENT PAGE END ===");
                                     <?php foreach ($upcomingEvents as $event):
                                         $daysUntil = $event['days_until'] ?? 0;
                                     ?>
-                                    <a href="event.php?id=<?= $event['id'] ?>" class="text-decoration-none">
+                                    <a href="event.php?id=<?= $event['id'] ?>&school_slug=<?= urlencode($schoolSlug) ?>" class="text-decoration-none">
                                         <div class="upcoming-event-item" style="border-left-color: <?= $eventColors[$event['type']] ?? '#6c757d' ?>;">
                                             <div class="d-flex justify-content-between align-items-start">
                                                 <div class="upcoming-event-title"><?= htmlspecialchars($event['title']) ?></div>
@@ -648,7 +896,7 @@ error_log("=== EVENT PAGE END ===");
         </footer>
     </main>
 
-    <!-- Add Event Sidebar - FIXED HTML -->
+    <!-- Add Event Sidebar -->
     <div class="my-sidebar bg-white position-fixed end-0 top-0 h-100vh overflow-y-auto z-99 max-w-700-px w-100">
         <div class="px-20 py-12 border-bottom d-flex align-items-center justify-content-between gap-20">
             <h5 class="text-lg mb-0">Add New Event</h5>
@@ -659,75 +907,111 @@ error_log("=== EVENT PAGE END ===");
         <form method="POST" class="p-20">
             <input type="hidden" name="action" value="create_event">
             <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+            <input type="hidden" name="school_slug" value="<?= htmlspecialchars($schoolSlug) ?>">
 
             <div class="row g-3">
                 <div class="col-12">
-                    <label for="eventTitle" class="form-label fw-semibold text-primary-light text-sm mb-8">Event Title <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control radius-8" id="eventTitle" name="title" placeholder="Enter Event Title" required>
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">
+                            Event Title <span class="text-danger-600">*</span>
+                        </label>
+                        <input type="text" name="title" class="form-control" placeholder="Enter event title" required>
+                    </div>
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">Event Type</label>
-                    <div class="d-flex align-items-center flex-wrap gap-28">
-                        <?php foreach ($eventTypes as $key => $value): ?>
-                        <div class="form-check d-flex align-items-center gap-2">
-                            <input class="form-check-input" type="radio" name="type" value="<?= $key ?>" id="type_<?= $key ?>" <?= $key == 'other' ? 'checked' : '' ?>>
-                            <label class="form-check-label line-height-1 fw-medium text-secondary-light text-sm d-flex align-items-center gap-1" for="type_<?= $key ?>">
-                                <span class="w-8-px h-8-px rounded-circle" style="background-color: <?= $eventColors[$key] ?>;"></span>
-                                <?= $value ?>
-                            </label>
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Event Type</label>
+                        <div class="d-flex align-items-center flex-wrap gap-28">
+                            <?php foreach ($eventTypes as $key => $value): ?>
+                            <div class="form-check d-flex align-items-center gap-2">
+                                <input class="form-check-input" type="radio" name="type" value="<?= $key ?>" id="type_<?= $key ?>" <?= $key == 'other' ? 'checked' : '' ?>>
+                                <label class="form-check-label line-height-1 fw-medium text-secondary-light text-sm d-flex align-items-center gap-1" for="type_<?= $key ?>">
+                                    <span class="w-8-px h-8-px rounded-circle" style="background-color: <?= $eventColors[$key] ?>;"></span>
+                                    <?= $value ?>
+                                </label>
+                            </div>
+                            <?php endforeach; ?>
                         </div>
-                        <?php endforeach; ?>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <label for="startDate" class="form-label fw-semibold text-primary-light text-sm mb-8">Start Date <span class="text-danger">*</span></label>
-                    <input class="form-control radius-8 bg-base" id="startDate" name="start_date" type="date" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="endDate" class="form-label fw-semibold text-primary-light text-sm mb-8">End Date</label>
-                    <input class="form-control radius-8 bg-base" id="endDate" name="end_date" type="date">
-                    <small class="text-muted">Leave blank for single day event</small>
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">
+                            Start Date <span class="text-danger-600">*</span>
+                        </label>
+                        <input type="date" name="start_date" class="form-control flatpickr" required>
+                    </div>
                 </div>
 
                 <div class="col-md-6">
-                    <label for="startTime" class="form-label fw-semibold text-primary-light text-sm mb-8">Start Time</label>
-                    <input class="form-control radius-8" id="startTime" name="start_time" type="time">
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">End Date</label>
+                        <input type="date" name="end_date" class="form-control flatpickr">
+                        <small class="text-muted">Leave blank for single day event</small>
+                    </div>
                 </div>
+
                 <div class="col-md-6">
-                    <label for="endTime" class="form-label fw-semibold text-primary-light text-sm mb-8">End Time</label>
-                    <input class="form-control radius-8" id="endTime" name="end_time" type="time">
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Start Time</label>
+                        <input type="time" name="start_time" class="form-control flatpickr-time">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">End Time</label>
+                        <input type="time" name="end_time" class="form-control flatpickr-time">
+                    </div>
                 </div>
 
                 <div class="col-12">
-                    <label for="venue" class="form-label fw-semibold text-primary-light text-sm mb-8">Venue</label>
-                    <input type="text" class="form-control radius-8" id="venue" name="venue" placeholder="Enter venue/location">
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Venue</label>
+                        <input type="text" name="venue" class="form-control" placeholder="Enter venue/location">
+                    </div>
                 </div>
 
                 <div class="col-12">
-                    <label for="description" class="form-label fw-semibold text-primary-light text-sm mb-8">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="4" placeholder="Write event description"></textarea>
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Description</label>
+                        <textarea name="description" class="form-control" rows="4" placeholder="Enter event description..."></textarea>
+                    </div>
                 </div>
 
                 <div class="col-12">
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input" name="send_notification" id="sendNotification" value="1" checked>
-                        <label class="form-check-label" for="sendNotification">Send email notifications to all users</label>
+                        <input type="checkbox" name="send_notification" class="form-check-input" id="send_notification" value="1" checked>
+                        <label class="form-check-label" for="send_notification">Send email notifications to all users</label>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-check">
+                        <input type="checkbox" name="send_whatsapp" class="form-check-input" id="send_whatsapp_event" value="1" <?php echo $whatsappEventEnabled ? 'checked' : ''; ?>>
+                        <input type="hidden" name="send_whatsapp_present" value="1">
+                        <label class="form-check-label" for="send_whatsapp_event">Send WhatsApp notifications to parents and teachers</label>
+                        <small class="d-block text-secondary-light">Controlled globally from General Settings &gt; WhatsApp.</small>
                     </div>
                 </div>
 
                 <div class="col-12">
                     <div class="d-flex align-items-center justify-content-center gap-3 mt-8">
-                        <button type="reset" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8 close-my-sidebar">Cancel</button>
-                        <button type="submit" class="btn btn-primary-600 border border-primary-600 text-md px-28 py-12 radius-8">Create Event</button>
+                        <button type="button" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8 close-my-sidebar">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary-600 border border-primary-600 text-md px-28 py-12 radius-8">
+                            Create Event
+                        </button>
                     </div>
                 </div>
             </div>
         </form>
     </div>
 
-    <!-- Edit Event Sidebar - FIXED HTML -->
+    <!-- Edit Event Sidebar -->
     <div class="edit-sidebar bg-white position-fixed end-0 top-0 h-100vh overflow-y-auto z-99 max-w-700-px w-100">
         <div class="px-20 py-12 border-bottom d-flex align-items-center justify-content-between gap-20">
             <h5 class="text-lg mb-0">Edit Event</h5>
@@ -739,84 +1023,107 @@ error_log("=== EVENT PAGE END ===");
             <input type="hidden" name="action" value="edit_event">
             <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
             <input type="hidden" name="event_id" id="edit_event_id">
+            <input type="hidden" name="school_slug" value="<?= htmlspecialchars($schoolSlug) ?>">
 
             <div class="row g-3">
                 <div class="col-12">
-                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">Event Title <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control radius-8" name="title" id="edit_title" required>
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">
+                            Event Title <span class="text-danger-600">*</span>
+                        </label>
+                        <input type="text" name="title" id="edit_title" class="form-control" required>
+                    </div>
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">Event Type</label>
-                    <div class="d-flex align-items-center flex-wrap gap-28">
-                        <?php foreach ($eventTypes as $key => $value): ?>
-                        <div class="form-check d-flex align-items-center gap-2">
-                            <input class="form-check-input" type="radio" name="type" value="<?= $key ?>" id="edit_type_<?= $key ?>">
-                            <label class="form-check-label line-height-1 fw-medium text-secondary-light text-sm d-flex align-items-center gap-1" for="edit_type_<?= $key ?>">
-                                <span class="w-8-px h-8-px rounded-circle" style="background-color: <?= $eventColors[$key] ?>;"></span>
-                                <?= $value ?>
-                            </label>
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Event Type</label>
+                        <div class="d-flex align-items-center flex-wrap gap-28">
+                            <?php foreach ($eventTypes as $key => $value): ?>
+                            <div class="form-check d-flex align-items-center gap-2">
+                                <input class="form-check-input" type="radio" name="type" value="<?= $key ?>" id="edit_type_<?= $key ?>">
+                                <label class="form-check-label line-height-1 fw-medium text-secondary-light text-sm d-flex align-items-center gap-1" for="edit_type_<?= $key ?>">
+                                    <span class="w-8-px h-8-px rounded-circle" style="background-color: <?= $eventColors[$key] ?>;"></span>
+                                    <?= $value ?>
+                                </label>
+                            </div>
+                            <?php endforeach; ?>
                         </div>
-                        <?php endforeach; ?>
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">Start Date <span class="text-danger">*</span></label>
-                    <input class="form-control radius-8" name="start_date" id="edit_start_date" type="date" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">End Date</label>
-                    <input class="form-control radius-8" name="end_date" id="edit_end_date" type="date">
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">
+                            Start Date <span class="text-danger-600">*</span>
+                        </label>
+                        <input type="date" name="start_date" id="edit_start_date" class="form-control flatpickr" required>
+                    </div>
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">Start Time</label>
-                    <input class="form-control radius-8" name="start_time" id="edit_start_time" type="time">
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">End Date</label>
+                        <input type="date" name="end_date" id="edit_end_date" class="form-control flatpickr">
+                    </div>
                 </div>
+
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">End Time</label>
-                    <input class="form-control radius-8" name="end_time" id="edit_end_time" type="time">
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Start Time</label>
+                        <input type="time" name="start_time" id="edit_start_time" class="form-control flatpickr-time">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">End Time</label>
+                        <input type="time" name="end_time" id="edit_end_time" class="form-control flatpickr-time">
+                    </div>
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">Venue</label>
-                    <input type="text" class="form-control radius-8" name="venue" id="edit_venue" placeholder="Enter venue/location">
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Venue</label>
+                        <input type="text" name="venue" id="edit_venue" class="form-control" placeholder="Enter venue/location">
+                    </div>
                 </div>
 
                 <div class="col-12">
-                    <label class="form-label fw-semibold text-primary-light text-sm mb-8">Description</label>
-                    <textarea class="form-control" name="description" id="edit_description" rows="4"></textarea>
+                    <div class="">
+                        <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Description</label>
+                        <textarea name="description" id="edit_description" class="form-control" rows="4"></textarea>
+                    </div>
                 </div>
 
                 <div class="col-12">
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input" name="send_notification" id="editSendNotification" value="1" checked>
-                        <label class="form-check-label" for="editSendNotification">Send email notifications about this update</label>
+                        <input type="checkbox" name="send_notification" class="form-check-input" id="edit_send_notification" value="1" checked>
+                        <label class="form-check-label" for="edit_send_notification">Send email notifications about this update</label>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-check">
+                        <input type="checkbox" name="send_whatsapp" class="form-check-input" id="edit_send_whatsapp_event" value="1" <?php echo $whatsappEventEnabled ? 'checked' : ''; ?>>
+                        <input type="hidden" name="send_whatsapp_present" value="1">
+                        <label class="form-check-label" for="edit_send_whatsapp_event">Send WhatsApp notifications about this update</label>
+                        <small class="d-block text-secondary-light">Parents and teachers with valid phone numbers will be notified.</small>
                     </div>
                 </div>
 
                 <div class="col-12">
                     <div class="d-flex align-items-center justify-content-center gap-3 mt-8">
-                        <button type="button" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8 close-edit-sidebar">Cancel</button>
-                        <button type="submit" class="btn btn-primary-600 border border-primary-600 text-md px-28 py-12 radius-8">Update Event</button>
+                        <button type="button" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8 close-edit-sidebar">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary-600 border border-primary-600 text-md px-28 py-12 radius-8">
+                            Update Event
+                        </button>
                     </div>
                 </div>
             </div>
         </form>
-    </div>
-
-    <!-- View Event Modal -->
-    <div class="modal fade" id="viewEventModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content radius-16 bg-base">
-                <div class="modal-header py-16 px-24 border-bottom">
-                    <h5 class="modal-title" id="viewEventModalLabel">Event Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-24" id="viewEventContent"><!-- Content loaded dynamically --></div>
-            </div>
-        </div>
     </div>
 
     <!-- Delete Confirmation Modal -->
@@ -850,77 +1157,74 @@ error_log("=== EVENT PAGE END ===");
     <script src="https://academixsuite.com/tenant/assets/js/lib/iconify-icon.min.js"></script>
     <script src="https://academixsuite.com/tenant/assets/js/lib/dataTables.min.js"></script>
     <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-ui.min.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/full-calendar.js"></script>
-    <script src="https://academixsuite.com/tenant/assets/js/lib/flatpickr.min.js"></script>
     <script src="https://academixsuite.com/tenant/assets/js/app.js"></script>
+
+    <!-- Your custom calendar script -->
+    <script src="https://academixsuite.com/tenant/assets/js/full-calendar.js"></script>
+    <script src="https://academixsuite.com/tenant/assets/js/flatpickr.min.js"></script>
 
     <script>
         $(document).ready(function() {
-            // Toasts
-            $('.toast').toast({ autohide: true, delay: 5000 }).toast('show');
+            // Initialize Bootstrap toasts
+            $('.toast').toast({
+                autohide: true,
+                delay: 5000
+            });
+            $('.toast').toast('show');
+
+            // Current year
             $('.current-year').text(new Date().getFullYear());
 
-            // FullCalendar
-            var calendarEl = document.getElementById('calendar');
-            if (calendarEl) {
-                var calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'dayGridMonth',
-                    headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
-                    events: <?= json_encode($calendarEvents ?? []) ?>,
-                    eventClick: function(info) { window.location.href = 'event.php?id=' + info.event.id; },
-                    eventDidMount: function(info) {
-                        $(info.el).tooltip({ title: info.event.title, placement: 'top', trigger: 'hover', container: 'body' });
-                    },
-                    height: 'auto',
-                    firstDay: 1
+            // Initialize flatpickr for date and time inputs
+            if (typeof flatpickr !== 'undefined') {
+                flatpickr(".flatpickr", {
+                    dateFormat: "Y-m-d"
                 });
-                calendar.render();
+
+                flatpickr(".flatpickr-time", {
+                    enableTime: true,
+                    noCalendar: true,
+                    dateFormat: "H:i",
+                    time_24hr: true
+                });
             }
 
-            // Sidebar toggle (fixed)
-            $('.my-sidebar-btn').on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+            // --- Sidebar Toggle ---
+            $('.my-sidebar-btn').on('click', function () {
                 $('.my-sidebar').addClass('active');
                 $('.overlay').addClass('active');
             });
 
-            $('.close-my-sidebar, .overlay').on('click', function() {
+            $('.close-my-sidebar, .overlay').on('click', function () {
                 $('.my-sidebar').removeClass('active');
-                $('.edit-sidebar').removeClass('active');
                 $('.overlay').removeClass('active');
             });
 
-            $('.edit-sidebar-btn, .edit-event-btn').on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                if ($(this).hasClass('edit-event-btn')) {
-                    const eventData = $(this).data('event');
-                    if (eventData) populateEditForm(eventData);
+            // Edit sidebar
+            $('.edit-event-btn').on('click', function () {
+                const eventData = $(this).data('event');
+                if (eventData) {
+                    $('#edit_event_id').val(eventData.id);
+                    $('#edit_title').val(eventData.title);
+                    $('#edit_type_' + eventData.type).prop('checked', true);
+                    $('#edit_start_date').val(eventData.start_date);
+                    $('#edit_end_date').val(eventData.end_date || eventData.start_date);
+                    $('#edit_start_time').val(eventData.start_time || '');
+                    $('#edit_end_time').val(eventData.end_time || '');
+                    $('#edit_venue').val(eventData.venue || '');
+                    $('#edit_description').val(eventData.description || '');
                 }
                 $('.edit-sidebar').addClass('active');
                 $('.overlay').addClass('active');
             });
 
-            $('.close-edit-sidebar').on('click', function() {
+            $('.close-edit-sidebar, .overlay').on('click', function () {
                 $('.edit-sidebar').removeClass('active');
                 $('.overlay').removeClass('active');
             });
 
-            function populateEditForm(event) {
-                $('#edit_event_id').val(event.id);
-                $('#edit_title').val(event.title);
-                $('#edit_type_' + event.type).prop('checked', true);
-                $('#edit_start_date').val(event.start_date);
-                $('#edit_end_date').val(event.end_date || event.start_date);
-                $('#edit_start_time').val(event.start_time || '');
-                $('#edit_end_time').val(event.end_time || '');
-                $('#edit_venue').val(event.venue || '');
-                $('#edit_description').val(event.description || '');
-            }
-
             // Date validation
-            $('#endDate, #edit_end_date').on('change', function() {
+            $('#end_date, #edit_end_date').on('change', function() {
                 const startDate = $(this).closest('form').find('input[name="start_date"]').val();
                 const endDate = $(this).val();
                 if (endDate && startDate && endDate < startDate) {
@@ -929,18 +1233,7 @@ error_log("=== EVENT PAGE END ===");
                 }
             });
 
-            $('#endTime, #edit_end_time').on('change', function() {
-                const startTime = $(this).closest('form').find('input[name="start_time"]').val();
-                const endTime = $(this).val();
-                const startDate = $(this).closest('form').find('input[name="start_date"]').val();
-                const endDate = $(this).closest('form').find('input[name="end_date"]').val();
-                if (startTime && endTime && startDate === endDate && endTime <= startTime) {
-                    alert('End time must be after start time');
-                    $(this).val('');
-                }
-            });
-
-            // Search
+            // Search functionality
             $('.navbar-search input').on('keyup', function() {
                 const term = $(this).val().toLowerCase();
                 $('.upcoming-event-item').each(function() {
@@ -949,12 +1242,9 @@ error_log("=== EVENT PAGE END ===");
                     $(this).toggle(title.includes(term) || type.includes(term));
                 });
             });
-
-            // Flatpickr
-            flatpickr("input[type=date]", { dateFormat: "Y-m-d" });
-            flatpickr("input[type=time]", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
         });
 
+        // Delete event function
         function deleteEvent(eventId, eventTitle) {
             $('#delete_event_id').val(eventId);
             $('#deleteEventMessage').text('Are you sure you want to delete "' + eventTitle + '"? This will notify all users via email.');

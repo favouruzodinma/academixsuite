@@ -1,8 +1,8 @@
 <?php
 /**
  * School Notice Board Page
- * Displays and manages all notices and announcements
- * 
+ * Displays and manages all announcements and notices in the school
+ *
  * @package AcademixSuite
  * @version 2.0
  */
@@ -15,9 +15,9 @@ ini_set('error_log', __DIR__ . '/../../../logs/school_notice_board.log');
 error_log("=== NOTICE BOARD PAGE START ===");
 error_log("Script: " . __FILE__);
 
-// Define constants if not defined. IS_LOCAL is now self-defining via
-// config/constants.php; don't force-true here, that would break production.
+// Define constants if not defined
 defined('APP_NAME') or define('APP_NAME', 'AcademixSuite');
+defined('IS_LOCAL') or define('IS_LOCAL', true);
 
 /**
  * Initialize session safely
@@ -82,8 +82,8 @@ error_log("School Name: " . ($school['name'] ?? 'N/A'));
 /**
  * Verify authentication
  */
-$isAuthenticated = isset($_SESSION['school_auth']) && 
-                   is_array($_SESSION['school_auth']) && 
+$isAuthenticated = isset($_SESSION['school_auth']) &&
+                   is_array($_SESSION['school_auth']) &&
                    ($_SESSION['school_auth']['school_slug'] ?? '') === $schoolSlug;
 
 if (!$isAuthenticated) {
@@ -97,8 +97,6 @@ $schoolAuth = $_SESSION['school_auth'];
 $userId = (int)($schoolAuth['user_id'] ?? 0);
 $userType = $schoolAuth['user_type'] ?? '';
 
-$currentPage = basename(__FILE__);
-
 error_log("Authenticated User ID: " . $userId);
 
 /**
@@ -107,25 +105,31 @@ error_log("Authenticated User ID: " . $userId);
 try {
     $autoloadPath = __DIR__ . '/../../../includes/autoload.php';
     error_log("Loading autoload from: " . $autoloadPath);
-    
+
     if (!file_exists($autoloadPath)) {
         throw new Exception("Autoload file not found at: " . $autoloadPath);
     }
     require_once $autoloadPath;
     error_log("Autoload loaded successfully");
-    
+
     if (!class_exists('Database')) {
         throw new Exception("Database class not found");
     }
     error_log("Database class found");
-    
+
     // Include GuardianManager for notifications
     $guardianManagerPath = __DIR__ . '/../../../includes/GuardianManager.php';
     if (file_exists($guardianManagerPath)) {
         require_once $guardianManagerPath;
         error_log("GuardianManager loaded successfully");
     }
-    
+
+    $whatsAppServicePath = __DIR__ . '/../../../includes/Services/WhatsAppService.php';
+    if (file_exists($whatsAppServicePath)) {
+        require_once $whatsAppServicePath;
+        error_log("WhatsAppService loaded successfully");
+    }
+
 } catch (Exception $e) {
     error_log("CRITICAL ERROR loading configuration: " . $e->getMessage());
     http_response_code(500);
@@ -140,7 +144,7 @@ try {
     if (!empty($school['database_name'])) {
         error_log("Attempting to connect to database: " . $school['database_name']);
         $schoolDb = Database::getSchoolConnection($school['database_name']);
-        
+
         if ($schoolDb) {
             error_log("School database connection successful");
         } else {
@@ -160,150 +164,218 @@ try {
  */
 $notificationCount = 0;
 $notifications = [];
+$whatsAppService = null;
+$whatsAppConfigured = false;
+$whatsAppAnnouncementEnabled = false;
+$whatsAppStatusMessage = 'WhatsApp notification service is unavailable.';
+$whatsAppDeliveryStats = [
+    'total' => 0,
+    'sent' => 0,
+    'failed' => 0,
+    'skipped' => 0,
+];
 
 if ($schoolDb && class_exists('GuardianManager')) {
     try {
         $guardianManager = new GuardianManager($schoolDb, $school['id'], $userId, $userType, $school);
-        
+
         if (method_exists($guardianManager, 'getNotificationCount')) {
             $notificationCount = $guardianManager->getNotificationCount();
         }
-        
+
         if (method_exists($guardianManager, 'getNotifications')) {
             $notifications = $guardianManager->getNotifications(5);
         }
-        
+
     } catch (Exception $e) {
         error_log("ERROR initializing GuardianManager: " . $e->getMessage());
     }
 }
 
-/**
- * Target audience options
- */
-$targetOptions = [
-    'all' => 'Everyone',
-    'students' => 'Students Only',
-    'teachers' => 'Teachers Only',
-    'parents' => 'Parents Only',
-    'staff' => 'Staff Only',
-    'class' => 'Specific Class',
-    'section' => 'Specific Section'
-];
-
-/**
- * Fetch notices from database
- */
-$notices = [];
-$totalNotices = 0;
-$activeNotices = 0;
-$expiredNotices = 0;
-
-if ($schoolDb) {
+if ($schoolDb && class_exists('WhatsAppService')) {
     try {
-        // Get notices with creator info
-        $noticeStmt = $schoolDb->prepare("
-            SELECT 
-                n.*,
-                u.name as created_by_name,
-                c.name as class_name,
-                s.name as section_name,
-                DATEDIFF(n.end_date, CURDATE()) as days_remaining,
-                CASE 
-                    WHEN n.is_published = 0 THEN 'draft'
-                    WHEN n.end_date < CURDATE() THEN 'expired'
-                    WHEN n.start_date > CURDATE() THEN 'upcoming'
-                    ELSE 'active'
-                END as status
-            FROM announcements n
-            LEFT JOIN users u ON n.created_by = u.id
-            LEFT JOIN classes c ON n.class_id = c.id
-            LEFT JOIN sections s ON n.section_id = s.id
-            WHERE n.school_id = ?
-            ORDER BY 
-                CASE 
-                    WHEN n.is_published = 0 THEN 1
-                    WHEN n.end_date < CURDATE() THEN 2
-                    WHEN n.start_date > CURDATE() THEN 3
-                    ELSE 0
-                END,
-                n.created_at DESC
+        $whatsAppService = new WhatsAppService($schoolDb, $school);
+        $whatsAppService->ensureTables();
+        $whatsAppConfigured = $whatsAppService->isConfigured();
+        $whatsAppAnnouncementEnabled = WhatsAppService::featureEnabled($schoolDb, (int)$school['id'], 'announcements', true);
+        $whatsAppStatusMessage = $whatsAppService->configurationStatus();
+
+        $whatsAppStatsStmt = $schoolDb->prepare("
+            SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) AS sent,
+                SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failed,
+                SUM(CASE WHEN status = 'skipped' THEN 1 ELSE 0 END) AS skipped
+            FROM whatsapp_notifications
+            WHERE school_id = ?
+              AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
         ");
-        $noticeStmt->execute([$school['id']]);
-        $notices = $noticeStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        
-        // Calculate statistics
-        $totalNotices = count($notices);
-        foreach ($notices as $notice) {
-            if ($notice['status'] == 'active') {
-                $activeNotices++;
-            } elseif ($notice['status'] == 'expired') {
-                $expiredNotices++;
-            }
+        $whatsAppStatsStmt->execute([$school['id']]);
+        $stats = $whatsAppStatsStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        $whatsAppDeliveryStats = [
+            'total' => (int) ($stats['total'] ?? 0),
+            'sent' => (int) ($stats['sent'] ?? 0),
+            'failed' => (int) ($stats['failed'] ?? 0),
+            'skipped' => (int) ($stats['skipped'] ?? 0),
+        ];
+    } catch (Throwable $e) {
+        error_log("ERROR initializing WhatsAppService: " . $e->getMessage());
+        $whatsAppService = null;
+        $whatsAppConfigured = false;
+        $whatsAppStatusMessage = 'WhatsApp notification service could not start.';
+    }
+}
+
+if (!function_exists('notice_board_column_exists')) {
+    function notice_board_column_exists(PDO $db, string $table, string $column): bool
+    {
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table) || !preg_match('/^[a-zA-Z0-9_]+$/', $column)) {
+            return false;
         }
-        
-        error_log("Fetched " . count($notices) . " notices successfully");
-        
-    } catch (Exception $e) {
-        error_log("Error fetching notices: " . $e->getMessage());
-        // If table doesn't exist, create it
-        if (strpos($e->getMessage(), "Table '.*announcements' doesn't exist") !== false) {
-            createAnnouncementsTable($schoolDb);
-            // Try fetching again
-            try {
-                $noticeStmt = $schoolDb->prepare("
-                    SELECT n.*, u.name as created_by_name 
-                    FROM announcements n 
-                    LEFT JOIN users u ON n.created_by = u.id 
-                    WHERE n.school_id = ? 
-                    ORDER BY n.created_at DESC
-                ");
-                $noticeStmt->execute([$school['id']]);
-                $notices = $noticeStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-                $totalNotices = count($notices);
-            } catch (Exception $e2) {
-                error_log("Error after table creation: " . $e2->getMessage());
-            }
-        } else {
-            $_SESSION['toast_error'] = "Error loading notices.";
+
+        try {
+            $stmt = $db->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
+            $stmt->execute([$column]);
+            return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            error_log("notice_board_column_exists: " . $e->getMessage());
+            return false;
         }
     }
 }
 
-/**
- * Create announcements table if it doesn't exist
- */
-function createAnnouncementsTable($db) {
-    try {
-        $sql = "
-            CREATE TABLE IF NOT EXISTS announcements (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                school_id INT NOT NULL,
-                title VARCHAR(255) NOT NULL,
-                description TEXT,
-                target VARCHAR(50) DEFAULT 'all',
-                class_id INT NULL,
-                section_id INT NULL,
-                start_date DATE NULL,
-                end_date DATE NULL,
-                is_published TINYINT DEFAULT 1,
-                is_important TINYINT DEFAULT 0,
-                created_by INT NULL,
-                created_at DATETIME,
-                updated_at DATETIME,
-                INDEX idx_school_id (school_id),
-                INDEX idx_target (target),
-                INDEX idx_dates (start_date, end_date),
-                INDEX idx_published (is_published)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-        ";
-        $db->exec($sql);
-        error_log("Announcements table created successfully");
-        return true;
-    } catch (Exception $e) {
-        error_log("Error creating announcements table: " . $e->getMessage());
-        return false;
+if (!function_exists('notice_board_default_campus_id')) {
+    function notice_board_default_campus_id(array $school, array $schoolAuth): int
+    {
+        foreach ([$schoolAuth['campus_id'] ?? null, $school['campus_id'] ?? null, $school['default_campus_id'] ?? null] as $candidate) {
+            $candidate = (int) $candidate;
+            if ($candidate > 0) {
+                return $candidate;
+            }
+        }
+
+        return 1;
     }
+}
+
+/**
+ * Get notice ID from URL if viewing single notice
+ */
+$noticeId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+/**
+ * Fetch notices/announcements
+ */
+$notices = [];
+$totalNotices = 0;
+$totalActive = 0;
+$totalExpired = 0;
+$totalTargeted = 0;
+$selectedNotice = null;
+$classes = [];
+$sections = [];
+
+if ($schoolDb) {
+    try {
+        // Get all classes for filter
+        $classStmt = $schoolDb->prepare("
+            SELECT id, name FROM classes
+            WHERE school_id = ? AND is_active = 1
+            ORDER BY name
+        ");
+        $classStmt->execute([$school['id']]);
+        $classes = $classStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        // Get all sections for filter
+        $sectionStmt = $schoolDb->prepare("
+            SELECT s.id, s.name, s.class_id, c.name as class_name
+            FROM sections s
+            LEFT JOIN classes c ON s.class_id = c.id
+            WHERE s.school_id = ? AND s.is_active = 1
+            ORDER BY c.name, s.name
+        ");
+        $sectionStmt->execute([$school['id']]);
+        $sections = $sectionStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        // Get notices/announcements
+        if ($noticeId > 0) {
+            // Fetch single notice
+            $noticeStmt = $schoolDb->prepare("
+                SELECT a.*, u.name as created_by_name,
+                       c.name as class_name, sc.name as section_name,
+                       CASE
+                           WHEN a.end_date IS NOT NULL AND a.end_date < CURDATE() THEN 'expired'
+                           WHEN a.start_date IS NOT NULL AND a.start_date > CURDATE() THEN 'scheduled'
+                           ELSE 'active'
+                       END as status
+                FROM announcements a
+                LEFT JOIN users u ON a.created_by = u.id
+                LEFT JOIN classes c ON a.class_id = c.id
+                LEFT JOIN sections sc ON a.section_id = sc.id
+                WHERE a.id = ? AND a.school_id = ?
+            ");
+            $noticeStmt->execute([$noticeId, $school['id']]);
+            $selectedNotice = $noticeStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$selectedNotice) {
+                error_log("Notice not found with ID: " . $noticeId);
+                $_SESSION['toast_error'] = "Notice not found.";
+                header("Location: notice-board.php");
+                exit;
+            }
+
+            // Get just this one notice for the list
+            $notices = [$selectedNotice];
+        } else {
+            // Fetch all notices
+            $noticeStmt = $schoolDb->prepare("
+                SELECT a.*, u.name as created_by_name,
+                       c.name as class_name, sc.name as section_name,
+                       CASE
+                           WHEN a.end_date IS NOT NULL AND a.end_date < CURDATE() THEN 'expired'
+                           WHEN a.start_date IS NOT NULL AND a.start_date > CURDATE() THEN 'scheduled'
+                           ELSE 'active'
+                       END as status
+                FROM announcements a
+                LEFT JOIN users u ON a.created_by = u.id
+                LEFT JOIN classes c ON a.class_id = c.id
+                LEFT JOIN sections sc ON a.section_id = sc.id
+                WHERE a.school_id = ?
+                ORDER BY
+                    CASE
+                        WHEN a.is_published = 1 AND (a.end_date IS NULL OR a.end_date >= CURDATE()) THEN 1
+                        ELSE 2
+                    END,
+                    a.created_at DESC
+            ");
+            $noticeStmt->execute([$school['id']]);
+            $notices = $noticeStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        }
+
+        // Calculate totals
+        $totalNotices = count($notices);
+        foreach ($notices as $notice) {
+            $status = $notice['status'] ?? 'active';
+            if ($status == 'active') {
+                $totalActive++;
+            } elseif ($status == 'expired') {
+                $totalExpired++;
+            }
+            if ($notice['target'] != 'all') {
+                $totalTargeted++;
+            }
+        }
+
+        error_log("Fetched " . count($notices) . " notices successfully");
+
+    } catch (Exception $e) {
+        error_log("Error fetching notices: " . $e->getMessage());
+        $_SESSION['toast_error'] = "Error loading notice board data.";
+    }
+}
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 /**
@@ -315,45 +387,79 @@ $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
-    
+
     try {
+        $submittedToken = (string) ($_POST['csrf_token'] ?? '');
+        $sessionToken = (string) ($_SESSION['csrf_token'] ?? '');
+        if ($sessionToken === '' || !hash_equals($sessionToken, $submittedToken)) {
+            throw new Exception("Invalid security token. Please refresh the page and try again.");
+        }
+
         if (!$schoolDb) {
             throw new Exception("Database connection not available");
         }
-        
+
         switch ($action) {
             case 'create_notice':
                 // Validate required fields
-                if (empty($_POST['title'])) {
-                    throw new Exception("Notice title is required");
+                if (empty($_POST['title']) || empty($_POST['description'])) {
+                    throw new Exception("Title and description are required");
                 }
-                
+
+                $target = $_POST['target'] ?? 'all';
+                $classId = !empty($_POST['class_id']) ? (int) $_POST['class_id'] : null;
+                $sectionId = !empty($_POST['section_id']) ? (int) $_POST['section_id'] : null;
+                $startDate = !empty($_POST['start_date']) ? $_POST['start_date'] : null;
+                $endDate = !empty($_POST['end_date']) ? $_POST['end_date'] : null;
+                $isPublished = 1;
+
+                if ($target === 'class' && !$classId) {
+                    throw new Exception("Please select a class for a class notice");
+                }
+
+                if ($target === 'section' && !$sectionId) {
+                    throw new Exception("Please select a section for a section notice");
+                }
+
                 $schoolDb->beginTransaction();
-                
-                $stmt = $schoolDb->prepare("
-                    INSERT INTO announcements (
-                        school_id, title, description, target,
-                        class_id, section_id, start_date, end_date,
-                        is_published, is_important, created_by, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-                ");
-                
-                $stmt->execute([
+
+                $announcementFields = [
+                    'school_id',
+                    'title',
+                    'description',
+                    'target',
+                    'class_id',
+                    'section_id',
+                    'start_date',
+                    'end_date',
+                    'is_published',
+                    'created_by',
+                ];
+                $announcementValues = [
                     $school['id'],
                     $_POST['title'],
-                    $_POST['description'] ?? null,
-                    $_POST['target'] ?? 'all',
-                    !empty($_POST['class_id']) ? $_POST['class_id'] : null,
-                    !empty($_POST['section_id']) ? $_POST['section_id'] : null,
-                    !empty($_POST['start_date']) ? $_POST['start_date'] : null,
-                    !empty($_POST['end_date']) ? $_POST['end_date'] : null,
-                    isset($_POST['is_published']) ? 1 : 1,
-                    isset($_POST['is_important']) ? 1 : 0,
+                    $_POST['description'],
+                    $target,
+                    $classId,
+                    $sectionId,
+                    $startDate,
+                    $endDate,
+                    $isPublished,
                     $userId
-                ]);
-                
-                $noticeId = $schoolDb->lastInsertId();
-                
+                ];
+
+                if (notice_board_column_exists($schoolDb, 'announcements', 'campus_id')) {
+                    array_splice($announcementFields, 1, 0, ['campus_id']);
+                    array_splice($announcementValues, 1, 0, [notice_board_default_campus_id($school, $schoolAuth)]);
+                }
+
+                $fieldSql = '`' . implode('`, `', $announcementFields) . '`, `created_at`';
+                $placeholders = implode(', ', array_fill(0, count($announcementFields), '?')) . ', NOW()';
+                $stmt = $schoolDb->prepare("INSERT INTO announcements ({$fieldSql}) VALUES ({$placeholders})");
+                $stmt->execute($announcementValues);
+
+                $noticeId = (int) $schoolDb->lastInsertId();
+
                 // Create audit log
                 $auditStmt = $schoolDb->prepare("
                     INSERT INTO audit_logs (
@@ -361,7 +467,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         entity_id, new_values, ip_address, user_agent, url, created_at
                     ) VALUES (?, ?, ?, 'create', 'announcement', ?, ?, ?, ?, ?, NOW())
                 ");
-                
+
                 $auditStmt->execute([
                     $school['id'],
                     $userId,
@@ -372,49 +478,89 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SERVER['HTTP_USER_AGENT'] ?? null,
                     $_SERVER['REQUEST_URI'] ?? null
                 ]);
-                
+
                 $schoolDb->commit();
-                
+
                 $success = true;
                 $message = "Notice created successfully!";
-                
+
+                if (!empty($_POST['send_whatsapp'])) {
+                    $whatsAppAudiences = $_POST['whatsapp_audiences'] ?? [];
+                    $whatsAppAudiences = is_array($whatsAppAudiences) ? $whatsAppAudiences : [$whatsAppAudiences];
+
+                    if (!$whatsAppAnnouncementEnabled) {
+                        $message .= ' WhatsApp announcement notifications are disabled in settings.';
+                    } elseif ($whatsAppService instanceof WhatsAppService) {
+                        $whatsAppResult = $whatsAppService->sendAnnouncement(
+                            $noticeId,
+                            (string) $_POST['title'],
+                            (string) $_POST['description'],
+                            $target,
+                            $classId,
+                            $sectionId,
+                            $whatsAppAudiences
+                        );
+                        $message .= ' ' . ($whatsAppResult['message'] ?? 'WhatsApp processing completed.');
+                    } else {
+                        $message .= ' WhatsApp was not sent because the notification service is unavailable.';
+                    }
+                }
+
                 // Refresh notices data
                 $noticeStmt->execute([$school['id']]);
                 $notices = $noticeStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
                 $totalNotices = count($notices);
-                
+
                 break;
-                
+
             case 'edit_notice':
-                if (empty($_POST['notice_id']) || empty($_POST['title'])) {
-                    throw new Exception("Notice ID and title are required");
+                if (empty($_POST['notice_id']) || empty($_POST['title']) || empty($_POST['description'])) {
+                    throw new Exception("Notice ID, title, and description are required");
                 }
-                
+
                 $schoolDb->beginTransaction();
-                
+
+                $updateParts = [
+                    'title = ?',
+                    'description = ?',
+                    'target = ?',
+                    'class_id = ?',
+                    'section_id = ?',
+                    'start_date = ?',
+                    'end_date = ?',
+                    'is_published = ?',
+                ];
+                if (notice_board_column_exists($schoolDb, 'announcements', 'updated_at')) {
+                    $updateParts[] = 'updated_at = NOW()';
+                }
+
+                if (($_POST['target'] ?? 'all') === 'class' && empty($_POST['class_id'])) {
+                    throw new Exception("Please select a class for a class notice");
+                }
+
+                if (($_POST['target'] ?? 'all') === 'section' && empty($_POST['section_id'])) {
+                    throw new Exception("Please select a section for a section notice");
+                }
+
                 $stmt = $schoolDb->prepare("
-                    UPDATE announcements 
-                    SET title = ?, description = ?, target = ?,
-                        class_id = ?, section_id = ?, start_date = ?,
-                        end_date = ?, is_published = ?, is_important = ?,
-                        updated_at = NOW()
+                    UPDATE announcements
+                    SET " . implode(', ', $updateParts) . "
                     WHERE id = ? AND school_id = ?
                 ");
-                
+
                 $stmt->execute([
                     $_POST['title'],
-                    $_POST['description'] ?? null,
+                    $_POST['description'],
                     $_POST['target'] ?? 'all',
                     !empty($_POST['class_id']) ? $_POST['class_id'] : null,
                     !empty($_POST['section_id']) ? $_POST['section_id'] : null,
                     !empty($_POST['start_date']) ? $_POST['start_date'] : null,
                     !empty($_POST['end_date']) ? $_POST['end_date'] : null,
                     isset($_POST['is_published']) ? 1 : 0,
-                    isset($_POST['is_important']) ? 1 : 0,
                     $_POST['notice_id'],
                     $school['id']
                 ]);
-                
+
                 // Create audit log
                 $auditStmt = $schoolDb->prepare("
                     INSERT INTO audit_logs (
@@ -422,7 +568,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         entity_id, new_values, ip_address, user_agent, url, created_at
                     ) VALUES (?, ?, ?, 'update', 'announcement', ?, ?, ?, ?, ?, NOW())
                 ");
-                
+
                 $auditStmt->execute([
                     $school['id'],
                     $userId,
@@ -433,34 +579,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SERVER['HTTP_USER_AGENT'] ?? null,
                     $_SERVER['REQUEST_URI'] ?? null
                 ]);
-                
+
                 $schoolDb->commit();
-                
+
                 $success = true;
                 $message = "Notice updated successfully!";
-                
+
                 // Refresh notices data
                 $noticeStmt->execute([$school['id']]);
                 $notices = $noticeStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-                
+
                 break;
-                
+
             case 'delete_notice':
                 if (empty($_POST['notice_id'])) {
                     throw new Exception("Notice ID is required");
                 }
-                
+
                 $schoolDb->beginTransaction();
-                
+
                 // Get notice data for audit log
                 $getStmt = $schoolDb->prepare("SELECT title FROM announcements WHERE id = ?");
                 $getStmt->execute([$_POST['notice_id']]);
                 $noticeData = $getStmt->fetch(PDO::FETCH_ASSOC);
-                
-                // Hard delete (or soft delete by setting is_published = 0)
-                $stmt = $schoolDb->prepare("DELETE FROM announcements WHERE id = ? AND school_id = ?");
+
+                // Soft delete - just mark as inactive
+                $stmt = $schoolDb->prepare("
+                    UPDATE announcements
+                    SET is_published = 0
+                    WHERE id = ? AND school_id = ?
+                ");
                 $stmt->execute([$_POST['notice_id'], $school['id']]);
-                
+
                 // Create audit log
                 $auditStmt = $schoolDb->prepare("
                     INSERT INTO audit_logs (
@@ -468,7 +618,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         entity_id, old_values, ip_address, user_agent, url, created_at
                     ) VALUES (?, ?, ?, 'delete', 'announcement', ?, ?, ?, ?, ?, NOW())
                 ");
-                
+
                 $auditStmt->execute([
                     $school['id'],
                     $userId,
@@ -479,23 +629,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SERVER['HTTP_USER_AGENT'] ?? null,
                     $_SERVER['REQUEST_URI'] ?? null
                 ]);
-                
+
                 $schoolDb->commit();
-                
+
                 $success = true;
                 $message = "Notice deleted successfully!";
-                
+
                 // Refresh notices data
                 $noticeStmt->execute([$school['id']]);
                 $notices = $noticeStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
                 $totalNotices = count($notices);
-                
+
                 break;
-                
+
             default:
                 throw new Exception("Unknown action");
         }
-        
+
     } catch (Exception $e) {
         if ($schoolDb && $schoolDb->inTransaction()) {
             $schoolDb->rollBack();
@@ -529,39 +679,15 @@ if (!function_exists('sanitize')) {
     }
 }
 
-// Get classes for dropdown
-$classes = [];
-if ($schoolDb) {
-    try {
-        $classStmt = $schoolDb->prepare("
-            SELECT id, name, code FROM classes 
-            WHERE school_id = ? AND is_active = 1
-            ORDER BY name
-        ");
-        $classStmt->execute([$school['id']]);
-        $classes = $classStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-    } catch (Exception $e) {
-        error_log("Error fetching classes: " . $e->getMessage());
-    }
-}
-
-// Get sections for dropdown
-$sections = [];
-if ($schoolDb) {
-    try {
-        $sectionStmt = $schoolDb->prepare("
-            SELECT s.id, s.name, s.code, c.name as class_name 
-            FROM sections s
-            JOIN classes c ON s.class_id = c.id
-            WHERE s.school_id = ? AND s.is_active = 1
-            ORDER BY c.name, s.name
-        ");
-        $sectionStmt->execute([$school['id']]);
-        $sections = $sectionStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-    } catch (Exception $e) {
-        error_log("Error fetching sections: " . $e->getMessage());
-    }
-}
+// Target options array
+$targetOptions = [
+    'all' => 'Everyone',
+    'students' => 'Students Only',
+    'teachers' => 'Teachers Only',
+    'parents' => 'Parents Only',
+    'class' => 'Specific Class',
+    'section' => 'Specific Section'
+];
 
 error_log("=== NOTICE BOARD PAGE END ===");
 ?>
@@ -575,7 +701,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
     <meta name="description" content="School Notice Board - Manage all announcements and notices">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($school['name']); ?> | <?php echo defined('APP_NAME') ? APP_NAME : 'School Management'; ?> - Notice Board</title>
-    
+
     <!-- Styles -->
     <link rel="icon" type="image/png" href="https://academixsuite.com/tenant/assets/images/favicon.png" sizes="16x16">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/remixicon.css">
@@ -586,7 +712,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/full-calendar.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/calendar.css">
     <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/style.css">
-    
+
     <style>
         .toast-container {
             position: fixed;
@@ -626,36 +752,26 @@ error_log("=== NOTICE BOARD PAGE END ===");
                 opacity: 1;
             }
         }
-        
+
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            transition: transform 0.3s ease;
         }
-        .stat-card i {
-            font-size: 2.5rem;
-            opacity: 0.8;
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
-        .stat-card .stat-value {
-            font-size: 1.8rem;
-            font-weight: 600;
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .stat-card .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-        .stat-card:nth-child(2) {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        .stat-card:nth-child(3) {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-        .stat-card:nth-child(4) {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        }
-        
+
         .notice-card {
             background: white;
             border: 1px solid #e9ecef;
@@ -668,57 +784,27 @@ error_log("=== NOTICE BOARD PAGE END ===");
             box-shadow: 0 8px 20px rgba(0,0,0,0.06);
             border-color: #25A194;
         }
-        .notice-card.important {
-            border-left: 4px solid #dc3545;
-            background: linear-gradient(to right, rgba(220, 53, 69, 0.02), white);
-        }
         .notice-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
-        .notice-date {
-            background: #f8f9fa;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-        .notice-date i {
-            color: #25A194;
-            margin-right: 5px;
+        .notice-badge {
+            background: #25A194;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
         }
         .target-badge {
-            background: #e3f2fd;
-            color: #1976d2;
-            padding: 4px 12px;
-            border-radius: 20px;
+            padding: 4px 10px;
+            border-radius: 16px;
             font-size: 12px;
-            font-weight: 500;
+            display: inline-block;
         }
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .status-active {
-            background: #d4edda;
-            color: #155724;
-        }
-        .status-expired {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        .status-upcoming {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .status-draft {
-            background: #e2e3e5;
-            color: #383d41;
-        }
-        
+
         /* Sidebar styles */
         .my-sidebar {
             transition: transform 0.3s ease;
@@ -738,35 +824,43 @@ error_log("=== NOTICE BOARD PAGE END ===");
             visibility: visible;
             opacity: 1;
         }
-        
+
         .dataTables_wrapper .dataTables_filter input {
             border: 1px solid #dee2e6;
             border-radius: 8px;
             padding: 8px 12px;
             margin-left: 8px;
         }
-        
+
         .dataTables_wrapper .dataTables_length select {
             border: 1px solid #dee2e6;
             border-radius: 8px;
             padding: 8px 12px;
             margin: 0 8px;
         }
-        
+
         .table td, .table th {
             vertical-align: middle;
         }
-        
-        .notice-description {
-            max-width: 300px;
+
+        .action-buttons {
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
-        
-        .important-star {
-            color: #ffc107;
-            margin-left: 5px;
+
+        .notice-content {
+            max-height: 60px;
+            overflow: hidden;
+            position: relative;
+        }
+        .notice-content.expanded {
+            max-height: none;
+        }
+        .read-more {
+            color: #25A194;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-block;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -809,85 +903,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
         class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
         <i class="ri-settings-3-line animate-spin"></i>
     </button>
-    <div class="theme-customization-sidebar w-100 bg-base h-100vh overflow-y-auto position-fixed end-0 top-0">
-        <div class="d-flex align-items-center gap-3 py-16 px-24 justify-content-between border-bottom">
-            <div>
-                <h6 class="text-sm dark:text-white">Theme Settings</h6>
-                <p class="text-xs mb-0 text-neutral-500 dark:text-neutral-200">Customize and preview instantly</p>
-            </div>
-            <button data-slot="button"
-                class="theme-customization-sidebar__close text-neutral-900 bg-transparent text-hover-primary-600 d-flex text-xl">
-                <i class="ri-close-fill"></i>
-            </button>
-        </div>
 
-        <div class="d-flex flex-column gap-48 p-24 overflow-y-auto flex-grow-1">
-            <div class="theme-setting-item">
-                <h6 class="fw-medium text-primary-light text-md mb-3">Theme Mode</h6>
-                <div class="d-grid grid-cols-3 gap-3 dark-light-mode">
-                    <button type="button"
-                        class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl active"
-                        data-theme="light" aria-label="light">
-                        <i class="ri-sun-line"></i>
-                    </button>
-                    <button type="button"
-                        class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl"
-                        data-theme="dark" aria-label="dark">
-                        <i class="ri-moon-line"></i>
-                    </button>
-                    <button type="button"
-                        class="theme-btn theme-setting-item__btn d-flex align-items-center justify-content-center h-64-px rounded-3 text-xl"
-                        data-theme="system" aria-label="system">
-                        <i class="ri-computer-line"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="theme-setting-item">
-                <h6 class="fw-medium text-primary-light text-md mb-3">Page Direction</h6>
-                <div class="d-grid grid-cols-2 gap-3">
-                    <button type="button"
-                        class="theme-setting-item__btn ltr-mode-btn d-flex align-items-center justify-content-center gap-2 h-56-px rounded-3 text-xl" aria-label="LTR">
-                        <span><i class="ri-align-item-left-line"></i></span>
-                        <span class="h6 text-sm font-medium mb-0">LTR</span>
-                    </button>
-
-                    <button type="button"
-                        class="theme-setting-item__btn rtl-mode-btn d-flex align-items-center justify-content-center gap-2 h-56-px rounded-3 text-xl" aria-label="RTL">
-                        <span class="h6 text-sm font-medium mb-0">RTL</span>
-                        <span><i class="ri-align-item-right-line"></i></span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="theme-setting-item">
-                <h6 class="fw-medium text-primary-light text-md mb-3">Color Schema</h6>
-                <div class="d-grid grid-cols-3 gap-3">
-                    <button type="button"
-                        class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                        data-color="base" aria-label="Base">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                            style="background-color: #25A194;"></span>
-                        <span class="fw-medium mt-1" style="color: #25A194;">Base</span>
-                    </button>
-                    <button type="button"
-                        class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                        data-color="red" aria-label="Red">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                            style="background-color: #dc2626;"></span>
-                        <span class="fw-medium mt-1" style="color: #dc2626;">Red</span>
-                    </button>
-                    <button type="button"
-                        class="color-picker-btn d-flex flex-column justify-content-center align-items-center"
-                        data-color="blue" aria-label="Blue">
-                        <span class="color-picker-btn__box h-40-px w-100 rounded-3"
-                            style="background-color: #2563eb;"></span>
-                        <span class="fw-medium mt-1" style="color: #2563eb;">Blue</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- Theme Customization Structure End -->
 
     <div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
@@ -896,9 +912,19 @@ error_log("=== NOTICE BOARD PAGE END ===");
     <?php include_once('includes/sidebar.php') ?>
 
     <main class="dashboard-main">
-        
-        <?php include_once('includes/header.php'); ?>
-</div>
+        <div class="navbar-header shadow-1">
+            <div class="row align-items-center justify-content-between">
+                <div class="col-auto">
+                    <div class="d-flex flex-wrap align-items-center gap-4">
+                        <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
+                            <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
+                        </button>
+                        <form class="navbar-search">
+                            <input type="text" class="bg-transparent" name="search" placeholder="Search notices...">
+                            <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
+                        </form>
+                    </div>
+                </div>
                 <div class="col-auto">
                     <div class="d-flex flex-wrap align-items-center gap-3">
                         <button type="button" data-theme-toggle
@@ -964,60 +990,136 @@ error_log("=== NOTICE BOARD PAGE END ===");
                     <h1 class="fw-semibold mb-4 h6 text-primary-light">Notice Board</h1>
                     <div class="">
                         <a href="index.php" class="text-secondary-light hover-text-primary hover-underline">Dashboard</a>
-                        <span class="text-secondary-light"> / Notice Board</span>
+                        <?php if ($selectedNotice): ?>
+                        <span class="text-secondary-light">/ Notice Details</span>
+                        <?php else: ?>
+                        <span class="text-secondary-light">/ Notices</span>
+                        <?php endif; ?>
                     </div>
                 </div>
+                <?php if (!$selectedNotice): ?>
                 <button type="button" class="my-sidebar-btn btn btn-primary-600 d-flex align-items-center gap-6">
                     <span class="d-flex text-md">
                         <i class="ri-add-large-line"></i>
                     </span>
                     Add New Notice
                 </button>
+                <?php else: ?>
+                <a href="notice-board.php" class="btn btn-outline-primary d-flex align-items-center gap-6">
+                    <span class="d-flex text-md">
+                        <i class="ri-arrow-left-line"></i>
+                    </span>
+                    Back to Notices
+                </a>
+                <?php endif; ?>
             </div>
 
-            <!-- Quick Stats -->
-            <div class="row mb-24">
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stat-value"><?php echo $totalNotices; ?></div>
-                                <div class="stat-label">Total Notices</div>
+            <?php if (!$selectedNotice): ?>
+            <!-- Stats Cards -->
+            <div class="row gy-4 mb-24">
+                <div class="col-xxl-3 col-sm-6">
+                    <div class="card shadow-1 radius-8 gradient-bg-end-1 h-100">
+                        <div class="card-body p-20">
+                            <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
+                                <div class="w-44-px h-44-px bg-warning-600 rounded-circle d-flex justify-content-center align-items-center">
+                                    <i class="ri-megaphone-line text-white fs-5"></i>
+                                </div>
+                                <p class="fw-medium text-primary-light mb-1">Total Notices</p>
                             </div>
-                            <i class="ri-megaphone-line"></i>
+                            <h6 class="mb-0"><?php echo number_format($totalNotices); ?></h6>
+                            <p class="fw-medium text-sm text-primary-light mt-12 mb-0 d-flex align-items-center gap-2">
+                                <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
+                                    <?php echo $totalActive; ?> Active
+                                </span>
+                                Posted Notices
+                            </p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stat-value"><?php echo $activeNotices; ?></div>
-                                <div class="stat-label">Active Notices</div>
+                <div class="col-xxl-3 col-sm-6">
+                    <div class="card shadow-1 radius-8 gradient-bg-end-2 h-100">
+                        <div class="card-body p-20">
+                            <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
+                                <div class="w-44-px h-44-px bg-blue-600 rounded-circle d-flex justify-content-center align-items-center">
+                                    <i class="ri-checkbox-circle-line text-white fs-5"></i>
+                                </div>
+                                <p class="fw-medium text-primary-light mb-1">Active Notices</p>
                             </div>
-                            <i class="ri-checkbox-circle-line"></i>
+                            <h6 class="mb-0"><?php echo number_format($totalActive); ?></h6>
+                            <p class="fw-medium text-sm text-primary-light mt-12 mb-0 d-flex align-items-center gap-2">
+                                <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
+                                    <?php echo $totalNotices > 0 ? round(($totalActive / $totalNotices) * 100) : 0; ?>%
+                                </span>
+                                Currently Active
+                            </p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stat-value"><?php echo $expiredNotices; ?></div>
-                                <div class="stat-label">Expired</div>
+                <div class="col-xxl-3 col-sm-6">
+                    <div class="card shadow-1 radius-8 gradient-bg-end-3 h-100">
+                        <div class="card-body p-20">
+                            <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
+                                <div class="w-44-px h-44-px bg-purple-600 rounded-circle d-flex justify-content-center align-items-center">
+                                    <i class="ri-time-line text-white fs-5"></i>
+                                </div>
+                                <p class="fw-medium text-primary-light mb-1">Expired Notices</p>
                             </div>
-                            <i class="ri-time-line"></i>
+                            <h6 class="mb-0"><?php echo number_format($totalExpired); ?></h6>
+                            <p class="fw-medium text-sm text-primary-light mt-12 mb-0 d-flex align-items-center gap-2">
+                                <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
+                                    <?php echo $totalNotices > 0 ? round(($totalExpired / $totalNotices) * 100) : 0; ?>%
+                                </span>
+                                Past Notices
+                            </p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="stat-card">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stat-value"><?php echo $totalNotices - $activeNotices - $expiredNotices; ?></div>
-                                <div class="stat-label">Upcoming/Draft</div>
+                <div class="col-xxl-3 col-sm-6">
+                    <div class="card shadow-1 radius-8 gradient-bg-end-4 h-100">
+                        <div class="card-body p-20">
+                            <div class="d-flex flex-wrap align-items-center gap-3 mb-16">
+                                <div class="w-44-px h-44-px bg-primary-600 rounded-circle d-flex justify-content-center align-items-center">
+                                    <i class="ri-group-line text-white fs-5"></i>
+                                </div>
+                                <p class="fw-medium text-primary-light mb-1">Targeted Notices</p>
                             </div>
-                            <i class="ri-calendar-todo-line"></i>
+                            <h6 class="mb-0"><?php echo number_format($totalTargeted); ?></h6>
+                            <p class="fw-medium text-sm text-primary-light mt-12 mb-0 d-flex align-items-center gap-2">
+                                <span class="d-inline-flex align-items-center gap-1 text-primary-600 text-sm fw-semibold">
+                                    <?php echo $totalNotices > 0 ? round(($totalTargeted / $totalNotices) * 100) : 0; ?>%
+                                </span>
+                                Specific Audience
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-24 border-0 shadow-1">
+                <div class="card-body p-20">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-16">
+                        <div class="d-flex align-items-center gap-12">
+                            <span class="w-48-px h-48-px rounded-circle <?php echo $whatsAppConfigured ? 'bg-success-600' : 'bg-warning-600'; ?> text-white d-flex align-items-center justify-content-center">
+                                <i class="ri-whatsapp-line text-2xl"></i>
+                            </span>
+                            <div>
+                                <h6 class="mb-4 text-lg">WhatsApp Notifications</h6>
+                                <p class="mb-0 text-sm text-secondary-light"><?php echo htmlspecialchars($whatsAppStatusMessage); ?></p>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-12">
+                            <span class="px-16 py-8 radius-8 bg-primary-50 text-primary-600 text-sm fw-semibold">
+                                <?php echo number_format($whatsAppDeliveryStats['total']); ?> attempts
+                            </span>
+                            <span class="px-16 py-8 radius-8 bg-success-50 text-success-600 text-sm fw-semibold">
+                                <?php echo number_format($whatsAppDeliveryStats['sent']); ?> sent
+                            </span>
+                            <span class="px-16 py-8 radius-8 bg-danger-50 text-danger-600 text-sm fw-semibold">
+                                <?php echo number_format($whatsAppDeliveryStats['failed']); ?> failed
+                            </span>
+                            <span class="px-16 py-8 radius-8 bg-warning-50 text-warning-600 text-sm fw-semibold">
+                                <?php echo number_format($whatsAppDeliveryStats['skipped']); ?> skipped
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -1028,20 +1130,19 @@ error_log("=== NOTICE BOARD PAGE END ===");
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-md-3">
-                            <select class="form-select" id="statusFilter">
-                                <option value="">All Status</option>
-                                <option value="active">Active</option>
-                                <option value="expired">Expired</option>
-                                <option value="upcoming">Upcoming</option>
-                                <option value="draft">Draft</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
                             <select class="form-select" id="targetFilter">
-                                <option value="">All Audiences</option>
+                                <option value="">All Targets</option>
                                 <?php foreach ($targetOptions as $key => $value): ?>
                                 <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
                                 <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="expired">Expired</option>
                             </select>
                         </div>
                         <div class="col-md-6 text-md-end">
@@ -1055,153 +1156,213 @@ error_log("=== NOTICE BOARD PAGE END ===");
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
-            <!-- Notices Table -->
-            <div class="card h-100">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table bordered-table mb-0" id="noticesTable">
-                            <thead>
-                                <tr>
-                                    <th scope="col" width="50">
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox" id="selectAll">
-                                            <label class="form-check-label">S.L</label>
-                                        </div>
-                                    </th>
-                                    <th scope="col">Date</th>
-                                    <th scope="col">Title</th>
-                                    <th scope="col">Description</th>
-                                    <th scope="col">Target</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Posted By</th>
-                                    <th scope="col" width="120">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (empty($notices)): ?>
-                                <tr>
-                                    <td colspan="8" class="text-center py-4">
-                                        <i class="ri-megaphone-line fs-1 text-secondary-light mb-3 d-block" style="font-size: 3rem;"></i>
-                                        <p class="text-secondary-light">No notices found. Click "Add New Notice" to create your first notice.</p>
-                                    </td>
-                                </tr>
-                                <?php else: ?>
-                                    <?php foreach ($notices as $index => $notice): ?>
-                                    <tr data-status="<?php echo $notice['status']; ?>" data-target="<?php echo $notice['target']; ?>">
-                                        <td>
-                                            <div class="form-check style-check d-flex align-items-center">
-                                                <input class="form-check-input" type="checkbox" value="<?php echo $notice['id']; ?>">
-                                                <label class="form-check-label">
-                                                    <?php echo str_pad($index + 1, 2, '0', STR_PAD_LEFT); ?>
-                                                </label>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="notice-date">
-                                                <i class="ri-calendar-line"></i>
-                                                <?php echo date('d M Y', strtotime($notice['created_at'])); ?>
-                                                <?php if (!empty($notice['start_date']) && $notice['start_date'] > date('Y-m-d')): ?>
-                                                <br><small class="text-warning">Starts: <?php echo date('d M', strtotime($notice['start_date'])); ?></small>
-                                                <?php endif; ?>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <strong>
-                                                <?php echo htmlspecialchars($notice['title']); ?>
-                                                <?php if (!empty($notice['is_important'])): ?>
-                                                <i class="ri-star-fill important-star" title="Important"></i>
-                                                <?php endif; ?>
-                                            </strong>
-                                            <?php if (!empty($notice['class_name'])): ?>
-                                            <br><small class="text-muted">Class: <?php echo htmlspecialchars($notice['class_name']); ?></small>
-                                            <?php endif; ?>
-                                            <?php if (!empty($notice['section_name'])): ?>
-                                            <br><small class="text-muted">Section: <?php echo htmlspecialchars($notice['section_name']); ?></small>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <div class="notice-description" title="<?php echo htmlspecialchars($notice['description'] ?? ''); ?>">
-                                                <?php echo htmlspecialchars($notice['description'] ?? 'No description'); ?>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="target-badge">
-                                                <i class="ri-group-line"></i>
-                                                <?php echo $targetOptions[$notice['target']] ?? ucfirst($notice['target']); ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <?php
-                                            $statusClass = '';
-                                            $statusText = '';
-                                            switch ($notice['status']) {
-                                                case 'active':
-                                                    $statusClass = 'status-active';
-                                                    $statusText = 'Active';
-                                                    break;
-                                                case 'expired':
-                                                    $statusClass = 'status-expired';
-                                                    $statusText = 'Expired';
-                                                    break;
-                                                case 'upcoming':
-                                                    $statusClass = 'status-upcoming';
-                                                    $statusText = 'Upcoming';
-                                                    break;
-                                                default:
-                                                    $statusClass = 'status-draft';
-                                                    $statusText = 'Draft';
-                                            }
-                                            ?>
-                                            <span class="status-badge <?php echo $statusClass; ?>">
-                                                <?php echo $statusText; ?>
-                                                <?php if (!empty($notice['days_remaining']) && $notice['days_remaining'] > 0 && $notice['days_remaining'] <= 7): ?>
-                                                <br><small><?php echo $notice['days_remaining']; ?> days left</small>
-                                                <?php endif; ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <small class="text-muted">
-                                                <?php echo htmlspecialchars($notice['created_by_name'] ?? 'System'); ?>
-                                            </small>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <button type="button" class="text-primary-light text-xl" data-bs-toggle="dropdown">
-                                                    <i class="ri-more-2-fill"></i>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu-end p-12">
-                                                    <li>
-                                                        <button type="button" class="dropdown-item" onclick="viewNotice(<?php echo $notice['id']; ?>)">
-                                                            <i class="ri-eye-line"></i> View
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <button type="button" class="dropdown-item edit-notice-btn" 
-                                                                data-notice='<?php echo json_encode($notice); ?>'>
-                                                            <i class="ri-edit-2-line"></i> Edit
-                                                        </button>
-                                                    </li>
-                                                    <li>
-                                                        <hr class="dropdown-divider">
-                                                    </li>
-                                                    <li>
-                                                        <button type="button" class="dropdown-item text-danger" 
-                                                                onclick="deleteNotice(<?php echo $notice['id']; ?>, '<?php echo addslashes($notice['title']); ?>')">
-                                                            <i class="ri-delete-bin-line"></i> Delete
-                                                        </button>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
+            <?php if ($selectedNotice): ?>
+            <!-- Single Notice View -->
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card">
+                        <div class="card-body p-32">
+                            <div class="d-flex justify-content-between align-items-start mb-24">
+                                <div>
+                                    <h2 class="fw-semibold mb-2"><?php echo htmlspecialchars($selectedNotice['title']); ?></h2>
+                                    <div class="d-flex flex-wrap gap-2 mb-16">
+                                        <span class="badge bg-primary">Posted by: <?php echo htmlspecialchars($selectedNotice['created_by_name'] ?? 'System'); ?></span>
+                                        <span class="badge bg-info"><?php echo date('d M Y', strtotime($selectedNotice['created_at'])); ?></span>
+                                        <span class="badge bg-<?php
+                                            echo $selectedNotice['status'] == 'active' ? 'success' :
+                                                ($selectedNotice['status'] == 'scheduled' ? 'warning' : 'danger');
+                                        ?>">
+                                            <?php echo ucfirst($selectedNotice['status']); ?>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+                                        <i class="ri-more-2-fill"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <button type="button" class="dropdown-item edit-notice-btn"
+                                                    data-notice='<?php echo json_encode($selectedNotice); ?>'>
+                                                <i class="ri-edit-line"></i> Edit
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item text-danger"
+                                                    onclick="deleteNotice(<?php echo $selectedNotice['id']; ?>, '<?php echo addslashes($selectedNotice['title']); ?>')">
+                                                <i class="ri-delete-bin-line"></i> Delete
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <?php if ($selectedNotice['target'] != 'all'): ?>
+                            <div class="alert alert-info mb-24">
+                                <i class="ri-information-line me-2"></i>
+                                This notice is targeted to:
+                                <strong>
+                                    <?php
+                                    echo $targetOptions[$selectedNotice['target']] ?? $selectedNotice['target'];
+                                    if ($selectedNotice['class_name']) {
+                                        echo ' - ' . $selectedNotice['class_name'];
+                                    }
+                                    if ($selectedNotice['section_name']) {
+                                        echo ' (Section ' . $selectedNotice['section_name'] . ')';
+                                    }
+                                    ?>
+                                </strong>
+                            </div>
+                            <?php endif; ?>
+
+                            <div class="notice-content-full mb-24">
+                                <?php echo nl2br(htmlspecialchars($selectedNotice['description'])); ?>
+                            </div>
+
+                            <?php if ($selectedNotice['start_date'] || $selectedNotice['end_date']): ?>
+                            <div class="border-top pt-24 mt-24">
+                                <div class="row">
+                                    <?php if ($selectedNotice['start_date']): ?>
+                                    <div class="col-md-6">
+                                        <p class="mb-1 fw-semibold">Start Date:</p>
+                                        <p class="text-primary-light"><?php echo date('d F Y', strtotime($selectedNotice['start_date'])); ?></p>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if ($selectedNotice['end_date']): ?>
+                                    <div class="col-md-6">
+                                        <p class="mb-1 fw-semibold">End Date:</p>
+                                        <p class="text-primary-light"><?php echo date('d F Y', strtotime($selectedNotice['end_date'])); ?></p>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+
+                            <div class="d-flex justify-content-between align-items-center border-top pt-24 mt-24">
+                                <a href="notice-board.php" class="btn btn-outline-primary">
+                                    <i class="ri-arrow-left-line me-2"></i>Back to Notices
+                                </a>
+                                <div>
+                                    <span class="text-muted">Posted: <?php echo date('d M Y, h:i A', strtotime($selectedNotice['created_at'])); ?></span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            <?php else: ?>
+            <!-- Notices Grid -->
+            <div class="row" id="noticesContainer">
+                <?php if (empty($notices)): ?>
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="ri-megaphone-line fs-1 text-secondary-light mb-3 d-block" style="font-size: 3rem;"></i>
+                        <h5>No Notices Found</h5>
+                        <p class="text-secondary-light mb-4">Get started by creating your first notice</p>
+                        <button type="button" class="btn btn-primary-600 my-sidebar-btn">
+                            <i class="ri-add-line"></i> Add New Notice
+                        </button>
+                    </div>
+                </div>
+                <?php else: ?>
+                    <?php foreach ($notices as $index => $notice):
+                        $status = $notice['status'] ?? 'active';
+                        $statusColor = $status == 'active' ? 'success' : ($status == 'scheduled' ? 'warning' : 'danger');
+                    ?>
+                    <div class="col-lg-6 notice-item"
+                         data-target="<?php echo $notice['target']; ?>"
+                         data-status="<?php echo $status; ?>">
+                        <div class="notice-card">
+                            <div class="notice-header">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="w-44-px h-44-px bg-<?php echo $statusColor; ?>-subtle rounded-circle d-flex justify-content-center align-items-center">
+                                        <i class="ri-megaphone-line text-<?php echo $statusColor; ?> fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1"><?php echo htmlspecialchars($notice['title']); ?></h5>
+                                        <div class="d-flex gap-2">
+                                            <span class="badge bg-<?php echo $statusColor; ?>"><?php echo ucfirst($status); ?></span>
+                                            <span class="badge bg-info"><?php echo date('d M Y', strtotime($notice['created_at'])); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+                                        <i class="ri-more-2-fill"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a href="notice-board.php?id=<?php echo $notice['id']; ?>" class="dropdown-item">
+                                                <i class="ri-eye-line"></i> View
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item edit-notice-btn"
+                                                    data-notice='<?php echo json_encode($notice); ?>'>
+                                                <i class="ri-edit-line"></i> Edit
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item text-danger"
+                                                    onclick="deleteNotice(<?php echo $notice['id']; ?>, '<?php echo addslashes($notice['title']); ?>')">
+                                                <i class="ri-delete-bin-line"></i> Delete
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="notice-content" id="notice-content-<?php echo $notice['id']; ?>">
+                                <?php echo nl2br(htmlspecialchars(substr($notice['description'], 0, 150))); ?>
+                                <?php if (strlen($notice['description']) > 150): ?>
+                                <span class="read-more" onclick="toggleContent(<?php echo $notice['id']; ?>)">... Read more</span>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="mt-16">
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="target-badge" style="background: #e3f2fd; color: #1976d2;">
+                                        <i class="ri-group-line me-1"></i>
+                                        <?php echo $targetOptions[$notice['target']] ?? $notice['target']; ?>
+                                    </span>
+                                    <?php if ($notice['class_name']): ?>
+                                    <span class="target-badge" style="background: #f3e5f5; color: #7b1fa2;">
+                                        <i class="ri-school-line me-1"></i>
+                                        <?php echo htmlspecialchars($notice['class_name']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                    <?php if ($notice['section_name']): ?>
+                                    <span class="target-badge" style="background: #e8f5e8; color: #2e7d32;">
+                                        <i class="ri-grid-line me-1"></i>
+                                        Section <?php echo htmlspecialchars($notice['section_name']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-16 pt-16 border-top">
+                                <small class="text-muted">
+                                    <i class="ri-user-line me-1"></i>
+                                    <?php echo htmlspecialchars($notice['created_by_name'] ?? 'System'); ?>
+                                </small>
+                                <?php if ($notice['end_date']): ?>
+                                <small class="text-muted">
+                                    <i class="ri-calendar-line me-1"></i>
+                                    Ends: <?php echo date('d M Y', strtotime($notice['end_date'])); ?>
+                                </small>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
         </div>
 
         <footer class="d-footer">
@@ -1211,7 +1372,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
         </footer>
     </main>
 
-    <!-- Add Notice Sidebar -->
+     <!-- Add Notice Sidebar -->
     <div class="my-sidebar bg-white position-fixed end-0 top-0 h-100vh overflow-y-auto z-99 max-w-700-px w-100">
         <div class="px-20 py-12 border-bottom d-flex align-items-center justify-content-between gap-20">
             <h5 class="text-lg mb-0">Add New Notice</h5>
@@ -1222,7 +1383,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
         <form method="POST" class="p-20">
             <input type="hidden" name="action" value="create_notice">
             <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
-            
+
             <div class="row g-3">
                 <div class="col-sm-12">
                     <div class="">
@@ -1232,7 +1393,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
                         <input type="text" name="title" class="form-control" placeholder="Enter notice title" required>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-12">
                     <div class="">
                         <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Target Audience</label>
@@ -1243,7 +1404,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-12" id="classSelectWrapper" style="display: none;">
                     <div class="">
                         <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Select Class</label>
@@ -1255,7 +1416,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-12" id="sectionSelectWrapper" style="display: none;">
                     <div class="">
                         <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Select Section</label>
@@ -1267,35 +1428,95 @@ error_log("=== NOTICE BOARD PAGE END ===");
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-6">
                     <div class="">
                         <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Start Date</label>
                         <input type="date" name="start_date" class="form-control">
                     </div>
                 </div>
-                
+
                 <div class="col-sm-6">
                     <div class="">
                         <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">End Date</label>
                         <input type="date" name="end_date" class="form-control">
                     </div>
                 </div>
-                
+
                 <div class="col-sm-12">
                     <div class="">
                         <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Description</label>
-                        <textarea name="description" class="form-control" rows="4" placeholder="Enter notice description..."></textarea>
+                        <textarea name="description" class="form-control" rows="4" placeholder="Enter notice description..." required></textarea>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-12">
                     <div class="form-check">
                         <input type="checkbox" name="is_important" class="form-check-input" id="is_important" value="1">
                         <label class="form-check-label" for="is_important">Mark as Important</label>
                     </div>
                 </div>
-                
+
+                <div class="col-sm-12">
+                    <div class="border radius-12 p-16 bg-success-50">
+                        <div class="d-flex align-items-start gap-12">
+                            <span class="w-40-px h-40-px rounded-circle bg-success-600 text-white d-flex align-items-center justify-content-center flex-shrink-0">
+                                <i class="ri-whatsapp-line text-xl"></i>
+                            </span>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-start justify-content-between gap-12">
+                                    <div>
+                                        <label class="form-check-label fw-semibold text-primary-light mb-4" for="send_whatsapp">
+                                            Send WhatsApp notification
+                                        </label>
+                                        <p class="text-sm text-secondary-light mb-0">
+                                            Notify parents and teachers using the approved WhatsApp announcement template.
+                                        </p>
+                                    </div>
+                                    <div class="form-switch switch-primary d-flex align-items-center">
+                                        <input type="checkbox"
+                                               name="send_whatsapp"
+                                               class="form-check-input"
+                                               id="send_whatsapp"
+                                               value="1"
+                                               <?php echo ($whatsAppConfigured && $whatsAppAnnouncementEnabled) ? '' : 'disabled'; ?>>
+                                    </div>
+                                </div>
+
+                                <div class="mt-12 d-flex flex-wrap gap-12">
+                                    <label class="form-check d-flex align-items-center gap-8 mb-0">
+                                        <input type="checkbox"
+                                               name="whatsapp_audiences[]"
+                                               class="form-check-input"
+                                               value="parents"
+                                               checked
+                                               <?php echo $whatsAppConfigured ? '' : 'disabled'; ?>>
+                                        <span class="text-sm">Parents</span>
+                                    </label>
+                                    <label class="form-check d-flex align-items-center gap-8 mb-0">
+                                        <input type="checkbox"
+                                               name="whatsapp_audiences[]"
+                                               class="form-check-input"
+                                               value="teachers"
+                                               checked
+                                               <?php echo $whatsAppConfigured ? '' : 'disabled'; ?>>
+                                        <span class="text-sm">Teachers</span>
+                                    </label>
+                                </div>
+
+                                <div class="mt-12 text-sm <?php echo $whatsAppConfigured ? 'text-success-600' : 'text-warning-600'; ?>">
+                                    <i class="<?php echo $whatsAppConfigured ? 'ri-checkbox-circle-line' : 'ri-error-warning-line'; ?> me-1"></i>
+                                    <?php echo htmlspecialchars($whatsAppStatusMessage); ?>
+                                </div>
+                                <p class="text-xs text-secondary-light mt-8 mb-0">
+                                    Template expected: <strong><?php echo htmlspecialchars(function_exists('env') ? env('WHATSAPP_ANNOUNCEMENT_TEMPLATE', 'school_announcement') : 'school_announcement'); ?></strong>.
+                                    Body variables should be: recipient name, school name, notice title, notice message, portal URL.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="col-12">
                     <div class="d-flex align-items-center justify-content-center gap-3 mt-8">
                         <button type="button" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8 close-my-sidebar">
@@ -1322,7 +1543,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
             <input type="hidden" name="action" value="edit_notice">
             <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
             <input type="hidden" name="notice_id" id="edit_notice_id">
-            
+
             <div class="row g-3">
                 <div class="col-sm-12">
                     <div class="">
@@ -1332,7 +1553,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
                         <input type="text" name="title" id="edit_title" class="form-control" required>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-12">
                     <div class="">
                         <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Target Audience</label>
@@ -1343,7 +1564,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-12" id="edit_class_wrapper">
                     <div class="">
                         <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Class</label>
@@ -1355,7 +1576,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-12" id="edit_section_wrapper">
                     <div class="">
                         <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Section</label>
@@ -1367,42 +1588,42 @@ error_log("=== NOTICE BOARD PAGE END ===");
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-6">
                     <div class="">
                         <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Start Date</label>
                         <input type="date" name="start_date" id="edit_start_date" class="form-control">
                     </div>
                 </div>
-                
+
                 <div class="col-sm-6">
                     <div class="">
                         <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">End Date</label>
                         <input type="date" name="end_date" id="edit_end_date" class="form-control">
                     </div>
                 </div>
-                
+
                 <div class="col-sm-12">
                     <div class="">
                         <label class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Description</label>
                         <textarea name="description" id="edit_description" class="form-control" rows="4"></textarea>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-12">
                     <div class="form-check">
                         <input type="checkbox" name="is_important" class="form-check-input" id="edit_is_important" value="1">
                         <label class="form-check-label" for="edit_is_important">Mark as Important</label>
                     </div>
                 </div>
-                
+
                 <div class="col-sm-12">
                     <div class="form-check">
                         <input type="checkbox" name="is_published" class="form-check-input" id="edit_is_published" value="1">
                         <label class="form-check-label" for="edit_is_published">Published</label>
                     </div>
                 </div>
-                
+
                 <div class="col-12">
                     <div class="d-flex align-items-center justify-content-center gap-3 mt-8">
                         <button type="button" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8 close-edit-sidebar">
@@ -1546,7 +1767,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
             // Edit sidebar
             $('.edit-notice-btn').on('click', function () {
                 const noticeData = $(this).data('notice');
-                
+
                 // Populate form
                 $('#edit_notice_id').val(noticeData.id);
                 $('#edit_title').val(noticeData.title);
@@ -1558,14 +1779,14 @@ error_log("=== NOTICE BOARD PAGE END ===");
                 $('#edit_description').val(noticeData.description || '');
                 $('#edit_is_important').prop('checked', noticeData.is_important == 1);
                 $('#edit_is_published').prop('checked', noticeData.is_published == 1);
-                
+
                 // Show/hide class/section based on target
                 toggleTargetFields(noticeData.target);
-                
+
                 $('.edit-sidebar').addClass('active');
                 $('.overlay').addClass('active');
             });
-            
+
             $('.close-edit-sidebar, .overlay').on('click', function () {
                 $('.edit-sidebar').removeClass('active');
                 $('.overlay').removeClass('active');
@@ -1585,28 +1806,28 @@ error_log("=== NOTICE BOARD PAGE END ===");
             $('#statusFilter, #targetFilter').on('change', function() {
                 const status = $('#statusFilter').val();
                 const target = $('#targetFilter').val();
-                
+
                 $.fn.dataTable.ext.search.push(
                     function(settings, data, dataIndex) {
                         const row = table.row(dataIndex).node();
                         const rowStatus = $(row).data('status');
                         const rowTarget = $(row).data('target');
-                        
+
                         let statusMatch = true;
                         let targetMatch = true;
-                        
+
                         if (status && rowStatus != status) {
                             statusMatch = false;
                         }
-                        
+
                         if (target && rowTarget != target) {
                             targetMatch = false;
                         }
-                        
+
                         return statusMatch && targetMatch;
                     }
                 );
-                
+
                 table.draw();
                 $.fn.dataTable.ext.search.pop();
             });
@@ -1639,7 +1860,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
         function viewNotice(noticeId) {
             // Find the notice data from the table
             const row = $(`button[onclick="viewNotice(${noticeId})"]`).closest('tr');
-            
+
             $('#viewNoticeTitle').text(row.find('td:eq(2) strong').text().trim());
             $('#viewNoticeDate').text(row.find('td:eq(1) .notice-date').text().trim());
             $('#viewNoticeTarget').text(row.find('td:eq(4)').text().trim());
@@ -1647,7 +1868,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
             $('#viewNoticeEnd').text(row.find('td:eq(5) small').text().replace('days left', '').trim() || 'N/A');
             $('#viewNoticeAuthor').text(row.find('td:eq(6)').text().trim());
             $('#viewNoticeDescription').text(row.find('td:eq(3)').attr('title') || 'No description');
-            
+
             $('#viewNoticeModal').modal('show');
         }
 
@@ -1661,7 +1882,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
         // Export to Excel
         function exportToExcel() {
             let csv = "Date,Title,Description,Target,Status,Posted By\n";
-            
+
             $('#noticesTable tbody tr').each(function() {
                 if ($(this).find('td').length > 1) {
                     const date = $(this).find('td:eq(1)').text().trim();
@@ -1670,11 +1891,11 @@ error_log("=== NOTICE BOARD PAGE END ===");
                     const target = $(this).find('td:eq(4)').text().trim();
                     const status = $(this).find('td:eq(5)').text().trim();
                     const author = $(this).find('td:eq(6)').text().trim();
-                    
+
                     csv += `"${date}","${title}","${description}","${target}","${status}","${author}"\n`;
                 }
             });
-            
+
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1698,10 +1919,10 @@ error_log("=== NOTICE BOARD PAGE END ===");
                         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
                         th { background: #f8f9fa; text-align: left; padding: 12px; }
                         td { padding: 10px; border-bottom: 1px solid #dee2e6; }
-                        .badge { 
-                            display: inline-block; 
-                            padding: 3px 8px; 
-                            border-radius: 12px; 
+                        .badge {
+                            display: inline-block;
+                            padding: 3px 8px;
+                            border-radius: 12px;
                             font-size: 12px;
                             background: #e9ecef;
                         }
@@ -1714,7 +1935,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
                     <h1><?php echo htmlspecialchars($school['name']); ?></h1>
                     <h2>Notice Board</h2>
                     <p>Generated on: ${new Date().toLocaleString()}</p>
-                    
+
                     <table>
                         <thead>
                             <tr>
@@ -1728,7 +1949,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
                         </thead>
                         <tbody>
             `);
-            
+
             $('#noticesTable tbody tr').each(function() {
                 if ($(this).find('td').length > 1) {
                     const date = $(this).find('td:eq(1)').text().trim();
@@ -1737,7 +1958,7 @@ error_log("=== NOTICE BOARD PAGE END ===");
                     const target = $(this).find('td:eq(4)').text().trim();
                     const status = $(this).find('td:eq(5)').text().trim();
                     const author = $(this).find('td:eq(6)').text().trim();
-                    
+
                     printWindow.document.write(`
                         <tr>
                             <td>${date}</td>
@@ -1750,14 +1971,14 @@ error_log("=== NOTICE BOARD PAGE END ===");
                     `);
                 }
             });
-            
+
             printWindow.document.write(`
                         </tbody>
                     </table>
                 </body>
                 </html>
             `);
-            
+
             printWindow.document.close();
             printWindow.print();
         }
