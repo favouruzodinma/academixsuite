@@ -18,31 +18,31 @@ if (empty($schoolId) || empty($filePath)) {
     die('Invalid request');
 }
 
-// Security check
-if (!$token && !self::checkFileAccess($schoolId, $filePath)) {
-    http_response_code(403);
-    die('Access denied');
-}
-
-// Validate token (if provided)
-if ($token && !self::validateToken($token, $schoolId, $filePath)) {
-    http_response_code(403);
-    die('Invalid or expired token');
+// Security: Prevent directory traversal (must check before path construction)
+if (strpos($filePath, '..') !== false || strpos($filePath, '/') === 0) {
+    http_response_code(400);
+    die('Invalid file path');
 }
 
 // Get full file path
 $fullPath = __DIR__ . '/../assets/uploads/schools/' . $schoolId . '/' . $filePath;
 
+// Security check
+if (!$token && !checkFileAccess($schoolId, $filePath)) {
+    http_response_code(403);
+    die('Access denied');
+}
+
+// Validate token (if provided)
+if ($token && !validateToken($token, $schoolId, $filePath)) {
+    http_response_code(403);
+    die('Invalid or expired token');
+}
+
 // Check if file exists
 if (!file_exists($fullPath) || !is_file($fullPath)) {
     http_response_code(404);
     die('File not found');
-}
-
-// Security: Prevent directory traversal
-if (strpos($filePath, '..') !== false) {
-    http_response_code(400);
-    die('Invalid file path');
 }
 
 // Security: Restrict file types (optional)
@@ -68,34 +68,28 @@ exit;
  * Check if user has permission to access file
  */
 function checkFileAccess($schoolId, $filePath) {
-    // Start session
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
     
-    // Check if user is logged in and belongs to this school
     if (!isset($_SESSION['school_user']) || $_SESSION['school_user']['school_id'] != $schoolId) {
         return false;
     }
     
-    // Additional permission checks based on file type/location
-    $userType = $_SESSION['school_user']['user_type'];
+    $userType = $_SESSION['school_user']['user_type'] ?? '';
     
-    // Restrict access based on file location
     if (strpos($filePath, 'students/') === 0) {
-        // Student files: only accessible to admins, teachers, and the specific student/parent
-        return self::hasStudentFileAccess($schoolId, $filePath, $userType);
+        return in_array($userType, ['admin', 'teacher'], true);
     }
     
     if (strpos($filePath, 'teachers/') === 0) {
-        // Teacher files: only accessible to admins and the specific teacher
-        return self::hasTeacherFileAccess($schoolId, $filePath, $userType);
+        return in_array($userType, ['admin', 'teacher'], true);
     }
     
     if (strpos($filePath, 'reports/') === 0) {
-        // Reports: only accessible to admins
         return $userType === 'admin';
     }
     
-    // Public files (logo, announcements) are accessible to all logged-in users
     return true;
 }
 
@@ -103,6 +97,12 @@ function checkFileAccess($schoolId, $filePath) {
  * Generate secure file access token
  */
 function generateFileToken($schoolId, $filePath, $expiry = 3600) {
+    $secret = defined('FILE_SERVER_SECRET') ? FILE_SERVER_SECRET : (getenv('FILE_SERVER_SECRET') ?: '');
+    if (empty($secret)) {
+        error_log('FILE_SERVER_SECRET not configured');
+        return '';
+    }
+    
     $data = [
         'school_id' => $schoolId,
         'file_path' => $filePath,
@@ -111,7 +111,7 @@ function generateFileToken($schoolId, $filePath, $expiry = 3600) {
     ];
     
     $token = base64_encode(json_encode($data));
-    $signature = hash_hmac('sha256', $token, 'your-secret-key-here');
+    $signature = hash_hmac('sha256', $token, $secret);
     
     return $token . '.' . $signature;
 }
@@ -120,31 +120,36 @@ function generateFileToken($schoolId, $filePath, $expiry = 3600) {
  * Validate file access token
  */
 function validateToken($token, $schoolId, $filePath) {
-    list($data, $signature) = explode('.', $token, 2);
+    $secret = defined('FILE_SERVER_SECRET') ? FILE_SERVER_SECRET : (getenv('FILE_SERVER_SECRET') ?: '');
+    if (empty($secret)) {
+        error_log('FILE_SERVER_SECRET not configured');
+        return false;
+    }
     
-    // Verify signature
-    $expectedSignature = hash_hmac('sha256', $data, 'your-secret-key-here');
+    $parts = explode('.', $token, 2);
+    if (count($parts) !== 2) {
+        return false;
+    }
+    list($data, $signature) = $parts;
+    
+    $expectedSignature = hash_hmac('sha256', $data, $secret);
     if (!hash_equals($expectedSignature, $signature)) {
         return false;
     }
     
-    // Decode data
     $data = json_decode(base64_decode($data), true);
     if (!$data) {
         return false;
     }
     
-    // Check expiry
     if ($data['expiry'] < time()) {
         return false;
     }
     
-    // Check IP (optional)
-    if ($data['ip'] !== $_SERVER['REMOTE_ADDR']) {
+    if (($data['ip'] ?? '') !== $_SERVER['REMOTE_ADDR']) {
         return false;
     }
     
-    // Check school and file match
     if ($data['school_id'] != $schoolId || $data['file_path'] != $filePath) {
         return false;
     }

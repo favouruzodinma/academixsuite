@@ -5,7 +5,7 @@
  * Handles two modes:
  *
  * 1. AI conversation (default):
- *    POST messages + csrf_token → runs Grok with school tools → returns reply.
+ *    POST messages + csrf_token → runs Groq with school tools → returns reply.
  *
  * 2. Direct send_email action (no AI involved):
  *    POST action=send_email + subject + body_html + audience + csrf_token
@@ -20,14 +20,27 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../../../logs/ai_assistant.log');
 
-require_once __DIR__ . '/../../../includes/autoload.php';
-
 if (session_status() === PHP_SESSION_NONE) {
     session_name('academix_tenant');
+    $sessionConfig = __DIR__ . '/../../../includes/session_config.php';
+    if (is_file($sessionConfig)) {
+        require_once $sessionConfig;
+    }
     session_start(function_exists('academix_session_options') ? academix_session_options() : []);
 }
 
+require_once __DIR__ . '/../../../includes/autoload.php';
+
 header('Content-Type: application/json');
+
+$jsonInput = [];
+$rawInput = file_get_contents('php://input');
+if (is_string($rawInput) && trim($rawInput) !== '') {
+    $decodedInput = json_decode($rawInput, true);
+    if (is_array($decodedInput)) {
+        $jsonInput = $decodedInput;
+    }
+}
 
 // ── Auth & CSRF ───────────────────────────────────────────────────────────────
 $schoolSlug = $GLOBALS['SCHOOL_SLUG'] ?? '';
@@ -38,19 +51,60 @@ if (empty($schoolSlug)) {
 }
 
 $school = $schoolData ?: ($_SESSION['school_info'][$schoolSlug] ?? []);
+if (empty($school['id'])) {
+    echo json_encode(['success' => false, 'message' => 'School profile could not be loaded. Please refresh and try again.']); exit;
+}
+$school['id'] = (int)$school['id'];
+$school['slug'] = $school['slug'] ?? $schoolSlug;
+$school['name'] = $school['name'] ?? 'School';
 
 if (empty($_SESSION['school_auth']) || $_SESSION['school_auth']['school_slug'] !== $schoolSlug
     || ($_SESSION['school_auth']['user_type'] ?? '') !== 'admin') {
     echo json_encode(['success' => false, 'message' => 'Unauthorised.']); exit;
 }
 
-if (!function_exists('validateCsrfToken')) {
-    function validateCsrfToken($t) {
-        return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], (string)$t);
+if (!function_exists('academix_ai_validate_csrf_token')) {
+    function academix_ai_validate_csrf_token(?string $token): bool {
+        $token = (string)$token;
+        if ($token === '') {
+            return false;
+        }
+
+        $sessionTokens = [
+            $_SESSION['ai_csrf_token'] ?? null,
+            $_SESSION['csrf_token'] ?? null,
+            $_SESSION['admin_csrf_token'] ?? null,
+        ];
+
+        foreach ($sessionTokens as $sessionToken) {
+            if (is_string($sessionToken) && $sessionToken !== '' && hash_equals($sessionToken, $token)) {
+                return true;
+            }
+        }
+
+        if (!empty($_SESSION['csrf_tokens']) && is_array($_SESSION['csrf_tokens'])) {
+            if (isset($_SESSION['csrf_tokens'][$token])) {
+                $expiry = $_SESSION['csrf_tokens'][$token];
+                if (is_numeric($expiry)) {
+                    return (int)$expiry >= time();
+                }
+                return true;
+            }
+
+            foreach ($_SESSION['csrf_tokens'] as $csrfTokenData) {
+                if (is_array($csrfTokenData) && isset($csrfTokenData['token'], $csrfTokenData['expiry'])) {
+                    if ((int)$csrfTokenData['expiry'] >= time() && hash_equals((string)$csrfTokenData['token'], $token)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }
-$token = $_POST['csrf_token'] ?? (json_decode(file_get_contents('php://input'), true)['csrf_token'] ?? '');
-if (!validateCsrfToken($token)) {
+$token = $_POST['csrf_token'] ?? ($jsonInput['csrf_token'] ?? '');
+if (!academix_ai_validate_csrf_token(is_string($token) ? $token : '')) {
     echo json_encode(['success' => false, 'message' => 'Invalid security token.']); exit;
 }
 
@@ -69,7 +123,7 @@ try {
 }
 
 require_once __DIR__ . '/../../../includes/SchoolActionManager.php';
-require_once __DIR__ . '/../../../includes/GrokClient.php';
+require_once __DIR__ . '/../../../includes/GroqClient.php';
 require_once __DIR__ . '/../../../includes/Services/SchoolEmailSender.php';
 require_once __DIR__ . '/../../../includes/Services/WhatsAppService.php';
 
@@ -240,15 +294,15 @@ if (!function_exists('academix_ai_send_whatsapp_batch')) {
 }
 
 // ── Handle direct (non-AI) actions ───────────────────────────────────────────
-$directAction = $_POST['action'] ?? '';
+$directAction = $_POST['action'] ?? ($jsonInput['action'] ?? '');
 
 if ($directAction === 'send_email') {
     if (!$schoolDb) {
         echo json_encode(['success' => false, 'message' => 'School database unavailable.']); exit;
     }
-    $subject  = trim($_POST['subject']   ?? '');
-    $bodyHtml = trim($_POST['body_html'] ?? '');
-    $audience = trim($_POST['audience']  ?? 'all');
+    $subject  = trim((string)($_POST['subject']   ?? ($jsonInput['subject']   ?? '')));
+    $bodyHtml = trim((string)($_POST['body_html'] ?? ($jsonInput['body_html'] ?? '')));
+    $audience = trim((string)($_POST['audience']  ?? ($jsonInput['audience']  ?? 'all')));
 
     if ($subject === '' || $bodyHtml === '') {
         echo json_encode(['success' => false, 'message' => 'Subject and body are required.']); exit;
@@ -264,7 +318,7 @@ if ($directAction === 'preview_recipients') {
     if (!$schoolDb) {
         echo json_encode(['success' => false, 'message' => 'School database unavailable.']); exit;
     }
-    $audience = trim($_POST['audience'] ?? 'all');
+    $audience = trim((string)($_POST['audience'] ?? ($jsonInput['audience'] ?? 'all')));
     $sender   = new SchoolEmailSender($schoolDb, $school);
     $preview  = $sender->resolveRecipients($audience);
     echo json_encode(array_merge(['success' => true], $preview));
@@ -293,7 +347,7 @@ if ($directAction === 'onboarding_status') {
 
 // ── Onboarding: mark a step done (non-AI, called by frontend on page visit) ──
 if ($directAction === 'mark_onboarding_step') {
-    $stepKey = trim($_POST['step'] ?? '');
+    $stepKey = trim((string)($_POST['step'] ?? ($jsonInput['step'] ?? '')));
     if ($schoolDb && $stepKey) {
         onboarding_mark_step($schoolDb, (int)$school['id'], $stepKey);
     }
@@ -302,7 +356,7 @@ if ($directAction === 'mark_onboarding_step') {
 }
 
 // ── Parse incoming messages ───────────────────────────────────────────────────
-$rawMessages = $_POST['messages'] ?? '';
+$rawMessages = $_POST['messages'] ?? ($jsonInput['messages'] ?? '');
 if (is_string($rawMessages)) {
     $rawMessages = json_decode($rawMessages, true) ?? [];
 }
@@ -313,7 +367,7 @@ if (!is_array($rawMessages) || empty($rawMessages)) {
 // ── System prompt ─────────────────────────────────────────────────────────────
 $schoolName   = htmlspecialchars_decode($school['name'] ?? 'the school');
 $today        = date('l, F j Y');
-$isOnboarding = !empty($_POST['is_onboarding']) || !empty((json_decode(file_get_contents('php://input'), true))['is_onboarding']);
+$isOnboarding = !empty($_POST['is_onboarding']) || !empty($jsonInput['is_onboarding']);
 
 // Build live checklist for onboarding mode
 $obStepsJson = '[]';
@@ -467,7 +521,7 @@ $tools = [
         'function' => [
             'name'        => 'list_classes',
             'description' => 'Return a list of all classes with their IDs — useful before filtering other queries by class.',
-            'parameters'  => ['type' => 'object', 'properties' => [], 'required' => []],
+            'parameters'  => ['type' => 'object', 'properties' => (object)[], 'required' => []],
         ],
     ],
 
@@ -477,7 +531,7 @@ $tools = [
         'function' => [
             'name'        => 'list_academic_years',
             'description' => 'Return all academic years with their IDs — useful before filtering by year.',
-            'parameters'  => ['type' => 'object', 'properties' => [], 'required' => []],
+            'parameters'  => ['type' => 'object', 'properties' => (object)[], 'required' => []],
         ],
     ],
 
@@ -487,7 +541,7 @@ $tools = [
         'function' => [
             'name'        => 'get_onboarding_status',
             'description' => 'Returns the live setup checklist showing which steps are done and which are pending. Use this at the start of an onboarding session.',
-            'parameters'  => ['type' => 'object', 'properties' => [], 'required' => []],
+            'parameters'  => ['type' => 'object', 'properties' => (object)[], 'required' => []],
         ],
     ],
 
@@ -633,7 +687,7 @@ $tools = [
         'function' => [
             'name'        => 'list_subjects',
             'description' => 'Return a list of active subjects with their IDs.',
-            'parameters'  => ['type' => 'object', 'properties' => [], 'required' => []],
+            'parameters'  => ['type' => 'object', 'properties' => (object)[], 'required' => []],
         ],
     ],
 
@@ -758,20 +812,29 @@ $toolExecutor = function (string $toolName, array $args) use ($manager, $eventMa
                 );
 
                 if (in_array('fee_payments', $tables)) {
+                    $paymentAmount = academix_ai_column_exists($schoolDb, 'fee_payments', 'amount_paid')
+                        ? 'fp.amount_paid'
+                        : (academix_ai_column_exists($schoolDb, 'fee_payments', 'amount') ? 'fp.amount' : '0');
+                    $hasFeeStructureId = academix_ai_column_exists($schoolDb, 'fee_payments', 'fee_structure_id');
+                    $join = $hasFeeStructureId && in_array('fee_structures', $tables, true)
+                        ? 'LEFT JOIN fee_structures fs ON fs.id = fp.fee_structure_id'
+                        : '';
+                    $invoiceExpr = $join !== '' ? 'COALESCE(SUM(fs.amount), 0)' : '0';
+
                     $where = 'WHERE fp.school_id = ' . (int)$school['id'];
-                    if (!empty($args['academic_year_id'])) {
+                    if ($join !== '' && !empty($args['academic_year_id'])) {
                         $where .= ' AND fs.academic_year_id = ' . (int)$args['academic_year_id'];
                     }
-                    if (!empty($args['class_id'])) {
+                    if ($join !== '' && !empty($args['class_id'])) {
                         $where .= ' AND fs.class_id = ' . (int)$args['class_id'];
                     }
 
                     $sql = "SELECT
-                                COALESCE(SUM(fs.amount), 0)          AS total_invoiced,
-                                COALESCE(SUM(fp.amount_paid), 0)     AS total_paid,
+                                {$invoiceExpr}                       AS total_invoiced,
+                                COALESCE(SUM({$paymentAmount}), 0)   AS total_paid,
                                 COUNT(DISTINCT fp.student_id)        AS paying_students
                             FROM fee_payments fp
-                            LEFT JOIN fee_structures fs ON fs.id = fp.fee_structure_id
+                            {$join}
                             {$where}";
                     $row = $schoolDb->query($sql)->fetch(PDO::FETCH_ASSOC);
                     if ($row) {
@@ -1350,25 +1413,28 @@ $toolExecutor = function (string $toolName, array $args) use ($manager, $eventMa
     }
 };
 
-// ── Run Grok ──────────────────────────────────────────────────────────────────
-$apiKey = $_ENV['GROK_API_KEY'] ?? getenv('GROK_API_KEY') ?? '';
-$model  = $_ENV['GROK_MODEL']   ?? getenv('GROK_MODEL')   ?? 'grok-3-mini';
+// ── Run Groq ──────────────────────────────────────────────────────────────────
+$apiKey = $_ENV['GROQ_API_KEY'] ?? getenv('GROQ_API_KEY') ?? '';
+$model  = $_ENV['GROQ_MODEL']   ?? getenv('GROQ_MODEL')   ?? 'llama-3.1-8b-instant';
 
-if (empty($apiKey) || $apiKey === 'xai-your-key-here') {
+if (empty($apiKey) || $apiKey === 'gsk-your-key-here') {
     echo json_encode([
         'success' => false,
-        'message' => 'Grok API key not configured. Please add GROK_API_KEY to your .env file.',
+        'message' => 'Groq API key not configured. Please add GROQ_API_KEY to your .env file.',
     ]);
     exit;
 }
 
 try {
-    $grok   = new GrokClient($apiKey, $model);
-    $result = $grok->run($messages, $tools, $toolExecutor);
+    $groq = new GroqClient($apiKey, $model);
+    $result = $groq->run($messages, $tools, $toolExecutor, 4, 700);
+
+    $isError = strncmp((string)($result['reply'] ?? ''), 'AI error: ', 10) === 0;
 
     echo json_encode([
-        'success'         => true,
+        'success'         => !$isError,
         'reply'           => $result['reply'],
+        'message'         => $isError ? $result['reply'] : '',
         'tool_calls_made' => $result['tool_calls_made'],
     ]);
 } catch (Throwable $e) {

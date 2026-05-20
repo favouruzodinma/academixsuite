@@ -565,11 +565,11 @@ class WhatsAppService
             return null;
         }
 
-        if (str_starts_with($digits, '00')) {
+        if (strncmp($digits, '00', 2) === 0) {
             $digits = substr($digits, 2);
         }
 
-        if (strlen($digits) === 11 && str_starts_with($digits, '0')) {
+        if (strlen($digits) === 11 && strncmp($digits, '0', 1) === 0) {
             $digits = self::DEFAULT_COUNTRY_CODE . substr($digits, 1);
         } elseif (strlen($digits) === 10 && preg_match('/^[789]/', $digits)) {
             $digits = self::DEFAULT_COUNTRY_CODE . $digits;

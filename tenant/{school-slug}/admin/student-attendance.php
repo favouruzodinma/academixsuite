@@ -289,7 +289,7 @@ if ($schoolDb) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_attendance']) && $schoolDb) {
 
     // Validate CSRF token
-    if (!isset($_POST['csrf_token']) || !validateCsrfToken($_POST['csrf_token'])) {
+    if (!isset($_POST['csrf_token']) || !academix_admin_validate_csrf($_POST['csrf_token'])) {
         $_SESSION['attendance_error'] = "Invalid security token. Please try again.";
         error_log("CSRF validation failed for attendance submission");
     } else {
@@ -345,7 +345,14 @@ $errorMessage = $_SESSION['attendance_error'] ?? '';
 unset($_SESSION['attendance_success'], $_SESSION['attendance_error']);
 
 // Generate CSRF token
-$csrfToken = generateCsrfToken();
+if (function_exists('academix_admin_csrf_token')) {
+    $csrfToken = academix_admin_csrf_token();
+} else {
+    if (empty($_SESSION['admin_csrf_token'])) {
+        $_SESSION['admin_csrf_token'] = bin2hex(random_bytes(32));
+    }
+    $csrfToken = $_SESSION['admin_csrf_token'];
+}
 
 // Get unread notification count
 $unreadCount = 0;
@@ -550,12 +557,9 @@ error_log("=== ATTENDANCE PAGE END ===");
 </head>
 <body>
     <!-- Theme Customization Structure Start -->
-    <div class="body-overlay"></div>
+    
 
-    <button type="button"
-        class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
-        <i class="ri-settings-3-line animate-spin"></i>
-    </button>
+    
 
     <!-- Theme Customization Structure End -->
 
@@ -757,10 +761,10 @@ error_log("=== ATTENDANCE PAGE END ===");
 
             <!-- Attendance Form -->
             <form method="POST" action="" id="attendanceForm">
-                <input type="hiddeun" name="csrf_token" value="<?php echo $csrfToken; ?>">
-                <input type="hiddeun" name="class_id" value="<?php echo $selectedClass; ?>">
-                <input type="hiddeun" name="section_id" value="<?php echo $selectedSection; ?>">
-                <input type="hiddeun" name="academic_year_id" value="<?php echo $selectedAcademicYear; ?>">
+                <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                <input type="hidden" name="class_id" value="<?php echo $selectedClass; ?>">
+                <input type="hidden" name="section_id" value="<?php echo $selectedSection; ?>">
+                <input type="hidden" name="academic_year_id" value="<?php echo $selectedAcademicYear; ?>">
                 <input type="hidden" name="attendance_date" value="<?php echo $selectedDate; ?>">
 
                 <div class="mt-24">

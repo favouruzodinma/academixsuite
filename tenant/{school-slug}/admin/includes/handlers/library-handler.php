@@ -6,6 +6,9 @@ require_once __DIR__ . '/../admin-bootstrap.php';
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $schoolDb) {
     $action = $_POST['action'] ?? '';
+    if (!academix_admin_validate_csrf($_POST['csrf_token'] ?? null)) {
+        throw new Exception('Security validation failed. Please refresh and try again.');
+    }
     try {
         switch ($action) {
             case 'create_book':
@@ -56,9 +59,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $schoolDb) {
                 if (empty($_POST['id'])) throw new Exception('Issue ID required');
                 $stmt = $schoolDb->prepare("UPDATE library_issues SET return_date=NOW(), status='returned' WHERE id=? AND school_id=?");
                 $stmt->execute([$_POST['id'], $school['id']]);
-                $issue = $schoolDb->prepare("SELECT book_id FROM library_issues WHERE id=?")->execute([$_POST['id']]);
-                if ($issue && $bookId = $issue->fetchColumn()) {
-                    $schoolDb->prepare("UPDATE library_books SET available = available + 1 WHERE id=?")->execute([$bookId]);
+                $issueStmt = $schoolDb->prepare("SELECT book_id FROM library_issues WHERE id=? AND school_id=?");
+                $issueStmt->execute([$_POST['id'], $school['id']]);
+                $bookId = $issueStmt->fetchColumn();
+                if ($bookId) {
+                    $schoolDb->prepare("UPDATE library_books SET available = available + 1 WHERE id=? AND school_id=?")->execute([$bookId, $school['id']]);
                 }
                 setToast('success', 'Book returned');
                 break;

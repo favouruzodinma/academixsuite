@@ -53,74 +53,68 @@ if (!function_exists('school_profile_admin_ensure_schema')) {
             }
         }
 
-        if (!academix_admin_table_exists($db, 'school_contacts')) {
-            $db->exec("
-                CREATE TABLE `school_contacts` (
-                    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                    `school_id` INT UNSIGNED NOT NULL,
-                    `type` ENUM('phone','email','address','website','social') NOT NULL DEFAULT 'phone',
-                    `label` VARCHAR(100) NULL,
-                    `value` VARCHAR(255) NOT NULL,
-                    `is_primary` TINYINT(1) NOT NULL DEFAULT 0,
-                    `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
-                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    KEY `idx_school_contacts_school` (`school_id`, `sort_order`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-            ");
-        }
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS `school_contacts` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                `school_id` INT UNSIGNED NOT NULL,
+                `type` ENUM('phone','email','address','website','social') NOT NULL DEFAULT 'phone',
+                `label` VARCHAR(100) NULL,
+                `value` VARCHAR(255) NOT NULL,
+                `is_primary` TINYINT(1) NOT NULL DEFAULT 0,
+                `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+                `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                KEY `idx_school_contacts_school` (`school_id`, `sort_order`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        ");
 
-        if (!academix_admin_table_exists($db, 'school_facilities')) {
-            $db->exec("
-                CREATE TABLE `school_facilities` (
-                    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                    `school_id` INT UNSIGNED NOT NULL,
-                    `name` VARCHAR(100) NOT NULL,
-                    `description` TEXT NULL,
-                    `icon` VARCHAR(50) NULL,
-                    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
-                    `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
-                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    KEY `idx_school_facilities_school` (`school_id`, `sort_order`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-            ");
-        }
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS `school_facilities` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                `school_id` INT UNSIGNED NOT NULL,
+                `name` VARCHAR(100) NOT NULL,
+                `description` TEXT NULL,
+                `icon` VARCHAR(50) NULL,
+                `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+                `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+                `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                KEY `idx_school_facilities_school` (`school_id`, `sort_order`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        ");
 
-        if (!academix_admin_table_exists($db, 'school_gallery')) {
-            $db->exec("
-                CREATE TABLE `school_gallery` (
-                    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                    `school_id` INT UNSIGNED NOT NULL,
-                    `image_url` VARCHAR(500) NOT NULL,
-                    `caption` VARCHAR(255) NULL,
-                    `type` ENUM('campus','classroom','laboratory','library','sports','events','other') NOT NULL DEFAULT 'campus',
-                    `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
-                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    KEY `idx_school_gallery_school` (`school_id`, `sort_order`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-            ");
-        }
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS `school_gallery` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                `school_id` INT UNSIGNED NOT NULL,
+                `image_url` VARCHAR(500) NOT NULL,
+                `caption` VARCHAR(255) NULL,
+                `type` ENUM('campus','classroom','laboratory','library','sports','events','other') NOT NULL DEFAULT 'campus',
+                `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
+                `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                KEY `idx_school_gallery_school` (`school_id`, `sort_order`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        ");
 
-        if (!academix_admin_table_exists($db, 'school_reviews')) {
-            $db->exec("
-                CREATE TABLE `school_reviews` (
-                    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                    `school_id` INT UNSIGNED NOT NULL,
-                    `parent_name` VARCHAR(255) NOT NULL,
-                    `parent_email` VARCHAR(255) NULL,
-                    `student_name` VARCHAR(255) NULL,
-                    `rating` DECIMAL(2,1) NOT NULL DEFAULT 5,
-                    `title` VARCHAR(255) NULL,
-                    `comment` TEXT NOT NULL,
-                    `pros` TEXT NULL,
-                    `cons` TEXT NULL,
-                    `is_verified` TINYINT(1) NOT NULL DEFAULT 0,
-                    `is_approved` TINYINT(1) NOT NULL DEFAULT 0,
-                    `helpful_count` INT UNSIGNED NOT NULL DEFAULT 0,
-                    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    KEY `idx_school_reviews_school` (`school_id`, `is_approved`, `created_at`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-            ");
-        } elseif (in_array('parent_email', school_profile_admin_columns_fresh($db, 'school_reviews'), true)) {
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS `school_reviews` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                `school_id` INT UNSIGNED NOT NULL,
+                `parent_name` VARCHAR(255) NOT NULL,
+                `parent_email` VARCHAR(255) NULL,
+                `student_name` VARCHAR(255) NULL,
+                `rating` DECIMAL(2,1) NOT NULL DEFAULT 5,
+                `title` VARCHAR(255) NULL,
+                `comment` TEXT NOT NULL,
+                `pros` TEXT NULL,
+                `cons` TEXT NULL,
+                `is_verified` TINYINT(1) NOT NULL DEFAULT 0,
+                `is_approved` TINYINT(1) NOT NULL DEFAULT 0,
+                `helpful_count` INT UNSIGNED NOT NULL DEFAULT 0,
+                `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                KEY `idx_school_reviews_school` (`school_id`, `is_approved`, `created_at`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        ");
+
+        if (academix_admin_table_exists($db, 'school_reviews') && in_array('parent_email', school_profile_admin_columns_fresh($db, 'school_reviews'), true)) {
             try {
                 $db->exec('ALTER TABLE `school_reviews` MODIFY `parent_email` VARCHAR(255) NULL');
             } catch (Throwable $e) {

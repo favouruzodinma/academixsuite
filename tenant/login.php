@@ -195,9 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             if (password_verify($password, $passwordHash)) {
                                 $authenticated = true;
-                            } elseif ($password === $passwordHash) {
-                                $authenticated = true;
-                            } elseif (md5($password) === $passwordHash) {
+                            } elseif (strlen($passwordHash) === 32 && ctype_xdigit($passwordHash) && md5($password) === $passwordHash) {
                                 $authenticated = true;
                             }
                             
@@ -212,7 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     $sessionUserType = $userType === 'staff' ? 'staff' : $userType;
                                     session_regenerate_id(true);
 
-                                    if (password_needs_rehash($passwordHash, PASSWORD_DEFAULT) || $password === $passwordHash || md5($password) === $passwordHash) {
+                                    if (password_needs_rehash($passwordHash, PASSWORD_DEFAULT)) {
                                         $rehashStmt = $schoolDb->prepare("UPDATE users SET password = ? WHERE id = ?");
                                         $rehashStmt->execute([password_hash($password, PASSWORD_DEFAULT), $user['id']]);
                                     }
@@ -372,12 +370,9 @@ $tenantLoginTitle = !empty($school['name']) ? $school['name'] : 'School Portal';
 <body>
 
     <!-- Theme Customization Structure Start -->
-    <div class="body-overlay"></div>
+    
 
-    <button type="button"
-        class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
-        <i class="ri-settings-3-line animate-spin"></i>
-    </button>
+    
     <div class="theme-customization-sidebar w-100 bg-base h-100vh overflow-y-auto position-fixed end-0 top-0">
         <div class="d-flex align-items-center gap-3 py-16 px-24 justify-content-between border-bottom">
             <div>

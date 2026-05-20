@@ -298,10 +298,8 @@ error_log("=== INVOICE VIEW PAGE END ===");
 
 <body>
     <!-- Theme Customization Structure Start -->
-    <div class="body-overlay"></div>
-    <button type="button" class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700 no-print" aria-label="Theme Customization Button">
-        <i class="ri-settings-3-line animate-spin"></i>
-    </button>
+    
+    
     
     <!-- Print Header (only visible when printing) -->
     <div class="print-only">

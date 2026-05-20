@@ -13,6 +13,7 @@ class CrudHandler {
     }
 
     public function getSchema($table) {
+        $this->validateTableName($table);
         $cacheKey = $this->getDbName() . '.' . $table;
         if (isset(self::$schemaCache[$cacheKey])) {
             return self::$schemaCache[$cacheKey];
@@ -81,6 +82,7 @@ class CrudHandler {
     }
 
     public function listAll($table, $params = []) {
+        $this->validateTableName($table);
         $schema = $this->getSchema($table);
         $page = max(1, (int)($params['page'] ?? 1));
         $perPage = min(100, max(1, (int)($params['per_page'] ?? 25)));
@@ -138,6 +140,7 @@ class CrudHandler {
     }
 
     public function get($table, $id) {
+        $this->validateTableName($table);
         $schema = $this->getSchema($table);
         $pk = $schema['primary_key'] ?? 'id';
 
@@ -163,6 +166,7 @@ class CrudHandler {
     }
 
     public function create($table, $data) {
+        $this->validateTableName($table);
         $schema = $this->getSchema($table);
         $allowed = $this->filterColumns($schema, $data);
 
@@ -195,6 +199,7 @@ class CrudHandler {
     }
 
     public function update($table, $id, $data) {
+        $this->validateTableName($table);
         $schema = $this->getSchema($table);
         $pk = $schema['primary_key'] ?? 'id';
         $allowed = $this->filterColumns($schema, $data);
@@ -235,6 +240,7 @@ class CrudHandler {
     }
 
     public function delete($table, $id) {
+        $this->validateTableName($table);
         $schema = $this->getSchema($table);
         $pk = $schema['primary_key'] ?? 'id';
 
@@ -258,6 +264,7 @@ class CrudHandler {
     }
 
     public function getRelatedData($table) {
+        $this->validateTableName($table);
         $schema = $this->getSchema($table);
         $related = [];
 
@@ -310,6 +317,7 @@ class CrudHandler {
     }
 
     public function getDisplayInfo($table) {
+        $this->validateTableName($table);
         $displayNames = [
             'academic_terms' => 'Academic Terms',
             'academic_years' => 'Academic Years',
@@ -358,6 +366,12 @@ class CrudHandler {
             }
         }
         return $schema['primary_key'] ?? 'id';
+    }
+
+    private function validateTableName(string $table): void {
+        if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $table)) {
+            throw new \InvalidArgumentException("Invalid table name: " . $table);
+        }
     }
 
     private function getDbName() {

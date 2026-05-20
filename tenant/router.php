@@ -212,7 +212,8 @@ $allowedPages = [
         'calendar.php',
         'logout.php',
         'forgot-password.php',
-        'reset-password.php'
+        'reset-password.php',
+        'ai_teacher.php'
     ],
     'student' => [
         'dashboard.php',
@@ -287,6 +288,15 @@ if (is_dir($sharedAdminDir)) {
         if (!in_array($templateName, $adminInternalFiles, true)) {
             $allowedPages['admin'][] = $templateName;
         }
+    }
+}
+
+// Auto-scan teacher template files (same approach as admin)
+$sharedTeacherDir = __DIR__ . '/{school-slug}/teacher';
+if (is_dir($sharedTeacherDir)) {
+    $teacherTemplateFiles = glob($sharedTeacherDir . '/*.php') ?: [];
+    foreach ($teacherTemplateFiles as $templateFile) {
+        $allowedPages['teacher'][] = basename($templateFile);
     }
 }
 

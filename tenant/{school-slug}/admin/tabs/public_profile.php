@@ -491,6 +491,8 @@ $ppPublicUrl = 'https://' . $pE($schoolSlug ?? '') . '.academixsuite.com/';
 
 <script>
 (function () {
+    var PP_CSRF = <?php echo json_encode($csrfToken ?? ''); ?>;
+
     // -- Tab switching ------------------------------------------------------
     document.querySelectorAll('.pp-tabs button[data-pp-tab]').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -533,6 +535,7 @@ $ppPublicUrl = 'https://' . $pE($schoolSlug ?? '') . '.academixsuite.com/';
     // -- Submit helper ------------------------------------------------------
     function postForm(form) {
         var fd = new FormData(form);
+        if (!fd.has('csrf_token')) fd.append('csrf_token', PP_CSRF);
         return fetch(window.location.pathname + window.location.search, {
             method: 'POST',
             body: fd,
@@ -574,8 +577,16 @@ $ppPublicUrl = 'https://' . $pE($schoolSlug ?? '') . '.academixsuite.com/';
         }
     };
     function doDeleteGallery(id, btn) {
-        var fd = new FormData(); fd.append('action', 'profile_gallery_delete'); fd.append('image_id', id);
-        fetch(window.location.pathname, { method:'POST', body: fd, credentials: 'same-origin' })
+        var fd = new FormData();
+        fd.append('action', 'profile_gallery_delete');
+        fd.append('image_id', id);
+        fd.append('csrf_token', PP_CSRF);
+        fetch(window.location.pathname, {
+            method:'POST',
+            body: fd,
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
             .then(r => r.json()).then(function (r) {
                 flash(r);
                 if (r.success) {
@@ -587,8 +598,17 @@ $ppPublicUrl = 'https://' . $pE($schoolSlug ?? '') . '.academixsuite.com/';
 
     // -- Review toggle ------------------------------------------------------
     window.ppToggleReview = function (id, approve, btn) {
-        var fd = new FormData(); fd.append('action', 'profile_review_toggle'); fd.append('review_id', id); fd.append('approve', approve);
-        fetch(window.location.pathname, { method:'POST', body: fd, credentials: 'same-origin' })
+        var fd = new FormData();
+        fd.append('action', 'profile_review_toggle');
+        fd.append('review_id', id);
+        fd.append('approve', approve);
+        fd.append('csrf_token', PP_CSRF);
+        fetch(window.location.pathname, {
+            method:'POST',
+            body: fd,
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
             .then(r => r.json()).then(function (r) { flash(r); if (r.success) location.reload(); });
     };
 })();

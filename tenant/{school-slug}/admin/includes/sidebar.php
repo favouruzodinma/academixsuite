@@ -441,8 +441,10 @@ $_obFirstVisit      = !empty($GLOBALS['onboarding_first_visit']);
 // Build the AJAX URL relative to the current admin page depth.
 // All admin pages sit at: tenant/{school-slug}/admin/*.php  (depth = 3 from root)
 $_aiSlug   = $sidebarSchoolSlug ?? ($GLOBALS['SCHOOL_SLUG'] ?? '');
-$_aiCsrf   = isset($_SESSION['csrf_token']) ? $_SESSION['csrf_token'] : (bin2hex(random_bytes(16)));
-if (!isset($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = $_aiCsrf;
+if (empty($_SESSION['ai_csrf_token'])) {
+    $_SESSION['ai_csrf_token'] = bin2hex(random_bytes(32));
+}
+$_aiCsrf = $_SESSION['ai_csrf_token'];
 ?>
 
 <!-- ══ AI Assistant Styles ══════════════════════════════════════════════════ -->
@@ -456,7 +458,8 @@ if (!isset($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = $_aiCsrf;
     cursor: pointer; border: none; transition: transform .2s,box-shadow .2s;
 }
 #academix-ai-bubble:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(37,161,148,.55); }
-#academix-ai-bubble svg { width:28px;height:28px;fill:#fff; }
+#academix-ai-bubble { color: #fff; }
+#academix-ai-bubble svg { width:28px;height:28px; }
 #academix-ai-bubble .ai-badge {
     position:absolute;top:-3px;right:-3px;background:#ef4444;
     color:#fff;font-size:10px;font-weight:700;border-radius:99px;
@@ -550,8 +553,9 @@ if (!isset($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = $_aiCsrf;
 </style>
 
 <!-- ══ AI Assistant HTML ═════════════════════════════════════════════════════ -->
-<button id="academix-ai-bubble" title="AI Assistant" aria-label="Open AI Assistant">
-    <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.959 9.959 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 0 1-4.168-1.168l-.3-.178-3.1.922.922-3.1-.178-.3A8 8 0 1 1 12 20zm4.29-6.04c-.233-.117-1.38-.68-1.594-.757-.214-.078-.37-.117-.525.117-.155.234-.6.757-.736.912-.135.156-.27.175-.504.059-.233-.117-.985-.363-1.875-1.158-.693-.618-1.16-1.381-1.296-1.614-.135-.234-.014-.36.102-.476.105-.105.233-.273.35-.41.116-.136.155-.234.233-.39.078-.155.039-.292-.02-.41-.058-.117-.524-1.265-.718-1.732-.19-.455-.382-.393-.525-.4l-.447-.008c-.155 0-.408.059-.622.292-.214.234-.815.797-.815 1.943s.835 2.253.951 2.41c.117.156 1.643 2.508 3.983 3.518.557.24 1.99.637 2.123.637.233 0 .748-.302.853-1.16.117-.858.117-.858.058-.962-.058-.117-.214-.175-.448-.292z"/></svg>
+<button id="academix-ai-bubble" title="AcademixAI — click to chat" aria-label="Open AI Assistant">
+    <!-- Remix Icons: ri-robot-2-fill -->
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2.05V4H17a2 2 0 0 1 2 2v2h1a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1v2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h1V6a2 2 0 0 1 2-2h4V2.05a1 1 0 1 1 2 0ZM9.5 11a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm5 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3ZM10 16h4v1h-4v-1Z"/></svg>
     <span class="ai-badge" id="ai-unread-badge">1</span>
 </button>
 
@@ -562,7 +566,7 @@ if (!isset($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = $_aiCsrf;
         </div>
         <div>
             <div class="ai-title">AcademixAI</div>
-            <div class="ai-sub">Powered by Grok &bull; Your school assistant</div>
+            <div class="ai-sub">Powered by Groq &bull; Your school assistant</div>
         </div>
         <button class="ai-close" id="ai-panel-close" aria-label="Close">&times;</button>
     </div>
@@ -616,37 +620,56 @@ if (!isset($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = $_aiCsrf;
 
     // ── Panel open / close ────────────────────────────────────────────────
     function openPanel() {
+        if (!panel) return;
         panel.classList.add('is-open');
         isOpen = true;
-        badge.style.display = 'none';
-        inputEl.focus();
+        if (badge) badge.style.display = 'none';
+        if (inputEl) inputEl.focus();
     }
     function closePanel() {
+        if (!panel) return;
         panel.classList.remove('is-open');
         isOpen = false;
     }
 
-    bubble.addEventListener('click', () => isOpen ? closePanel() : openPanel());
-    closeBtn.addEventListener('click', closePanel);
+    if (bubble) {
+        bubble.addEventListener('click', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            isOpen ? closePanel() : openPanel();
+        });
+    }
+    if (closeBtn) {
+        closeBtn.addEventListener('click', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            closePanel();
+        });
+    }
 
     // Close on outside click
     document.addEventListener('click', e => {
-        if (isOpen && !panel.contains(e.target) && e.target !== bubble) closePanel();
+        if (!isOpen) return;
+        if (panel && panel.contains(e.target)) return;
+        if (bubble && bubble.contains(e.target)) return;
+        closePanel();
     });
 
     // ── Auto-resize textarea ──────────────────────────────────────────────
-    inputEl.addEventListener('input', function () {
-        this.style.height = 'auto';
-        this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-    });
-    inputEl.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    });
+    if (inputEl) {
+        inputEl.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+        inputEl.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        });
+    }
 
-    sendBtn.addEventListener('click', sendMessage);
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
 
     // ── Quick-action buttons ──────────────────────────────────────────────
-    quickAct.querySelectorAll('[data-prompt]').forEach(btn => {
+    if (quickAct) quickAct.querySelectorAll('[data-prompt]').forEach(btn => {
         btn.addEventListener('click', function () {
             inputEl.value = this.dataset.prompt;
             openPanel();
@@ -656,11 +679,12 @@ if (!isset($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = $_aiCsrf;
 
     // ── Core send function ────────────────────────────────────────────────
     function sendMessage() {
+        if (!inputEl || !sendBtn) return;
         const text = inputEl.value.trim();
         if (!text || sendBtn.disabled) return;
 
         // Hide quick actions after first real message
-        quickAct.style.display = 'none';
+        if (quickAct) quickAct.style.display = 'none';
 
         appendMsg('user', escHtml(text));
         history.push({ role: 'user', content: text });
@@ -719,6 +743,7 @@ if (!isset($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = $_aiCsrf;
 
     // ── DOM helpers ───────────────────────────────────────────────────────
     function appendMsg(role, html) {
+        if (!msgBox) return;
         const d = document.createElement('div');
         d.className = 'ai-msg ' + role;
         d.innerHTML = html;
@@ -726,12 +751,13 @@ if (!isset($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = $_aiCsrf;
         msgBox.scrollTop = msgBox.scrollHeight;
 
         // Badge if panel closed
-        if (!isOpen && role === 'assistant') {
+        if (!isOpen && role === 'assistant' && badge) {
             badge.style.display = 'block';
         }
     }
 
     function setLoading(on) {
+        if (!sendBtn || !msgBox) return;
         sendBtn.disabled = on;
         if (on) {
             const t = document.createElement('div');
@@ -1027,7 +1053,15 @@ if (!isset($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = $_aiCsrf;
     }
 
     function _openPanel() {
-        if (window._academixAI) window._academixAI.openPanel();
+        if (window._academixAI && typeof window._academixAI.openPanel === 'function') {
+            window._academixAI.openPanel();
+        } else {
+            // Direct DOM fallback in case the main IIFE hasn't initialised yet
+            var panel = document.getElementById('academix-ai-panel');
+            if (panel && !panel.classList.contains('is-open')) {
+                panel.classList.add('is-open');
+            }
+        }
     }
 
     function _appendTyping() {
@@ -1051,9 +1085,17 @@ if (!isset($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = $_aiCsrf;
                 banner.style.transform = 'translateY(-100%)';
             });
 
-            document.getElementById('ob-open-guide-btn')?.addEventListener('click', () => {
+            document.getElementById('ob-open-guide-btn')?.addEventListener('click', e => {
+                e.preventDefault();
+                e.stopPropagation();
                 _openPanel();
-                window.startOnboardingGuide?.();
+                // Always send a fresh guide prompt, even if messages already exist
+                setTimeout(() => {
+                    sendOnboardingMessage(
+                        [],
+                        "Hi! Can you show me the school setup checklist and tell me what still needs to be done?"
+                    );
+                }, 150);
             });
         }
     }

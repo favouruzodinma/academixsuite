@@ -261,6 +261,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_subjects'])) {
         $error = "Invalid security token.";
     } else {
         try {
+            // Verify class belongs to this school
+            $classCheck = $schoolDb->prepare("SELECT id FROM classes WHERE id = ? AND school_id = ?");
+            $classCheck->execute([$classId, $school['id']]);
+            if (!$classCheck->fetch()) {
+                throw new Exception('Invalid class selected');
+            }
+
             $schoolDb->beginTransaction();
             
             // Get selected subject IDs from form
@@ -490,11 +497,8 @@ error_log("=== ASSIGN SUBJECTS PAGE END ===");
     </div>
 
     <!-- Theme Customization Structure Start (optional, same as other pages) -->
-    <div class="body-overlay"></div>
-    <button type="button"
-        class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
-        <i class="ri-settings-3-line animate-spin"></i>
-    </button>
+    
+    
     
     <!-- Theme Customization Structure End -->
 

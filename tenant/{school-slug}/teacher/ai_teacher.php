@@ -9,7 +9,7 @@
  *   - Drafting parent emails (preview card, then send via SchoolEmailSender)
  *
  * Generative tasks (lesson plans, assignment questions, exam papers,
- * student remarks) are handled directly by Grok in its reply —
+ * student remarks) are handled directly by Groq in its reply —
  * no tool call needed, just great system-prompt guidance.
  *
  * POST body:
@@ -17,6 +17,9 @@
  *   csrf_token – required
  *   action     – optional: 'send_email' or 'preview_recipients' (direct, non-AI)
  */
+
+// Buffer ALL output so no stray PHP notice/warning can corrupt the JSON response
+ob_start();
 
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
@@ -33,7 +36,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start(function_exists('academix_session_options') ? academix_session_options() : []);
 }
 
+ob_end_clean(); // discard any accidental output before JSON
 header('Content-Type: application/json');
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('X-Content-Type-Options: nosniff');
 
 $jsonInput = json_decode((string) file_get_contents('php://input'), true);
 $requestInput = $_POST;
@@ -101,7 +107,7 @@ try {
     error_log('ai_teacher: school DB unavailable – ' . $e->getMessage());
 }
 
-require_once __DIR__ . '/../../../includes/GrokClient.php';
+require_once __DIR__ . '/../../../includes/GroqClient.php';
 require_once __DIR__ . '/../../../includes/Services/SchoolEmailSender.php';
 
 // ── Direct (non-AI) actions ───────────────────────────────────────────────────
@@ -501,17 +507,17 @@ $toolExecutor = function (string $toolName, array $args)
     }
 };
 
-// ── Run Grok ──────────────────────────────────────────────────────────────────
-$apiKey = $_ENV['GROK_API_KEY'] ?? getenv('GROK_API_KEY') ?? '';
-$model  = $_ENV['GROK_MODEL']   ?? getenv('GROK_MODEL')   ?? 'grok-3-mini';
+// ── Run Groq ──────────────────────────────────────────────────────────────────
+$apiKey = $_ENV['GROQ_API_KEY'] ?? getenv('GROQ_API_KEY') ?? '';
+$model  = $_ENV['GROQ_MODEL']   ?? getenv('GROQ_MODEL')   ?? 'llama-3.3-70b-versatile';
 
-if (empty($apiKey) || $apiKey === 'xai-your-key-here') {
-    echo json_encode(['success'=>false,'message'=>'Grok API key not configured in .env.']); exit;
+if (empty($apiKey) || $apiKey === 'gsk-your-key-here') {
+    echo json_encode(['success'=>false,'message'=>'Groq API key not configured in .env.']); exit;
 }
 
 try {
-    $grok   = new GrokClient($apiKey, $model);
-    $result = $grok->run($messages, $tools, $toolExecutor);
+    $groq = new GroqClient($apiKey, $model);
+    $result = $groq->run($messages, $tools, $toolExecutor);
 
     echo json_encode([
         'success'         => true,

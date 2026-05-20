@@ -6,6 +6,9 @@ require_once __DIR__ . '/../admin-bootstrap.php';
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $schoolDb) {
     $action = $_POST['action'] ?? '';
+    if (!academix_admin_validate_csrf($_POST['csrf_token'] ?? null)) {
+        throw new Exception('Security validation failed. Please refresh and try again.');
+    }
     try {
         switch ($action) {
             case 'create_exam_schedule':

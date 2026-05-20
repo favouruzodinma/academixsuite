@@ -571,29 +571,37 @@ $languages = is_array($languages ?? null) ? $languages : [
     const ENDPOINT = 'general.php';    // same page
 
     let _currentField = '';    // field name currently being generated for
+    const aiPanel = document.getElementById('aiGenPanel');
+    const aiOverlay = document.getElementById('aiGenOverlay');
+
+    // The generator is rendered inside the General tab, but its buttons also
+    // appear in Public Profile. Move the overlay/panel outside hidden tab panes
+    // so it can open from every section of this page.
+    if (aiOverlay && aiOverlay.parentElement !== document.body) document.body.appendChild(aiOverlay);
+    if (aiPanel && aiPanel.parentElement !== document.body) document.body.appendChild(aiPanel);
 
     /* ── Open panel ────────────────────────────────────────────────────── */
-    document.querySelectorAll('.btn-ai-gen').forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            _currentField = this.dataset.field;
-            document.getElementById('aig-field-label').textContent = this.dataset.label;
-            document.getElementById('aig-hint').value    = '';
-            document.getElementById('aig-tone').value    = 'professional';
-            document.getElementById('aig-preview-wrap').style.display = 'none';
-            document.getElementById('aig-error').style.display        = 'none';
-            document.getElementById('aig-preview-box').textContent    = '';
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-ai-gen');
+        if (!btn) return;
+        e.preventDefault();
+        _currentField = btn.dataset.field;
+        document.getElementById('aig-field-label').textContent = btn.dataset.label || 'Content';
+        document.getElementById('aig-hint').value    = '';
+        document.getElementById('aig-tone').value    = 'professional';
+        document.getElementById('aig-preview-wrap').style.display = 'none';
+        document.getElementById('aig-error').style.display        = 'none';
+        document.getElementById('aig-preview-box').textContent    = '';
 
-            document.getElementById('aiGenOverlay').style.display = 'block';
-            document.getElementById('aiGenPanel').style.display   = 'block';
-            document.getElementById('aig-hint').focus();
-        });
+        if (aiOverlay) aiOverlay.style.display = 'block';
+        if (aiPanel) aiPanel.style.display = 'block';
+        document.getElementById('aig-hint').focus();
     });
 
     /* ── Close panel ────────────────────────────────────────────────────── */
     function closePanel() {
-        document.getElementById('aiGenPanel').style.display   = 'none';
-        document.getElementById('aiGenOverlay').style.display = 'none';
+        if (aiPanel) aiPanel.style.display = 'none';
+        if (aiOverlay) aiOverlay.style.display = 'none';
         _currentField = '';
     }
     document.getElementById('aig-close-btn').addEventListener('click', closePanel);
@@ -632,6 +640,7 @@ $languages = is_array($languages ?? null) ? $languages : [
         fetch(ENDPOINT, {
             method:  'POST',
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin',
             body:    fd,
         })
         .then(r => r.json())

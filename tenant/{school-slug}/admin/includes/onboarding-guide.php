@@ -23,6 +23,7 @@ define('ACADEMIX_ONBOARDING_LOADED', true);
 
 function onboarding_table_exists(PDO $db, string $table): bool {
     try {
+        if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $table)) return false;
         return (bool) $db->query("SHOW TABLES LIKE '{$table}'")->fetchColumn();
     } catch (Throwable $e) { return false; }
 }

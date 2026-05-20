@@ -6,3 +6,4 @@ public/error_log
 vendor/
 uploads/
 backups/
+*.zip

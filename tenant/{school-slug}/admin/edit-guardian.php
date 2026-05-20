@@ -415,21 +415,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardian_name'])) {
                 mkdir($uploadDir, 0755, true);
             }
             
-            $fileExt = pathinfo($_FILES['guardian_photo']['name'], PATHINFO_EXTENSION);
-            $fileName = 'guardian_' . time() . '_' . uniqid() . '.' . $fileExt;
-            $uploadPath = $uploadDir . $fileName;
-            
-            if (move_uploaded_file($_FILES['guardian_photo']['tmp_name'], $uploadPath)) {
-                $photoStmt = $schoolDb->prepare("UPDATE users SET profile_photo = ? WHERE id = ?");
-                $photoStmt->execute(['uploads/guardians/' . $fileName, $guardianId]);
+            $mimeToExt = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
+            $detectedMime = function_exists('finfo_open')
+                ? (function($p) { $fi = finfo_open(FILEINFO_MIME_TYPE); $m = finfo_file($fi, $p); finfo_close($fi); return $m; })($_FILES['guardian_photo']['tmp_name'])
+                : (mime_content_type($_FILES['guardian_photo']['tmp_name']) ?: '');
+            if (isset($mimeToExt[$detectedMime])) {
+                $fileName = 'guardian_' . time() . '_' . uniqid() . '.' . $mimeToExt[$detectedMime];
+                $uploadPath = $uploadDir . $fileName;
+                if (move_uploaded_file($_FILES['guardian_photo']['tmp_name'], $uploadPath)) {
+                    $photoStmt = $schoolDb->prepare("UPDATE users SET profile_photo = ? WHERE id = ? AND school_id = ?");
+                    $photoStmt->execute(['uploads/guardians/' . $fileName, $guardianId, $school['id']]);
+                }
             }
         }
 
         // Handle password update if provided
         if (!empty($_POST['password'])) {
             $hashedPassword = password_hash($_POST['password'], PASSWORD_DEFAULT);
-            $passStmt = $schoolDb->prepare("UPDATE users SET password = ? WHERE id = ?");
-            $passStmt->execute([$hashedPassword, $guardianId]);
+            $passStmt = $schoolDb->prepare("UPDATE users SET password = ? WHERE id = ? AND school_id = ?");
+            $passStmt->execute([$hashedPassword, $guardianId, $school['id']]);
             
             // Store password in session for email
             if (!isset($_SESSION['temp_passwords'])) {
@@ -738,12 +742,9 @@ error_log("=== EDIT GUARDIAN PAGE END ===");
 </div>
 
 <!-- Theme Customization Structure Start -->
-<div class="body-overlay"></div>
 
-<button type="button"
-    class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
-    <i class="ri-settings-3-line animate-spin"></i>
-</button>
+
+
 
 <!-- Theme Customization Structure End -->
 

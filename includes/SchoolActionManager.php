@@ -191,6 +191,7 @@ class SchoolActionManager {
     public function getClasses() {
         if (!$this->schoolDb) return [];
         try {
+            $this->ensureSubjectTables();
             $stmt = $this->schoolDb->prepare("
                 SELECT c.*, ay.name as academic_year_name,
                        COUNT(DISTINCT s.id) as section_count,
@@ -235,6 +236,7 @@ class SchoolActionManager {
     public function getSubjects() {
         if (!$this->schoolDb) return [];
         try {
+            $this->ensureSubjectTables();
             $stmt = $this->schoolDb->prepare("
                 SELECT * FROM subjects 
                 WHERE school_id = ? AND is_active = 1
@@ -251,6 +253,7 @@ class SchoolActionManager {
     public function getClassSubjects() {
         if (!$this->schoolDb) return [];
         try {
+            $this->ensureSubjectTables();
             $stmt = $this->schoolDb->prepare("
                 SELECT cs.*, c.name as class_name, s.name as subject_name,
                        u.name as teacher_name
@@ -509,12 +512,21 @@ class SchoolActionManager {
             $check->execute([$this->schoolId, $data['code'], $data['academic_year_id']]);
             if ($check->fetch()) throw new Exception("Class code already exists for this academic year");
 
+            $hasCampus = $this->hasColumn('classes', 'campus_id');
             $stmt = $this->schoolDb->prepare("
-                INSERT INTO classes (school_id, name, code, description, grade_level, class_teacher_id, capacity, room_number, academic_year_id, is_active, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())
+                INSERT INTO classes (
+                    school_id" . ($hasCampus ? ", campus_id" : "") . ",
+                    name, code, description, grade_level, class_teacher_id, capacity, room_number, academic_year_id, is_active, created_at
+                )
+                VALUES (?" . ($hasCampus ? ", ?" : "") . ", ?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())
             ");
-            $stmt->execute([
+            $params = [
                 $this->schoolId,
+            ];
+            if ($hasCampus) {
+                $params[] = $this->defaultCampusId();
+            }
+            $params = array_merge($params, [
                 $data['name'],
                 $data['code'],
                 $data['description'] ?? null,
@@ -524,6 +536,7 @@ class SchoolActionManager {
                 $data['room_number'] ?? null,
                 $data['academic_year_id']
             ]);
+            $stmt->execute($params);
             $id = $this->schoolDb->lastInsertId();
             $this->createAuditLog('class_created', 'classes', $id, $data);
             return ['success' => true, 'message' => 'Class created', 'id' => $id];
@@ -762,10 +775,21 @@ class SchoolActionManager {
     public function createSubject($data) {
         try {
             if (!$this->schoolDb) throw new Exception("School database not connected");
+            $this->ensureSubjectTables();
+            $code = trim((string)($data['code'] ?? ''));
+            if ($code !== '') {
+                $check = $this->schoolDb->prepare("SELECT id FROM subjects WHERE school_id = ? AND code = ? LIMIT 1");
+                $check->execute([$this->schoolId, $code]);
+                if ($check->fetch()) {
+                    throw new Exception("Subject code already exists.");
+                }
+            }
+
             $id = $this->insertRow('subjects', [
                 'school_id' => $this->schoolId,
+                'campus_id' => $this->defaultCampusId(),
                 'name' => trim((string)($data['name'] ?? '')),
-                'code' => trim((string)($data['code'] ?? '')),
+                'code' => $code,
                 'type' => $data['type'] ?? 'core',
                 'credit_hours' => (float)($data['credit_hours'] ?? 1.0),
                 'description' => $data['description'] ?? null,
@@ -781,6 +805,7 @@ class SchoolActionManager {
     public function updateSubject($id, $data) {
         try {
             if (!$this->schoolDb) throw new Exception("School database not connected");
+            $this->ensureSubjectTables();
             $this->updateRow('subjects', $id, [
                 'name' => trim((string)($data['name'] ?? '')),
                 'code' => trim((string)($data['code'] ?? '')),
@@ -798,6 +823,7 @@ class SchoolActionManager {
     public function deleteSubject($id) {
         try {
             if (!$this->schoolDb) throw new Exception("School database not connected");
+            $this->ensureSubjectTables();
             if ($this->tableExists('class_subjects')) {
                 $check = $this->schoolDb->prepare("SELECT COUNT(*) FROM class_subjects WHERE subject_id = ?");
                 $check->execute([$id]);
@@ -816,6 +842,7 @@ class SchoolActionManager {
     public function assignSubjectToClass($data) {
         try {
             if (!$this->schoolDb) throw new Exception("School database not connected");
+            $this->ensureSubjectTables();
             $classId = (int)($data['class_id'] ?? 0);
             $subjectId = (int)($data['subject_id'] ?? 0);
             if (!$classId || !$subjectId) {
@@ -837,6 +864,7 @@ class SchoolActionManager {
 
             $id = $this->insertRow('class_subjects', [
                 'school_id' => $this->schoolId,
+                'campus_id' => $this->defaultCampusId(),
                 'class_id' => $classId,
                 'subject_id' => $subjectId,
                 'teacher_id' => $data['teacher_id'] ?? null,
@@ -1141,6 +1169,49 @@ class SchoolActionManager {
         ], false);
     }
 
+    private function ensureSubjectTables(): void {
+        if (!$this->schoolDb) {
+            throw new Exception("School database not connected");
+        }
+
+        $this->schoolDb->exec("
+            CREATE TABLE IF NOT EXISTS `subjects` (
+                `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+                `school_id` int(10) unsigned NOT NULL,
+                `campus_id` int(10) unsigned DEFAULT NULL,
+                `name` varchar(150) NOT NULL,
+                `code` varchar(50) DEFAULT NULL,
+                `type` varchar(50) NOT NULL DEFAULT 'core',
+                `credit_hours` decimal(5,2) NOT NULL DEFAULT 1.00,
+                `description` text DEFAULT NULL,
+                `is_active` tinyint(1) NOT NULL DEFAULT 1,
+                `created_at` timestamp NULL DEFAULT current_timestamp(),
+                `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+                PRIMARY KEY (`id`),
+                KEY `idx_subjects_school_active` (`school_id`, `is_active`),
+                KEY `idx_subjects_school_code` (`school_id`, `code`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+
+        $this->schoolDb->exec("
+            CREATE TABLE IF NOT EXISTS `class_subjects` (
+                `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+                `school_id` int(10) unsigned NOT NULL,
+                `campus_id` int(10) unsigned DEFAULT NULL,
+                `class_id` int(10) unsigned NOT NULL,
+                `subject_id` int(10) unsigned NOT NULL,
+                `teacher_id` int(10) unsigned DEFAULT NULL,
+                `created_at` timestamp NULL DEFAULT current_timestamp(),
+                `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uniq_class_subject` (`class_id`, `subject_id`),
+                KEY `idx_class_subjects_school` (`school_id`),
+                KEY `idx_class_subjects_subject` (`subject_id`),
+                KEY `idx_class_subjects_teacher` (`teacher_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+    }
+
     private function getById($table, $id) {
         try {
             if (!$this->schoolDb || !$this->tableExists($table)) return [];
@@ -1239,7 +1310,7 @@ class SchoolActionManager {
     private function columns($table) {
         static $cache = [];
         $key = $this->schoolId . ':' . $table;
-        if (isset($cache[$key])) {
+        if (isset($cache[$key]) && $cache[$key] !== []) {
             return $cache[$key];
         }
         try {

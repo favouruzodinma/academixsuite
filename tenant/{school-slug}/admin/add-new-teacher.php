@@ -276,12 +276,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && $teacher
             mkdir($uploadDir, 0755, true);
         }
         
-        $extension = pathinfo($_FILES['profile_photo']['name'], PATHINFO_EXTENSION);
-        $filename = 'teacher_' . time() . '_' . uniqid() . '.' . $extension;
-        $uploadPath = $uploadDir . $filename;
-        
-        if (move_uploaded_file($_FILES['profile_photo']['tmp_name'], $uploadPath)) {
-            $teacherData['profile_photo'] = 'uploads/teachers/' . $filename;
+        $mimeToExt = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
+        $detectedMime = function_exists('finfo_open')
+            ? (function($p) { $fi = finfo_open(FILEINFO_MIME_TYPE); $m = finfo_file($fi, $p); finfo_close($fi); return $m; })($_FILES['profile_photo']['tmp_name'])
+            : (mime_content_type($_FILES['profile_photo']['tmp_name']) ?: '');
+        if (isset($mimeToExt[$detectedMime])) {
+            $filename = 'teacher_' . time() . '_' . uniqid() . '.' . $mimeToExt[$detectedMime];
+            $uploadPath = $uploadDir . $filename;
+            if (move_uploaded_file($_FILES['profile_photo']['tmp_name'], $uploadPath)) {
+                $teacherData['profile_photo'] = 'uploads/teachers/' . $filename;
+            }
         }
     }
 
@@ -578,10 +582,8 @@ error_log("=== ADD TEACHER PAGE END ===");
 </div>
 
 <!-- Theme Customization Structure -->
-<div class="body-overlay"></div>
-<button type="button" class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
-    <i class="ri-settings-3-line animate-spin"></i>
-</button>
+
+
 
 <div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
 

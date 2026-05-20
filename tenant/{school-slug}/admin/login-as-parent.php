@@ -217,9 +217,23 @@ try {
 }
 
 /**
- * Check if this is a confirmation to proceed
+ * Generate CSRF token
  */
-if (isset($_GET['confirm']) && $_GET['confirm'] === 'yes') {
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+/**
+ * Check if this is a confirmation to proceed (POST only with CSRF)
+ */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm']) && $_POST['confirm'] === 'yes') {
+    
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        error_log("CSRF validation failed for impersonation attempt");
+        $_SESSION['toast_error'] = "Security validation failed. Please try again.";
+        header("Location: guardian-list.php");
+        exit;
+    }
     
     // Create impersonation session
     $_SESSION['impersonating'] = true;
@@ -645,10 +659,14 @@ error_log("=== LOGIN AS PARENT PAGE END ===");
             <i class="ri-close-line me-2"></i>
             Cancel
         </a>
-        <a href="?id=<?php echo $guardianId; ?>&confirm=yes" class="btn btn-primary" onclick="return confirmImpersonation()">
-            <i class="ri-login-box-line me-2"></i>
-            Login as Parent
-        </a>
+        <form method="POST" style="flex:1; display:flex;" onsubmit="return confirmImpersonation()">
+            <input type="hidden" name="confirm" value="yes">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="ri-login-box-line me-2"></i>
+                Login as Parent
+            </button>
+        </form>
     </div>
 </div>
 

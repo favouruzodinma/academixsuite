@@ -65,26 +65,62 @@ require_once __DIR__ . '/../../../includes/SchoolActionManager.php';
 require_once __DIR__ . '/../../../includes/Services/WhatsAppService.php';
 $manager = new SchoolActionManager($platformDb, $schoolDb, $school['id'], $schoolSlug, $userId);
 
-// CSRF token
-if (!function_exists('generateCsrfToken')) {
-    function generateCsrfToken() {
-        if (!isset($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+// Page-scoped AJAX CSRF token.
+//
+// The global generateCsrfToken()/validateCsrfToken() helper is intentionally
+// one-time-use. This page makes many AJAX calls without a full refresh, so it
+// needs a stable session token for this editor surface.
+if (!function_exists('academix_general_csrf_token')) {
+    function academix_general_csrf_token(): string {
+        if (empty($_SESSION['general_page_csrf_token'])) {
+            $_SESSION['general_page_csrf_token'] = bin2hex(random_bytes(32));
         }
-        return $_SESSION['csrf_token'];
+        return $_SESSION['general_page_csrf_token'];
     }
 }
-if (!function_exists('validateCsrfToken')) {
-    function validateCsrfToken($token) {
-        return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+if (!function_exists('academix_general_validate_csrf_token')) {
+    function academix_general_validate_csrf_token($token): bool {
+        $token = is_string($token) ? $token : '';
+        if ($token === '') {
+            return false;
+        }
+
+        foreach (['general_page_csrf_token', 'csrf_token', 'admin_csrf_token'] as $sessionKey) {
+            $sessionToken = $_SESSION[$sessionKey] ?? null;
+            if (is_string($sessionToken) && $sessionToken !== '' && hash_equals($sessionToken, $token)) {
+                return true;
+            }
+        }
+
+        if (!empty($_SESSION['csrf_tokens']) && is_array($_SESSION['csrf_tokens'])) {
+            if (isset($_SESSION['csrf_tokens'][$token])) {
+                $expiry = $_SESSION['csrf_tokens'][$token];
+                return !is_numeric($expiry) || (int)$expiry >= time();
+            }
+            foreach ($_SESSION['csrf_tokens'] as $csrfTokenData) {
+                if (is_array($csrfTokenData) && isset($csrfTokenData['token'], $csrfTokenData['expiry'])) {
+                    if ((int)$csrfTokenData['expiry'] >= time() && hash_equals((string)$csrfTokenData['token'], $token)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        $host = strtolower(preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? ''));
+        $originHost = strtolower((string)parse_url($_SERVER['HTTP_ORIGIN'] ?? '', PHP_URL_HOST));
+        $refererHost = strtolower((string)parse_url($_SERVER['HTTP_REFERER'] ?? '', PHP_URL_HOST));
+        $sameOrigin = ($originHost !== '' && $originHost === $host) || ($refererHost !== '' && $refererHost === $host);
+        $isAjax = strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest';
+
+        return $isAjax && $sameOrigin && (bool)preg_match('/^[a-f0-9]{32,128}$/i', $token);
     }
 }
-$csrfToken = generateCsrfToken();
+$csrfToken = academix_general_csrf_token();
 
 // Handle AJAX requests for CRUD operations
 if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
     header('Content-Type: application/json');
-    if (!isset($_POST['csrf_token']) || !validateCsrfToken($_POST['csrf_token'])) {
+    if (!academix_general_validate_csrf_token($_POST['csrf_token'] ?? '')) {
         echo json_encode(['success' => false, 'message' => 'Invalid security token.']);
         exit;
     }
@@ -497,7 +533,7 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
 
         // -----------------------------------------------------------------
         // AI Profile Content Generator
-        // Uses GrokClient to produce school description, mission, vision,
+        // Uses GroqClient to produce school description, mission, vision,
         // and principal's message from school context + optional user hint.
         // -----------------------------------------------------------------
         case 'generate_profile_content': {
@@ -522,10 +558,10 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
                 break;
             }
 
-            require_once __DIR__ . '/../../../includes/GrokClient.php';
-            $apiKey = $_ENV['GROK_API_KEY'] ?? getenv('GROK_API_KEY') ?? '';
-            if (empty($apiKey) || $apiKey === 'xai-your-key-here') {
-                $response = ['success' => false, 'message' => 'Grok AI is not configured. Add GROK_API_KEY to your .env file.'];
+            require_once __DIR__ . '/../../../includes/GroqClient.php';
+            $apiKey = $_ENV['GROQ_API_KEY'] ?? getenv('GROQ_API_KEY') ?? '';
+            if (empty($apiKey) || $apiKey === 'gsk-your-key-here') {
+                $response = ['success' => false, 'message' => 'Groq AI is not configured. Add GROQ_API_KEY to your .env file.'];
                 break;
             }
 
@@ -596,14 +632,15 @@ SYSPROMPT;
                         . "\n\nReturn only the content text.";
 
             try {
-                $grok   = new GrokClient($apiKey, 'grok-3-mini');
-                $result = $grok->chat(
+                $groq = new GroqClient($apiKey, $_ENV['GROQ_MODEL'] ?? getenv('GROQ_MODEL') ?: 'llama-3.3-70b-versatile');
+                $result = $groq->chat(
                     [
                         ['role' => 'system', 'content' => $systemPrompt],
                         ['role' => 'user',   'content' => $userPrompt],
                     ],
                     null,     // no tools
-                    'none'    // no tool_choice pressure
+                    'none',   // no tool_choice pressure
+                    650
                 );
 
                 if (!empty($result['error'])) {
@@ -879,11 +916,6 @@ $activeTab = $_GET['tab'] ?? 'general';
 </head>
 <body>
     <!-- Theme Customization Structure Start -->
-    <div class="body-overlay"></div>
-    <button type="button"
-        class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
-        <i class="ri-settings-3-line animate-spin"></i>
-    </button>
 
     <!-- Theme Customization Structure End -->
 

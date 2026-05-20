@@ -301,11 +301,8 @@ error_log("=== LEAVE TYPES PAGE END ===");
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- Theme Customization Structure Start (same as original) -->
-<div class="body-overlay"></div>
-<button type="button"
-    class="theme-customization__button w-48-px h-48-px bg-primary-600 text-white rounded-circle d-flex justify-content-center align-items-center position-fixed end-0 bottom-0 mb-40 me-40 text-2xxl bg-hover-primary-700" aria-label="Theme Customization Button">
-    <i class="ri-settings-3-line animate-spin"></i>
-</button>
+
+
 
 <div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
 

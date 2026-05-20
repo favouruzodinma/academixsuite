@@ -166,9 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             if (password_verify($password, $passwordHash)) {
                                 $authenticated = true;
-                            } elseif ($password === $passwordHash) {
-                                $authenticated = true;
-                            } elseif (md5($password) === $passwordHash) {
+                            } elseif (strlen($passwordHash) === 32 && ctype_xdigit($passwordHash) && md5($password) === $passwordHash) {
                                 $authenticated = true;
                             }
                             
@@ -183,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     $sessionUserType = $userType === 'staff' ? 'staff' : $userType;
                                     session_regenerate_id(true);
 
-                                    if (password_needs_rehash($passwordHash, PASSWORD_DEFAULT) || $password === $passwordHash || md5($password) === $passwordHash) {
+                                    if (password_needs_rehash($passwordHash, PASSWORD_DEFAULT)) {
                                         $rehashStmt = $schoolDb->prepare("UPDATE users SET password = ? WHERE id = ?");
                                         $rehashStmt->execute([password_hash($password, PASSWORD_DEFAULT), $user['id']]);
                                     }

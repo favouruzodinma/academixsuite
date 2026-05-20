@@ -187,6 +187,145 @@ $profileClass = $auth['class_name'] ?? ($auth['class'] ?? ($auth['assigned_class
 $profileSubject = $auth['subject_name'] ?? ($auth['subject'] ?? ($auth['department'] ?? 'Academics'));
 $profileRoll = $auth['roll_number'] ?? ($auth['admission_number'] ?? 'Active');
 
+// ── Teacher-specific dashboard stats ─────────────────────────────────────────
+if ($portalRole === 'teacher' && $schoolDb) {
+    $teacherId = (int)($auth['user_id'] ?? 0);
+    $schoolId  = (int)($school['id'] ?? 0);
+
+    // Helper: run a COUNT query safely, return 0 on failure
+    $rp_count = function(string $sql, array $params) use ($schoolDb): int {
+        try {
+            $s = $schoolDb->prepare($sql);
+            $s->execute($params);
+            return (int) $s->fetchColumn();
+        } catch (Throwable $e) { return 0; }
+    };
+
+    if ($teacherId && $schoolId) {
+        // Active classes assigned to this teacher (as class teacher OR subject teacher)
+        $teacherClassCount = $rp_count(
+            "SELECT COUNT(DISTINCT class_id) FROM (
+                SELECT id AS class_id FROM classes
+                WHERE school_id = ? AND class_teacher_id = ? AND is_active = 1
+                UNION
+                SELECT cs.class_id FROM class_subjects cs
+                JOIN classes c ON c.id = cs.class_id AND c.school_id = ?
+                WHERE cs.teacher_id = ? AND c.is_active = 1
+            ) t",
+            [$schoolId, $teacherId, $schoolId, $teacherId]
+        );
+
+        // Students in teacher's classes
+        $teacherStudentCount = $rp_count(
+            "SELECT COUNT(DISTINCT s.id) FROM students s
+             JOIN classes c ON c.id = s.class_id
+             WHERE c.school_id = ? AND s.status = 'active'
+               AND (c.class_teacher_id = ?
+                    OR EXISTS (SELECT 1 FROM class_subjects cs WHERE cs.class_id = c.id AND cs.teacher_id = ?))",
+            [$schoolId, $teacherId, $teacherId]
+        );
+
+        // Assignments created by this teacher
+        $teacherAssignmentCount = 0;
+        foreach (['created_by', 'teacher_id'] as $col) {
+            try {
+                $teacherAssignmentCount = $rp_count(
+                    "SELECT COUNT(*) FROM assignments WHERE school_id = ? AND {$col} = ?",
+                    [$schoolId, $teacherId]
+                );
+                if ($teacherAssignmentCount > 0) break;
+                // verify column exists by running a test query
+                $schoolDb->query("SELECT `{$col}` FROM assignments LIMIT 0");
+                break;
+            } catch (Throwable $e) { continue; }
+        }
+
+        // Messages involving this teacher
+        $teacherMessageCount = 0;
+        foreach (['messages', 'school_messages'] as $tbl) {
+            $c = $rp_count(
+                "SELECT COUNT(*) FROM `{$tbl}` WHERE school_id = ? AND (sender_id = ? OR receiver_id = ?)",
+                [$schoolId, $teacherId, $teacherId]
+            );
+            $teacherMessageCount += $c;
+        }
+        if ($teacherMessageCount === 0) {
+            $teacherMessageCount = $messageCount; // graceful fallback
+        }
+
+        // Teacher's primary class name & subject
+        try {
+            $stmt = $schoolDb->prepare(
+                "SELECT c.name FROM classes c
+                 WHERE c.school_id = ? AND c.class_teacher_id = ? AND c.is_active = 1
+                 ORDER BY c.name LIMIT 1"
+            );
+            $stmt->execute([$schoolId, $teacherId]);
+            $row = $stmt->fetchColumn();
+            if ($row) $profileClass = $row;
+        } catch (Throwable $e) {}
+
+        if ($profileClass === 'Class not assigned') {
+            // Try through class_subjects
+            try {
+                $stmt = $schoolDb->prepare(
+                    "SELECT c.name FROM class_subjects cs
+                     JOIN classes c ON c.id = cs.class_id AND c.school_id = ?
+                     WHERE cs.teacher_id = ? AND c.is_active = 1
+                     ORDER BY c.name LIMIT 1"
+                );
+                $stmt->execute([$schoolId, $teacherId]);
+                $row = $stmt->fetchColumn();
+                if ($row) $profileClass = $row;
+            } catch (Throwable $e) {}
+        }
+
+        try {
+            $stmt = $schoolDb->prepare(
+                "SELECT sub.name FROM class_subjects cs
+                 JOIN subjects sub ON sub.id = cs.subject_id
+                 WHERE cs.teacher_id = ?
+                 LIMIT 1"
+            );
+            $stmt->execute([$teacherId]);
+            $row = $stmt->fetchColumn();
+            if ($row) $profileSubject = $row;
+        } catch (Throwable $e) {}
+
+        // Real attendance data for teacher's classes
+        try {
+            $stmt = $schoolDb->prepare(
+                "SELECT
+                    SUM(CASE WHEN a.status = 'present'  THEN 1 ELSE 0 END) AS present,
+                    SUM(CASE WHEN a.status = 'absent'   THEN 1 ELSE 0 END) AS absent,
+                    SUM(CASE WHEN a.status = 'late'     THEN 1 ELSE 0 END) AS late,
+                    SUM(CASE WHEN a.status IN ('half_day','halfday') THEN 1 ELSE 0 END) AS half_day
+                 FROM attendance a
+                 JOIN classes c ON c.id = a.class_id
+                 WHERE a.school_id = ?
+                   AND (c.class_teacher_id = ?
+                        OR EXISTS (SELECT 1 FROM class_subjects cs WHERE cs.class_id = c.id AND cs.teacher_id = ?))"
+            );
+            $stmt->execute([$schoolId, $teacherId, $teacherId]);
+            $att = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($att && ((int)$att['present'] + (int)$att['absent'] + (int)$att['late'] + (int)$att['half_day']) > 0) {
+                $attendanceRows = [
+                    ['Present',  (int)$att['present'],  'green'],
+                    ['Half Day', (int)$att['half_day'], 'orange'],
+                    ['Late',     (int)$att['late'],     'teal'],
+                    ['Absent',   (int)$att['absent'],   'purple'],
+                ];
+            }
+        } catch (Throwable $e) {}
+
+        // Override tiles with teacher-specific values
+        $studentCount    = $teacherStudentCount;
+        $classCount      = $teacherClassCount;
+        $assignmentCount = $teacherAssignmentCount;
+        $messageCount    = $teacherMessageCount;
+    }
+}
+
 $teacherTiles = [
     ['Total Students', number_format($studentCount), 'ri-group-line', 'purple'],
     ['Active Classes', number_format($classCount), 'ri-school-line', 'green'],
@@ -246,6 +385,9 @@ $metricValues = ['Rate' => '94%', 'Average' => '81%', 'Outstanding' => 'NGN 0', 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo rp_h($pageConfig[0]); ?> | <?php echo rp_h($schoolName); ?></title>
     <link rel="icon" type="image/png" href="<?php echo rp_h($schoolLogo); ?>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
     <link rel="stylesheet" href="<?php echo rp_h($assetUrl); ?>css/remixicon.css">
     <link rel="stylesheet" href="<?php echo rp_h($assetUrl); ?>css/lib/bootstrap.min.css">
     <style>
@@ -1623,9 +1765,18 @@ $ai_endpoint = rtrim($baseUrl, '/') . '/ai_teacher.php';
         fetch(endpoint, {
             method: 'POST',
             headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
-            body: JSON.stringify({ action: 'chat', csrf_token: csrf, history: history })
+            credentials: 'same-origin',
+            body: JSON.stringify({ action: 'chat', csrf_token: csrf, messages: history })
         })
-        .then(function (res) { return res.json(); })
+        .then(function (res) {
+            var contentType = res.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                return res.text().then(function (txt) {
+                    throw new Error('Server returned an unexpected response. Please refresh and try again.');
+                });
+            }
+            return res.json();
+        })
         .then(function (data) {
             typing.remove();
             if (!data || !data.success) {
@@ -1645,7 +1796,7 @@ $ai_endpoint = rtrim($baseUrl, '/') . '/ai_teacher.php';
         })
         .catch(function (err) {
             typing.remove();
-            appendMsg('err', 'Network error: ' + escHtml(err.message));
+            appendMsg('err', escHtml(err.message || 'Could not reach the assistant. Please try again.'));
         })
         .finally(function () { setBusy(false); });
     }
