@@ -216,8 +216,7 @@ class TimetableManager {
                     subject_id = ?,
                     teacher_id = ?,
                     room_number = ?,
-                    is_break = ?,
-                    updated_at = NOW()
+                    is_break = ?
                 WHERE id = ? AND school_id = ?
             ");
 

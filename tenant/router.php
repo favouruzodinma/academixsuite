@@ -175,6 +175,8 @@ $allowedPages = [
         'events.php',
         'activity-log.php',
         'staff.php',
+        'academix-ai.php',
+        'ai_assistant.php',
         'schedule.php',
         'general.php',
         'invoice-details.php',

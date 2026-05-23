@@ -443,8 +443,7 @@ class TeacherManager {
                     joining_date = ?,
                     bank_name = ?,
                     bank_account = ?,
-                    ifsc_code = ?,
-                    updated_at = NOW()
+                    ifsc_code = ?
                 WHERE id = ? AND school_id = ?
             ");
             $teacherUpdateStmt->execute([

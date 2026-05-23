@@ -181,8 +181,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fc_ajax'])) {
         switch ($_GET['fc_ajax']) {
             case 'get_events':
                 // Get date range from FullCalendar
-                $start = $_GET['start'] ?? null;
-                $end = $_GET['end'] ?? null;
+                $normalizeCalendarDate = static function ($value): ?string {
+                    if ($value === null || $value === '') {
+                        return null;
+                    }
+                    if (is_numeric($value)) {
+                        $timestamp = (int)$value;
+                        if ($timestamp > 2000000000) {
+                            $timestamp = (int)floor($timestamp / 1000);
+                        }
+                        return date('Y-m-d', $timestamp);
+                    }
+                    $timestamp = strtotime((string)$value);
+                    return $timestamp ? date('Y-m-d', $timestamp) : null;
+                };
+
+                $start = $normalizeCalendarDate($_GET['start'] ?? null);
+                $end = $normalizeCalendarDate($_GET['end'] ?? null);
 
                 error_log("FC AJAX: Fetching events from $start to $end");
 
@@ -196,19 +211,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fc_ajax'])) {
                 // Format events for FullCalendar
                 $formattedEvents = [];
                 foreach ($events as $event) {
+                    $eventStartDate = $event['start'] ?? $event['start_date'] ?? null;
+                    $eventEndDate = $event['end'] ?? $event['end_date'] ?? $eventStartDate;
+                    if (empty($eventStartDate)) {
+                        continue;
+                    }
+
                     // Determine if it's an all-day event
                     $allDay = empty($event['start_time']) && empty($event['end_time']);
 
                     // Format start and end dates with times
-                    $startDate = $event['start'];
-                    $endDate = $event['end'] ?? $event['start'];
+                    $startDate = $eventStartDate;
+                    $endDate = $eventEndDate ?: $eventStartDate;
 
                     if (!$allDay) {
                         if (!empty($event['start_time'])) {
-                            $startDate = $event['start'] . 'T' . date('H:i:s', strtotime($event['start_time']));
+                            $startDate = $eventStartDate . 'T' . date('H:i:s', strtotime($event['start_time']));
                         }
                         if (!empty($event['end_time'])) {
-                            $endDate = ($event['end'] ?? $event['start']) . 'T' . date('H:i:s', strtotime($event['end_time']));
+                            $endDate = ($eventEndDate ?: $eventStartDate) . 'T' . date('H:i:s', strtotime($event['end_time']));
                         }
                     }
 
@@ -604,8 +625,40 @@ error_log("=== EVENT PAGE END ===");
             opacity: 1;
         }
 
-        #calendar { max-width: 100%; margin: 0 auto; }
-        .fc-event { cursor: pointer; }
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 18px;
+            overflow: hidden;
+        }
+        .fc-event {
+            cursor: pointer;
+            border: 0 !important;
+            border-radius: 9px !important;
+            padding: 4px 7px !important;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.10);
+        }
+        .fc-state-highlight {
+            background: #eefbf8 !important;
+        }
+        .fc-header-title h2 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1f2937;
+        }
+        .fc-button {
+            border-radius: 10px !important;
+            border-color: #d7e6e3 !important;
+            background: #fff !important;
+            color: #27776f !important;
+            text-transform: capitalize !important;
+        }
+        .fc-button.fc-state-active,
+        .fc-button:hover {
+            background: #4aa398 !important;
+            color: #fff !important;
+        }
         .event-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
         .upcoming-event-item { padding: 12px; border-left: 3px solid; margin-bottom: 10px; background: #f8f9fa; border-radius: 0 8px 8px 0; transition: all 0.3s ease; display: block; text-decoration: none; color: inherit; }
         .upcoming-event-item:hover { background: #e9ecef; text-decoration: none; color: inherit; }
@@ -615,6 +668,33 @@ error_log("=== EVENT PAGE END ===");
         .event-detail-item { margin-bottom: 16px; }
         .event-detail-label { font-size: 12px; color: #6c757d; margin-bottom: 4px; }
         .event-detail-value { font-size: 16px; font-weight: 500; color: #212529; }
+        .event-detail-shell { max-width: 1120px; margin: 0 auto; }
+        .event-detail-card { border: 0; border-radius: 28px; overflow: hidden; box-shadow: 0 24px 70px rgba(15, 23, 42, .12); background: #fff; }
+        .event-detail-hero { position: relative; padding: 34px; color: #fff; isolation: isolate; overflow: hidden; }
+        .event-detail-hero::after { content: ""; position: absolute; inset: auto -80px -130px auto; width: 340px; height: 340px; border-radius: 50%; background: rgba(255,255,255,.16); z-index: -1; }
+        .event-detail-hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 28px; }
+        .event-detail-pill-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .event-detail-pill { display: inline-flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 12px; border-radius: 999px; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.28); color: #fff; font-size: 12px; font-weight: 700; }
+        .event-detail-title { max-width: 820px; margin: 0; font-size: clamp(34px, 4.8vw, 64px); line-height: 1; font-weight: 800; letter-spacing: 0; }
+        .event-detail-subtitle { margin: 14px 0 0; max-width: 760px; color: rgba(255,255,255,.86); font-size: 15px; }
+        .event-detail-menu { width: 42px; height: 42px; border-radius: 14px; border: 1px solid rgba(255,255,255,.24); background: rgba(255,255,255,.14); color: #fff; display: inline-flex; align-items: center; justify-content: center; }
+        .event-detail-body { padding: 30px 34px 34px; }
+        .event-detail-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+        .event-detail-info { min-height: 126px; padding: 18px; border: 1px solid #e5eef1; border-radius: 18px; background: #f8fafc; }
+        .event-detail-info .icon { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: #e6f7f5; color: #27776f; font-size: 20px; margin-bottom: 14px; }
+        .event-detail-info span { display: block; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
+        .event-detail-info strong { display: block; color: #111827; font-size: 16px; line-height: 1.35; margin-top: 5px; }
+        .event-detail-info small { display: block; color: #64748b; margin-top: 3px; }
+        .event-detail-description { margin-top: 22px; padding: 24px; border: 1px solid #e5eef1; border-radius: 20px; background: #fff; }
+        .event-detail-description h3 { margin: 0 0 10px; font-size: 20px; font-weight: 800; color: #111827; }
+        .event-detail-description p { margin: 0; color: #475569; line-height: 1.7; }
+        .event-detail-footer { margin-top: 24px; padding-top: 20px; border-top: 1px solid #edf2f7; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+        @media (max-width: 991px) { .event-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 575px) {
+            .event-detail-hero, .event-detail-body { padding: 24px; }
+            .event-detail-grid { grid-template-columns: 1fr; }
+            .event-detail-title { font-size: 36px; }
+        }
 
         /* Calendar loading state */
         #calendar.fc-loading {
@@ -688,37 +768,7 @@ error_log("=== EVENT PAGE END ===");
     <?php include_once('includes/sidebar.php'); ?>
 
     <main class="dashboard-main">
-        <div class="navbar-header shadow-1">
-            <div class="row align-items-center justify-content-between">
-                <div class="col-auto">
-                    <div class="d-flex flex-wrap align-items-center gap-4">
-                        <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
-                            <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
-                        </button>
-                        <form class="navbar-search">
-                            <input type="text" class="bg-transparent" name="search" placeholder="Search events...">
-                            <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-                        </form>
-                    </div>
-                </div>
-                <div class="col-auto">
-                    <div class="d-flex flex-wrap align-items-center gap-3">
-                        <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-                        <div class="dropdown d-inline-block">
-                            <button class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative" type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
-                                <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
-                                <?php if ($notificationCount > 0): ?>
-                                <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
-                                <?php endif; ?>
-                            </button>
-                            <div class="dropdown-menu to-top dropdown-menu-lg p-0">
-                                <!-- notification content -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <?php require_once __DIR__ . '/includes/nav-header.php'; ?>
 
         <div class="dashboard-main-body">
             <!-- Breadcrumb -->
@@ -749,88 +799,93 @@ error_log("=== EVENT PAGE END ===");
 
             <?php if ($selectedEvent): ?>
             <!-- Single Event View -->
-            <div class="row">
-                <div class="col-lg-8 mx-auto">
-                    <div class="card">
-                        <div class="card-body p-32">
-                            <div class="d-flex justify-content-between align-items-start mb-24">
-                                <div>
-                                    <div class="d-flex align-items-center gap-2 mb-2">
-                                        <span class="event-color-dot" style="background-color: <?= $eventColors[$selectedEvent['type']] ?? '#6c757d' ?>;"></span>
-                                        <span class="badge bg-<?= $selectedEvent['type'] == 'holiday' ? 'danger' : ($selectedEvent['type'] == 'exam' ? 'warning' : ($selectedEvent['type'] == 'celebration' ? 'success' : 'info')) ?>">
-                                            <?= $eventTypes[$selectedEvent['type']] ?? ucfirst($selectedEvent['type']) ?>
-                                        </span>
-                                    </div>
-                                    <h2 class="fw-semibold mb-2"><?= htmlspecialchars($selectedEvent['title']) ?></h2>
-                                    <div class="d-flex flex-wrap gap-2 mb-16">
-                                        <span class="badge bg-primary">Posted by: <?= htmlspecialchars($selectedEvent['created_by_name'] ?? 'System') ?></span>
-                                        <span class="badge bg-info">Status: <?= ucfirst($selectedEvent['status'] ?? 'upcoming') ?></span>
-                                    </div>
-                                </div>
-                                <div class="dropdown">
-                                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="dropdown">
-                                        <i class="ri-more-2-fill"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><button type="button" class="dropdown-item edit-event-btn" data-event='<?= json_encode($selectedEvent) ?>'><i class="ri-edit-line"></i> Edit</button></li>
-                                        <li><button type="button" class="dropdown-item text-danger" onclick="deleteEvent(<?= $selectedEvent['id'] ?>, '<?= addslashes($selectedEvent['title']) ?>')"><i class="ri-delete-bin-line"></i> Delete</button></li>
-                                    </ul>
-                                </div>
+            <?php
+                $selectedType = (string) ($selectedEvent['type'] ?? 'other');
+                $eventColor = $eventColors[$selectedType] ?? '#4aa398';
+                $eventTypeLabel = $eventTypes[$selectedType] ?? ucwords(str_replace('_', ' ', $selectedType));
+                $eventStatus = ucwords(str_replace('_', ' ', (string) ($selectedEvent['status'] ?? 'upcoming')));
+                $startDateTs = strtotime((string) ($selectedEvent['start_date'] ?? ''));
+                $endDateTs = strtotime((string) ($selectedEvent['end_date'] ?? ($selectedEvent['start_date'] ?? '')));
+                $createdTs = strtotime((string) ($selectedEvent['created_at'] ?? ''));
+                $startDateText = $startDateTs ? date('l, F j, Y', $startDateTs) : 'Not scheduled';
+                $endDateText = $endDateTs ? date('l, F j, Y', $endDateTs) : $startDateText;
+                $startTimeText = !empty($selectedEvent['start_time']) ? date('g:i A', strtotime($selectedEvent['start_time'])) : '';
+                $endTimeText = !empty($selectedEvent['end_time']) ? date('g:i A', strtotime($selectedEvent['end_time'])) : '';
+                try {
+                    $start = new DateTime((string) ($selectedEvent['start_date'] ?? 'now'));
+                    $end = new DateTime((string) ($selectedEvent['end_date'] ?? ($selectedEvent['start_date'] ?? 'now')));
+                    $durationDays = $start->diff($end)->days + 1;
+                } catch (Throwable $e) {
+                    $durationDays = 1;
+                }
+                $audience = trim((string) ($selectedEvent['target_audience'] ?? $selectedEvent['audience'] ?? 'School community'));
+                $createdText = $createdTs ? date('d M Y, h:i A', $createdTs) : 'Recently';
+            ?>
+            <div class="event-detail-shell">
+                <article class="event-detail-card">
+                    <div class="event-detail-hero" style="background: linear-gradient(135deg, <?= htmlspecialchars($eventColor) ?>, #1f2937);">
+                        <div class="event-detail-hero-top">
+                            <div class="event-detail-pill-row">
+                                <span class="event-detail-pill"><span class="event-color-dot" style="background:#fff;"></span><?= htmlspecialchars($eventTypeLabel) ?></span>
+                                <span class="event-detail-pill"><i class="ri-time-line"></i><?= htmlspecialchars($eventStatus) ?></span>
+                                <span class="event-detail-pill"><i class="ri-user-smile-line"></i>Posted by <?= htmlspecialchars($selectedEvent['created_by_name'] ?? 'System') ?></span>
                             </div>
-                            <div class="row g-4 mb-24">
-                                <div class="col-md-6">
-                                    <div class="event-detail-item">
-                                        <div class="event-detail-label">Start Date</div>
-                                        <div class="event-detail-value">
-                                            <?= date('l, F j, Y', strtotime($selectedEvent['start_date'])) ?>
-                                            <?php if (!empty($selectedEvent['start_time'])): ?><br><small class="text-muted"><?= date('g:i A', strtotime($selectedEvent['start_time'])) ?></small><?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="event-detail-item">
-                                        <div class="event-detail-label">End Date</div>
-                                        <div class="event-detail-value">
-                                            <?= date('l, F j, Y', strtotime($selectedEvent['end_date'])) ?>
-                                            <?php if (!empty($selectedEvent['end_time'])): ?><br><small class="text-muted"><?= date('g:i A', strtotime($selectedEvent['end_time'])) ?></small><?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-                                <?php if (!empty($selectedEvent['venue'])): ?>
-                                <div class="col-md-6">
-                                    <div class="event-detail-item">
-                                        <div class="event-detail-label">Venue</div>
-                                        <div class="event-detail-value"><?= htmlspecialchars($selectedEvent['venue']) ?></div>
-                                    </div>
-                                </div>
-                                <?php endif; ?>
-                                <div class="col-md-6">
-                                    <div class="event-detail-item">
-                                        <div class="event-detail-label">Duration</div>
-                                        <div class="event-detail-value">
-                                            <?php
-                                            $start = new DateTime($selectedEvent['start_date']);
-                                            $end   = new DateTime($selectedEvent['end_date']);
-                                            $diff  = $start->diff($end);
-                                            echo ($diff->days + 1) . ' day' . (($diff->days + 1) > 1 ? 's' : '');
-                                            ?>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <?php if (!empty($selectedEvent['description'])): ?>
-                            <div class="border-top pt-24 mt-24">
-                                <h6 class="fw-semibold mb-12">Description</h6>
-                                <div class="text-secondary-light"><?= nl2br(htmlspecialchars($selectedEvent['description'])) ?></div>
-                            </div>
-                            <?php endif; ?>
-                            <div class="d-flex justify-content-between align-items-center border-top pt-24 mt-24">
-                                <a href="event.php?school_slug=<?= urlencode($schoolSlug) ?>" class="btn btn-outline-primary"><i class="ri-arrow-left-line me-2"></i>Back to Calendar</a>
-                                <span class="text-muted">Created: <?= date('d M Y, h:i A', strtotime($selectedEvent['created_at'])) ?></span>
+                            <div class="dropdown">
+                                <button type="button" class="event-detail-menu" data-bs-toggle="dropdown" aria-label="Event actions">
+                                    <i class="ri-more-2-fill"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><button type="button" class="dropdown-item edit-event-btn" data-event='<?= htmlspecialchars(json_encode($selectedEvent), ENT_QUOTES, 'UTF-8') ?>'><i class="ri-edit-line"></i> Edit event</button></li>
+                                    <li><button type="button" class="dropdown-item text-danger" onclick="deleteEvent(<?= (int) $selectedEvent['id'] ?>, '<?= addslashes((string) $selectedEvent['title']) ?>')"><i class="ri-delete-bin-line"></i> Delete event</button></li>
+                                </ul>
                             </div>
                         </div>
+                        <h2 class="event-detail-title"><?= htmlspecialchars($selectedEvent['title']) ?></h2>
+                        <p class="event-detail-subtitle">
+                            <?= htmlspecialchars($startDateText) ?><?php if ($startTimeText): ?> at <?= htmlspecialchars($startTimeText) ?><?php endif; ?>
+                            <?php if (!empty($selectedEvent['venue'])): ?> &middot; <?= htmlspecialchars($selectedEvent['venue']) ?><?php endif; ?>
+                        </p>
                     </div>
-                </div>
+
+                    <div class="event-detail-body">
+                        <div class="event-detail-grid">
+                            <div class="event-detail-info">
+                                <div class="icon"><i class="ri-calendar-event-line"></i></div>
+                                <span>Start date</span>
+                                <strong><?= htmlspecialchars($startDateText) ?></strong>
+                                <?php if ($startTimeText): ?><small><?= htmlspecialchars($startTimeText) ?></small><?php endif; ?>
+                            </div>
+                            <div class="event-detail-info">
+                                <div class="icon"><i class="ri-calendar-check-line"></i></div>
+                                <span>End date</span>
+                                <strong><?= htmlspecialchars($endDateText) ?></strong>
+                                <?php if ($endTimeText): ?><small><?= htmlspecialchars($endTimeText) ?></small><?php endif; ?>
+                            </div>
+                            <div class="event-detail-info">
+                                <div class="icon"><i class="ri-hourglass-line"></i></div>
+                                <span>Duration</span>
+                                <strong><?= (int) $durationDays ?> day<?= $durationDays > 1 ? 's' : '' ?></strong>
+                                <small><?= htmlspecialchars($eventStatus) ?></small>
+                            </div>
+                            <div class="event-detail-info">
+                                <div class="icon"><i class="ri-group-line"></i></div>
+                                <span>Audience</span>
+                                <strong><?= htmlspecialchars($audience !== '' ? $audience : 'School community') ?></strong>
+                                <?php if (!empty($selectedEvent['venue'])): ?><small><?= htmlspecialchars($selectedEvent['venue']) ?></small><?php endif; ?>
+                            </div>
+                        </div>
+
+                        <section class="event-detail-description">
+                            <h3>Description</h3>
+                            <p><?= !empty($selectedEvent['description']) ? nl2br(htmlspecialchars($selectedEvent['description'])) : 'No description has been added for this event yet.' ?></p>
+                        </section>
+
+                        <div class="event-detail-footer">
+                            <a href="event.php?school_slug=<?= urlencode($schoolSlug) ?>" class="btn btn-outline-primary"><i class="ri-arrow-left-line me-2"></i>Back to Calendar</a>
+                            <span class="text-muted">Created: <?= htmlspecialchars($createdText) ?></span>
+                        </div>
+                    </div>
+                </article>
             </div>
             <?php else: ?>
             <!-- Calendar and Events List -->
@@ -889,9 +944,7 @@ error_log("=== EVENT PAGE END ===");
             <?php endif; ?>
         </div>
 
-        <footer class="d-footer">
-            <p class="mb-0 text-center">&copy; <span class="current-year"></span> <?= htmlspecialchars($school['name']) ?> | Made With ❤️ by AcademixSuite.</p>
-        </footer>
+        <?php require_once __DIR__ . '/includes/footer.php'; ?>
     </main>
 
     <!-- Add Event Sidebar -->
@@ -1240,7 +1293,81 @@ error_log("=== EVENT PAGE END ===");
                     $(this).toggle(title.includes(term) || type.includes(term));
                 });
             });
+
+            initializeSchoolCalendar();
         });
+
+        function calendarDateParam(value) {
+            if (!value) return '';
+            if (typeof value.format === 'function') {
+                return value.format('YYYY-MM-DD');
+            }
+            const date = value instanceof Date ? value : new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return year + '-' + month + '-' + day;
+        }
+
+        function initializeSchoolCalendar() {
+            const $calendar = $('#calendar');
+            if (!$calendar.length || typeof $.fn.fullCalendar !== 'function') {
+                return;
+            }
+
+            try {
+                $calendar.fullCalendar('destroy');
+            } catch (error) {
+                // Calendar may not have been initialized by the bundled script yet.
+            }
+
+            $calendar.fullCalendar({
+                header: {
+                    left: 'title',
+                    center: 'agendaDay,agendaWeek,month',
+                    right: 'prev,next today'
+                },
+                defaultView: 'month',
+                firstDay: 1,
+                editable: false,
+                selectable: false,
+                eventLimit: true,
+                events: function(start, end, callback) {
+                    $.ajax({
+                        url: 'event.php',
+                        dataType: 'json',
+                        data: {
+                            school_slug: <?php echo json_encode($schoolSlug); ?>,
+                            fc_ajax: 'get_events',
+                            start: calendarDateParam(start),
+                            end: calendarDateParam(end)
+                        },
+                        success: function(response) {
+                            callback(response && response.success ? response.events : []);
+                        },
+                        error: function() {
+                            callback([]);
+                        }
+                    });
+                },
+                eventRender: function(event, element) {
+                    const meta = [
+                        event.venue ? 'Venue: ' + event.venue : '',
+                        event.description ? event.description : ''
+                    ].filter(Boolean).join('\n');
+                    if (meta) {
+                        element.attr('title', meta);
+                    }
+                    element.addClass('school-calendar-event');
+                },
+                eventClick: function(event) {
+                    if (event && event.id) {
+                        window.location.href = 'event.php?id=' + encodeURIComponent(event.id) + '&school_slug=' + encodeURIComponent(<?php echo json_encode($schoolSlug); ?>);
+                    }
+                }
+            });
+        }
 
         // Delete event function
         function deleteEvent(eventId, eventTitle) {

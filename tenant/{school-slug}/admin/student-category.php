@@ -1,4 +1,13 @@
 <?php require_once __DIR__ . '/includes/handlers/other-handler.php'; ?>
+<?php
+$csrf = academix_admin_csrf_token();
+$categories = [];
+try {
+    $stmt = $schoolDb->prepare("SELECT * FROM student_categories WHERE school_id = ? ORDER BY id DESC");
+    $stmt->execute([$school['id']]);
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {}
+?>
 <!-- meta tags and other links -->
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
@@ -36,791 +45,10 @@
 
   <div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300">
   </div>
-<aside class="sidebar">
-  <button type="button" class="sidebar-close-btn">
-    <iconify-icon icon="radix-icons:cross-2"></iconify-icon>
-  </button>
-  <div class="">
-    <div class="sidebar-logo d-flex align-items-center justify-content-between">
-      <a href="index.html" class="">
-        <img src="https://academixsuite.com/tenant/assets/images/logo.png" alt="site logo" class="light-logo">
-        <img src="https://academixsuite.com/tenant/assets/images/logo-light.png" alt="site logo" class="dark-logo">
-        <img src="https://academixsuite.com/tenant/assets/images/logo-icon.png" alt="site logo" class="logo-icon">
-      </a>
-      <button type="button" class="text-xxl d-xl-flex d-none line-height-1 sidebar-toggle text-neutral-500"
-        aria-label="Collapse Sidebar">
-        <i class="ri-contract-left-line"></i>
-      </button>
-    </div>
-  </div>
-  <!-- User Info start -->
-  <div class="mx-16 py-12">
-    <div class="dropdown profile-dropdown">
-      <button type="button"
-        class="profile-dropdown__button d-flex align-items-center justify-content-between p-10 w-100 overflow-hidden bg-neutral-50 radius-12 "
-        data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-        <span class="d-flex align-items-start gap-10">
-          <img src="https://academixsuite.com/tenant/assets/images/thumbs/leave-request-img2.png" alt="Thumbnail"
-            class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
-          <span class="profile-dropdown__contents">
-            <span class="h6 mb-0 text-md d-block text-primary-light">Jone Copper</span>
-            <span class="text-secondary-light text-sm mb-0 d-block">Admin</span>
-          </span>
-        </span>
-        <span class="profile-dropdown__icon pe-8 text-xl d-flex line-height-1">
-          <i class="ri-arrow-right-s-line"></i>
-        </span>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-        <li>
-          <a href="student-details.html" 
-            class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-            <i class="ri-user-3-line"></i>
-            My Profile
-          </a>
-        </li>
-        <li>
-          <a href="general.html"
-            class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-            <i class="ri-settings-3-line"></i>
-            Setting
-          </a>
-        </li>
-        <li>
-          <a href="login.html"
-            class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-            <i class="ri-shut-down-line"></i>
-            Log Out
-          </a>
-        </li>
-      </ul>
-    </div>
-  </div>
-  <!-- User Info end -->
-  <div class="sidebar-menu-area">
-    <ul class="sidebar-menu" id="sidebar-menu">
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-home-4-line"></i>
-          <span>Dashboard </span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="index.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              School
-            </a>
-          </li>
-          <li>
-            <a href="index-2.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Student
-            </a>
-          </li>
-          <li>
-            <a href="index-3.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Teacher
-            </a>
-          </li>
-          <li>
-            <a href="index-4.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Parent
-            </a>
-          </li>
-          <li>
-            <a href="index-5.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              LMS 
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-graduation-cap-line"></i>
-          <span>Students</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="add-new-student.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Add New Student
-            </a>
-          </li>
-          <li>
-            <a href="student-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Student List
-            </a>
-          </li>
-          <li>
-            <a href="suspended-student.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Suspend Student
-            </a>
-          </li>
-          <li>
-            <a href="student-category.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Student Categories
-            </a>
-          </li>
-          <li>
-            <a href="edit-student.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Edit Student
-            </a>
-          </li>
-          <li>
-            <a href="student-details.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Student Details
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-user-follow-line"></i>
-          <span>Teachers</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="add-new-teacher.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Add New Teacher
-            </a>
-          </li>
-          <li>
-            <a href="teacher-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Teacher List
-            </a>
-          </li>
-          <li>
-            <a href="edit-teacher.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Edit Teacher
-            </a>
-          </li>
-          <li>
-            <a href="teacher-details.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Teacher Details
-            </a>
-          </li>
-          <li>
-            <a href="teacher-timetable.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Teacher Timetable
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-account-circle-line"></i>
-          <span>Guardian</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="add-new-guardian.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Add New Guardians
-            </a>
-          </li>
-          <li>
-            <a href="guardian-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Guardians List
-            </a>
-          </li>
-          <li>
-            <a href="edit-guardian.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Edit Guardian
-            </a>
-          </li>
-          <li>
-            <a href="guardian-details.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Guardian Details
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-list-view"></i>
-          <span>Classes</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="section-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Section
-            </a>
-          </li>
-          <li>
-            <a href="subject-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Subjects
-            </a>
-          </li>
-          <li>
-            <a href="class-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Class List
-            </a>
-          </li>
-          <li>
-            <a href="class-room-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Class Room
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-file-edit-line"></i>
-          <span>Examinations</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="exam.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Exam
-            </a>
-          </li>
-          <li>
-            <a href="exam-schedule.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Exam Schedule
-            </a>
-          </li>
-          <li>
-            <a href="exam-result.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Exam Result
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-money-dollar-circle-line"></i>
-          <span>Fees Collection</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="fees-collect.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Fees Collect
-            </a>
-          </li>
-          <li>
-            <a href="fees-type.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Fees Type
-            </a>
-          </li>
-          <li>
-            <a href="fees-group.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Fees Group
-            </a>
-          </li>
-          <li>
-            <a href="fees-discount.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Fees Discount
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-calendar-check-line"></i>
-          <span>Attendance</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="student-attendance.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Student Attendance
-            </a>
-          </li>
-          <li>
-            <a href="teacher-attendance.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Teacher Attendance
-            </a>
-          </li>
-          <li>
-            <a href="employee-attendance.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Employee Attendance
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-time-line"></i>
-          <span>Leaves</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="leave-types.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Leave Types
-            </a>
-          </li>
-          <li>
-            <a href="leave-request.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Leave Request
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li>
-        <a href="certificate.html">
-          <i class="ri-home-4-line"></i>
-          <span>Certificate </span>
-        </a>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-book-2-line"></i>
-          <span>Library</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="books-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Books List
-            </a>
-          </li>
-          <li>
-            <a href="members-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Members List
-            </a>
-          </li>
-          <li>
-            <a href="member-details.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Members Details
-            </a>
-          </li>
-          <li>
-            <a href="issue-return.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Issue Return
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-money-dollar-circle-line"></i>
-          <span>Accounts</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="income-head.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Income Head
-            </a>
-          </li>
-          <li>
-            <a href="income-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Income List
-            </a>
-          </li>
-          <li>
-            <a href="expense-head.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Expense Head
-            </a>
-          </li>
-          <li>
-            <a href="expense-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Expense List
-            </a>
-          </li>
-          <li>
-            <a href="transaction.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Transaction
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-user-settings-line"></i>
-          <span>HRM</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="employee-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Employee List
-            </a>
-          </li>
-          <li>
-            <a href="employee-details.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Employee Details
-            </a>
-          </li>
-          <li>
-            <a href="add-new-employee.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Add New Employee
-            </a>
-          </li>
-          <li>
-            <a href="payroll.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Payroll
-            </a>
-          </li>
-          <li>
-            <a href="designation.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Designation
-            </a>
-          <li>
-            <a href="department.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Department
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li>
-        <a href="notice-board.html">
-          <i class="ri-booklet-line"></i>
-          <span>Notice Board </span>
-        </a>
-      </li>
-      <li>
-        <a href="event.html">
-          <i class="ri-calendar-event-line"></i>
-          <span>Event </span>
-        </a>
-      </li>
-      <li>
-        <a href="message.html">
-          <i class="ri-message-2-line"></i>
-          <span>Message </span>
-        </a>
-      </li>
-      <li>
-        <a href="subscription-plan.html">
-          <i class="ri-price-tag-3-line"></i>
-          <span>Subscription Plan </span>
-        </a>
-      </li>
-      <li>
-        <a href="role-access.html">
-          <i class="ri-macbook-line"></i>
-          <span>Role & Access</span>
-        </a>
-      </li>
-         <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-shield-check-line"></i>
-          <span>Authentication</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="login.html"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> Login</a>
-          </li>
-          <li>
-            <a href="register.html"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Register</a>
-          </li>
-        </ul>
-      </li>
-      <li>
-        <a href="assign-role-plan.html">
-          <i class="ri-user-follow-line"></i>
-          <span>Assign Role</span>
-        </a>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-user-settings-line"></i>
-          <span>Settings</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="general.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              General
-            </a>
-          </li>
-          <li>
-            <a href="notification.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Notification
-            </a>
-          </li>
-          <li>
-            <a href="currencies.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Currencies
-            </a>
-          </li>
-          <li>
-            <a href="languages.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Languages
-            </a>
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </div>
-</aside>
+<?php include_once __DIR__ . '/includes/sidebar.php'; ?>
 
 <main class="dashboard-main">
-    <div class="navbar-header shadow-1">
-  <div class="row align-items-center justify-content-between">
-    <div class="col-auto">
-      <div class="d-flex flex-wrap align-items-center gap-4">
-        <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
-          <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
-        </button>
-        <form class="navbar-search">
-          <input type="text" class="bg-transparent" name="search" placeholder="Search">
-          <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-        </form>
-      </div>
-    </div>
-    <div class="col-auto">
-      <div class="d-flex flex-wrap align-items-center gap-3">
-        <button type="button" data-theme-toggle
-          class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-        <div class="dropdown d-inline-block">
-          <button
-            class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center"
-            type="button" data-bs-toggle="dropdown" aria-label="Language Change Button">
-            <img src="https://academixsuite.com/tenant/assets/images/flags/flag1.png" alt="image" class="w-24 h-24 object-fit-cover rounded-circle">
-          </button>
-          <div class="dropdown-menu to-top dropdown-menu-sm">
-            <div
-              class="py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
-              <div>
-                <h6 class="text-lg text-primary-light fw-semibold mb-0">Choose Your Language</h6>
-              </div>
-            </div>
-
-            <div class="max-h-400-px overflow-y-auto scroll-sm pe-8">
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="english">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag1.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">English</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="english">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="japan">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag2.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Japan</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="japan">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="france">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag3.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">France</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="france">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="germany">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag4.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Germany</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="germany">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="korea">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag5.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">South Korea</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="korea">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="bangladesh">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag6.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Bangladesh</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="bangladesh">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="india">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag7.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">India</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="india">
-              </div>
-              <div class="form-check style-check d-flex align-items-center justify-content-between">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="canada">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag8.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Canada</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="canada">
-              </div>
-            </div>
-          </div>
-        </div><!-- Language dropdown end -->
-
-        <div class="dropdown">
-          <button
-            class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative"
-            type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
-            <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
-            <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
-          </button>
-          <div class="dropdown-menu to-top dropdown-menu-lg p-0">
-            <div
-              class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
-              <div>
-                <h6 class="text-lg text-primary-light fw-semibold mb-0">Notifications</h6>
-              </div>
-              <span
-                class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center">05</span>
-            </div>
-
-            <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    <iconify-icon icon="bitcoin-icons:verify-outline" class="icon text-xxl"></iconify-icon>
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Congratulations</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Your profile has been Verified. Your
-                      profile has been Verified</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    <img src="https://academixsuite.com/tenant/assets/images/notification/profile-1.png" alt="Image">
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Ronald Richards</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">You can stitch between artboards</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-info-subtle text-info-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    AM
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Arlene McCoy</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Invite you to prototyping</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    <img src="https://academixsuite.com/tenant/assets/images/notification/profile-2.png" alt="Image">
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Robiul Hasan</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Invite you to prototyping</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-info-subtle text-info-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    DR
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Darlene Robertson</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Invite you to prototyping</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-            </div>
-
-            <div class="text-center py-12 px-16">
-              <a href="javascript:void(0)" class="text-primary-600 fw-semibold text-md hover-underline">See All Notification</a>
-            </div>
-
-          </div>
-        </div><!-- Notification dropdown end -->
-
-      </div>
-    </div>
-  </div>
-</div>
+    <?php require_once __DIR__ . '/includes/nav-header.php'; ?>
 
     <div class="dashboard-main-body">
 
@@ -904,16 +132,20 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <?php $sl = 1; foreach ($categories as $cat): ?>
                                 <tr>
                                     <td>
                                         <div class="form-check style-check d-flex align-items-center">
                                             <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">01</label>
+                                            <label class="form-check-label"><?php echo str_pad($sl++, 2, '0', STR_PAD_LEFT); ?></label>
                                         </div>
                                     </td>
-                                    <td><span class="">General</span></td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Active</span>
+                                    <td><span class=""><?php echo academix_admin_e($cat['name']); ?></span></td>
+                                    <td>
+                                        <?php 
+                                            $stCls = strtolower($cat['status'] ?? 'Active') === 'active' ? 'bg-success-100 text-success-600' : 'bg-danger-100 text-danger-600';
+                                        ?>
+                                        <span class="<?php echo $stCls; ?> px-24 py-4 radius-4 fw-medium text-sm"><?php echo academix_admin_e($cat['status'] ?? 'Active'); ?></span>
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group">
@@ -926,14 +158,16 @@
                                                 <li>
                                                     <button
                                                         class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
+                                                        type="button"
+                                                        onclick="editCategory(<?php echo (int)$cat['id']; ?>, '<?php echo academix_admin_e(str_replace("'", "\\'", $cat['name'])); ?>', '<?php echo academix_admin_e($cat['status'] ?? 'Active'); ?>')">
                                                         <i class="ri-edit-2-line"></i>Edit
                                                     </button>
                                                 </li>
                                                 <li>
                                                     <button
                                                         class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
+                                                        type="button"
+                                                        onclick="deleteCategory(<?php echo (int)$cat['id']; ?>, '<?php echo academix_admin_e(str_replace("'", "\\'", $cat['name'])); ?>')">
                                                         <i class="ri-delete-bin-6-line"></i>Delete
                                                     </button>
                                                 </li>
@@ -941,349 +175,12 @@
                                         </div>
                                     </td>
                                 </tr>
-
+                                <?php endforeach; ?>
+                                <?php if (empty($categories)): ?>
                                 <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">02</label>
-                                        </div>
-                                    </td>
-                                    <td><span class="">Special</span></td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-edit-2-line"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-delete-bin-6-line"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
+                                    <td colspan="4" class="text-center text-secondary-light py-24">No categories found. Click "New Category" to add one.</td>
                                 </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">03</label>
-                                        </div>
-                                    </td>
-                                    <td><span class="">Physically Challenged</span></td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Active</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-edit-2-line"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-delete-bin-6-line"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">04</label>
-                                        </div>
-                                    </td>
-                                    <td><span class="">General</span></td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-edit-2-line"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-delete-bin-6-line"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">05</label>
-                                        </div>
-                                    </td>
-                                    <td><span class="">Special</span></td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Active</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-edit-2-line"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-delete-bin-6-line"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">06</label>
-                                        </div>
-                                    </td>
-                                    <td><span class="">Physically Challenged</span></td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-edit-2-line"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-delete-bin-6-line"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">07</label>
-                                        </div>
-                                    </td>
-                                    <td><span class="">General</span></td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Active</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-edit-2-line"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-delete-bin-6-line"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">08</label>
-                                        </div>
-                                    </td>
-                                    <td><span class="">Special</span></td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-edit-2-line"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-delete-bin-6-line"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">09</label>
-                                        </div>
-                                    </td>
-                                    <td><span class="">Physically Challenged</span></td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Active</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-edit-2-line"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-delete-bin-6-line"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">10</label>
-                                        </div>
-                                    </td>
-                                    <td><span class="">General</span></td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-edit-2-line"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button">
-                                                        <i class="ri-delete-bin-6-line"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -1292,11 +189,7 @@
         </div>
     </div>
 
-    <footer class="d-footer">
-  <div class="">
-    <p class="mb-0 text-center"> &copy; <span class="current-year"></span> Made With ❤️ by Wowtheme7.</p>
-  </div>
-</footer>
+    <?php require_once __DIR__ . '/includes/footer.php'; ?>
 </main>
 
 <!-- add new category sidebar start -->
@@ -1309,6 +202,7 @@
         </button>
     </div>
     <form method="POST" action="" class="d-flex flex-column gap-20 p-20">
+        <input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrf); ?>">
         <input type="hidden" name="action" value="create_student_category">
         <div class="">
             <label for="studentCategoryName" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Student
@@ -1335,6 +229,71 @@
     </form>
 </div>
 <!-- add new category sidebar ebd -->
+
+<!-- edit category sidebar start -->
+<div
+    class="my-sidebar-edit bg-white position-fixed end-0 top-0 h-100vh overflow-y-auto z-99 max-w-700-px w-100 translate-x-full duration-300 active-translate-0">
+    <div class="px-20 py-12 border-bottom d-flex align-items-center justify-content-between gap-20">
+        <h5 class="text-lg mb-0">Edit Student Category</h5>
+        <button type="button" class="close-my-sidebar-edit text-danger-600 text-lg d-flex">
+            <i class="ri-close-large-line"></i>
+        </button>
+    </div>
+    <form method="POST" action="" class="d-flex flex-column gap-20 p-20">
+        <input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrf); ?>">
+        <input type="hidden" name="action" value="update_student_category">
+        <input type="hidden" name="id" id="edit_category_id" value="">
+        <div class="">
+            <label for="edit_studentCategoryName" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Student
+                Category Name </label>
+            <input type="text" class="form-control" id="edit_studentCategoryName" name="name" placeholder="Enter Student Category Name">
+        </div>
+        <div class="">
+            <label for="edit_studentStatus" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Status</label>
+            <select id="edit_studentStatus" name="status" class="form-control form-select">
+                <option value="Select a status" disabled>Select a Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+        </div>
+        <div class="d-flex align-items-center justify-content-center gap-3 mt-8">
+            <button type="reset"
+                class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8">
+                Cancel
+            </button>
+            <button type="submit" class="btn btn-primary-600 text-md px-48 py-12 radius-8">
+                Update
+            </button>
+        </div>
+    </form>
+</div>
+<!-- edit category sidebar end -->
+
+<!-- delete category modal start -->
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCategoryModalLabel">Delete Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="">
+                <input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrf); ?>">
+                <input type="hidden" name="action" value="delete_student_category">
+                <input type="hidden" name="id" id="delete_category_id" value="">
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the category: <strong id="delete_category_name"></strong>?</p>
+                    <p class="text-danger-600 text-sm">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- delete category modal end -->
 
   <!-- jQuery library js -->
   <script src="assets/js/lib/jquery-3.7.1.min.js"></script>
@@ -1374,7 +333,7 @@
     });
     // ✅ Data Table end
 
-    // Sidebar js start
+    // Add sidebar js start
     $('.my-sidebar-btn').on('click', function () {
         $('.my-sidebar').addClass('active');
         $('.overlay').addClass('active');
@@ -1383,7 +342,29 @@
         $('.my-sidebar').removeClass('active');
         $('.overlay').removeClass('active');
     });
-    // Sidebar js end
+    // Add sidebar js end
+
+    // Edit sidebar js start
+    function editCategory(id, name, status) {
+        $('#edit_category_id').val(id);
+        $('#edit_studentCategoryName').val(name);
+        $('#edit_studentStatus').val(status);
+        $('.my-sidebar-edit').addClass('active');
+        $('.overlay').addClass('active');
+    }
+    $('.close-my-sidebar-edit').on('click', function () {
+        $('.my-sidebar-edit').removeClass('active');
+        $('.overlay').removeClass('active');
+    });
+    // Edit sidebar js end
+
+    // Delete modal js start
+    function deleteCategory(id, name) {
+        $('#delete_category_id').val(id);
+        $('#delete_category_name').text(name);
+        $('#deleteCategoryModal').modal('show');
+    }
+    // Delete modal js end
 </script>
 
 </body>

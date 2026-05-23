@@ -82,8 +82,7 @@ try {
     // Update invoice status
     $updateStmt = $db->prepare("
         UPDATE invoices 
-        SET status = 'rejected', 
-            updated_at = NOW()
+        SET status = 'rejected'
         WHERE id = ?
     ");
     $updateStmt->execute([$invoice['id']]);

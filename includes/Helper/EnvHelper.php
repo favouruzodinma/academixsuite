@@ -12,7 +12,7 @@ class EnvHelper {
     /**
      * Load environment variables from .env file
      */
-    public static function load(string $path = null): void {
+    public static function load(?string $path = null): void {
         if ($path === null) {
             $path = __DIR__ . '/../../.env';
         }

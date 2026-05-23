@@ -157,6 +157,41 @@ if ($schoolDb) {
 require_once __DIR__ . '/../../../includes/MessengerManager.php';
 $messenger = new MessengerManager($schoolDb, $school['id'], $userId, $userType);
 $unreadCount = $messenger->getUnreadCount();
+$recentNotifications = [];
+$inAppNotificationCount = 0;
+
+if ($schoolDb) {
+    try {
+        $tableStmt = $schoolDb->prepare('SHOW TABLES LIKE ?');
+        $tableStmt->execute(['notifications']);
+        if ($tableStmt->fetchColumn()) {
+            $countStmt = $schoolDb->prepare("
+                SELECT COUNT(*)
+                FROM notifications
+                WHERE school_id = ?
+                  AND user_id = ?
+                  AND is_read = 0
+            ");
+            $countStmt->execute([(int)$school['id'], (int)$userId]);
+            $inAppNotificationCount = (int)$countStmt->fetchColumn();
+
+            $notificationStmt = $schoolDb->prepare("
+                SELECT id, type, title, message, data, priority, is_read, created_at
+                FROM notifications
+                WHERE school_id = ?
+                  AND user_id = ?
+                ORDER BY created_at DESC, id DESC
+                LIMIT 8
+            ");
+            $notificationStmt->execute([(int)$school['id'], (int)$userId]);
+            $recentNotifications = $notificationStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        }
+    } catch (Exception $e) {
+        error_log("Messenger notifications query failed: " . $e->getMessage());
+    }
+}
+
+$totalAlertCount = (int)$unreadCount + (int)$inAppNotificationCount;
 
 error_log("=================== MESSENGER PAGE END ===================");
 ?>
@@ -1343,6 +1378,299 @@ error_log("=================== MESSENGER PAGE END ===================");
         max-width: 85%;
     }
 }
+
+.messenger-command-center {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.messenger-insight-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid #e6edf3;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #ffffff 0%, #f7fbfb 100%);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+}
+
+.messenger-insight-card small {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+}
+
+.messenger-insight-card strong {
+    display: block;
+    color: #172033;
+    font-size: 24px;
+    line-height: 1.2;
+}
+
+.messenger-insight-card.wide strong {
+    font-size: 15px;
+}
+
+.messenger-insight-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: #4aa398;
+    font-size: 22px;
+    flex: 0 0 46px;
+}
+
+.messenger-insight-icon.accent {
+    background: #3b82f6;
+}
+
+.messenger-insight-icon.soft {
+    background: #111827;
+}
+
+.message-notification-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.message-notification-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 14px;
+    color: #1f2937;
+    text-decoration: none;
+    margin-bottom: 8px;
+    background: #f8fafc;
+    border: 1px solid transparent;
+}
+
+.message-notification-item:hover {
+    color: #111827;
+    background: #eefbf8;
+    border-color: #d7f2ed;
+}
+
+.message-notification-item.is-unread {
+    background: #eefbf8;
+    border-color: #c9ebe5;
+}
+
+.message-notification-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: #4aa398;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+}
+
+.message-notification-copy strong,
+.message-notification-copy small {
+    display: block;
+}
+
+.message-notification-copy strong {
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.message-notification-copy small {
+    color: #64748b;
+    line-height: 1.35;
+}
+
+.message-notification-empty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 12px;
+    color: #64748b;
+}
+
+@media (max-width: 991px) {
+    .messenger-command-center {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        background: #eef3f7;
+    }
+
+    .dashboard-main-body {
+        padding: 14px !important;
+    }
+
+    .messenger-command-center {
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .messenger-insight-card {
+        padding: 14px;
+        border-radius: 16px;
+        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+    }
+
+    .chat-wrapper {
+        position: relative;
+        height: calc(100dvh - 126px);
+        min-height: 560px;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
+    }
+
+    .chat-sidebar {
+        position: absolute;
+        inset: 0 auto 0 0;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: min(88vw, 340px);
+        max-width: none;
+        height: 100%;
+        z-index: 1050;
+        border-right: 1px solid #e5edf4;
+        background: #ffffff;
+        box-shadow: 18px 0 42px rgba(15, 23, 42, 0.18);
+        transform: translateX(-106%);
+        transition: transform 0.25s ease;
+    }
+
+    .chat-sidebar.show {
+        left: 0;
+        transform: translateX(0);
+    }
+
+    .chat-search {
+        padding: 16px;
+        background: #ffffff;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .chat-users-list {
+        padding: 10px;
+        padding-bottom: 24px;
+    }
+
+    .chat-user-item {
+        border-radius: 18px;
+        margin-bottom: 10px;
+        border: 1px solid transparent;
+    }
+
+    .chat-user-item.active {
+        border-color: #bfe4dd;
+        background: #edf8f5;
+    }
+
+    .chat-main {
+        width: 100%;
+        min-width: 0;
+        background: #f8fafc;
+    }
+
+    .chat-header {
+        min-height: 74px;
+        padding: 12px 14px;
+        border-radius: 22px 22px 0 0;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(12px);
+    }
+
+    .chat-header-info {
+        min-width: 0;
+    }
+
+    .chat-header-details h6,
+    .chat-header-details p {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .chat-header-actions button,
+    .back-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 14px;
+    }
+
+    .chat-messages-area {
+        padding: 14px;
+    }
+
+    .chat-input-area {
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.96);
+        border-top: 1px solid #edf2f7;
+    }
+
+    .chat-input-wrapper {
+        border-radius: 18px;
+        padding: 8px;
+        background: #ffffff;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .chat-input {
+        min-height: 42px;
+        max-height: 120px;
+    }
+
+    .mobile-sidebar-overlay {
+        background: rgba(15, 23, 42, 0.48);
+        backdrop-filter: blur(3px);
+    }
+
+    .sidebar.show {
+        width: min(84vw, 320px) !important;
+        max-width: 320px;
+        border-radius: 0 24px 24px 0;
+        box-shadow: 18px 0 48px rgba(15, 23, 42, 0.2);
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-main-body {
+        padding: 10px !important;
+    }
+
+    .chat-wrapper {
+        height: calc(100dvh - 104px);
+        min-height: 520px;
+        border-radius: 18px;
+    }
+
+    .chat-sidebar {
+        width: min(86vw, 310px);
+    }
+
+    .chat-header {
+        border-radius: 18px 18px 0 0;
+    }
+
+    .message-bubble {
+        max-width: 88%;
+    }
+}
 </style>
 </head>
 
@@ -1361,45 +1689,7 @@ error_log("=================== MESSENGER PAGE END ===================");
     <?php include_once('includes/sidebar.php') ?>
 
     <main class="dashboard-main">
-        <div class="navbar-header shadow-1">
-            <div class="row align-items-center justify-content-between">
-                <div class="col-auto">
-                    <div class="d-flex flex-wrap align-items-center gap-4">
-                        <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button" onclick="toggleMainSidebar()">
-                            <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
-                        </button>
-                        <form class="navbar-search" onsubmit="return false;">
-                            <input type="text" class="bg-transparent" id="globalSearch" placeholder="Search messages...">
-                            <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-                        </form>
-                    </div>
-                </div>
-                <div class="col-auto">
-                    <div class="d-flex flex-wrap align-items-center gap-3">
-                        <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-                        <div class="dropdown">
-                            <button class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative" type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
-                                <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
-                                <?php if ($unreadCount > 0): ?>
-                                <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
-                                <?php endif; ?>
-                            </button>
-                            <div class="dropdown-menu to-top dropdown-menu-lg p-0">
-                                <div class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
-                                    <div>
-                                        <h6 class="text-lg text-primary-light fw-semibold mb-0">Notifications</h6>
-                                    </div>
-                                    <span class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center"><?php echo $unreadCount; ?></span>
-                                </div>
-                                <div class="text-center py-12 px-16">
-                                    <a href="message.php" class="text-primary-600 fw-semibold text-md hover-underline">View All Messages</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <?php require_once __DIR__ . '/includes/nav-header.php'; ?>
 
         <div class="dashboard-main-body">
             <div class="breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
@@ -1419,6 +1709,30 @@ error_log("=================== MESSENGER PAGE END ===================");
                         <i class="ri-group-line"></i>
                         <span class="d-none d-sm-inline">New Group</span>
                     </button>
+                </div>
+            </div>
+
+            <div class="messenger-command-center">
+                <div class="messenger-insight-card">
+                    <span class="messenger-insight-icon"><i class="ri-chat-3-line"></i></span>
+                    <div>
+                        <small>Unread messages</small>
+                        <strong><?php echo (int)$unreadCount; ?></strong>
+                    </div>
+                </div>
+                <div class="messenger-insight-card">
+                    <span class="messenger-insight-icon accent"><i class="ri-notification-4-line"></i></span>
+                    <div>
+                        <small>In-app alerts</small>
+                        <strong><?php echo (int)$inAppNotificationCount; ?></strong>
+                    </div>
+                </div>
+                <div class="messenger-insight-card wide">
+                    <span class="messenger-insight-icon soft"><i class="ri-shield-check-line"></i></span>
+                    <div>
+                        <small>Secure school conversations</small>
+                        <strong>Parents, teachers, staff, and students in one place</strong>
+                    </div>
                 </div>
             </div>
 
@@ -1631,11 +1945,7 @@ error_log("=================== MESSENGER PAGE END ===================");
         </div>
     </div>
 
-    <footer class="d-footer">
-        <div class="">
-            <p class="mb-0 text-center"> &copy; <span class="current-year"></span> <?php echo htmlspecialchars($school['name']); ?> | Messenger System</p>
-        </div>
-    </footer>
+    <?php require_once __DIR__ . '/includes/footer.php'; ?>
 
     <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>
     <script src="https://academixsuite.com/tenant/assets/js/lib/bootstrap.bundle.min.js"></script>

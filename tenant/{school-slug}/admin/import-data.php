@@ -1219,22 +1219,7 @@ error_log("=== IMPORT DATA PAGE END ===");
 <?php include_once('includes/sidebar.php'); ?>
 
 <main class="dashboard-main">
-    <div class="navbar-header shadow-1">
-        <div class="row align-items-center justify-content-between">
-            <div class="col-auto">
-                <div class="d-flex flex-wrap align-items-center gap-4">
-                    <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
-                        <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
-                    </button>
-                </div>
-            </div>
-            <div class="col-auto">
-                <div class="d-flex flex-wrap align-items-center gap-3">
-                    <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center"></button>
-                </div>
-            </div>
-        </div>
-    </div>
+<?php require_once __DIR__ . '/includes/nav-header.php'; ?>
 
     <div class="dashboard-main-body">
         <div class="breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
@@ -1525,11 +1510,7 @@ error_log("=== IMPORT DATA PAGE END ===");
         <?php endif; ?>
     </div>
 
-    <footer class="d-footer">
-        <div>
-            <p class="mb-0 text-center"> &copy; <span class="current-year"></span> <?php echo htmlspecialchars($school['name'] ?? 'School'); ?> | Made With ❤️ by AcademixSuite.</p>
-        </div>
-    </footer>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
 </main>
 
 <script src="https://academixsuite.com/tenant/assets/js/lib/jquery-3.7.1.min.js"></script>

@@ -1,1601 +1,254 @@
-<?php require_once __DIR__ . '/includes/handlers/fees-handler.php'; ?>
-<!-- meta tags and other links -->
+<?php
+require_once __DIR__ . '/includes/handlers/fees-handler.php';
+require_once __DIR__ . '/includes/campus-context.php';
+
+$csrf = academix_admin_csrf_token();
+$toasts = academix_admin_take_toasts();
+$campuses = academix_admin_get_campuses($schoolDb, $school, false);
+$activeCampuses = array_values(array_filter($campuses, static fn($campus) => (int)($campus['is_active'] ?? 1) === 1));
+$selectedCampusId = academix_admin_resolve_campus_id($schoolDb, $school, false);
+$returnTo = 'fees-type.php?campus_id=' . $selectedCampusId;
+$feeTypes = [];
+
+if ($schoolDb && $selectedCampusId > 0) {
+    try {
+        $stmt = $schoolDb->prepare("
+            SELECT ft.*, COUNT(fs.id) AS class_fee_count
+            FROM fee_types ft
+            LEFT JOIN fee_structures fs
+                ON fs.fee_category_id = ft.id
+                AND fs.school_id = ft.school_id
+                AND fs.campus_id = ft.campus_id
+            WHERE ft.school_id = ? AND ft.campus_id = ?
+            GROUP BY ft.id
+            ORDER BY ft.status = 'Active' DESC, ft.created_at DESC, ft.name ASC
+        ");
+        $stmt->execute([(int)$school['id'], $selectedCampusId]);
+        $feeTypes = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Throwable $e) {
+        error_log('Fee type page load failed: ' . $e->getMessage());
+        $toasts['error'] = 'Could not load fee types for this campus.';
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
-
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description"
-    content="Modern Education Admin Dashboard for schools, colleges, universities, and eLearning platforms. Includes student and course management, attendance, exams, payments, analytics, and a fully responsive clean UI—ideal for LMS, coaching centers, and academic admin systems.">
-  <meta name="keywords"
-    content="Education Admin Dashboard, School Admin Panel, College Dashboard, University Dashboard, LMS Dashboard, eLearning Admin Template, Student Management System, Course Management, Education Template, Study Dashboard, Online Learning Dashboard, Academic Admin Panel, Bootstrap Dashboard, React Education Dashboard, Next.js Education Template">
-  <meta name="robots" content="INDEX,FOLLOW">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Title -->
-  <title> <?php echo htmlspecialchars($school['name']); ?> | <?php echo defined('APP_NAME') ? APP_NAME : 'School Management'; ?></title>
-  <link rel="icon" type="image/png" href="https://academixsuite.com/tenant/assets/images/favicon.png" sizes="16x16">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/remixicon.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/bootstrap.min.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/apexcharts.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/dataTables.min.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/flatpickr.min.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/full-calendar.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/lib/calendar.css">
-    <link rel="stylesheet" href="https://academixsuite.com/tenant/assets/css/style.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo academix_admin_e($school['name']); ?> | Fee Types</title>
+    <link rel="icon" type="image/png" href="<?php echo academix_admin_e($schoolLogoUrl); ?>">
+    <link rel="stylesheet" href="<?php echo academix_admin_asset('css/remixicon.css'); ?>">
+    <link rel="stylesheet" href="<?php echo academix_admin_asset('css/lib/bootstrap.min.css'); ?>">
+    <link rel="stylesheet" href="<?php echo academix_admin_asset('css/lib/dataTables.min.css'); ?>">
+    <link rel="stylesheet" href="<?php echo academix_admin_asset('css/style.css'); ?>">
+    <style>
+        .finance-page-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            box-shadow: 0 16px 45px rgba(15, 23, 42, .07);
+        }
+        .fee-type-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 7px 12px;
+            background: #eefdf8;
+            color: #0f766e;
+            font-weight: 700;
+            font-size: 12px;
+        }
+        .campus-select-card {
+            background: linear-gradient(135deg, #f8fafc, #eefdf8);
+            border: 1px solid #dbe4ea;
+            border-radius: 18px;
+            padding: 18px;
+        }
+    </style>
 </head>
-
 <body>
-
-  <!-- Theme Customization Structure Start -->
-
-
-
-
-<!-- Theme Customization Structure End -->
-
-  <div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300">
-  </div>
-<aside class="sidebar">
-  <button type="button" class="sidebar-close-btn">
-    <iconify-icon icon="radix-icons:cross-2"></iconify-icon>
-  </button>
-  <div class="">
-    <div class="sidebar-logo d-flex align-items-center justify-content-between">
-      <a href="index.html" class="">
-        <img src="https://academixsuite.com/tenant/assets/images/logo.png" alt="site logo" class="light-logo">
-        <img src="https://academixsuite.com/tenant/assets/images/logo-light.png" alt="site logo" class="dark-logo">
-        <img src="https://academixsuite.com/tenant/assets/images/logo-icon.png" alt="site logo" class="logo-icon">
-      </a>
-      <button type="button" class="text-xxl d-xl-flex d-none line-height-1 sidebar-toggle text-neutral-500"
-        aria-label="Collapse Sidebar">
-        <i class="ri-contract-left-line"></i>
-      </button>
-    </div>
-  </div>
-  <!-- User Info start -->
-  <div class="mx-16 py-12">
-    <div class="dropdown profile-dropdown">
-      <button type="button"
-        class="profile-dropdown__button d-flex align-items-center justify-content-between p-10 w-100 overflow-hidden bg-neutral-50 radius-12 "
-        data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-        <span class="d-flex align-items-start gap-10">
-          <img src="https://academixsuite.com/tenant/assets/images/thumbs/leave-request-img2.png" alt="Thumbnail"
-            class="w-40-px h-40-px rounded-circle object-fit-cover flex-shrink-0">
-          <span class="profile-dropdown__contents">
-            <span class="h6 mb-0 text-md d-block text-primary-light">Jone Copper</span>
-            <span class="text-secondary-light text-sm mb-0 d-block">Admin</span>
-          </span>
-        </span>
-        <span class="profile-dropdown__icon pe-8 text-xl d-flex line-height-1">
-          <i class="ri-arrow-right-s-line"></i>
-        </span>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-        <li>
-          <a href="student-details.html" 
-            class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-            <i class="ri-user-3-line"></i>
-            My Profile
-          </a>
-        </li>
-        <li>
-          <a href="general.html"
-            class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-            <i class="ri-settings-3-line"></i>
-            Setting
-          </a>
-        </li>
-        <li>
-          <a href="login.html"
-            class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-            <i class="ri-shut-down-line"></i>
-            Log Out
-          </a>
-        </li>
-      </ul>
-    </div>
-  </div>
-  <!-- User Info end -->
-  <div class="sidebar-menu-area">
-    <ul class="sidebar-menu" id="sidebar-menu">
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-home-4-line"></i>
-          <span>Dashboard </span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="index.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              School
-            </a>
-          </li>
-          <li>
-            <a href="index-2.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Student
-            </a>
-          </li>
-          <li>
-            <a href="index-3.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Teacher
-            </a>
-          </li>
-          <li>
-            <a href="index-4.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Parent
-            </a>
-          </li>
-          <li>
-            <a href="index-5.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              LMS 
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-graduation-cap-line"></i>
-          <span>Students</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="add-new-student.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Add New Student
-            </a>
-          </li>
-          <li>
-            <a href="student-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Student List
-            </a>
-          </li>
-          <li>
-            <a href="suspended-student.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Suspend Student
-            </a>
-          </li>
-          <li>
-            <a href="student-category.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Student Categories
-            </a>
-          </li>
-          <li>
-            <a href="edit-student.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Edit Student
-            </a>
-          </li>
-          <li>
-            <a href="student-details.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Student Details
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-user-follow-line"></i>
-          <span>Teachers</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="add-new-teacher.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Add New Teacher
-            </a>
-          </li>
-          <li>
-            <a href="teacher-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Teacher List
-            </a>
-          </li>
-          <li>
-            <a href="edit-teacher.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Edit Teacher
-            </a>
-          </li>
-          <li>
-            <a href="teacher-details.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Teacher Details
-            </a>
-          </li>
-          <li>
-            <a href="teacher-timetable.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Teacher Timetable
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-account-circle-line"></i>
-          <span>Guardian</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="add-new-guardian.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Add New Guardians
-            </a>
-          </li>
-          <li>
-            <a href="guardian-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Guardians List
-            </a>
-          </li>
-          <li>
-            <a href="edit-guardian.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Edit Guardian
-            </a>
-          </li>
-          <li>
-            <a href="guardian-details.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Guardian Details
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-list-view"></i>
-          <span>Classes</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="section-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Section
-            </a>
-          </li>
-          <li>
-            <a href="subject-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Subjects
-            </a>
-          </li>
-          <li>
-            <a href="class-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Class List
-            </a>
-          </li>
-          <li>
-            <a href="class-room-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Class Room
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-file-edit-line"></i>
-          <span>Examinations</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="exam.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Exam
-            </a>
-          </li>
-          <li>
-            <a href="exam-schedule.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Exam Schedule
-            </a>
-          </li>
-          <li>
-            <a href="exam-result.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Exam Result
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-money-dollar-circle-line"></i>
-          <span>Fees Collection</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="fees-collect.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Fees Collect
-            </a>
-          </li>
-          <li>
-            <a href="fees-type.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Fees Type
-            </a>
-          </li>
-          <li>
-            <a href="fees-group.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Fees Group
-            </a>
-          </li>
-          <li>
-            <a href="fees-discount.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Fees Discount
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-calendar-check-line"></i>
-          <span>Attendance</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="student-attendance.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Student Attendance
-            </a>
-          </li>
-          <li>
-            <a href="teacher-attendance.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Teacher Attendance
-            </a>
-          </li>
-          <li>
-            <a href="employee-attendance.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Employee Attendance
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-time-line"></i>
-          <span>Leaves</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="leave-types.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Leave Types
-            </a>
-          </li>
-          <li>
-            <a href="leave-request.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Leave Request
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li>
-        <a href="certificate.html">
-          <i class="ri-home-4-line"></i>
-          <span>Certificate </span>
-        </a>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-book-2-line"></i>
-          <span>Library</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="books-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Books List
-            </a>
-          </li>
-          <li>
-            <a href="members-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Members List
-            </a>
-          </li>
-          <li>
-            <a href="member-details.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Members Details
-            </a>
-          </li>
-          <li>
-            <a href="issue-return.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Issue Return
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-money-dollar-circle-line"></i>
-          <span>Accounts</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="income-head.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Income Head
-            </a>
-          </li>
-          <li>
-            <a href="income-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Income List
-            </a>
-          </li>
-          <li>
-            <a href="expense-head.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Expense Head
-            </a>
-          </li>
-          <li>
-            <a href="expense-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Expense List
-            </a>
-          </li>
-          <li>
-            <a href="transaction.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Transaction
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-user-settings-line"></i>
-          <span>HRM</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="employee-list.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Employee List
-            </a>
-          </li>
-          <li>
-            <a href="employee-details.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Employee Details
-            </a>
-          </li>
-          <li>
-            <a href="add-new-employee.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Add New Employee
-            </a>
-          </li>
-          <li>
-            <a href="payroll.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Payroll
-            </a>
-          </li>
-          <li>
-            <a href="designation.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Designation
-            </a>
-          <li>
-            <a href="department.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Department
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li>
-        <a href="notice-board.html">
-          <i class="ri-booklet-line"></i>
-          <span>Notice Board </span>
-        </a>
-      </li>
-      <li>
-        <a href="event.html">
-          <i class="ri-calendar-event-line"></i>
-          <span>Event </span>
-        </a>
-      </li>
-      <li>
-        <a href="message.html">
-          <i class="ri-message-2-line"></i>
-          <span>Message </span>
-        </a>
-      </li>
-      <li>
-        <a href="subscription-plan.html">
-          <i class="ri-price-tag-3-line"></i>
-          <span>Subscription Plan </span>
-        </a>
-      </li>
-      <li>
-        <a href="role-access.html">
-          <i class="ri-macbook-line"></i>
-          <span>Role & Access</span>
-        </a>
-      </li>
-         <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-shield-check-line"></i>
-          <span>Authentication</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="login.html"><i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i> Login</a>
-          </li>
-          <li>
-            <a href="register.html"><i class="ri-circle-fill circle-icon text-warning-main w-auto"></i> Register</a>
-          </li>
-        </ul>
-      </li>
-      <li>
-        <a href="assign-role-plan.html">
-          <i class="ri-user-follow-line"></i>
-          <span>Assign Role</span>
-        </a>
-      </li>
-      <li class="dropdown">
-        <a href="javascript:void(0)">
-          <i class="ri-user-settings-line"></i>
-          <span>Settings</span>
-        </a>
-        <ul class="sidebar-submenu">
-          <li>
-            <a href="general.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              General
-            </a>
-          </li>
-          <li>
-            <a href="notification.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Notification
-            </a>
-          </li>
-          <li>
-            <a href="currencies.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Currencies
-            </a>
-          </li>
-          <li>
-            <a href="languages.html">
-              <i class="ri-circle-fill circle-icon w-auto"></i>
-              Languages
-            </a>
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </div>
-</aside>
+<div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
+<?php include_once __DIR__ . '/includes/sidebar.php'; ?>
 
 <main class="dashboard-main">
-    <div class="navbar-header shadow-1">
-  <div class="row align-items-center justify-content-between">
-    <div class="col-auto">
-      <div class="d-flex flex-wrap align-items-center gap-4">
-        <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
-          <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
-        </button>
-        <form class="navbar-search">
-          <input type="text" class="bg-transparent" name="search" placeholder="Search">
-          <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-        </form>
-      </div>
-    </div>
-    <div class="col-auto">
-      <div class="d-flex flex-wrap align-items-center gap-3">
-        <button type="button" data-theme-toggle
-          class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-        <div class="dropdown d-inline-block">
-          <button
-            class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center"
-            type="button" data-bs-toggle="dropdown" aria-label="Language Change Button">
-            <img src="https://academixsuite.com/tenant/assets/images/flags/flag1.png" alt="image" class="w-24 h-24 object-fit-cover rounded-circle">
-          </button>
-          <div class="dropdown-menu to-top dropdown-menu-sm">
-            <div
-              class="py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
-              <div>
-                <h6 class="text-lg text-primary-light fw-semibold mb-0">Choose Your Language</h6>
-              </div>
-            </div>
-
-            <div class="max-h-400-px overflow-y-auto scroll-sm pe-8">
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="english">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag1.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">English</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="english">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="japan">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag2.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Japan</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="japan">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="france">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag3.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">France</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="france">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="germany">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag4.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Germany</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="germany">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="korea">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag5.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">South Korea</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="korea">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="bangladesh">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag6.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Bangladesh</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="bangladesh">
-              </div>
-
-              <div class="form-check style-check d-flex align-items-center justify-content-between mb-16">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="india">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag7.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">India</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="india">
-              </div>
-              <div class="form-check style-check d-flex align-items-center justify-content-between">
-                <label class="form-check-label line-height-1 fw-medium text-secondary-light" for="canada">
-                  <span class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                    <img src="https://academixsuite.com/tenant/assets/images/flags/flag8.png" alt="Image"
-                      class="w-36-px h-36-px bg-success-subtle text-success-main rounded-circle flex-shrink-0">
-                    <span class="text-md fw-semibold mb-0">Canada</span>
-                  </span>
-                </label>
-                <input class="form-check-input" type="radio" name="crypto" id="canada">
-              </div>
-            </div>
-          </div>
-        </div><!-- Language dropdown end -->
-
-        <div class="dropdown">
-          <button
-            class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative"
-            type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
-            <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
-            <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
-          </button>
-          <div class="dropdown-menu to-top dropdown-menu-lg p-0">
-            <div
-              class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
-              <div>
-                <h6 class="text-lg text-primary-light fw-semibold mb-0">Notifications</h6>
-              </div>
-              <span
-                class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center">05</span>
-            </div>
-
-            <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    <iconify-icon icon="bitcoin-icons:verify-outline" class="icon text-xxl"></iconify-icon>
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Congratulations</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Your profile has been Verified. Your
-                      profile has been Verified</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    <img src="https://academixsuite.com/tenant/assets/images/notification/profile-1.png" alt="Image">
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Ronald Richards</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">You can stitch between artboards</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-info-subtle text-info-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    AM
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Arlene McCoy</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Invite you to prototyping</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between bg-neutral-50">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    <img src="https://academixsuite.com/tenant/assets/images/notification/profile-2.png" alt="Image">
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Robiul Hasan</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Invite you to prototyping</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-
-              <a href="javascript:void(0)"
-                class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between">
-                <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                  <span
-                    class="w-44-px h-44-px bg-info-subtle text-info-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                    DR
-                  </span>
-                  <div>
-                    <h6 class="text-md fw-semibold mb-4">Darlene Robertson</h6>
-                    <p class="mb-0 text-sm text-secondary-light text-w-200-px">Invite you to prototyping</p>
-                  </div>
-                </div>
-                <span class="text-sm text-secondary-light flex-shrink-0">23 Mins ago</span>
-              </a>
-            </div>
-
-            <div class="text-center py-12 px-16">
-              <a href="javascript:void(0)" class="text-primary-600 fw-semibold text-md hover-underline">See All Notification</a>
-            </div>
-
-          </div>
-        </div><!-- Notification dropdown end -->
-
-      </div>
-    </div>
-  </div>
-</div>
+    <?php require_once __DIR__ . '/includes/nav-header.php'; ?>
 
     <div class="dashboard-main-body">
-
-        <div class="breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-            <div class="">
-                <h1 class="fw-semibold mb-4 h6 text-primary-light">Fees Type</h1>
-                <div class="">
-                    <a href="index.html" class="text-secondary-light hover-text-primary hover-underline">Dashboard </a>
-                    <span class="text-secondary-light">/ Fees Type</span>
+        <?php foreach ($toasts as $toastType => $toastMessage): ?>
+            <?php if ($toastMessage !== ''): ?>
+                <div class="alert alert-<?php echo $toastType === 'error' ? 'danger' : academix_admin_e($toastType); ?> alert-dismissible fade show" role="alert">
+                    <?php echo academix_admin_e($toastMessage); ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
+            <?php endif; ?>
+        <?php endforeach; ?>
+
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
+            <div>
+                <h1 class="fw-bold mb-4 h4 text-primary-light">Fee Types</h1>
+                <p class="text-secondary-light mb-0">Create campus-specific fee names before assigning amounts to classes.</p>
             </div>
-            <button type="button" class="my-sidebar-btn btn btn-primary-600 d-flex align-items-center gap-6">
-                <span class="d-flex text-md">
-                    <i class="ri-add-large-line"></i>
-                </span>
-                Add Fees Type
-            </button>
+            <form method="get" class="campus-select-card d-flex align-items-center gap-2">
+                <label class="text-sm fw-semibold text-secondary-light mb-0">Campus</label>
+                <select name="campus_id" class="form-select radius-10" onchange="this.form.submit()">
+                    <?php foreach ($activeCampuses as $campus): ?>
+                        <option value="<?php echo (int)$campus['id']; ?>" <?php echo $selectedCampusId === (int)$campus['id'] ? 'selected' : ''; ?>>
+                            <?php echo academix_admin_e($campus['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </form>
         </div>
 
-        <div class="mt-24">
-            <div class="card h-100">
-                <div class="card-body p-0 dataTable-wrapper">
-
-                    <div
-                        class="d-flex align-items-center justify-content-between flex-wrap gap-16 px-20 py-12 border-bottom border-neutral-200">
-                        <div class="d-flex flex-wrap align-items-center gap-16">
-                            <div class="dropdown">
-                                <button type="button"
-                                    class="px-12 py-5-px border border-neutral-300 radius-8 d-flex align-items-center gap-20 "
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <span class="d-flex align-items-center gap-1 text-secondary-light text-sm">
-                                        <i class="ri-file-upload-line text-md line-height-1"></i>
-                                        Export
-                                    </span>
-                                    <span class="">
-                                        <i class="ri-arrow-down-s-line"></i>
-                                    </span>
-                                </button>
-                                <ul class="dropdown-menu p-12 border bg-base shadow">
-                                    <li>
-                                        <button type="button"
-                                            class="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-10"
-                                            data-bs-toggle="modal" data-bs-target="#exampleModalView">
-                                            <i class="ri-file-3-line"></i>
-                                            PDF
+        <div class="card finance-page-card">
+            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <h5 class="mb-0 text-primary-light"><?php echo academix_admin_e(academix_admin_campus_name($campuses, $selectedCampusId)); ?></h5>
+                    <span class="text-sm text-secondary-light"><?php echo count($feeTypes); ?> fee type<?php echo count($feeTypes) === 1 ? '' : 's'; ?> configured</span>
+                </div>
+                <span class="fee-type-pill"><i class="ri-price-tag-3-line"></i> Campus fee catalogue</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table bordered-table mb-0" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Class fee usage</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($feeTypes)): ?>
+                                <tr>
+                                    <td colspan="5" class="text-center py-40 text-secondary-light">
+                                        No fee types found for this campus.
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php foreach ($feeTypes as $feeType): ?>
+                                <tr>
+                                    <td>
+                                        <span class="fw-semibold text-primary-light"><?php echo academix_admin_e($feeType['name']); ?></span>
+                                        <span class="d-block text-xs text-secondary-light">Created <?php echo academix_admin_e(!empty($feeType['created_at']) ? date('M j, Y', strtotime((string)$feeType['created_at'])) : 'recently'); ?></span>
+                                    </td>
+                                    <td><?php echo academix_admin_e($feeType['description'] ?? ''); ?></td>
+                                    <td>
+                                        <span class="badge <?php echo ($feeType['status'] ?? 'Active') === 'Active' ? 'bg-success-100 text-success-600' : 'bg-danger-100 text-danger-600'; ?>">
+                                            <?php echo academix_admin_e($feeType['status'] ?? 'Active'); ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo (int)($feeType['class_fee_count'] ?? 0); ?> class setup<?php echo (int)($feeType['class_fee_count'] ?? 0) === 1 ? '' : 's'; ?></td>
+                                    <td class="text-end">
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-primary-600 edit-fee-type"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#feeTypeModal"
+                                            data-id="<?php echo (int)$feeType['id']; ?>"
+                                            data-name="<?php echo academix_admin_e($feeType['name']); ?>"
+                                            data-description="<?php echo academix_admin_e($feeType['description'] ?? ''); ?>"
+                                            data-status="<?php echo academix_admin_e($feeType['status'] ?? 'Active'); ?>">
+                                            Edit
                                         </button>
-                                    </li>
-                                    <li>
-                                        <button type="button"
-                                            class="dropdown-item px-16 py-8 rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-10"
-                                            data-bs-toggle="modal" data-bs-target="#exampleModalEdit">
-                                            <i class="ri-file-excel-line"></i>
-                                            Excel
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                            <form class="navbar-search dt-search m-0">
-                                <input type="text" class="dt-input bg-transparent radius-4" aria-controls="dataTable"
-                                    name="search" placeholder="Search...">
-                                <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-                            </form>
-                        </div>
-                        <div class="d-flex align-items-center gap-8 text-secondary-light">
-                            <span class="">
-                                Rows per page:
-                            </span>
-                            <div class="dt-length">
-                                <select name="dataTable_length" aria-controls="dataTable"
-                                    class="dt-input form-control form-select">
-                                    <option value="5">5</option>
-                                    <option value="10" selected>10</option>
-                                    <option value="25">25</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-0">
-                        <table class="table bordered-table mb-0 data-table" id="dataTable" data-page-length='10'>
-                            <thead>
-                                <tr>
-                                    <th scope="col">
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">
-                                                S.L
-                                            </label>
-                                        </div>
-                                    </th>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">
-                                                01
-                                            </label>
-                                        </div>
-                                    </td>
-                                    <td>May month fees</td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Active</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="edit-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-edit-2-line"></i>
-                                                        Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
+                                        <form method="post" class="d-inline" onsubmit="return confirm('Delete this fee type?');">
+                                            <input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrf); ?>">
+                                            <input type="hidden" name="action" value="delete_fees_type">
+                                            <input type="hidden" name="id" value="<?php echo (int)$feeType['id']; ?>">
+                                            <input type="hidden" name="campus_id" value="<?php echo (int)$selectedCampusId; ?>">
+                                            <input type="hidden" name="return_to" value="<?php echo academix_admin_e($returnTo); ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger-600">Delete</button>
+                                        </form>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">
-                                                02
-                                            </label>
-                                        </div>
-                                    </td>
-                                    <td>Admission fees</td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="edit-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-edit-2-line"></i>
-                                                        Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">03</label>
-                                        </div>
-                                    </td>
-                                    <td>Exam fees</td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Active</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="edit-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-edit-2-line"></i>
-                                                        Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">04</label>
-                                        </div>
-                                    </td>
-                                    <td>April month fees</td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li><a href="teacher-list.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-user-3-line"></i>View Teacher</a></li>
-                                                <li><a href="edit-student.html"
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-edit-2-line"></i>Edit</a></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-money-dollar-box-line"></i>Collect Fees</button>
-                                                </li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-error-warning-line"></i>Activate</button></li>
-                                                <li><button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"><i
-                                                            class="ri-delete-bin-6-line"></i>Delete</button></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">05</label>
-                                        </div>
-                                    </td>
-                                    <td>March month fees</td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Active</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="edit-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-edit-2-line"></i>
-                                                        Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">06</label>
-                                        </div>
-                                    </td>
-                                    <td>February month fees</td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="edit-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-edit-2-line"></i>
-                                                        Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">07</label>
-                                        </div>
-                                    </td>
-                                    <td>January month fees</td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Active</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="edit-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-edit-2-line"></i>
-                                                        Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">08</label>
-                                        </div>
-                                    </td>
-                                    <td>Admission fees</td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="edit-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-edit-2-line"></i>
-                                                        Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">09</label>
-                                        </div>
-                                    </td>
-                                    <td>Lumpsum fees</td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Active</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="edit-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-edit-2-line"></i>
-                                                        Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">10</label>
-                                        </div>
-                                    </td>
-                                    <td>December Month fees</td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="edit-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-edit-2-line"></i>
-                                                        Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">11</label>
-                                        </div>
-                                    </td>
-                                    <td>May month fees</td>
-                                    <td><span
-                                            class="bg-success-100 text-success-600 px-24 py-4 radius-4 fw-medium text-sm">Active</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="edit-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-edit-2-line"></i>
-                                                        Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>
-                                        <div class="form-check style-check d-flex align-items-center">
-                                            <input class="form-check-input" type="checkbox">
-                                            <label class="form-check-label">12</label>
-                                        </div>
-                                    </td>
-                                    <td>May month fees</td>
-                                    <td><span
-                                            class="bg-danger-100 text-danger-600 px-24 py-4 radius-4 fw-medium text-sm">Inactive</span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button type="button" class="text-primary-light text-xl"
-                                                data-bs-toggle="dropdown" data-bs-display="static"
-                                                aria-expanded="false">
-                                                <iconify-icon icon="tabler:dots-vertical"></iconify-icon>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-lg-end border p-12">
-                                                <li>
-                                                    <button type="button"
-                                                        class="edit-sidebar-btn dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6">
-                                                        <i class="ri-edit-2-line"></i>
-                                                        Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button
-                                                        class="dropdown-item rounded text-secondary-light bg-hover-neutral-200 text-hover-neutral-900 d-flex align-items-center gap-2 py-6"
-                                                        type="button" data-bs-toggle="modal"
-                                                        data-bs-target="#exampleModalDelete">
-                                                        <i class="ri-delete-bin-6-line"></i>
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
-
-    <footer class="d-footer">
-  <div class="">
-    <p class="mb-0 text-center"> &copy; <span class="current-year"></span> Made With ❤️ by Wowtheme7.</p>
-  </div>
-</footer>
 </main>
 
-<!-- Add sidebar start -->
-<div
-    class="my-sidebar bg-white position-fixed end-0 top-0 h-100vh overflow-y-auto z-99 max-w-700-px w-100 translate-x-full duration-300 active-translate-0">
-    <div class="px-20 py-12 border-bottom d-flex align-items-center justify-content-between gap-20">
-        <h5 class="text-lg mb-0">Add New Fees Type</h5>
-        <button type="button" class="close-my-sidebar text-danger-600 text-lg d-flex">
-            <i class="ri-close-large-line"></i>
-        </button>
-    </div>
-    <form method="POST" action="" class="d-flex flex-column p-20">
-        <input type="hidden" name="action" value="create_fees_type">
-        <div class="row g-3">
-            <div class="col-sm-12">
-                <div class="">
-                    <label for="sectionName" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Fees Name
-                    </label>
-                    <input type="text" class="form-control" id="sectionName" name="name" placeholder="Enter Fees Type name">
+<div class="modal fade" id="feeTypeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content radius-16">
+            <form method="post">
+                <input type="hidden" name="csrf_token" value="<?php echo academix_admin_e($csrf); ?>">
+                <input type="hidden" name="action" id="fee-type-action" value="create_fees_type">
+                <input type="hidden" name="id" id="fee-type-id" value="">
+                <input type="hidden" name="campus_id" value="<?php echo (int)$selectedCampusId; ?>">
+                <input type="hidden" name="return_to" value="<?php echo academix_admin_e($returnTo); ?>">
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <h5 class="modal-title text-primary-light" id="fee-type-title">Add Fee Type</h5>
+                        <p class="text-secondary-light text-sm mb-0">This fee type will belong to <?php echo academix_admin_e(academix_admin_campus_name($campuses, $selectedCampusId)); ?>.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="col-sm-12">
-                <div class="">
-                    <label for="sectionStatusTwo" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Status
-                    </label>
-                    <select id="sectionStatusTwo" name="status" class="form-control form-select">
-                        <option value="Select a subject" selected disabled>Select Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
+                <div class="modal-body">
+                    <div class="mb-16">
+                        <label class="form-label fw-semibold">Name</label>
+                        <input type="text" name="name" id="fee-type-name" class="form-control" required placeholder="e.g. Tuition, PTA levy, Uniform">
+                    </div>
+                    <div class="mb-16">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea name="description" id="fee-type-description" class="form-control" rows="3" placeholder="Optional internal note"></textarea>
+                    </div>
+                    <div>
+                        <label class="form-label fw-semibold">Status</label>
+                        <select name="status" id="fee-type-status" class="form-select">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="col-12">
-                <div class="d-flex align-items-center justify-content-center gap-3 mt-8">
-                    <button type="reset"
-                        class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8">
-                        Cancel
-                    </button>
-                    <button type="submit"
-                        class="btn btn-primary-600 border border-primary-600 text-md px-28 py-12 radius-8 max-w-156-px w-100">
-                        Save
-                    </button>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-neutral-200" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary-600">Save fee type</button>
                 </div>
-            </div>
-        </div>
-    </form>
-</div>
-<!-- Add sidebar end -->
-
-<!-- Edit sidebar start -->
-<div
-    class="edit-sidebar bg-white position-fixed end-0 top-0 h-100vh overflow-y-auto z-99 max-w-700-px w-100 translate-x-full duration-300 active-translate-0">
-    <div class="px-20 py-12 border-bottom d-flex align-items-center justify-content-between gap-20">
-        <h5 class="text-lg mb-0">Edit Fees Type</h5>
-        <button type="button" class="close-edit-sidebar text-danger-600 text-lg d-flex">
-            <i class="ri-close-large-line"></i>
-        </button>
-    </div>
-    <form method="POST" action="" class="d-flex flex-column p-20">
-        <input type="hidden" name="action" value="update_fees_type">
-        <input type="hidden" name="id" id="edit_id" value="">
-        <div class="row g-3">
-            <div class="col-sm-12">
-                <div class="">
-                    <label for="sectionNameTwo" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Fees Name
-                    </label>
-                    <input type="text" class="form-control" id="sectionNameTwo" name="name" placeholder="Enter Fees Type name">
-                </div>
-            </div>
-            <div class="col-sm-12">
-                <div class="">
-                    <label for="sectionStatus" class="text-sm fw-semibold text-primary-light d-inline-block mb-8">Status
-                    </label>
-                    <select id="sectionStatus" name="status" class="form-control form-select">
-                        <option value="Select a subject" selected disabled>Select Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-12">
-                <div class="d-flex align-items-center justify-content-center gap-3 mt-8">
-                    <button type="reset"
-                        class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8">
-                        Cancel
-                    </button>
-                    <button type="submit"
-                        class="btn btn-primary-600 border border-primary-600 text-md px-28 py-12 radius-8 max-w-156-px w-100">
-                        Save
-                    </button>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-<!-- Edit sidebar end -->
-
-<!-- Modal Delete Event start -->
-<div class="modal fade" id="exampleModalDelete" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog modal-dialog-centered max-w-340-px">
-        <div class="modal-content radius-16 bg-base">
-            <div class="modal-body pt-32 px-36 pb-24 text-center">
-                <span class="mb-16 fs-1 line-height-1 text-danger">
-                    <iconify-icon icon="fluent:delete-24-regular" class="menu-icon"></iconify-icon>
-                </span>
-                <h6 class="text-lg fw-semibold text-primary-light mb-0">Are your sure you want to Suspend this teacher
-                </h6>
-                <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                    <button type="reset"
-                        class="flex-grow-1 border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-24 py-11 radius-8" data-bs-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button type="button"
-                        class="flex-grow-1 btn btn-primary-600 border border-primary-600 text-md px-16 py-12 radius-8">
-                        Yes, Suspend
-                    </button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
-<!-- Modal Delete Event end -->
 
-  <!-- jQuery library js -->
-  <script src="assets/js/lib/jquery-3.7.1.min.js"></script>
-  <!-- Bootstrap js -->
-  <script src="assets/js/lib/bootstrap.bundle.min.js"></script>
-  <!-- Apex Chart js -->
-  <script src="assets/js/lib/apexcharts.min.js"></script>
-  <!-- Iconify Font js -->
-  <script src="assets/js/lib/iconify-icon.min.js"></script>
-  <!-- Data Table js -->
-  <script src="assets/js/lib/dataTables.min.js"></script>
-  
-  <!-- jQuery UI js -->
-  <script src="assets/js/lib/jquery-ui.min.js"></script>
-  
-  <!-- main js -->
-  <script src="assets/js/app.js"></script>
-
+<script src="<?php echo academix_admin_asset('js/lib/jquery-3.7.1.min.js'); ?>"></script>
+<script src="<?php echo academix_admin_asset('js/lib/bootstrap.bundle.min.js'); ?>"></script>
+<script src="<?php echo academix_admin_asset('js/lib/iconify-icon.min.js'); ?>"></script>
+<script src="<?php echo academix_admin_asset('js/lib/dataTables.min.js'); ?>"></script>
+<script src="<?php echo academix_admin_asset('js/app.js'); ?>"></script>
 <script>
-    let table = new DataTable('#dataTable');
-
-    // ✅ Data Table start
-    $('.data-table').each(function () {
-        const $table = $(this);
-        const tableInstance = new DataTable(this);
-
-        // Handle search input (inside same wrapper)
-        $table.closest('.dataTable-wrapper').find('.dt-search .dt-input').on('keyup', function () {
-            tableInstance.search(this.value).draw();
-        });
-
-        // Handle page length change (inside same wrapper)
-        $table.closest('.dataTable-wrapper').find('.dt-length .dt-input').on('change', function () {
-            const value = $(this).val();
-            tableInstance.page.len(value).draw();
-        });
-    });
-    // ✅ Data Table end
-
-    // Sidebar js start
-    $('.my-sidebar-btn').on('click', function () {
-        $('.my-sidebar').addClass('active');
-        $('.overlay').addClass('active');
-    });
-    $('.close-my-sidebar, .overlay').on('click', function () {
-        $('.my-sidebar').removeClass('active');
-        $('.overlay').removeClass('active');
+$(function () {
+    const hasEmptyState = $('#dataTable tbody td[colspan]').length > 0;
+    const table = hasEmptyState ? null : $('#dataTable').DataTable({ pageLength: 10, dom: 'lrtip' });
+    $('#tableSearch').on('keyup', function () {
+        if (table) {
+            table.search(this.value).draw();
+        }
     });
 
-    $('.edit-sidebar-btn').on('click', function () {
-        $('.edit-sidebar').addClass('active');
-        $('.overlay').addClass('active');
+    $('#feeTypeModal').on('hidden.bs.modal', function () {
+        $('#fee-type-title').text('Add Fee Type');
+        $('#fee-type-action').val('create_fees_type');
+        $('#fee-type-id').val('');
+        $('#fee-type-name').val('');
+        $('#fee-type-description').val('');
+        $('#fee-type-status').val('Active');
     });
-    $('.close-edit-sidebar, .overlay').on('click', function () {
-        $('.edit-sidebar').removeClass('active');
-        $('.overlay').removeClass('active');
-    });
-    // Sidebar js end
 
+    $('.edit-fee-type').on('click', function () {
+        $('#fee-type-title').text('Edit Fee Type');
+        $('#fee-type-action').val('update_fees_type');
+        $('#fee-type-id').val($(this).data('id'));
+        $('#fee-type-name').val($(this).data('name'));
+        $('#fee-type-description').val($(this).data('description'));
+        $('#fee-type-status').val($(this).data('status'));
+    });
+});
 </script>
-
 </body>
-
 </html>

@@ -9,7 +9,7 @@
  *   - Drafting parent emails (preview card, then send via SchoolEmailSender)
  *
  * Generative tasks (lesson plans, assignment questions, exam papers,
- * student remarks) are handled directly by Groq in its reply —
+ * student remarks) are handled directly by DeepSeek in its reply —
  * no tool call needed, just great system-prompt guidance.
  *
  * POST body:
@@ -107,7 +107,7 @@ try {
     error_log('ai_teacher: school DB unavailable – ' . $e->getMessage());
 }
 
-require_once __DIR__ . '/../../../includes/GroqClient.php';
+require_once __DIR__ . '/../../../includes/DeepSeekClient.php';
 require_once __DIR__ . '/../../../includes/Services/SchoolEmailSender.php';
 
 // ── Direct (non-AI) actions ───────────────────────────────────────────────────
@@ -507,17 +507,17 @@ $toolExecutor = function (string $toolName, array $args)
     }
 };
 
-// ── Run Groq ──────────────────────────────────────────────────────────────────
-$apiKey = $_ENV['GROQ_API_KEY'] ?? getenv('GROQ_API_KEY') ?? '';
-$model  = $_ENV['GROQ_MODEL']   ?? getenv('GROQ_MODEL')   ?? 'llama-3.3-70b-versatile';
+// ── Run DeepSeek ───────────────────────────────────────────────────────────────
+$apiKey = $_ENV['DEEPSEEK_API_KEY'] ?? getenv('DEEPSEEK_API_KEY') ?? '';
+$model  = $_ENV['DEEPSEEK_MODEL']   ?? getenv('DEEPSEEK_MODEL')   ?? 'deepseek-v4-flash';
 
-if (empty($apiKey) || $apiKey === 'gsk-your-key-here') {
-    echo json_encode(['success'=>false,'message'=>'Groq API key not configured in .env.']); exit;
+if (empty($apiKey) || $apiKey === 'sk-your-key-here') {
+    echo json_encode(['success'=>false,'message'=>'DeepSeek API key not configured in .env.']); exit;
 }
 
 try {
-    $groq = new GroqClient($apiKey, $model);
-    $result = $groq->run($messages, $tools, $toolExecutor);
+    $deepseek = new DeepSeekClient($apiKey, $model);
+    $result = $deepseek->run($messages, $tools, $toolExecutor);
 
     echo json_encode([
         'success'         => true,

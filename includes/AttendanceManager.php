@@ -18,6 +18,7 @@ class AttendanceManager {
     private $userType;
     private $schoolData;
     private $mailConfig;
+    private $attendanceTableReady = false;
 
     /**
      * Constructor
@@ -34,7 +35,47 @@ class AttendanceManager {
         $this->userType = $userType;
         $this->schoolData = $schoolData;
         $this->loadMailConfig();
+        $this->ensureAttendanceTable();
         error_log("AttendanceManager initialized for school ID: " . $schoolId);
+    }
+
+    /**
+     * Ensure older tenant databases have the attendance table used by this manager.
+     */
+    private function ensureAttendanceTable() {
+        if ($this->attendanceTableReady) {
+            return true;
+        }
+
+        try {
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS `attendance` (
+                    `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+                    `school_id` int(10) UNSIGNED NOT NULL,
+                    `student_id` int(10) UNSIGNED NOT NULL,
+                    `class_id` int(10) UNSIGNED NOT NULL,
+                    `date` date NOT NULL,
+                    `status` enum('present','absent','late','half_day','holiday','sunday') NOT NULL DEFAULT 'present',
+                    `remark` varchar(255) DEFAULT NULL,
+                    `marked_by` int(10) UNSIGNED DEFAULT NULL,
+                    `session` enum('morning','afternoon','full_day') DEFAULT 'full_day',
+                    `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+                    PRIMARY KEY (`id`),
+                    UNIQUE KEY `unique_attendance` (`student_id`,`date`,`session`),
+                    KEY `marked_by` (`marked_by`),
+                    KEY `idx_school` (`school_id`),
+                    KEY `idx_student` (`student_id`),
+                    KEY `idx_date` (`date`),
+                    KEY `idx_class` (`class_id`),
+                    KEY `idx_attendance_student_date` (`student_id`,`date`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
+            $this->attendanceTableReady = true;
+            return true;
+        } catch (Throwable $e) {
+            error_log("Failed to ensure attendance table: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -53,7 +94,7 @@ class AttendanceManager {
             }
             $this->mailConfig = $config;
             error_log("Mail configuration loaded for school ID: " . $this->schoolId);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Failed to load mail config: " . $e->getMessage());
             $this->mailConfig = [];
         }
@@ -153,7 +194,7 @@ class AttendanceManager {
             error_log("Fetched " . count($results) . " students for class ID: " . $classId . " on date: " . $date);
             return $results;
             
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Error in getStudentsWithAttendance: " . $e->getMessage());
             return [];
         }
@@ -292,7 +333,7 @@ class AttendanceManager {
                 'total' => count($attendanceData)
             ];
             
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             if ($this->db && $this->db->inTransaction()) {
                 $this->db->rollBack();
             }
@@ -418,7 +459,7 @@ class AttendanceManager {
                 'message' => "$sent notifications sent ($emailSent emails, $whatsappSent WhatsApp)"
             ];
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Error sending attendance notifications: " . $e->getMessage());
             return ['success' => false, 'sent' => 0, 'email_sent' => 0, 'whatsapp_sent' => 0, 'error' => $e->getMessage()];
         }
@@ -442,7 +483,7 @@ class AttendanceManager {
             $result = $stmt->execute([$this->schoolId, $userId, $type, $title, $message]);
             error_log("Notification created for user $userId: $title");
             return $result;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Failed to create notification for user $userId: " . $e->getMessage());
             return false;
         }
@@ -540,7 +581,7 @@ class AttendanceManager {
             $mail->send();
             error_log("Email sent to $to");
             return true;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Email could not be sent to $to. Error: {$mail->ErrorInfo}");
             return false;
         }
@@ -630,7 +671,7 @@ class AttendanceManager {
                 ]
             ];
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Error in getAttendanceSummary: " . $e->getMessage());
             return [
                 'daily' => [],
@@ -702,7 +743,7 @@ class AttendanceManager {
                 'statistics' => $stats
             ];
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Error in getStudentAttendanceReport: " . $e->getMessage());
             return [
                 'attendance' => [],
@@ -798,7 +839,7 @@ class AttendanceManager {
                 ]
             ];
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Error in getClassAttendanceReport: " . $e->getMessage());
             return [
                 'daily' => [],
@@ -851,7 +892,7 @@ class AttendanceManager {
             error_log("Attendance check for class $classId, section $sectionId: " . ($count > 0 ? "already marked" : "not marked"));
             return $count > 0;
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Error in isAttendanceMarked: " . $e->getMessage());
             return false;
         }
@@ -899,7 +940,7 @@ class AttendanceManager {
             error_log("Attendance status counts fetched for range $startDate to $endDate: " . json_encode($counts));
             return $counts;
 
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             error_log("Error in getAttendanceStatusCounts: " . $e->getMessage());
             return [];
         }

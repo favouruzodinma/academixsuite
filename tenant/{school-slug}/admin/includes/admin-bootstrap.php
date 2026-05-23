@@ -139,6 +139,44 @@ if (!function_exists('academix_admin_validate_csrf')) {
     }
 }
 
+if (!function_exists('setToast')) {
+    function setToast(string $type, string $message): void {
+        $type = in_array($type, ['success', 'error', 'warning', 'info'], true) ? $type : 'info';
+        $_SESSION['toast_' . $type] = $message;
+    }
+}
+
+if (!function_exists('academix_admin_take_toasts')) {
+    function academix_admin_take_toasts(): array {
+        $toasts = [
+            'success' => $_SESSION['toast_success'] ?? '',
+            'error' => $_SESSION['toast_error'] ?? '',
+            'warning' => $_SESSION['toast_warning'] ?? '',
+            'info' => $_SESSION['toast_info'] ?? '',
+        ];
+        unset($_SESSION['toast_success'], $_SESSION['toast_error'], $_SESSION['toast_warning'], $_SESSION['toast_info']);
+        return $toasts;
+    }
+}
+
+if (!function_exists('academix_admin_safe_redirect_target')) {
+    function academix_admin_safe_redirect_target(?string $target = null, ?string $fallback = null): string {
+        $fallback = $fallback ?: ($_SERVER['PHP_SELF'] ?? 'index.php');
+        $target = trim((string) $target);
+
+        if ($target === '' || preg_match('/[\r\n]/', $target) || substr($target, 0, 2) === '//') {
+            return $fallback;
+        }
+
+        $parts = parse_url($target);
+        if (!is_array($parts) || isset($parts['scheme']) || isset($parts['host'])) {
+            return $fallback;
+        }
+
+        return $target;
+    }
+}
+
 $schoolSlug = academix_admin_current_slug();
 $userType = $GLOBALS['USER_TYPE'] ?? 'admin';
 $currentPage = $GLOBALS['CURRENT_PAGE'] ?? basename($_SERVER['SCRIPT_NAME'] ?? 'index.php');
@@ -224,6 +262,55 @@ if ($schoolDb && academix_admin_table_exists($schoolDb, 'users')) {
 $schoolLogoUrl = function_exists('school_logo_url') ? school_logo_url($school, false) : academix_admin_asset('images/logo.png');
 $schoolLogoAbsoluteUrl = function_exists('school_logo_url') ? school_logo_url($school, true) : academix_admin_asset('images/logo.png');
 $csrfToken = academix_admin_csrf_token();
+
+// ── Shared helper: timeAgo ───────────────────────────────────────────────────
+if (!function_exists('timeAgo')) {
+    function timeAgo($datetime) {
+        $now = new DateTime;
+        $ago = new DateTime($datetime);
+        $diff = $now->diff($ago);
+        if ($diff->y > 0) return $diff->y . ' year' . ($diff->y > 1 ? 's' : '') . ' ago';
+        if ($diff->m > 0) return $diff->m . ' month' . ($diff->m > 1 ? 's' : '') . ' ago';
+        if ($diff->d > 0) return $diff->d . ' day' . ($diff->d > 1 ? 's' : '') . ' ago';
+        if ($diff->h > 0) return $diff->h . ' hour' . ($diff->h > 1 ? 's' : '') . ' ago';
+        if ($diff->i > 0) return $diff->i . ' minute' . ($diff->i > 1 ? 's' : '') . ' ago';
+        return 'just now';
+    }
+}
+
+// ── Load notifications for all pages ─────────────────────────────────────────
+// Admin pages need a school-wide feed, while non-admin users keep user-scoped
+// notifications through NotificationManager.
+if ($schoolDb && (empty($notifications) || !isset($notificationCount))) {
+    try {
+        $isAdminFeed = in_array(strtolower((string) $userType), ['admin', 'administrator', 'school_admin', 'super_admin'], true);
+        if ($isAdminFeed && academix_admin_table_exists($schoolDb, 'notifications')) {
+            $countStmt = $schoolDb->prepare('SELECT COUNT(*) FROM notifications WHERE school_id = ? AND is_read = 0');
+            $countStmt->execute([(int) $school['id']]);
+            $notificationCount = (int) $countStmt->fetchColumn();
+
+            $stmt = $schoolDb->prepare('SELECT * FROM notifications WHERE school_id = ? ORDER BY created_at DESC LIMIT 5');
+            $stmt->execute([(int) $school['id']]);
+            $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($notifications as &$notification) {
+                $notification['icon'] = $notification['icon'] ?? 'notification-line';
+            }
+            unset($notification);
+        } else {
+            $nmPath = ROOT_PATH . '/includes/NotificationManager.php';
+            if (file_exists($nmPath)) {
+                require_once $nmPath;
+                if (class_exists('NotificationManager')) {
+                    $notificationManager = new NotificationManager($schoolDb, (int)$school['id'], $userId, $userType, $school);
+                    $notificationCount = $notificationManager->getUnreadCount();
+                    $notifications = $notificationManager->getNotifications(5, false);
+                }
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('Admin bootstrap notification error: ' . $e->getMessage());
+    }
+}
 $notifications = is_array($notifications ?? null) ? $notifications : [];
-$unreadCount = (int) ($unreadCount ?? 0);
+$unreadCount = (int) ($unreadCount ?? ($notificationCount ?? 0));
 $notificationCount = (int) ($notificationCount ?? $unreadCount);

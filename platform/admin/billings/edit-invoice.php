@@ -279,8 +279,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     notes = ?,
                     payment_method = ?,
                     transaction_id = ?,
-                    payment_gateway_id = ?,
-                    updated_at = NOW()
+                    payment_gateway_id = ?
                 WHERE id = ?
             ";
             

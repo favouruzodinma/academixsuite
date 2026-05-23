@@ -289,7 +289,17 @@ if ($schoolDb) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_attendance']) && $schoolDb) {
 
     // Validate CSRF token
-    if (!isset($_POST['csrf_token']) || !academix_admin_validate_csrf($_POST['csrf_token'])) {
+    $submittedToken = $_POST['csrf_token'] ?? '';
+    $isValidToken = false;
+    if ($submittedToken !== '') {
+        if (function_exists('academix_admin_validate_csrf')) {
+            $isValidToken = academix_admin_validate_csrf($submittedToken);
+        } else {
+            $isValidToken = validateCsrfToken($submittedToken);
+        }
+    }
+
+    if (!$isValidToken) {
         $_SESSION['attendance_error'] = "Invalid security token. Please try again.";
         error_log("CSRF validation failed for attendance submission");
     } else {
@@ -348,10 +358,7 @@ unset($_SESSION['attendance_success'], $_SESSION['attendance_error']);
 if (function_exists('academix_admin_csrf_token')) {
     $csrfToken = academix_admin_csrf_token();
 } else {
-    if (empty($_SESSION['admin_csrf_token'])) {
-        $_SESSION['admin_csrf_token'] = bin2hex(random_bytes(32));
-    }
-    $csrfToken = $_SESSION['admin_csrf_token'];
+    $csrfToken = generateCsrfToken();
 }
 
 // Get unread notification count
@@ -568,80 +575,7 @@ error_log("=== ATTENDANCE PAGE END ===");
     <?php include_once('includes/sidebar.php') ?>
 
     <main class="dashboard-main">
-        <div class="navbar-header shadow-1">
-            <div class="row align-items-center justify-content-between">
-                <div class="col-auto">
-                    <div class="d-flex flex-wrap align-items-center gap-4">
-                        <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
-                            <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
-                        </button>
-                        <form class="navbar-search" method="GET" action="">
-                            <input type="text" class="bg-transparent" name="search" placeholder="Search students...">
-                            <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-                        </form>
-                    </div>
-                </div>
-                <div class="col-auto">
-                    <div class="d-flex flex-wrap align-items-center gap-3">
-                        <button type="button" data-theme-toggle
-                            class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-
-                        <div class="dropdown">
-                            <button
-                                class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative"
-                                type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
-                                <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
-                                <?php if ($unreadCount > 0): ?>
-                                <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
-                                <?php endif; ?>
-                            </button>
-                            <div class="dropdown-menu to-top dropdown-menu-lg p-0">
-                                <div
-                                    class="m-16 py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
-                                    <div>
-                                        <h6 class="text-lg text-primary-light fw-semibold mb-0">Notifications</h6>
-                                    </div>
-                                    <?php if ($unreadCount > 0): ?>
-                                    <span
-                                        class="text-primary-600 fw-semibold text-lg w-40-px h-40-px rounded-circle bg-base d-flex justify-content-center align-items-center"><?php echo str_pad($unreadCount, 2, '0', STR_PAD_LEFT); ?></span>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="max-h-400-px overflow-y-auto scroll-sm pe-4">
-                                    <?php if (empty($notifications)): ?>
-                                    <div class="px-24 py-12 text-center text-secondary-light">
-                                        <i class="ri-inbox-line fs-2 d-block mb-2"></i>
-                                        <p class="mb-0">No notifications</p>
-                                    </div>
-                                    <?php else: ?>
-                                        <?php foreach ($notifications as $notification): ?>
-                                        <a href="javascript:void(0)"
-                                            class="px-24 py-12 d-flex align-items-start gap-3 mb-2 justify-content-between <?php echo !$notification['is_read'] ? 'bg-neutral-50' : ''; ?>">
-                                            <div class="text-black hover-bg-transparent hover-text-primary d-flex align-items-center gap-3">
-                                                <span
-                                                    class="w-44-px h-44-px bg-success-subtle text-success-main rounded-circle d-flex justify-content-center align-items-center flex-shrink-0">
-                                                    <iconify-icon icon="bitcoin-icons:verify-outline" class="icon text-xxl"></iconify-icon>
-                                                </span>
-                                                <div>
-                                                    <h6 class="text-md fw-semibold mb-4"><?php echo htmlspecialchars($notification['title']); ?></h6>
-                                                    <p class="mb-0 text-sm text-secondary-light text-w-200-px"><?php echo htmlspecialchars($notification['message']); ?></p>
-                                                </div>
-                                            </div>
-                                            <span class="text-sm text-secondary-light flex-shrink-0"><?php echo $attendanceManager->timeAgo($notification['created_at']); ?></span>
-                                        </a>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="text-center py-12 px-16">
-                                    <a href="notifications.php" class="text-primary-600 fw-semibold text-md hover-underline">See All Notifications</a>
-                                </div>
-                            </div>
-                        </div><!-- Notification dropdown end -->
-                    </div>
-                </div>
-            </div>
-        </div>
+        <?php require_once __DIR__ . '/includes/nav-header.php'; ?>
 
         <div class="dashboard-main-body">
 
@@ -801,11 +735,11 @@ error_log("=== ATTENDANCE PAGE END ===");
                                             </li>
                                         </ul>
                                     </div>
-                                    <form class="navbar-search dt-search m-0">
+                                    <div class="navbar-search dt-search m-0">
                                         <input type="text" class="dt-input bg-transparent radius-4" aria-controls="dataTable"
                                             name="search" placeholder="Search...">
                                         <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-                                    </form>
+                                    </div>
                                 </div>
                                 <div class="d-flex align-items-center gap-8 text-secondary-light">
                                     <span class="">Rows per page:</span>
@@ -952,11 +886,7 @@ error_log("=== ATTENDANCE PAGE END ===");
             <?php endif; ?>
         </div>
 
-        <footer class="d-footer">
-            <div class="">
-                <p class="mb-0 text-center"> &copy; <span class="current-year"></span> <?php echo htmlspecialchars($school['name']); ?> | Made With ❤️ by AcademixSuite.</p>
-            </div>
-        </footer>
+        <?php require_once __DIR__ . '/includes/footer.php'; ?>
     </main>
 
     <!-- jQuery library js -->

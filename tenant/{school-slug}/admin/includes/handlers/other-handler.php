@@ -3,11 +3,15 @@
  * Handler for remaining admin pages
  */
 require_once __DIR__ . '/../admin-bootstrap.php';
+require_once __DIR__ . '/../campus-context.php';
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $schoolDb) {
     $action = $_POST['action'] ?? '';
     if (!academix_admin_validate_csrf($_POST['csrf_token'] ?? null)) {
-        throw new Exception('Security validation failed. Please refresh and try again.');
+        setToast('error', 'Security validation failed. Please refresh and try again.');
+        $redirectTo = academix_admin_safe_redirect_target($_POST['return_to'] ?? null);
+        header('Location: ' . $redirectTo);
+        exit;
     }
     try {
         switch ($action) {
@@ -109,8 +113,21 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $schoolDb) {
                 break;
             case 'create_transaction':
                 if (empty($_POST['type']) || empty($_POST['amount'])) throw new Exception('Type and amount required');
-                $stmt = $schoolDb->prepare("INSERT INTO transactions (school_id, type, amount, description, category, payment_method, reference, date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-                $stmt->execute([$school['id'], $_POST['type'], $_POST['amount'], $_POST['description'] ?? '', $_POST['category'] ?? '', $_POST['payment_method'] ?? 'cash', $_POST['reference'] ?? 'TXN-' . time(), $_POST['date'] ?? date('Y-m-d')]);
+                academix_admin_ensure_transactions_table($schoolDb);
+                $campusId = academix_admin_resolve_campus_id($schoolDb, $school, false);
+                $type = strtolower((string) $_POST['type']);
+                $type = in_array($type, ['income', 'expense'], true) ? $type : 'income';
+                $reference = trim((string) ($_POST['reference'] ?? ''));
+                $reference = $reference !== '' ? $reference : 'TXN-' . date('YmdHis');
+                $columns = academix_admin_fresh_columns($schoolDb, 'transactions');
+
+                if (in_array('campus_id', $columns, true)) {
+                    $stmt = $schoolDb->prepare("INSERT INTO transactions (school_id, campus_id, type, amount, description, category, payment_method, reference, date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+                    $stmt->execute([$school['id'], $campusId, $type, $_POST['amount'], $_POST['description'] ?? '', $_POST['category'] ?? '', $_POST['payment_method'] ?? 'cash', $reference, $_POST['date'] ?? date('Y-m-d')]);
+                } else {
+                    $stmt = $schoolDb->prepare("INSERT INTO transactions (school_id, type, amount, description, category, payment_method, reference, date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+                    $stmt->execute([$school['id'], $type, $_POST['amount'], $_POST['description'] ?? '', $_POST['category'] ?? '', $_POST['payment_method'] ?? 'cash', $reference, $_POST['date'] ?? date('Y-m-d')]);
+                }
                 setToast('success', 'Transaction recorded');
                 break;
             case 'delete_transaction':
@@ -142,6 +159,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $schoolDb) {
         error_log("Other handler error: " . $e->getMessage());
         setToast('error', $e->getMessage());
     }
-    header('Location: ' . ($_SERVER['PHP_SELF'] ?? ''));
+    $redirectTo = academix_admin_safe_redirect_target($_POST['return_to'] ?? null);
+    header('Location: ' . $redirectTo);
     exit;
 }

@@ -379,6 +379,10 @@ class Tenant
             self::getExamGradesTableSql(),
             self::getFeeCategoriesTableSql(),
             self::getFeeStructuresTableSql(),
+            self::getFeeTypesTableSql(),
+            self::getFeeGroupsTableSql(),
+            self::getFeeDiscountsTableSql(),
+            self::getFeePaymentsTableSql(),
             self::getGuardiansTableSql(),
             self::getHomeworkTableSql(),
             self::getInvoicesTableSql(),
@@ -908,6 +912,86 @@ class Tenant
             KEY `idx_campus` (`campus_id`),
             KEY `idx_year` (`academic_year_id`),
             CONSTRAINT `fk_fee_structures_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getFeeTypesTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `fee_types` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(100) NOT NULL,
+            `description` text DEFAULT NULL,
+            `status` enum('Active','Inactive') DEFAULT 'Active',
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_fee_types_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getFeeGroupsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `fee_groups` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(100) NOT NULL,
+            `description` text DEFAULT NULL,
+            `status` enum('Active','Inactive') DEFAULT 'Active',
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_fee_groups_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getFeeDiscountsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `fee_discounts` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `name` varchar(100) NOT NULL,
+            `amount` decimal(10,2) NOT NULL,
+            `type` enum('fixed','percentage') DEFAULT 'fixed',
+            `status` enum('Active','Inactive') DEFAULT 'Active',
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            CONSTRAINT `fk_fee_discounts_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    }
+
+    private static function getFeePaymentsTableSql()
+    {
+        return "CREATE TABLE IF NOT EXISTS `fee_payments` (
+            `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+            `school_id` int(10) UNSIGNED NOT NULL,
+            `campus_id` int(10) UNSIGNED NOT NULL,
+            `student_id` int(10) UNSIGNED NOT NULL,
+            `fee_type_id` int(10) UNSIGNED DEFAULT NULL,
+            `invoice_id` int(10) UNSIGNED DEFAULT NULL,
+            `amount` decimal(10,2) NOT NULL,
+            `discount_id` int(10) UNSIGNED DEFAULT NULL,
+            `discount_amount` decimal(10,2) DEFAULT 0.00,
+            `payment_method` varchar(50) DEFAULT 'cash',
+            `reference` varchar(255) DEFAULT NULL,
+            `notes` text DEFAULT NULL,
+            `paid_at` timestamp NULL DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`id`),
+            KEY `idx_school` (`school_id`),
+            KEY `idx_campus` (`campus_id`),
+            KEY `idx_student` (`student_id`),
+            KEY `idx_fee_type` (`fee_type_id`),
+            KEY `idx_invoice` (`invoice_id`),
+            KEY `idx_discount` (`discount_id`),
+            CONSTRAINT `fk_fee_payments_campus` FOREIGN KEY (`campus_id`) REFERENCES `campuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     }
 

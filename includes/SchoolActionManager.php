@@ -507,10 +507,41 @@ class SchoolActionManager {
     public function createClass($data) {
         try {
             if (!$this->schoolDb) throw new Exception("School database not connected");
+            $className = trim((string)($data['name'] ?? ''));
+            if ($className === '') {
+                throw new Exception("Class name is required");
+            }
+
+            $duplicateName = $this->schoolDb->prepare("
+                SELECT id FROM classes
+                WHERE school_id = ?
+                  AND academic_year_id = ?
+                  AND LOWER(TRIM(name)) = LOWER(TRIM(?))
+                LIMIT 1
+            ");
+            $duplicateName->execute([$this->schoolId, $data['academic_year_id'], $className]);
+            $existingClassId = $duplicateName->fetchColumn();
+            if ($existingClassId) {
+                return [
+                    'success' => true,
+                    'duplicate' => true,
+                    'message' => 'This class already exists, so no duplicate was created.',
+                    'id' => (int)$existingClassId,
+                ];
+            }
+
             // Check duplicate code
             $check = $this->schoolDb->prepare("SELECT id FROM classes WHERE school_id = ? AND code = ? AND academic_year_id = ?");
             $check->execute([$this->schoolId, $data['code'], $data['academic_year_id']]);
-            if ($check->fetch()) throw new Exception("Class code already exists for this academic year");
+            $existingCodeId = $check->fetchColumn();
+            if ($existingCodeId) {
+                return [
+                    'success' => true,
+                    'duplicate' => true,
+                    'message' => 'This class code already exists for the academic year, so no duplicate was created.',
+                    'id' => (int)$existingCodeId,
+                ];
+            }
 
             $hasCampus = $this->hasColumn('classes', 'campus_id');
             $stmt = $this->schoolDb->prepare("
@@ -776,19 +807,47 @@ class SchoolActionManager {
         try {
             if (!$this->schoolDb) throw new Exception("School database not connected");
             $this->ensureSubjectTables();
+            $subjectName = trim((string)($data['name'] ?? ''));
+            if ($subjectName === '') {
+                throw new Exception("Subject name is required");
+            }
+
+            $nameCheck = $this->schoolDb->prepare("
+                SELECT id FROM subjects
+                WHERE school_id = ?
+                  AND LOWER(TRIM(name)) = LOWER(TRIM(?))
+                LIMIT 1
+            ");
+            $nameCheck->execute([$this->schoolId, $subjectName]);
+            $existingSubjectId = $nameCheck->fetchColumn();
+            if ($existingSubjectId) {
+                return [
+                    'success' => true,
+                    'duplicate' => true,
+                    'message' => 'This subject already exists, so no duplicate was created.',
+                    'id' => (int)$existingSubjectId,
+                ];
+            }
+
             $code = trim((string)($data['code'] ?? ''));
             if ($code !== '') {
                 $check = $this->schoolDb->prepare("SELECT id FROM subjects WHERE school_id = ? AND code = ? LIMIT 1");
                 $check->execute([$this->schoolId, $code]);
-                if ($check->fetch()) {
-                    throw new Exception("Subject code already exists.");
+                $existingCodeId = $check->fetchColumn();
+                if ($existingCodeId) {
+                    return [
+                        'success' => true,
+                        'duplicate' => true,
+                        'message' => 'This subject code already exists, so no duplicate was created.',
+                        'id' => (int)$existingCodeId,
+                    ];
                 }
             }
 
             $id = $this->insertRow('subjects', [
                 'school_id' => $this->schoolId,
                 'campus_id' => $this->defaultCampusId(),
-                'name' => trim((string)($data['name'] ?? '')),
+                'name' => $subjectName,
                 'code' => $code,
                 'type' => $data['type'] ?? 'core',
                 'credit_hours' => (float)($data['credit_hours'] ?? 1.0),

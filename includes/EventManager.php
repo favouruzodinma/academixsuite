@@ -151,6 +151,16 @@ class EventManager {
                 throw new Exception("End date cannot be before start date");
             }
 
+            $duplicate = $this->findDuplicateEvent($data);
+            if ($duplicate) {
+                return [
+                    'success' => true,
+                    'duplicate' => true,
+                    'message' => 'This event is already on the calendar, so no duplicate was created.',
+                    'event_id' => (int)$duplicate['id'],
+                ];
+            }
+
             // Check if transaction is already active
             $inTransaction = $this->schoolDb->inTransaction();
             
@@ -261,6 +271,16 @@ class EventManager {
                 }
             }
 
+            $duplicate = $this->findDuplicateEvent($data, (int)$eventId);
+            if ($duplicate) {
+                return [
+                    'success' => false,
+                    'duplicate' => true,
+                    'message' => 'Another event already has this title, date, time, and type.',
+                    'event_id' => (int)$duplicate['id'],
+                ];
+            }
+
             $inTransaction = $this->schoolDb->inTransaction();
             
             if (!$inTransaction) {
@@ -333,6 +353,53 @@ class EventManager {
                 'success' => false,
                 'message' => 'Failed to update event: ' . $e->getMessage()
             ];
+        }
+    }
+
+    /**
+     * Find an existing event that represents the same calendar item.
+     */
+    private function findDuplicateEvent(array $data, ?int $excludeId = null): ?array {
+        try {
+            $title = trim((string)($data['title'] ?? ''));
+            $startDate = trim((string)($data['start_date'] ?? ''));
+            $endDate = trim((string)($data['end_date'] ?? $startDate));
+            if ($endDate === '') {
+                $endDate = $startDate;
+            }
+            $startTime = trim((string)($data['start_time'] ?? ''));
+            $type = trim((string)($data['type'] ?? 'other'));
+
+            if ($title === '' || $startDate === '') {
+                return null;
+            }
+
+            $sql = "
+                SELECT id, title, start_date, end_date, start_time, type
+                FROM events
+                WHERE school_id = ?
+                  AND LOWER(TRIM(title)) = LOWER(TRIM(?))
+                  AND start_date = ?
+                  AND COALESCE(end_date, start_date) = ?
+                  AND COALESCE(start_time, '') = ?
+                  AND type = ?
+            ";
+            $params = [$this->schoolId, $title, $startDate, $endDate, $startTime, $type];
+
+            if ($excludeId !== null && $excludeId > 0) {
+                $sql .= " AND id != ?";
+                $params[] = $excludeId;
+            }
+
+            $sql .= " LIMIT 1";
+            $stmt = $this->schoolDb->prepare($sql);
+            $stmt->execute($params);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $row ?: null;
+        } catch (Exception $e) {
+            error_log("Event duplicate check failed: " . $e->getMessage());
+            return null;
         }
     }
 

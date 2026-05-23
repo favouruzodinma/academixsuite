@@ -61,8 +61,11 @@ $allowances = $payrollManager->getEmployeeAllowances($employeeId);
     <!-- same head -->
 </head>
 <body>
-<!-- Toast Container, Sidebar, Navbar... (same structure) -->
+<div class="overlay bg-black bg-opacity-50 w-100 h-100 position-fixed z-9 visibility-hidden opacity-0 duration-300"></div>
+<?php include_once __DIR__ . '/includes/sidebar.php'; ?>
 
+<main class="dashboard-main">
+<?php require_once __DIR__ . '/includes/nav-header.php'; ?>
 <div class="dashboard-main-body">
     <div class="d-flex justify-content-between align-items-center mb-24">
         <h1 class="fw-semibold h6 text-primary-light">Allowances for <?php echo htmlspecialchars($employee['name']); ?></h1>
@@ -217,5 +220,8 @@ $allowances = $payrollManager->getEmployeeAllowances($employeeId);
         });
     }
 </script>
+</div>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
+</main>
 </body>
 </html>

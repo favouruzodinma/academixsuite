@@ -496,36 +496,7 @@ error_log("=== TEACHER DETAILS PAGE END ===");
 <?php include_once('includes/sidebar.php'); ?>
 
 <main class="dashboard-main">
-    <div class="navbar-header shadow-1">
-        <div class="row align-items-center justify-content-between">
-            <div class="col-auto">
-                <div class="d-flex flex-wrap align-items-center gap-4">
-                    <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
-                        <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
-                    </button>
-                    <form class="navbar-search" method="GET" action="teacher-list.php">
-                        <input type="text" class="bg-transparent" name="search" placeholder="Search teachers...">
-                        <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-                    </form>
-                </div>
-            </div>
-            <div class="col-auto">
-                <div class="d-flex flex-wrap align-items-center gap-3">
-                    <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-                    <div class="dropdown">
-                        <button class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative" type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
-                            <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
-                        </button>
-                        <div class="dropdown-menu to-top dropdown-menu-lg p-0">
-                            <div class="text-center py-20">
-                                <p class="text-secondary-light">No new notifications</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<?php require_once __DIR__ . '/includes/nav-header.php'; ?>
 
     <div class="dashboard-main-body">
         <div class="breadcrumb d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
@@ -766,11 +737,7 @@ error_log("=== TEACHER DETAILS PAGE END ===");
         <?php endif; ?>
     </div>
 
-    <footer class="d-footer">
-        <div class="">
-            <p class="mb-0 text-center"> &copy; <span class="current-year"></span> <?php echo htmlspecialchars($school['name'] ?? 'School'); ?> | Made With ❤️ by AcademixSuite.</p>
-        </div>
-    </footer>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
 </main>
 
 <!-- Login Details Sidebar -->

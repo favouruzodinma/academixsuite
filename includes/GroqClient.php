@@ -13,15 +13,26 @@
 
 class GroqClient
 {
-    private const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+    private string $apiUrl;
     private const TIMEOUT = 30;
 
     private string $apiKey;
     private string $model;
 
-    public function __construct(string $apiKey, string $model = 'llama-3.3-70b-versatile')
+    public function __construct(string $apiKey, string $model = 'llama-3.1-8b-instant')
     {
         $this->apiKey = $apiKey;
+        
+        // Detect if this is a DeepSeek API key or model
+        if (strpos($apiKey, 'sk-') === 0 || strpos($model, 'deepseek') === 0) {
+            $this->apiUrl = 'https://api.deepseek.com/chat/completions';
+            if ($model === 'llama-3.1-8b-instant' || $model === 'llama-3.3-70b-versatile') {
+                $model = 'deepseek-chat';
+            }
+        } else {
+            $this->apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+        }
+        
         $this->model = $model;
     }
 
@@ -135,7 +146,7 @@ class GroqClient
     {
         $body = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-        $ch = curl_init(self::API_URL);
+        $ch = curl_init($this->apiUrl);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
@@ -175,6 +186,9 @@ class GroqClient
 
             if ($errMsg === '') {
                 $errMsg = "AI service returned HTTP {$status}";
+            }
+            if (stripos($errMsg, 'rate limit') !== false || stripos($errMsg, 'tokens per minute') !== false) {
+                $errMsg = 'Groq rate limit reached. Please wait a few seconds and try again. If it keeps happening, switch to a lighter Groq model or upgrade the Groq billing tier.';
             }
 
             error_log("GroqClient HTTP {$status} error: {$errMsg}");

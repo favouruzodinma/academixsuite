@@ -69,12 +69,32 @@ $manager = new SchoolActionManager($platformDb, $schoolDb, $school['id'], $schoo
 //
 // The global generateCsrfToken()/validateCsrfToken() helper is intentionally
 // one-time-use. This page makes many AJAX calls without a full refresh, so it
-// needs a stable session token for this editor surface.
+// rotates its own token and briefly accepts the previous token for overlapping
+// requests.
 if (!function_exists('academix_general_csrf_token')) {
     function academix_general_csrf_token(): string {
         if (empty($_SESSION['general_page_csrf_token'])) {
             $_SESSION['general_page_csrf_token'] = bin2hex(random_bytes(32));
         }
+        return $_SESSION['general_page_csrf_token'];
+    }
+}
+if (!function_exists('academix_general_rotate_csrf_token')) {
+    function academix_general_rotate_csrf_token(): string {
+        $current = $_SESSION['general_page_csrf_token'] ?? '';
+        if (is_string($current) && $current !== '') {
+            $_SESSION['general_page_csrf_previous_tokens'][$current] = time() + 600;
+        }
+
+        if (!empty($_SESSION['general_page_csrf_previous_tokens']) && is_array($_SESSION['general_page_csrf_previous_tokens'])) {
+            foreach ($_SESSION['general_page_csrf_previous_tokens'] as $oldToken => $expiresAt) {
+                if ((int)$expiresAt < time()) {
+                    unset($_SESSION['general_page_csrf_previous_tokens'][$oldToken]);
+                }
+            }
+        }
+
+        $_SESSION['general_page_csrf_token'] = bin2hex(random_bytes(32));
         return $_SESSION['general_page_csrf_token'];
     }
 }
@@ -89,6 +109,14 @@ if (!function_exists('academix_general_validate_csrf_token')) {
             $sessionToken = $_SESSION[$sessionKey] ?? null;
             if (is_string($sessionToken) && $sessionToken !== '' && hash_equals($sessionToken, $token)) {
                 return true;
+            }
+        }
+
+        if (!empty($_SESSION['general_page_csrf_previous_tokens']) && is_array($_SESSION['general_page_csrf_previous_tokens'])) {
+            foreach ($_SESSION['general_page_csrf_previous_tokens'] as $previousToken => $expiresAt) {
+                if ((int)$expiresAt >= time() && hash_equals((string)$previousToken, $token)) {
+                    return true;
+                }
             }
         }
 
@@ -121,7 +149,7 @@ $csrfToken = academix_general_csrf_token();
 if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
     header('Content-Type: application/json');
     if (!academix_general_validate_csrf_token($_POST['csrf_token'] ?? '')) {
-        echo json_encode(['success' => false, 'message' => 'Invalid security token.']);
+        echo json_encode(['success' => false, 'message' => 'Invalid security token.', 'csrf_token' => $csrfToken]);
         exit;
     }
     $action = $_POST['action'] ?? '';
@@ -525,6 +553,11 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
         case 'profile_save_basics':
         case 'profile_save_contacts':
         case 'profile_save_facilities':
+        case 'profile_save_copy':
+        case 'profile_save_faqs':
+        case 'profile_save_blogs':
+        case 'profile_slide_add':
+        case 'profile_slide_delete':
         case 'profile_gallery_add':
         case 'profile_gallery_delete':
         case 'profile_review_toggle':
@@ -533,7 +566,7 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
 
         // -----------------------------------------------------------------
         // AI Profile Content Generator
-        // Uses GroqClient to produce school description, mission, vision,
+        // Uses DeepSeekClient to produce school description, mission, vision,
         // and principal's message from school context + optional user hint.
         // -----------------------------------------------------------------
         case 'generate_profile_content': {
@@ -558,10 +591,10 @@ if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQ
                 break;
             }
 
-            require_once __DIR__ . '/../../../includes/GroqClient.php';
-            $apiKey = $_ENV['GROQ_API_KEY'] ?? getenv('GROQ_API_KEY') ?? '';
-            if (empty($apiKey) || $apiKey === 'gsk-your-key-here') {
-                $response = ['success' => false, 'message' => 'Groq AI is not configured. Add GROQ_API_KEY to your .env file.'];
+            require_once __DIR__ . '/../../../includes/DeepSeekClient.php';
+            $apiKey = $_ENV['DEEPSEEK_API_KEY'] ?? getenv('DEEPSEEK_API_KEY') ?? '';
+            if (empty($apiKey) || $apiKey === 'sk-your-key-here') {
+                $response = ['success' => false, 'message' => 'DeepSeek AI is not configured. Add DEEPSEEK_API_KEY to your .env file.'];
                 break;
             }
 
@@ -632,8 +665,8 @@ SYSPROMPT;
                         . "\n\nReturn only the content text.";
 
             try {
-                $groq = new GroqClient($apiKey, $_ENV['GROQ_MODEL'] ?? getenv('GROQ_MODEL') ?: 'llama-3.3-70b-versatile');
-                $result = $groq->chat(
+                $deepseek = new DeepSeekClient($apiKey, $_ENV['DEEPSEEK_MODEL'] ?? getenv('DEEPSEEK_MODEL') ?: 'deepseek-v4-flash');
+                $result = $deepseek->chat(
                     [
                         ['role' => 'system', 'content' => $systemPrompt],
                         ['role' => 'user',   'content' => $userPrompt],
@@ -680,6 +713,7 @@ SYSPROMPT;
         default:
             $response = ['success' => false, 'message' => 'Unknown action'];
     }
+    $response['csrf_token'] = academix_general_rotate_csrf_token();
     echo json_encode($response);
     exit;
 }
@@ -925,35 +959,7 @@ $activeTab = $_GET['tab'] ?? 'general';
     <?php include_once('includes/sidebar.php') ?>
 
     <main class="dashboard-main">
-        <div class="navbar-header shadow-1">
-            <div class="row align-items-center justify-content-between">
-                <div class="col-auto">
-                    <div class="d-flex flex-wrap align-items-center gap-4">
-                        <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
-                            <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
-                        </button>
-                        <form class="navbar-search">
-                            <input type="text" class="bg-transparent" name="search" placeholder="Search">
-                            <iconify-icon icon="ion:search-outline" class="icon"></iconify-icon>
-                        </form>
-                    </div>
-                </div>
-                <div class="col-auto">
-                    <div class="d-flex flex-wrap align-items-center gap-3">
-                        <button type="button" data-theme-toggle
-                            class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-                        <div class="dropdown">
-                            <button
-                                class="has-indicator w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center position-relative"
-                                type="button" data-bs-toggle="dropdown" aria-label="Notification Button">
-                                <iconify-icon icon="iconoir:bell" class="text-primary-light text-xl"></iconify-icon>
-                                <span class="w-8-px h-8-px bg-danger-600 position-absolute end-0 top-0 rounded-circle mt-2 me-2"></span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <?php require_once __DIR__ . '/includes/nav-header.php'; ?>
 
         <div class="dashboard-main-body">
             <!-- Breadcrumb -->
@@ -2045,11 +2051,7 @@ $activeTab = $_GET['tab'] ?? 'general';
             </div>
         </div>
 
-        <footer class="d-footer">
-            <div class="">
-                <p class="mb-0 text-center"> &copy; <span class="current-year"></span> <?php echo htmlspecialchars($school['name']); ?> | Made With ❤️ by AcademixSuite.</p>
-            </div>
-        </footer>
+        <?php require_once __DIR__ . '/includes/footer.php'; ?>
     </main>
 
     <!-- ========== MODALS ========== -->
@@ -3096,7 +3098,19 @@ $activeTab = $_GET['tab'] ?? 'general';
         }
 
         // CSRF token
-        const csrfToken = '<?php echo $csrfToken; ?>';
+        let csrfToken = '<?php echo $csrfToken; ?>';
+        window.academixGeneralCsrfToken = csrfToken;
+
+        function syncGeneralCsrfToken(response) {
+            if (!response || !response.csrf_token) return;
+            csrfToken = response.csrf_token;
+            window.academixGeneralCsrfToken = csrfToken;
+            $('[name="csrf_token"]').val(csrfToken);
+        }
+
+        $(document).ajaxSuccess(function (_event, xhr) {
+            syncGeneralCsrfToken(xhr.responseJSON);
+        });
 
         // Generic AJAX form submission
         $('.modal-form').on('submit', function(e) {
@@ -3507,6 +3521,7 @@ $activeTab = $_GET['tab'] ?? 'general';
                 })
                 .then(r => r.json())
                 .then(res => {
+                    syncGeneralCsrfToken(res);
                     showToast(res.message || (res.success ? 'Saved' : 'Error'), res.success ? 'success' : 'error');
                     if (res.success) {
                         // Refresh after a short delay so logo/favicon previews update

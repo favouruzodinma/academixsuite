@@ -88,8 +88,7 @@ try {
     $updateStmt = $db->prepare("
         UPDATE invoices 
         SET status = 'paid', 
-            paid_at = NOW(),
-            updated_at = NOW()
+            paid_at = NOW()
         WHERE id = ?
     ");
     $updateStmt->execute([$invoice['id']]);

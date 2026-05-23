@@ -695,8 +695,7 @@ function savePeriod($db, $schoolId) {
                     start_time = ?,
                     end_time = ?,
                     period_number = ?,
-                    is_break = ?,
-                    updated_at = NOW()
+                    is_break = ?
                 WHERE id = ? AND school_id = ?
             ";
             

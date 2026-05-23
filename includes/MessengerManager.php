@@ -414,6 +414,8 @@ public function getConversations($page = 1, $limit = 20) {
                     WHERE conversation_id = ? AND user_id != ?";
             $stmt = $this->schoolDb->prepare($sql);
             $stmt->execute([$messageId, $conversationId, $this->userId]);
+
+            $this->createMessageNotifications($conversationId, (int)$messageId, (string)$message, $messageType);
             
             $this->schoolDb->commit();
             
@@ -836,6 +838,92 @@ public function getAvailableUsers($search = '', $page = 1, $limit = 20) {
             return $user ? $user['name'] : 'Unknown';
         } catch (Exception $e) {
             return 'Unknown';
+        }
+    }
+
+    /**
+     * Add in-app notification rows for message recipients.
+     */
+    private function createMessageNotifications($conversationId, $messageId, $messageText, $messageType = 'text') {
+        try {
+            if (!$this->tableExists('notifications')) {
+                return;
+            }
+
+            $conversationStmt = $this->schoolDb->prepare("
+                SELECT conversation_type, subject
+                FROM conversations
+                WHERE id = ?
+                LIMIT 1
+            ");
+            $conversationStmt->execute([$conversationId]);
+            $conversation = $conversationStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+            $participantStmt = $this->schoolDb->prepare("
+                SELECT user_id, is_muted
+                FROM conversation_participants
+                WHERE conversation_id = ?
+                  AND user_id != ?
+                  AND is_deleted = 0
+            ");
+            $participantStmt->execute([$conversationId, $this->userId]);
+            $participants = $participantStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            if (!$participants) {
+                return;
+            }
+
+            $senderName = $this->getUserName($this->userId);
+            $snippet = trim(strip_tags((string)$messageText));
+            if ($snippet === '') {
+                $snippet = $messageType === 'text' ? 'Sent a message' : 'Sent an attachment';
+            }
+            if (function_exists('mb_substr')) {
+                $snippet = mb_substr($snippet, 0, 140);
+            } else {
+                $snippet = substr($snippet, 0, 140);
+            }
+
+            $isGroup = ($conversation['conversation_type'] ?? '') === 'group';
+            $subject = trim((string)($conversation['subject'] ?? 'Group conversation'));
+            $title = $isGroup ? "New message in {$subject}" : "New message from {$senderName}";
+            $payload = json_encode([
+                'conversation_id' => (int)$conversationId,
+                'message_id' => (int)$messageId,
+                'sender_id' => (int)$this->userId,
+                'icon' => 'ri-message-3-line',
+                'path' => 'message.php',
+            ]);
+
+            $insertStmt = $this->schoolDb->prepare("
+                INSERT INTO notifications (
+                    school_id, user_id, type, title, message, data, priority, is_read, is_sent, created_at
+                ) VALUES (?, ?, 'in_app', ?, ?, ?, 'normal', 0, 0, NOW())
+            ");
+
+            foreach ($participants as $participant) {
+                if (!empty($participant['is_muted'])) {
+                    continue;
+                }
+                $insertStmt->execute([
+                    $this->schoolId,
+                    (int)$participant['user_id'],
+                    $title,
+                    $snippet,
+                    $payload,
+                ]);
+            }
+        } catch (Exception $e) {
+            error_log("Message notification error: " . $e->getMessage());
+        }
+    }
+
+    private function tableExists($table) {
+        try {
+            $stmt = $this->schoolDb->prepare('SHOW TABLES LIKE ?');
+            $stmt->execute([$table]);
+            return (bool)$stmt->fetchColumn();
+        } catch (Exception $e) {
+            return false;
         }
     }
 

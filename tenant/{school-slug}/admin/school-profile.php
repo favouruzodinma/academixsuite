@@ -41,6 +41,9 @@ if (!function_exists('school_profile_admin_ensure_schema')) {
             'landing_cta_text' => 'TEXT NULL',
             'landing_hero_image' => 'VARCHAR(500) NULL',
             'landing_feature_image' => 'VARCHAR(500) NULL',
+            'landing_showcase_image_1' => 'VARCHAR(500) NULL',
+            'landing_showcase_image_2' => 'VARCHAR(500) NULL',
+            'landing_showcase_image_3' => 'VARCHAR(500) NULL',
             'landing_programs' => 'LONGTEXT NULL',
             'landing_testimonials' => 'LONGTEXT NULL',
             'primary_color' => "VARCHAR(7) NULL DEFAULT '#3B82F6'",
@@ -87,11 +90,12 @@ if (!function_exists('school_profile_admin_ensure_schema')) {
                 `school_id` INT UNSIGNED NOT NULL,
                 `image_url` VARCHAR(500) NOT NULL,
                 `caption` VARCHAR(255) NULL,
-                `type` ENUM('campus','classroom','laboratory','library','sports','events','other') NOT NULL DEFAULT 'campus',
+                `type` VARCHAR(50) NOT NULL DEFAULT 'campus',
                 `sort_order` INT UNSIGNED NOT NULL DEFAULT 0,
                 `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 KEY `idx_school_gallery_school` (`school_id`, `sort_order`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");
 
         $db->exec("
@@ -337,6 +341,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'logo_file' => ['logo_path', 'logo'],
                 'hero_file' => ['landing_hero_image', 'hero'],
                 'feature_file' => ['landing_feature_image', 'feature'],
+                'showcase_image_1_file' => ['landing_showcase_image_1', 'showcase1'],
+                'showcase_image_2_file' => ['landing_showcase_image_2', 'showcase2'],
+                'showcase_image_3_file' => ['landing_showcase_image_3', 'showcase3'],
             ] as $fileField => $target) {
                 if (in_array($target[0], $columns, true)) {
                     $uploaded = school_profile_admin_upload_image($fileField, $schoolId, $schoolSlug, $target[1]);
@@ -509,27 +516,7 @@ $secondaryColor = preg_match('/^#[0-9a-fA-F]{6}$/', (string)($school['secondary_
 <?php include_once __DIR__ . '/includes/sidebar.php'; ?>
 
 <main class="dashboard-main">
-    <div class="navbar-header shadow-1">
-        <div class="row align-items-center justify-content-between">
-            <div class="col-auto">
-                <div class="d-flex flex-wrap align-items-center gap-4">
-                    <button type="button" class="sidebar-mobile-toggle" aria-label="Sidebar Mobile Toggler Button">
-                        <iconify-icon icon="heroicons:bars-3-solid" class="icon"></iconify-icon>
-                    </button>
-                    <div>
-                        <h6 class="mb-0">School Profile</h6>
-                        <span class="text-sm text-secondary-light">Manage the public school landing page</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-auto d-flex align-items-center gap-2">
-                <a href="<?php echo academix_admin_e($profileUrl); ?>" target="_blank" class="btn btn-outline-primary d-flex align-items-center gap-2">
-                    <i class="ri-external-link-line"></i> View Site
-                </a>
-                <button type="button" data-theme-toggle class="w-40-px h-40-px bg-neutral-200 rounded-circle d-flex justify-content-center align-items-center" aria-label="Dark & Light Mode Button"></button>
-            </div>
-        </div>
-    </div>
+    <?php require_once __DIR__ . '/includes/nav-header.php'; ?>
 
     <div class="dashboard-main-body profile-shell">
         <?php if ($flash): ?>
@@ -613,6 +600,18 @@ $secondaryColor = preg_match('/^#[0-9a-fA-F]{6}$/', (string)($school['secondary_
                                 <div class="col-md-6">
                                     <label class="soft-label">Feature Image</label>
                                     <input class="form-control" type="file" name="feature_file" accept="image/*">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="soft-label">Showcase Image 1</label>
+                                    <input class="form-control" type="file" name="showcase_image_1_file" accept="image/*">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="soft-label">Showcase Image 2</label>
+                                    <input class="form-control" type="file" name="showcase_image_2_file" accept="image/*">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="soft-label">Showcase Image 3</label>
+                                    <input class="form-control" type="file" name="showcase_image_3_file" accept="image/*">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="soft-label">Intro Title</label>

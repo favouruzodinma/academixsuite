@@ -567,7 +567,7 @@ $languages = is_array($languages ?? null) ? $languages : [
 (function () {
     'use strict';
 
-    const CSRF     = <?= json_encode($csrfToken ?? ($_SESSION['csrf_token'] ?? '')) ?>;
+    let CSRF       = window.academixGeneralCsrfToken || <?= json_encode($csrfToken ?? ($_SESSION['csrf_token'] ?? '')) ?>;
     const ENDPOINT = 'general.php';    // same page
 
     let _currentField = '';    // field name currently being generated for
@@ -579,6 +579,15 @@ $languages = is_array($languages ?? null) ? $languages : [
     // so it can open from every section of this page.
     if (aiOverlay && aiOverlay.parentElement !== document.body) document.body.appendChild(aiOverlay);
     if (aiPanel && aiPanel.parentElement !== document.body) document.body.appendChild(aiPanel);
+
+    function syncCsrfToken(data) {
+        if (!data || !data.csrf_token) return;
+        CSRF = data.csrf_token;
+        window.academixGeneralCsrfToken = CSRF;
+        document.querySelectorAll('input[name="csrf_token"]').forEach(input => {
+            input.value = CSRF;
+        });
+    }
 
     /* ── Open panel ────────────────────────────────────────────────────── */
     document.addEventListener('click', function (e) {
@@ -645,6 +654,7 @@ $languages = is_array($languages ?? null) ? $languages : [
         })
         .then(r => r.json())
         .then(data => {
+            syncCsrfToken(data);
             if (data.success && data.content) {
                 prevBox.textContent    = data.content;
                 prevWrap.style.display = 'block';
